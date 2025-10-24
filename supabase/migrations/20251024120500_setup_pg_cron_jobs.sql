@@ -23,6 +23,7 @@ COMMENT ON EXTENSION pg_cron IS 'PostgreSQL job scheduler for automated tasks';
 
 -- Job 1: Reset monthly generation limit
 -- Runs on the 1st day of every month at 00:00 UTC
+-- This job resets the generations_remaining counter for all users to 5
 SELECT cron.schedule(
     'reset_monthly_generations',           -- Job name
     '0 0 1 * *',                          -- Cron schedule (minute hour day month weekday)
@@ -32,8 +33,6 @@ SELECT cron.schedule(
     WHERE generations_remaining < 5;
     $$
 );
-
-COMMENT ON FUNCTION cron.schedule IS 'Schedules the monthly reset of free plan generation quotas';
 
 -- Job 2: Auto-archive completed plans
 -- Runs daily at 01:00 UTC
@@ -49,8 +48,6 @@ SELECT cron.schedule(
     AND end_date < CURRENT_DATE;
     $$
 );
-
-COMMENT ON FUNCTION cron.schedule IS 'Schedules the daily archival of plans past their end date';
 
 /*
  * Monitoring scheduled jobs:
