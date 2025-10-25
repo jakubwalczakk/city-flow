@@ -4,21 +4,21 @@ This document outlines the REST API for the CityFlow application, based on the p
 
 ## 1. Resources
 
-- **Profile**: Represents the user's application-specific settings. Corresponds to the `profiles` table. Managed as a singleton resource per authenticated user.
-- **Plan**: The core resource representing a travel plan, from a preliminary draft to a fully generated itinerary. Corresponds to the `plans` table.
-- **FixedPoint**: A sub-resource of a Plan, representing a non-negotiable event like a flight or hotel reservation. Corresponds to the `fixed_points` table.
-- **Feedback**: A sub-resource of a Plan, representing user feedback. Corresponds to the `feedback` table.
+- **Profiles**: Represents the user's application-specific settings. Corresponds to the `profiles` table. Managed as a singleton resource per authenticated user.
+- **Plans**: The core resource representing a travel plan, from a preliminary draft to a fully generated itinerary. Corresponds to the `plans` table.
+- **FixedPoints**: A sub-resource of a Plan, representing a non-negotiable event like a flight or hotel reservation. Corresponds to the `fixed_points` table.
+- **Feedbacks**: A sub-resource of a Plan, representing user feedback. Corresponds to the `feedback` table.
 
 ## 2. Endpoints
 
-### 2.1. Profile
+### 2.1. Profiles
 
 The profile is a singleton resource for the currently authenticated user. The user is identified via the JWT token.
 
 #### Get Profile
 
 - **Method**: `GET`
-- **URL**: `/profile`
+- **URL**: `/profiles`
 - **Description**: Retrieves the profile of the currently authenticated user.
 - **Request Body**: None
 - **Success Response**:
@@ -41,7 +41,7 @@ The profile is a singleton resource for the currently authenticated user. The us
 #### Update Profile
 
 - **Method**: `PATCH`
-- **URL**: `/profile`
+- **URL**: `/profiles`
 - **Description**: Updates the profile of the currently authenticated user. Also used for the initial onboarding setup.
 - **Request Body**:
   ```json
@@ -53,7 +53,7 @@ The profile is a singleton resource for the currently authenticated user. The us
   ```
 - **Success Response**:
   - **Code**: `200 OK`
-  - **Content**: The updated profile object (same structure as `GET /profile`).
+  - **Content**: The updated profile object (same structure as `GET /profiles`).
 - **Error Response**:
   - **Code**: `400 Bad Request`
   - **Content**: `{ "error": "Validation failed.", "details": { "preferences": "Must have between 2 and 5 items." } }`
@@ -266,12 +266,12 @@ The profile is a singleton resource for the currently authenticated user. The us
 
 ---
 
-### 2.5. Feedback (Sub-resource of Plan)
+### 2.5. Feedbacks (Sub-resource of Plan)
 
 #### Submit Feedback
 
 - **Method**: `POST`
-- **URL**: `/plans/{planId}/feedback`
+- **URL**: `/plans/{planId}/feedbacks`
 - **Description**: Submits feedback for a plan. Since a user can only give one feedback per plan, this acts as an "upsert" (create or update).
 - **Request Body**:
   ```json
@@ -287,7 +287,7 @@ The profile is a singleton resource for the currently authenticated user. The us
 #### Get Feedback
 
 - **Method**: `GET`
-- **URL**: `/plans/{planId}/feedback`
+- **URL**: `/plans/{planId}/feedbacks`
 - **Description**: Retrieves the authenticated user's feedback for a specific plan.
 - **Success Response**:
   - **Code**: `200 OK`
