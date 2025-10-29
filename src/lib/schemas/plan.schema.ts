@@ -29,3 +29,24 @@ export const createPlanSchema = z
       path: ["end_date"],
     }
   );
+
+/**
+ * Schema for validating query parameters for listing plans.
+ * Ensures pagination, filtering, and sorting parameters are valid.
+ */
+export const listPlansQuerySchema = z.object({
+  status: z.enum(["draft", "generated", "archived"]).optional(),
+  sort_by: z.enum(["created_at", "name"]).default("created_at"),
+  order: z.enum(["asc", "desc"]).default("desc"),
+  limit: z.coerce
+    .number()
+    .int()
+    .min(1, { message: "Limit must be at least 1." })
+    .max(100, { message: "Limit cannot exceed 100." })
+    .default(20),
+  offset: z.coerce
+    .number()
+    .int()
+    .min(0, { message: "Offset must be non-negative." })
+    .default(0),
+});

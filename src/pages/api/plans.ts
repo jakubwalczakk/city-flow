@@ -1,10 +1,56 @@
 import type { APIRoute } from "astro";
 import { DEFAULT_USER_ID } from "@/db/supabase.client";
-import { createPlanSchema } from "@/lib/schemas/plan.schema";
-import { createPlan } from "@/lib/services/plan.service";
+import { createPlanSchema, listPlansQuerySchema } from "@/lib/schemas/plan.schema";
+import { createPlan, getPlans } from "@/lib/services/plan.service";
 import { ValidationError } from "@/lib/errors/app-error";
 import { handleApiError, successResponse } from "@/lib/utils/error-handler";
 import { logger } from "@/lib/utils/logger";
+
+/**
+ * GET /api/plans
+ * Retrieves a paginated list of travel plans for the authenticated user.
+ *
+ * Query parameters should conform to listPlansQuerySchema.
+ * Returns a paginated list of plans with status 200 on success.
+ */
+export const GET: APIRoute = async ({ url, locals }) => {
+  try {
+    // In development, use a default user ID since we are not handling authorization yet.
+    const supabase = locals.supabase;
+    const user = { id: DEFAULT_USER_ID };
+
+    logger.debug("Received request to list plans", { userId: user.id });
+
+    // Extract and parse query parameters
+    const queryParams = {
+      status: url.searchParams.get("status"),
+      sort_by: url.searchParams.get("sort_by"),
+      order: url.searchParams.get("order"),
+      limit: url.searchParams.get("limit"),
+      offset: url.searchParams.get("offset"),
+    };
+
+    // Validate query parameters
+    const validation = listPlansQuerySchema.safeParse(queryParams);
+
+    if (!validation.success) {
+      logger.debug("Query parameter validation failed", {
+        errors: validation.error.flatten(),
+      });
+      throw new ValidationError("Invalid query parameters", validation.error.flatten());
+    }
+
+    // Fetch the plans
+    const result = await getPlans(supabase, user.id, validation.data);
+
+    return successResponse(result, 200);
+  } catch (error) {
+    return handleApiError(error, {
+      endpoint: "GET /api/plans",
+      userId: DEFAULT_USER_ID,
+    });
+  }
+};
 
 /**
  * POST /api/plans
