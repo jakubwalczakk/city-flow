@@ -246,3 +246,40 @@ export type NewPlanViewModel = {
   };
   fixedPoints: CreateFixedPointCommand[];
 };
+
+/**
+ * ViewModel for the plan details view.
+ * Manages the entire client-side state of the view.
+ */
+export type PlanDetailsViewModel = {
+  isLoading: boolean;
+  error: string | null;
+  plan: PlanDetailsDto | null;
+};
+
+/**
+ * Type definition for a single event/slot in the generated plan's timeline.
+ */
+export type TimelineEvent = {
+  time: string; // e.g., "09:00"
+  title: string;
+  description: string;
+  estimated_cost?: string;
+};
+
+/**
+ * Type definition for a single day in the generated plan.
+ */
+export type DayPlan = {
+  date: string; // e.g., "2025-12-24"
+  title: string;
+  events: TimelineEvent[];
+};
+
+/**
+ * ViewModel for the structured generated_content from a plan.
+ */
+export type GeneratedContentViewModel = {
+  days: DayPlan[];
+  summary: string;
+};

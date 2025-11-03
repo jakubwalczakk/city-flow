@@ -106,5 +106,14 @@ export const fixedPointSchema = z.object({
   description: z.string().nullable().optional(),
 });
 
+/**
+ * Schema for validating plan update requests.
+ * Ensures that all fields are properly formatted.
+ */
+export const updatePlanSchema = z.object({
+  name: z.string().min(1, "Name cannot be empty.").optional(),
+  notes: z.string().optional().nullable(),
+});
+
 export type BasicInfoFormData = z.infer<typeof basicInfoSchema>;
 export type FixedPointFormData = z.infer<typeof fixedPointSchema>;
