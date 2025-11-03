@@ -231,3 +231,18 @@ export type PlansDashboardViewModel = {
   activeTab: "my-plans" | "history";
   currentPage: number;
 };
+
+/**
+ * ViewModel for the new plan creation form.
+ * Holds the entire state of the multi-step form on the client-side.
+ */
+export type NewPlanViewModel = {
+  basicInfo: {
+    name: string;
+    destination: string;
+    start_date: Date | null;
+    end_date: Date | null;
+    notes: string;
+  };
+  fixedPoints: CreateFixedPointCommand[];
+};

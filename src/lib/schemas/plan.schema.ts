@@ -70,3 +70,41 @@ export const listPlansQuerySchema = z.object({
     .min(0, { message: "Offset must be non-negative." })
     .default(0),
 });
+
+/**
+ * Schema for validating basic info step in the create plan form (client-side).
+ * Uses Date objects instead of strings for easier form handling.
+ */
+export const basicInfoSchema = z
+  .object({
+    name: z.string().min(1, "Plan name is required"),
+    destination: z.string().min(1, "Destination is required"),
+    start_date: z.date().nullable(),
+    end_date: z.date().nullable(),
+    notes: z.string(),
+  })
+  .refine(
+    (data) => {
+      if (data.start_date && data.end_date) {
+        return data.end_date >= data.start_date;
+      }
+      return true;
+    },
+    {
+      message: "End date must be after or equal to start date",
+      path: ["end_date"],
+    }
+  );
+
+/**
+ * Schema for validating fixed point form (client-side).
+ */
+export const fixedPointSchema = z.object({
+  location: z.string().min(1, "Location is required"),
+  event_at: z.string().min(1, "Date and time is required"),
+  event_duration: z.number().min(0, "Duration must be positive"),
+  description: z.string().nullable().optional(),
+});
+
+export type BasicInfoFormData = z.infer<typeof basicInfoSchema>;
+export type FixedPointFormData = z.infer<typeof fixedPointSchema>;
