@@ -7,7 +7,7 @@ import { logger } from "@/lib/utils/logger";
  * Parameters for listing plans.
  */
 export type GetPlansParams = {
-  status?: PlanStatus;
+  status?: PlanStatus | PlanStatus[];
   sort_by: "created_at" | "name";
   order: "asc" | "desc";
   limit: number;
@@ -84,7 +84,11 @@ export const getPlans = async (
 
   // Apply status filter if provided
   if (params.status) {
-    query = query.eq("status", params.status);
+    if (Array.isArray(params.status)) {
+      query = query.in("status", params.status);
+    } else {
+      query = query.eq("status", params.status);
+    }
   }
 
   // Apply sorting

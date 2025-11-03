@@ -215,3 +215,19 @@ export type SubmitFeedbackCommand = {
   rating: FeedbackRating;
   comment?: string | null;
 };
+
+// ############################################################################
+// #                              VIEW MODELS                                 #
+// ############################################################################
+
+/**
+ * View model representing the complete state of the Plans Dashboard.
+ * Used in the PlansDashboard component to manage UI state.
+ */
+export type PlansDashboardViewModel = {
+  isLoading: boolean;
+  error: string | null;
+  plansData: PaginatedPlansDto | null;
+  activeTab: "my-plans" | "history";
+  currentPage: number;
+};

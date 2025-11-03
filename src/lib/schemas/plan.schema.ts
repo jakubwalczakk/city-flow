@@ -33,9 +33,29 @@ export const createPlanSchema = z
 /**
  * Schema for validating query parameters for listing plans.
  * Ensures pagination, filtering, and sorting parameters are valid.
+ * 
+ * Uses `statuses` parameter for filtering by status (supports single or multiple values).
  */
 export const listPlansQuerySchema = z.object({
-  status: z.enum(["draft", "generated", "archived"]).optional(),
+  statuses: z.preprocess(
+    (val) => {
+      // Handle null or undefined
+      if (!val) return undefined;
+      
+      // If it's a string with commas, split it
+      if (typeof val === "string" && val.includes(",")) {
+        return val.split(",").map(s => s.trim());
+      }
+      
+      // Otherwise return as-is (single value as array)
+      if (typeof val === "string") {
+        return [val];
+      }
+      
+      return val;
+    },
+    z.array(z.enum(["draft", "generated", "archived"])).optional()
+  ),
   sort_by: z.enum(["created_at", "name"]).default("created_at"),
   order: z.enum(["asc", "desc"]).default("desc"),
   limit: z.coerce

@@ -23,7 +23,7 @@ export const GET: APIRoute = async ({ url, locals }) => {
 
     // Extract and parse query parameters
     const queryParams = {
-      status: url.searchParams.get("status"),
+      statuses: url.searchParams.get("statuses"),
       sort_by: url.searchParams.get("sort_by"),
       order: url.searchParams.get("order"),
       limit: url.searchParams.get("limit"),
@@ -41,7 +41,10 @@ export const GET: APIRoute = async ({ url, locals }) => {
     }
 
     // Fetch the plans
-    const result = await getPlans(supabase, user.id, validation.data);
+    const result = await getPlans(supabase, user.id, {
+      ...validation.data,
+      status: validation.data.statuses,
+    });
 
     return successResponse(result, 200);
   } catch (error) {
