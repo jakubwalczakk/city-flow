@@ -41,7 +41,7 @@ export default function NewPlanForm({
               formData={formData.basicInfo}
               updateFormData={updateBasicInfo}
               goToNextStep={nextStep}
-              onCancel={onFinished}
+              onCancel={() => onFinished?.()}
               isLoading={isLoading}
               error={error}
               onSave={saveDraft}
@@ -56,7 +56,7 @@ export default function NewPlanForm({
               updateFixedPoint={updateFixedPoint}
               goToNextStep={nextStep}
               goToPrevStep={prevStep}
-              onCancel={onFinished}
+              onCancel={() => onFinished?.()}
               isLoading={isLoading}
               error={error}
               onSave={saveDraft}

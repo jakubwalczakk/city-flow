@@ -38,8 +38,8 @@ export function FixedPointsStep({
   const [currentPoint, setCurrentPoint] = useState<CreateFixedPointCommand>({
     location: "",
     event_at: "",
-    event_duration: null,
-    description: null,
+    event_duration: 0,
+    description: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -70,8 +70,8 @@ export function FixedPointsStep({
     setCurrentPoint({
       location: "",
       event_at: "",
-      event_duration: null,
-      description: null,
+      event_duration: 0,
+      description: "",
     });
     setErrors({});
     setIsAdding(false);
@@ -189,13 +189,11 @@ export function FixedPointsStep({
               id="event_duration"
               type="number"
               min="0"
-              value={currentPoint.event_duration ?? ""}
+              value={currentPoint.event_duration}
               onChange={(e) =>
                 setCurrentPoint({
                   ...currentPoint,
-                  event_duration: e.target.value
-                    ? parseInt(e.target.value, 10)
-                    : null,
+                  event_duration: parseInt(e.target.value, 10) || 0,
                 })
               }
               className={errors.event_duration ? "border-destructive" : ""}

@@ -84,7 +84,7 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
     }
 
     // Update the plan
-    const plan = await updatePlan(supabase, planId, user.id, validation.data);
+    const plan = await updatePlan(supabase, planId, validation.data);
 
     return successResponse(plan, 200);
   } catch (error) {

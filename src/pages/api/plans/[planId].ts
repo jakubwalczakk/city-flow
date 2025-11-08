@@ -11,7 +11,7 @@ const updatePlanSchema = planSchema.pick({
   notes: true,
 });
 
-export const PUT: APIRoute = async ({ request, params }) => {
+export const PUT: APIRoute = async ({ request, params, locals }) => {
   const { planId } = params;
 
   if (!planId) {
@@ -25,7 +25,7 @@ export const PUT: APIRoute = async ({ request, params }) => {
     const data = await request.json();
     const validatedData = updatePlanSchema.parse(data);
 
-    await updatePlan(planId, validatedData);
+    await updatePlan(locals.supabase, planId, validatedData);
 
     return new Response(null, { status: 204 });
   } catch (error) {

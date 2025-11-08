@@ -1,4 +1,11 @@
-import type { CreatePlanCommand, UpdatePlanCommand, PlanDetailsDto, PaginatedPlansDto, PlanStatus } from "@/types";
+import type {
+  CreatePlanCommand,
+  UpdatePlanCommand,
+  PlanDetailsDto,
+  PaginatedPlansDto,
+  PlanStatus,
+  PlanListItemDto,
+} from "@/types";
 import type { SupabaseClient } from "@/db/supabase.client";
 import { DatabaseError, NotFoundError } from "@/lib/errors/app-error";
 import { logger } from "@/lib/utils/logger";
@@ -49,12 +56,20 @@ export const createPlan = async (
     throw new DatabaseError("Failed to create a plan. Please try again later.", new Error(error.message));
   }
 
+  if (!data.start_date || !data.end_date) {
+    logger.error("Plan created without start_date or end_date", {
+      planId: data.id,
+      userId,
+    });
+    throw new DatabaseError("Failed to create a plan with complete data.");
+  }
+
   logger.info("Plan created successfully", {
     planId: data.id,
     userId,
   });
 
-  return data;
+  return data as PlanDetailsDto;
 };
 
 /**
@@ -118,8 +133,22 @@ export const getPlans = async (
     total: count ?? 0,
   });
 
+  const validatedData = (data ?? []).map((plan) => {
+    if (!plan.start_date || !plan.end_date) {
+      logger.error("A plan in the list is missing start_date or end_date", {
+        planId: plan.id,
+        userId,
+      });
+      // Depending on desired behavior, you could either filter out invalid plans
+      // or throw an error to indicate a severe data inconsistency issue.
+      // Throwing an error is safer to avoid presenting incomplete data.
+      throw new DatabaseError("Inconsistent plan data received.");
+    }
+    return plan as PlanListItemDto;
+  });
+
   return {
-    data: data ?? [],
+    data: validatedData,
     pagination: {
       total: count ?? 0,
       limit: params.limit,
@@ -179,7 +208,15 @@ export const getPlanById = async (
     userId,
   });
 
-  return data;
+  if (!data.start_date || !data.end_date) {
+    logger.error("Plan from database is missing start_date or end_date", {
+      planId: data.id,
+      userId,
+    });
+    throw new DatabaseError("Incomplete plan data received from the database.");
+  }
+
+  return data as PlanDetailsDto;
 };
 
 /**
@@ -232,7 +269,14 @@ export const updatePlan = async (
     planId,
   });
 
-  return data;
+  if (!data.start_date || !data.end_date) {
+    logger.error("Plan updated without start_date or end_date", {
+      planId: data.id,
+    });
+    throw new DatabaseError("Failed to update a plan with complete data.");
+  }
+
+  return data as PlanDetailsDto;
 };
 
 /**

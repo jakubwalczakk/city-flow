@@ -3,7 +3,7 @@ import type {
   NewPlanViewModel,
   CreatePlanCommand,
   CreateFixedPointCommand,
-  Plan,
+  PlanDetailsDto,
   PlanListItemDto,
 } from "@/types";
 
@@ -48,17 +48,33 @@ export function useNewPlanForm({
 
   useEffect(() => {
     if (editingPlan) {
-      setPlanId(editingPlan.id);
-      setFormData({
-        basicInfo: {
-          name: editingPlan.name,
-          destination: editingPlan.destination,
-          start_date: new Date(editingPlan.start_date),
-          end_date: new Date(editingPlan.end_date),
-          notes: editingPlan.notes || "",
-        },
-        fixedPoints: [], // Fetch fixed points separately
-      });
+      setIsLoading(true);
+      const fetchPlanDetails = async () => {
+        try {
+          const response = await fetch(`/api/plans/${editingPlan.id}`);
+          if (!response.ok) {
+            throw new Error("Failed to fetch plan details for editing.");
+          }
+          const planDetails: PlanDetailsDto = await response.json();
+          setPlanId(planDetails.id);
+          setFormData({
+            basicInfo: {
+              name: planDetails.name,
+              destination: planDetails.destination,
+              start_date: new Date(planDetails.start_date),
+              end_date: new Date(planDetails.end_date),
+              notes: planDetails.notes || "",
+            },
+            fixedPoints: [], // These will be fetched next
+          });
+        } catch (err) {
+          setError(
+            err instanceof Error ? err.message : "Could not load plan details"
+          );
+        } finally {
+          setIsLoading(false);
+        }
+      };
 
       const fetchFixedPoints = async () => {
         try {
@@ -75,7 +91,12 @@ export function useNewPlanForm({
         }
       };
 
-      fetchFixedPoints();
+      const loadDataForEditing = async () => {
+        await fetchPlanDetails();
+        await fetchFixedPoints();
+      };
+
+      loadDataForEditing();
     }
   }, [editingPlan]);
 
@@ -134,7 +155,7 @@ export function useNewPlanForm({
     }
 
     if (!planId) {
-      const createdPlan: Plan = await response.json();
+      const createdPlan: PlanDetailsDto = await response.json();
       setPlanId(createdPlan.id);
     }
   };

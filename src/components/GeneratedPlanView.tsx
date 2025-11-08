@@ -206,7 +206,9 @@ export default function GeneratedPlanView({ plan }: GeneratedPlanViewProps) {
           <Accordion type="single" collapsible className="w-full">
             {generatedContent.days.map((day, index) => {
               // Calculate activity count for the day
-              const activityCount = day.items.filter((i) => i.type === "activity").length;
+              const activityCount = day.items.filter(
+                (i) => i.category !== "transport" && i.category !== "accommodation"
+              ).length;
 
               return (
                 <AccordionItem key={index} value={`day-${index}`}>

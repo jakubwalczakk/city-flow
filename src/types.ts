@@ -202,7 +202,7 @@ export type CreateFixedPointCommand = {
 export type UpdateFixedPointCommand = {
   location?: string;
   event_at?: string;
-  event_duration?: number;
+  event_duration?: number | null;
   description?: string | null;
 };
 

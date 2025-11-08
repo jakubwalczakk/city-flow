@@ -213,7 +213,7 @@ Please generate the travel plan now based on the provided details. Ensure the ou
     }
 
     // Then, update the plan with the generated content.
-    const updatedPlan = await updatePlan(supabase, planId, user.id, {
+    const updatedPlan = await updatePlan(supabase, planId, {
       status: "generated",
       generated_content: contentForDb as any, // Cast to any to match Supabase type
     });

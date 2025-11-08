@@ -173,10 +173,19 @@ export const updateFixedPoint = async (
     throw new NotFoundError("Plan not found or you don't have access to it");
   }
 
+  // Handle null event_duration before updating
+  const { event_duration, ...restOfCommand } = command;
+  const updateData: Omit<UpdateFixedPointCommand, "event_duration"> & {
+    event_duration?: number;
+  } = { ...restOfCommand };
+  if (event_duration !== null && event_duration !== undefined) {
+    updateData.event_duration = event_duration;
+  }
+
   // Update the fixed point
   const { data, error } = await supabase
     .from("fixed_points")
-    .update(command)
+    .update(updateData)
     .eq("id", fixedPointId)
     .eq("plan_id", planId)
     .select()
