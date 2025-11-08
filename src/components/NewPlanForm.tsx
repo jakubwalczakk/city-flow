@@ -16,6 +16,7 @@ export default function NewPlanForm() {
     updateBasicInfo,
     addFixedPoint,
     removeFixedPoint,
+    updateFixedPoint,
     nextStep,
     prevStep,
     handleSubmit,
@@ -40,6 +41,7 @@ export default function NewPlanForm() {
               fixedPoints={formData.fixedPoints}
               addFixedPoint={addFixedPoint}
               removeFixedPoint={removeFixedPoint}
+              updateFixedPoint={updateFixedPoint}
               goToNextStep={nextStep}
               goToPrevStep={prevStep}
             />

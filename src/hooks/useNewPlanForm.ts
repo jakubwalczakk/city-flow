@@ -61,6 +61,13 @@ export function useNewPlanForm() {
     }));
   };
 
+  const updateFixedPoint = (index: number, point: CreateFixedPointCommand) => {
+    setFormData((prev) => ({
+      ...prev,
+      fixedPoints: prev.fixedPoints.map((p, i) => (i === index ? point : p)),
+    }));
+  };
+
   const nextStep = () => {
     setError(null);
     setCurrentStep((prev) => Math.min(prev + 1, 3));
@@ -145,6 +152,7 @@ export function useNewPlanForm() {
     updateBasicInfo,
     addFixedPoint,
     removeFixedPoint,
+    updateFixedPoint,
     nextStep,
     prevStep,
     handleSubmit,
