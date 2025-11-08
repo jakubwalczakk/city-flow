@@ -262,28 +262,55 @@ export type PlanDetailsViewModel = {
 };
 
 /**
- * Type definition for a single event/slot in the generated plan's timeline.
+ * Represents the category of a timeline item.
+ * Used for displaying icons and filtering.
  */
-export type TimelineEvent = {
-  time: string; // e.g., "09:00"
-  title: string;
-  description: string;
-  estimated_cost?: string;
+export type TimelineItemCategory =
+  | "history"
+  | "food"
+  | "sport"
+  | "nature"
+  | "culture"
+  | "transport"
+  | "accommodation"
+  | "other";
+
+/**
+ * Type definition for a single item/event in the generated plan's timeline.
+ * Corresponds to the database schema validation for generated_content.
+ */
+export type TimelineItem = {
+  id: string; // UUID
+  time?: string; // e.g., "09:00" (optional)
+  category: TimelineItemCategory; // Required by database validation
+  title: string; // Required by database validation
+  description?: string;
+  location?: string;
+  estimated_price?: string;
+  estimated_duration?: string;
+  notes?: string;
 };
 
 /**
  * Type definition for a single day in the generated plan.
+ * Corresponds to the database schema validation for generated_content.
  */
 export type DayPlan = {
   date: string; // e.g., "2025-12-24"
-  title: string;
-  events: TimelineEvent[];
+  items: TimelineItem[]; // Changed from 'events' to 'items' to match database schema
 };
 
 /**
  * ViewModel for the structured generated_content from a plan.
+ * Corresponds to the database schema validation for generated_content.
  */
 export type GeneratedContentViewModel = {
   days: DayPlan[];
-  summary: string;
+  modifications?: string[]; // Optional: AI modifications made to the plan
+  warnings?: string[]; // Optional: Warnings for the user
 };
+
+/**
+ * @deprecated Use TimelineItem instead. This type is kept for backward compatibility.
+ */
+export type TimelineEvent = TimelineItem;

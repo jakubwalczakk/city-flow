@@ -42,7 +42,7 @@ Centralna tabela zarządzająca notatkami i wygenerowanymi planami podróży.
         {
           "id": "uuid",
           "time": "09:00",
-          "type": "activity|meal|transport",
+          "category": "history",
           "title": "Koloseum",
           "description": "Wizyta w starożytnym amfiteatrze",
           "location": "Piazza del Colosseo, 1",
@@ -94,6 +94,18 @@ Tabela zbierająca oceny i komentarze użytkowników na temat wygenerowanych pla
 ### 2.1. `travel_pace_enum` ENUM = ['slow', 'moderate', 'intensive']
 ### 2.2. `plan_status_enum` ENUM = ['draft', 'generated', 'archived']
 ### 2.3. `feedback_rating_enum` ENUM = ['thumbs_up', 'thumbs_down']
+
+### 2.4. Kategorie Atrakcji (używane w `generated_content`)
+Poniższe kategorie są używane w polu `generated_content` do klasyfikacji każdego punktu planu. Nie są one typem ENUM w bazie danych, ale stanowią zdefiniowany standard w logice aplikacji.
+
+-   `history`: Zabytki historyczne
+-   `food`: Jedzenie i gastronomia
+-   `sport`: Aktywności sportowe
+-   `nature`: Atrakcje związane z naturą
+-   `culture`: Kultura i sztuka (np. muzea, teatry, oceanaria)
+-   `transport`: Logistyka i transport (np. lot, pociąg, autobus)
+-   `accommodation`: Zakwaterowanie (np. zameldowanie w hotelu)
+-   `other`: Inne
 
 ## 3. Relacje między tabelami
 

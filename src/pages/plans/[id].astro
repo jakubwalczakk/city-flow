@@ -2,18 +2,17 @@
 import Layout from "@/layouts/Layout.astro";
 import PlanDetailsView from "@/components/PlanDetailsView";
 
+// Get the plan ID from the URL params
 const { id } = Astro.params;
 
+// Validate that we have an ID
 if (!id) {
   return Astro.redirect("/plans");
 }
-
-export const prerender = false;
 ---
 
 <Layout title="Plan Details - CityFlow">
-  <main class="container mx-auto px-4 py-8 max-w-6xl">
-    <PlanDetailsView client:load planId={id} />
+  <main class="container mx-auto px-4 py-8 max-w-5xl">
+    <PlanDetailsView planId={id} client:load />
   </main>
 </Layout>
-

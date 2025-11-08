@@ -237,6 +237,14 @@ Następujące funkcje są celowo wyłączone z zakresu MVP, aby umożliwić szyb
     1.  Jeśli API AI zwróci błąd 5xx lub przekroczy limit czasu, użytkownik widzi komunikat (np. "Wystąpił błąd podczas generowania planu. Spróbuj ponownie za chwilę.").
     2.  Licznik darmowych generacji użytkownika nie ulega zmianie.
 
+* ID: US-037
+* Tytuł: Wyświetlanie kategorii dla punktów planu
+* Opis: Jako użytkownik, przeglądając wygenerowany plan, chcę widzieć kategorie dla każdego punktu (np. "jedzenie", "kultura"), aby szybko zorientować się w charakterze zaplanowanych aktywności.
+* Kryteria akceptacji:
+    1. Każdy element w wygenerowanym planie posiada przypisaną kategorię.
+    2. Obok tytułu każdego punktu w planie wyświetlana jest ikona reprezentująca jego kategorię.
+    3. Kategorie są spójne z moimi preferencjami (np. jeśli wybrałem "Sztuka", plan powinien zawierać punkty z kategorią "kultura").
+
 ### 5.5. Edycja i przebudowa planu
 * ID: US-040
 * Tytuł: Usuwanie punktu z planu

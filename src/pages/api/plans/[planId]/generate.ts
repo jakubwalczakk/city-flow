@@ -19,6 +19,18 @@ export const prerender = false;
 const aiTimelineEventSchema = z.object({
   time: z.string().describe("The time of the event in HH:mm AM/PM format."),
   activity: z.string().describe("A short, descriptive title for the activity."),
+  category: z
+    .enum([
+      "history",
+      "food",
+      "sport",
+      "nature",
+      "culture",
+      "transport",
+      "accommodation",
+      "other",
+    ])
+    .describe("The category of the activity."),
   description: z
     .string()
     .describe("A detailed description of the activity."),
@@ -130,6 +142,7 @@ The final JSON object MUST have the following root structure. It is critical tha
           {
             "time": "HH:mm AM/PM",
             "activity": "Activity Title",
+            "category": "history | food | sport | nature | culture | transport | accommodation | other",
             "description": "Detailed description of the activity.",
             "estimated_price": "e.g., '€18', 'Free', or null"
           }
@@ -173,10 +186,10 @@ Please generate the travel plan now based on the provided details. Ensure the ou
         items: day.activities.map((activity) => ({
           // Add required fields for the DB check constraint
           id: crypto.randomUUID(),
-          type: "activity", 
           // Map AI response fields to DB fields
           title: activity.activity,
           time: activity.time,
+          category: activity.category,
           description: activity.description,
           estimated_price: activity.estimated_price,
         })),
