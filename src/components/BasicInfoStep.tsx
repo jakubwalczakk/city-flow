@@ -10,12 +10,20 @@ interface BasicInfoStepProps {
   formData: NewPlanViewModel["basicInfo"];
   updateFormData: (data: Partial<NewPlanViewModel["basicInfo"]>) => void;
   goToNextStep: () => void;
+  onCancel: () => void;
+  isLoading: boolean;
+  error: string | null;
+  onSave: () => Promise<void>;
 }
 
 export function BasicInfoStep({
   formData,
   updateFormData,
   goToNextStep,
+  onCancel,
+  isLoading,
+  error,
+  onSave,
 }: BasicInfoStepProps) {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -39,6 +47,24 @@ export function BasicInfoStep({
       basicInfoSchema.parse(formData);
       setErrors({});
       goToNextStep();
+    } catch (error) {
+      if (error instanceof Error && "errors" in error) {
+        const zodError = error as any;
+        const newErrors: Record<string, string> = {};
+        zodError.errors.forEach((err: any) => {
+          const path = err.path[0];
+          newErrors[path] = err.message;
+        });
+        setErrors(newErrors);
+      }
+    }
+  };
+
+  const handleSave = () => {
+    try {
+      basicInfoSchema.parse(formData);
+      setErrors({});
+      onSave();
     } catch (error) {
       if (error instanceof Error && "errors" in error) {
         const zodError = error as any;
@@ -149,10 +175,28 @@ export function BasicInfoStep({
         </p>
       </div>
 
-      <div className="flex justify-end pt-4">
-        <Button onClick={validateAndProceed} disabled={!isFormValid()}>
-          Next
+      {error && <p className="text-sm text-destructive">{error}</p>}
+
+      <div className="flex justify-between pt-4">
+        <Button variant="outline" onClick={onCancel}>
+          Cancel
         </Button>
+        <div>
+          <Button
+            variant="outline"
+            onClick={handleSave}
+            disabled={!isFormValid() || isLoading}
+            className="mr-2"
+          >
+            {isLoading ? "Saving..." : "Save as draft"}
+          </Button>
+          <Button
+            onClick={validateAndProceed}
+            disabled={!isFormValid() || isLoading}
+          >
+            Next
+          </Button>
+        </div>
       </div>
     </div>
   );

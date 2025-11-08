@@ -15,6 +15,10 @@ interface FixedPointsStepProps {
   updateFixedPoint: (index: number, point: CreateFixedPointCommand) => void;
   goToNextStep: () => void;
   goToPrevStep: () => void;
+  onCancel: () => void;
+  isLoading: boolean;
+  error: string | null;
+  onSave: () => Promise<void>;
 }
 
 export function FixedPointsStep({
@@ -24,6 +28,10 @@ export function FixedPointsStep({
   updateFixedPoint,
   goToNextStep,
   goToPrevStep,
+  onCancel,
+  isLoading,
+  error,
+  onSave,
 }: FixedPointsStepProps) {
   const [isAdding, setIsAdding] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
@@ -314,12 +322,26 @@ export function FixedPointsStep({
         </Button>
       )}
 
+      {error && (
+        <p className="text-sm text-destructive text-center my-2">{error}</p>
+      )}
+
       {/* Navigation buttons */}
       <div className="flex justify-between pt-4">
         <Button variant="outline" onClick={goToPrevStep}>
           Back
         </Button>
-        <Button onClick={goToNextStep}>Next</Button>
+        <div>
+          <Button
+            variant="outline"
+            onClick={onSave}
+            disabled={isLoading || isAdding || editingIndex !== null}
+            className="mr-2"
+          >
+            {isLoading ? "Saving..." : "Save as draft"}
+          </Button>
+          <Button onClick={goToNextStep}>Next</Button>
+        </div>
       </div>
     </div>
   );

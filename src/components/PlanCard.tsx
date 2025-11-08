@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
  */
 type PlanCardProps = {
   plan: PlanListItemDto;
+  onClick: () => void;
 };
 
 /**
@@ -46,23 +47,19 @@ const formatDateTime = (dateString: string): string => {
  * Component displaying a summary card for a single plan.
  * The entire card is clickable and navigates to the plan details page.
  */
-export const PlanCard = ({ plan }: PlanCardProps) => {
+export const PlanCard = ({ plan, onClick }: PlanCardProps) => {
   const statusInfo = statusConfig[plan.status];
-
-  const handleClick = () => {
-    window.location.href = `/plans/${plan.id}`;
-  };
 
   return (
     <Card
       className="cursor-pointer transition-shadow hover:shadow-lg"
-      onClick={handleClick}
+      onClick={onClick}
       role="link"
       tabIndex={0}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
-          handleClick();
+          onClick();
         }
       }}
       aria-label={`View plan: ${plan.name}`}

@@ -9,13 +9,19 @@ type PlanListProps = {
   plans: PlanListItemDto[];
   isLoading: boolean;
   error: string | null;
+  onPlanClick: (plan: PlanListItemDto) => void;
 };
 
 /**
  * Component for rendering a grid of plan cards.
  * Displays loading state, error state, or empty state as needed.
  */
-export const PlanList = ({ plans, isLoading, error }: PlanListProps) => {
+export const PlanList = ({
+  plans,
+  isLoading,
+  error,
+  onPlanClick,
+}: PlanListProps) => {
   // Loading state
   if (isLoading) {
     return (
@@ -52,7 +58,11 @@ export const PlanList = ({ plans, isLoading, error }: PlanListProps) => {
   return (
     <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
       {plans.map((plan) => (
-        <PlanCard key={plan.id} plan={plan} />
+        <PlanCard
+          key={plan.id}
+          plan={plan}
+          onClick={() => onPlanClick(plan)}
+        />
       ))}
     </div>
   );

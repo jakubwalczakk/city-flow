@@ -3,16 +3,28 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { usePlans } from "@/hooks/usePlans";
 import type { PlansDashboardViewModel } from "@/types";
+import type { PlanListItemDto } from "@/types";
 import { PlanList } from "@/components/PlanList";
 import { PaginationControls } from "@/components/PaginationControls";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import NewPlanForm from "./NewPlanForm";
 
 /**
  * Main dashboard component for displaying user's travel plans.
  * Manages tabs (My Plans / History), pagination, and plan data fetching.
  */
 export const PlansDashboard = () => {
-  const [activeTab, setActiveTab] = useState<PlansDashboardViewModel["activeTab"]>("my-plans");
+  const [activeTab, setActiveTab] =
+    useState<PlansDashboardViewModel["activeTab"]>("my-plans");
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingPlan, setEditingPlan] = useState<PlanListItemDto | null>(null);
 
   const limit = 12;
   const offset = (currentPage - 1) * limit;
@@ -24,7 +36,12 @@ export const PlansDashboard = () => {
   );
 
   // Fetch plans using custom hook
-  const { data, isLoading, error } = usePlans({
+  const {
+    data,
+    isLoading,
+    error,
+    refetch: refetchPlans,
+  } = usePlans({
     status,
     limit,
     offset,
@@ -43,9 +60,19 @@ export const PlansDashboard = () => {
     setCurrentPage(newPage);
   };
 
-  // Handle navigation to create new plan
-  const handleCreatePlan = () => {
-    window.location.href = "/plans/new";
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setEditingPlan(null);
+    refetchPlans();
+  };
+
+  const handlePlanClick = (plan: PlanListItemDto) => {
+    if (plan.status === "draft") {
+      setEditingPlan(plan);
+      setIsModalOpen(true);
+    } else {
+      window.location.href = `/plans/${plan.id}`;
+    }
   };
 
   const plans = data?.data ?? [];
@@ -57,9 +84,27 @@ export const PlansDashboard = () => {
       {/* Header */}
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-3xl font-bold tracking-tight">Moje Plany</h1>
-        <Button onClick={handleCreatePlan} className="w-full sm:w-auto">
-          + Utwórz nowy plan
-        </Button>
+        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+          <DialogTrigger asChild>
+            <Button
+              className="w-full sm:w-auto"
+              onClick={() => setEditingPlan(null)}
+            >
+              + Utwórz nowy plan
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-4xl">
+            <DialogHeader>
+              <DialogTitle>
+                {editingPlan ? "Edit Draft" : "Create a New Travel Plan"}
+              </DialogTitle>
+            </DialogHeader>
+            <NewPlanForm
+              onFinished={handleModalClose}
+              editingPlan={editingPlan}
+            />
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Tabs */}
@@ -71,7 +116,12 @@ export const PlansDashboard = () => {
 
         {/* My Plans Tab */}
         <TabsContent value="my-plans">
-          <PlanList plans={plans} isLoading={isLoading} error={error} />
+          <PlanList
+            plans={plans}
+            isLoading={isLoading}
+            error={error}
+            onPlanClick={handlePlanClick}
+          />
           {showPagination && (
             <div className="mt-8">
               <PaginationControls pagination={pagination} onPageChange={handlePageChange} />
@@ -81,7 +131,12 @@ export const PlansDashboard = () => {
 
         {/* History Tab */}
         <TabsContent value="history">
-          <PlanList plans={plans} isLoading={isLoading} error={error} />
+          <PlanList
+            plans={plans}
+            isLoading={isLoading}
+            error={error}
+            onPlanClick={handlePlanClick}
+          />
           {showPagination && (
             <div className="mt-8">
               <PaginationControls pagination={pagination} onPageChange={handlePageChange} />

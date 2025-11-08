@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type {
   NewPlanViewModel,
   CreatePlanCommand,
   CreateFixedPointCommand,
+  Plan,
+  PlanListItemDto,
 } from "@/types";
 
 // Helper function to create default start date (tomorrow at 9:00 AM)
@@ -32,11 +34,50 @@ const INITIAL_FORM_DATA: NewPlanViewModel = {
   fixedPoints: [],
 };
 
-export function useNewPlanForm() {
+export function useNewPlanForm({
+  onFinished,
+  editingPlan,
+}: { onFinished?: () => void; editingPlan?: PlanListItemDto | null } = {}) {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<NewPlanViewModel>(INITIAL_FORM_DATA);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [planId, setPlanId] = useState<string | null>(
+    editingPlan ? editingPlan.id : null
+  );
+
+  useEffect(() => {
+    if (editingPlan) {
+      setPlanId(editingPlan.id);
+      setFormData({
+        basicInfo: {
+          name: editingPlan.name,
+          destination: editingPlan.destination,
+          start_date: new Date(editingPlan.start_date),
+          end_date: new Date(editingPlan.end_date),
+          notes: editingPlan.notes || "",
+        },
+        fixedPoints: [], // Fetch fixed points separately
+      });
+
+      const fetchFixedPoints = async () => {
+        try {
+          const response = await fetch(`/api/plans/${editingPlan.id}/fixed-points`);
+          if (!response.ok) {
+            throw new Error("Failed to fetch fixed points");
+          }
+          const fixedPoints = await response.json();
+          setFormData((prev) => ({ ...prev, fixedPoints }));
+        } catch (err) {
+          setError(
+            err instanceof Error ? err.message : "Could not load draft details"
+          );
+        }
+      };
+
+      fetchFixedPoints();
+    }
+  }, [editingPlan]);
 
   const updateBasicInfo = (
     data: Partial<NewPlanViewModel["basicInfo"]>
@@ -68,6 +109,80 @@ export function useNewPlanForm() {
     }));
   };
 
+  const saveStep1 = async () => {
+    const planCommand: CreatePlanCommand = {
+      name:
+        formData.basicInfo.name || `${formData.basicInfo.destination} trip`,
+      destination: formData.basicInfo.destination,
+      start_date: formData.basicInfo.start_date.toISOString(),
+      end_date: formData.basicInfo.end_date.toISOString(),
+      notes: formData.basicInfo.notes || null,
+    };
+
+    const url = planId ? `/api/plans/${planId}` : "/api/plans";
+    const method = planId ? "PUT" : "POST";
+
+    const response = await fetch(url, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(planCommand),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Failed to save plan");
+    }
+
+    if (!planId) {
+      const createdPlan: Plan = await response.json();
+      setPlanId(createdPlan.id);
+    }
+  };
+
+  const saveStep2 = async () => {
+    if (!planId) return;
+
+    // TODO: This should be a bulk update, not a series of individual requests
+    if (formData.fixedPoints.length > 0) {
+      const fixedPointPromises = formData.fixedPoints.map((point) =>
+        fetch(`/api/plans/${planId}/fixed-points`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(point),
+        })
+      );
+
+      const results = await Promise.allSettled(fixedPointPromises);
+      const failedPoints = results.filter((r) => r.status === "rejected");
+
+      if (failedPoints.length > 0) {
+        console.error("Some fixed points failed to save:", failedPoints);
+        setError("Some fixed points failed to save.");
+      }
+    }
+  };
+
+  const saveDraft = async () => {
+    setError(null);
+    setIsLoading(true);
+    try {
+      if (currentStep === 1) {
+        await saveStep1();
+      } else if (currentStep === 2) {
+        await saveStep2();
+      }
+      if (onFinished) {
+        onFinished();
+      }
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "An unexpected error occurred"
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const nextStep = () => {
     setError(null);
     setCurrentStep((prev) => Math.min(prev + 1, 3));
@@ -79,67 +194,36 @@ export function useNewPlanForm() {
   };
 
   const handleSubmit = async () => {
+    if (!planId) {
+      setError("Please save the plan before generating.");
+      return;
+    }
     setIsLoading(true);
     setError(null);
 
     try {
-      // Step 1: Create the plan draft
-      const planCommand: CreatePlanCommand = {
-        name: formData.basicInfo.name || `${formData.basicInfo.destination} trip`,
-        destination: formData.basicInfo.destination,
-        start_date: formData.basicInfo.start_date.toISOString(),
-        end_date: formData.basicInfo.end_date.toISOString(),
-        notes: formData.basicInfo.notes || null,
-      };
-
-      const planResponse = await fetch("/api/plans", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(planCommand),
-      });
-
-      if (!planResponse.ok) {
-        const errorData = await planResponse.json();
-        throw new Error(errorData.error || "Failed to create plan");
-      }
-
-      const createdPlan = await planResponse.json();
-      const planId = createdPlan.id;
-
-      // Step 2: Add fixed points if any
-      if (formData.fixedPoints.length > 0) {
-        const fixedPointPromises = formData.fixedPoints.map((point) =>
-          fetch(`/api/plans/${planId}/fixed-points`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(point),
-          })
-        );
-
-        const results = await Promise.allSettled(fixedPointPromises);
-        const failedPoints = results.filter((r) => r.status === "rejected");
-
-        if (failedPoints.length > 0) {
-          console.error("Some fixed points failed to save:", failedPoints);
-          // Non-fatal error, we can still proceed to generation
-          setError("Plan draft created, but some fixed points failed to save.");
-        }
-      }
-
-      // Step 3: Trigger the AI generation
+      // Trigger the AI generation
       const generationResponse = await fetch(`/api/plans/${planId}/generate`, {
         method: "POST",
       });
 
       if (!generationResponse.ok) {
         const errorData = await generationResponse.json();
-        throw new Error(errorData.error || "Failed to generate the plan itinerary.");
+        throw new Error(
+          errorData.error || "Failed to generate the plan itinerary."
+        );
       }
 
-      // Success! Redirect to the newly generated plan details page
-      window.location.href = `/plans/${planId}`;
+      if (onFinished) {
+        onFinished();
+      } else {
+        window.location.href = `/plans/${planId}`;
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An unexpected error occurred");
+      setError(
+        err instanceof Error ? err.message : "An unexpected error occurred"
+      );
+    } finally {
       setIsLoading(false);
     }
   };
@@ -156,6 +240,7 @@ export function useNewPlanForm() {
     nextStep,
     prevStep,
     handleSubmit,
+    saveDraft,
   };
 }
 

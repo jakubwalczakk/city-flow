@@ -187,7 +187,6 @@ export const getPlanById = async (
  *
  * @param supabase - The Supabase client instance
  * @param planId - The ID of the plan to update
- * @param userId - The ID of the user who owns the plan
  * @param command - The update data
  * @returns The updated plan
  * @throws {NotFoundError} If the plan is not found or doesn't belong to the user
@@ -196,39 +195,41 @@ export const getPlanById = async (
 export const updatePlan = async (
   supabase: SupabaseClient,
   planId: string,
-  userId: string,
   command: UpdatePlanCommand
 ): Promise<PlanDetailsDto> => {
   logger.debug("Updating plan", {
     planId,
-    userId,
   });
-
-  // First, verify the plan exists and belongs to the user
-  await getPlanById(supabase, planId, userId);
 
   const { data, error } = await supabase
     .from("plans")
     .update(command)
     .eq("id", planId)
-    .eq("user_id", userId)
     .select()
     .single();
 
   if (error) {
+    if (error.code === "PGRST116") {
+      logger.warn("Plan not found during update", {
+        planId,
+      });
+      throw new NotFoundError("Plan not found.");
+    }
+
     logger.error("Failed to update plan in database", {
       planId,
-      userId,
       errorCode: error.code,
       errorMessage: error.message,
     });
 
-    throw new DatabaseError("Failed to update plan. Please try again later.", new Error(error.message));
+    throw new DatabaseError(
+      "Failed to update plan. Please try again later.",
+      new Error(error.message)
+    );
   }
 
   logger.info("Plan updated successfully", {
     planId,
-    userId,
   });
 
   return data;

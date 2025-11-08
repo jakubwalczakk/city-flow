@@ -4,10 +4,17 @@ import { BasicInfoStep } from "@/components/BasicInfoStep";
 import { FixedPointsStep } from "@/components/FixedPointsStep";
 import { SummaryStep } from "@/components/SummaryStep";
 import { Card, CardContent } from "@/components/ui/card";
+import type { PlanListItemDto } from "@/types";
 
 const STEPS = ["Basic Info", "Fixed Points", "Review"];
 
-export default function NewPlanForm() {
+export default function NewPlanForm({
+  onFinished,
+  editingPlan,
+}: {
+  onFinished?: () => void;
+  editingPlan?: PlanListItemDto | null;
+}) {
   const {
     currentStep,
     formData,
@@ -20,12 +27,13 @@ export default function NewPlanForm() {
     nextStep,
     prevStep,
     handleSubmit,
-  } = useNewPlanForm();
+    saveDraft,
+  } = useNewPlanForm({ onFinished, editingPlan });
 
   return (
     <div className="w-full">
       <StepIndicator currentStep={currentStep} steps={STEPS} />
-      
+
       <Card>
         <CardContent className="pt-6">
           {currentStep === 1 && (
@@ -33,6 +41,10 @@ export default function NewPlanForm() {
               formData={formData.basicInfo}
               updateFormData={updateBasicInfo}
               goToNextStep={nextStep}
+              onCancel={onFinished}
+              isLoading={isLoading}
+              error={error}
+              onSave={saveDraft}
             />
           )}
 
@@ -44,6 +56,10 @@ export default function NewPlanForm() {
               updateFixedPoint={updateFixedPoint}
               goToNextStep={nextStep}
               goToPrevStep={prevStep}
+              onCancel={onFinished}
+              isLoading={isLoading}
+              error={error}
+              onSave={saveDraft}
             />
           )}
 

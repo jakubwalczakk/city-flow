@@ -1,36 +1,39 @@
 import { z } from "zod";
 
 /**
+ * Base schema for a plan. This is the source of truth for the plan's shape.
+ */
+export const planSchema = z.object({
+  name: z.string({ required_error: "Name is required." }).min(1, {
+    message: "Name cannot be empty.",
+  }),
+  destination: z
+    .string({ required_error: "Destination is required." })
+    .min(1, { message: "Destination cannot be empty." }),
+  start_date: z
+    .string({ required_error: "Start date is required." })
+    .datetime({ message: "Start date must be a valid datetime." }),
+  end_date: z
+    .string({ required_error: "End date is required." })
+    .datetime({ message: "End date must be a valid datetime." }),
+  notes: z.string().optional().nullable(),
+});
+
+/**
  * Schema for validating plan creation requests.
  * Ensures that all required fields are present and properly formatted.
  * Note: start_date and end_date are required and must be in ISO 8601 datetime format.
  */
-export const createPlanSchema = z
-  .object({
-    name: z.string({ required_error: "Name is required." }).min(1, {
-      message: "Name cannot be empty.",
-    }),
-    destination: z
-      .string({ required_error: "Destination is required." })
-      .min(1, { message: "Destination cannot be empty." }),
-    start_date: z
-      .string({ required_error: "Start date is required." })
-      .datetime({ message: "Start date must be a valid datetime." }),
-    end_date: z
-      .string({ required_error: "End date is required." })
-      .datetime({ message: "End date must be a valid datetime." }),
-    notes: z.string().optional().nullable(),
-  })
-  .refine(
-    (data) => {
-      // end_date must be after or equal to start_date
-      return new Date(data.end_date) >= new Date(data.start_date);
-    },
-    {
-      message: "End date must be equal to or after start date.",
-      path: ["end_date"],
-    }
-  );
+export const createPlanSchema = planSchema.refine(
+  (data) => {
+    // end_date must be after or equal to start_date
+    return new Date(data.end_date) >= new Date(data.start_date);
+  },
+  {
+    message: "End date must be equal to or after start date.",
+    path: ["end_date"],
+  }
+);
 
 /**
  * Schema for validating query parameters for listing plans.

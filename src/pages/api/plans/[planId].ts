@@ -1,0 +1,44 @@
+import type { APIRoute } from "astro";
+import { z } from "zod";
+import { planSchema } from "@/lib/schemas/plan.schema";
+import { updatePlan } from "@/lib/services/plan.service";
+
+const updatePlanSchema = planSchema.pick({
+  name: true,
+  destination: true,
+  start_date: true,
+  end_date: true,
+  notes: true,
+});
+
+export const PUT: APIRoute = async ({ request, params }) => {
+  const { planId } = params;
+
+  if (!planId) {
+    return new Response(
+      JSON.stringify({ error: "Plan ID is required" }),
+      { status: 400, headers: { "Content-Type": "application/json" } }
+    );
+  }
+
+  try {
+    const data = await request.json();
+    const validatedData = updatePlanSchema.parse(data);
+
+    await updatePlan(planId, validatedData);
+
+    return new Response(null, { status: 204 });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return new Response(
+        JSON.stringify({ error: "Invalid input", details: error.errors }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
+    }
+    console.error("Error updating plan:", error);
+    return new Response(
+      JSON.stringify({ error: "Failed to update plan" }),
+      { status: 500, headers: { "Content-Type": "application/json" } }
+    );
+  }
+};
