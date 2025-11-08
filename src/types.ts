@@ -66,8 +66,8 @@ export type PlanListItemDto = {
   id: string;
   name: string;
   destination: string;
-  start_date: string | null;
-  end_date: string | null;
+  start_date: string;
+  end_date: string;
   status: PlanStatus;
   created_at: string;
 };
@@ -94,8 +94,8 @@ export type PlanDetailsDto = {
   user_id: string;
   name: string;
   destination: string;
-  start_date: string | null;
-  end_date: string | null;
+  start_date: string;
+  end_date: string;
   notes: string | null;
   status: PlanStatus;
   generated_content: Json | null;
@@ -159,12 +159,13 @@ export type UpdateProfileCommand = {
 /**
  * Command model for creating a new draft plan.
  * Corresponds to the request body of `POST /plans`.
+ * Note: start_date and end_date are required and must include both date and time in ISO 8601 format.
  */
 export type CreatePlanCommand = {
   name: string;
   destination: string;
-  start_date?: string | null;
-  end_date?: string | null;
+  start_date: string;
+  end_date: string;
   notes?: string | null;
 };
 
@@ -237,13 +238,14 @@ export type PlansDashboardViewModel = {
 /**
  * ViewModel for the new plan creation form.
  * Holds the entire state of the multi-step form on the client-side.
+ * Note: Dates are stored as Date objects on the client for easier manipulation.
  */
 export type NewPlanViewModel = {
   basicInfo: {
     name: string;
     destination: string;
-    start_date: Date | null;
-    end_date: Date | null;
+    start_date: Date;
+    end_date: Date;
     notes: string;
   };
   fixedPoints: CreateFixedPointCommand[];

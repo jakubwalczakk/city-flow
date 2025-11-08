@@ -62,29 +62,26 @@ export function SummaryStep({
             <p className="font-medium">{basicInfo.destination}</p>
           </div>
 
-          {(basicInfo.start_date || basicInfo.end_date) && (
-            <div>
-              <p className="text-sm text-muted-foreground mb-1 flex items-center gap-1">
-                <Calendar className="h-3 w-3" />
-                Travel Dates
-              </p>
+          <div>
+            <p className="text-sm text-muted-foreground mb-1 flex items-center gap-1">
+              <Calendar className="h-3 w-3" />
+              Travel Dates & Times
+            </p>
+            <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2">
-                {basicInfo.start_date && (
-                  <span className="font-medium">
-                    {format(basicInfo.start_date, "PPP")}
-                  </span>
-                )}
-                {basicInfo.start_date && basicInfo.end_date && (
-                  <span className="text-muted-foreground">→</span>
-                )}
-                {basicInfo.end_date && (
-                  <span className="font-medium">
-                    {format(basicInfo.end_date, "PPP")}
-                  </span>
-                )}
+                <span className="text-sm text-muted-foreground">Start:</span>
+                <span className="font-medium">
+                  {format(basicInfo.start_date, "PPP")} at {format(basicInfo.start_date, "HH:mm")}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">End:</span>
+                <span className="font-medium">
+                  {format(basicInfo.end_date, "PPP")} at {format(basicInfo.end_date, "HH:mm")}
+                </span>
               </div>
             </div>
-          )}
+          </div>
 
           {basicInfo.notes && (
             <div>

@@ -145,15 +145,15 @@ export default function DraftPlanView({ plan }: DraftPlanViewProps) {
         </CardContent>
       </Card>
 
-      {plan.start_date && plan.end_date && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Travel Dates</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Travel Dates & Times</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col gap-3 text-sm">
+            <div className="flex items-center gap-2">
               <svg
-                className="h-4 w-4"
+                className="h-4 w-4 text-muted-foreground"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -165,23 +165,49 @@ export default function DraftPlanView({ plan }: DraftPlanViewProps) {
                   d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                 />
               </svg>
-              <span>
-                {new Date(plan.start_date).toLocaleDateString("en-US", {
-                  month: "long",
-                  day: "numeric",
-                  year: "numeric",
-                })}{" "}
-                -{" "}
-                {new Date(plan.end_date).toLocaleDateString("en-US", {
-                  month: "long",
-                  day: "numeric",
-                  year: "numeric",
-                })}
-              </span>
+              <div className="flex flex-col">
+                <span className="text-xs text-muted-foreground">Start</span>
+                <span className="font-medium">
+                  {new Date(plan.start_date).toLocaleString("en-US", {
+                    month: "long",
+                    day: "numeric",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </span>
+              </div>
             </div>
-          </CardContent>
-        </Card>
-      )}
+            <div className="flex items-center gap-2">
+              <svg
+                className="h-4 w-4 text-muted-foreground"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                />
+              </svg>
+              <div className="flex flex-col">
+                <span className="text-xs text-muted-foreground">End</span>
+                <span className="font-medium">
+                  {new Date(plan.end_date).toLocaleString("en-US", {
+                    month: "long",
+                    day: "numeric",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </span>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

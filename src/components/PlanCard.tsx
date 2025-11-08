@@ -29,16 +29,16 @@ const statusConfig: Record<
 };
 
 /**
- * Format date string to human-readable format.
+ * Format datetime string to human-readable format with date and time.
  */
-const formatDate = (dateString: string | null): string => {
-  if (!dateString) return "—";
-
+const formatDateTime = (dateString: string): string => {
   const date = new Date(dateString);
   return new Intl.DateTimeFormat("pl-PL", {
     day: "numeric",
     month: "short",
     year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   }).format(date);
 };
 
@@ -76,11 +76,11 @@ export const PlanCard = ({ plan }: PlanCardProps) => {
         <div className="flex flex-col gap-1 text-sm text-muted-foreground">
           <div className="flex items-center justify-between">
             <span>Data rozpoczęcia:</span>
-            <span className="font-medium">{formatDate(plan.start_date)}</span>
+            <span className="font-medium">{formatDateTime(plan.start_date)}</span>
           </div>
           <div className="flex items-center justify-between">
             <span>Data zakończenia:</span>
-            <span className="font-medium">{formatDate(plan.end_date)}</span>
+            <span className="font-medium">{formatDateTime(plan.end_date)}</span>
           </div>
         </div>
       </CardContent>

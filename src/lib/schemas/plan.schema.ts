@@ -3,6 +3,7 @@ import { z } from "zod";
 /**
  * Schema for validating plan creation requests.
  * Ensures that all required fields are present and properly formatted.
+ * Note: start_date and end_date are required and must be in ISO 8601 datetime format.
  */
 export const createPlanSchema = z
   .object({
@@ -12,17 +13,18 @@ export const createPlanSchema = z
     destination: z
       .string({ required_error: "Destination is required." })
       .min(1, { message: "Destination cannot be empty." }),
-    start_date: z.string().datetime().optional().nullable(),
-    end_date: z.string().datetime().optional().nullable(),
+    start_date: z
+      .string({ required_error: "Start date is required." })
+      .datetime({ message: "Start date must be a valid datetime." }),
+    end_date: z
+      .string({ required_error: "End date is required." })
+      .datetime({ message: "End date must be a valid datetime." }),
     notes: z.string().optional().nullable(),
   })
   .refine(
     (data) => {
-      // If both dates are provided, end_date must be after start_date
-      if (data.start_date && data.end_date) {
-        return new Date(data.end_date) >= new Date(data.start_date);
-      }
-      return true;
+      // end_date must be after or equal to start_date
+      return new Date(data.end_date) >= new Date(data.start_date);
     },
     {
       message: "End date must be equal to or after start date.",
@@ -74,21 +76,19 @@ export const listPlansQuerySchema = z.object({
 /**
  * Schema for validating basic info step in the create plan form (client-side).
  * Uses Date objects instead of strings for easier form handling.
+ * Note: start_date and end_date are required fields.
  */
 export const basicInfoSchema = z
   .object({
     name: z.string().min(1, "Plan name is required"),
     destination: z.string().min(1, "Destination is required"),
-    start_date: z.date().nullable(),
-    end_date: z.date().nullable(),
+    start_date: z.date({ required_error: "Start date is required" }),
+    end_date: z.date({ required_error: "End date is required" }),
     notes: z.string(),
   })
   .refine(
     (data) => {
-      if (data.start_date && data.end_date) {
-        return data.end_date >= data.start_date;
-      }
-      return true;
+      return data.end_date >= data.start_date;
     },
     {
       message: "End date must be after or equal to start date",

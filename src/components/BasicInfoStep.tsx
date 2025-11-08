@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { DatePicker } from "@/components/ui/date-picker";
 import { Button } from "@/components/ui/button";
 import { basicInfoSchema, type BasicInfoFormData } from "@/lib/schemas/plan.schema";
 import type { NewPlanViewModel } from "@/types";
@@ -19,6 +18,21 @@ export function BasicInfoStep({
   goToNextStep,
 }: BasicInfoStepProps) {
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Convert Date to datetime-local string format (YYYY-MM-DDTHH:mm)
+  const dateToDateTimeLocal = (date: Date): string => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
+
+  // Convert datetime-local string to Date
+  const dateTimeLocalToDate = (dateTimeLocal: string): Date => {
+    return new Date(dateTimeLocal);
+  };
 
   const validateAndProceed = () => {
     try {
@@ -83,11 +97,17 @@ export function BasicInfoStep({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label>Start Date</Label>
-          <DatePicker
-            date={formData.start_date}
-            onSelect={(date) => updateFormData({ start_date: date || null })}
-            placeholder="Select start date"
+          <Label htmlFor="start_date">
+            Start Date & Time <span className="text-destructive">*</span>
+          </Label>
+          <Input
+            id="start_date"
+            type="datetime-local"
+            value={dateToDateTimeLocal(formData.start_date)}
+            onChange={(e) =>
+              updateFormData({ start_date: dateTimeLocalToDate(e.target.value) })
+            }
+            className={errors.start_date ? "border-destructive" : ""}
           />
           {errors.start_date && (
             <p className="text-sm text-destructive">{errors.start_date}</p>
@@ -95,12 +115,18 @@ export function BasicInfoStep({
         </div>
 
         <div className="space-y-2">
-          <Label>End Date</Label>
-          <DatePicker
-            date={formData.end_date}
-            onSelect={(date) => updateFormData({ end_date: date || null })}
-            placeholder="Select end date"
-            minDate={formData.start_date || undefined}
+          <Label htmlFor="end_date">
+            End Date & Time <span className="text-destructive">*</span>
+          </Label>
+          <Input
+            id="end_date"
+            type="datetime-local"
+            value={dateToDateTimeLocal(formData.end_date)}
+            onChange={(e) =>
+              updateFormData({ end_date: dateTimeLocalToDate(e.target.value) })
+            }
+            min={dateToDateTimeLocal(formData.start_date)}
+            className={errors.end_date ? "border-destructive" : ""}
           />
           {errors.end_date && (
             <p className="text-sm text-destructive">{errors.end_date}</p>

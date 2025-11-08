@@ -97,6 +97,11 @@ export const POST: APIRoute = async ({ params, locals }) => {
       throw new AppError("This plan has already been generated.", 409);
     }
 
+    // Validate that required dates are present
+    if (!plan.start_date || !plan.end_date) {
+      throw new AppError("Plan must have both start date and end date to generate.", 400);
+    }
+
     const { data: fixedPoints, error: fixedPointsError } = await supabase
         .from("fixed_points")
         .select("*")
@@ -136,10 +141,11 @@ The final JSON object MUST have the following root structure. It is critical tha
 
 Key requirements for the plan:
 - Destination: ${plan.destination}
-- Dates: ${plan.start_date} to ${plan.end_date}
+- Start Date & Time: ${new Date(plan.start_date).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}
+- End Date & Time: ${new Date(plan.end_date).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}
 - User Notes: ${plan.notes || "No special notes provided."}
 - Fixed Points: The user has scheduled the following non-negotiable events. You MUST incorporate them into the plan at the specified times.
-${fixedPoints.map((fp) => `- ${fp.event_at}: ${fp.location} - ${fp.description || "No description"}`).join("\n")}
+${fixedPoints && fixedPoints.length > 0 ? fixedPoints.map((fp) => `- ${new Date(fp.event_at).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })}: ${fp.location} - ${fp.description || "No description"}`).join("\n") : "No fixed points scheduled."}
 
 Generate a plan that is logical, engaging, and takes into account travel times between locations. Be creative and suggest interesting activities, restaurants, and sights.
 `;

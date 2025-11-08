@@ -75,7 +75,19 @@ CityFlow is an AI-powered web application (MVP) designed to simplify the process
     OPENROUTER_API_KEY=your_openrouter_api_key
     ```
 
-4.  **Run the development server:**
+4.  **Initialize the database:**
+
+    ```bash
+    # Start Supabase (first time)
+    supabase start
+    
+    # Or reset the database (if already started)
+    supabase db reset
+    ```
+
+    This will automatically create a default development user (see `supabase/SEED_DATA_GUIDE.md` for details).
+
+5.  **Run the development server:**
 
     ```bash
     npm run dev

@@ -5,12 +5,28 @@ import type {
   CreateFixedPointCommand,
 } from "@/types";
 
+// Helper function to create default start date (tomorrow at 9:00 AM)
+const getDefaultStartDate = (): Date => {
+  const date = new Date();
+  date.setDate(date.getDate() + 1);
+  date.setHours(9, 0, 0, 0);
+  return date;
+};
+
+// Helper function to create default end date (3 days from tomorrow at 18:00)
+const getDefaultEndDate = (): Date => {
+  const date = new Date();
+  date.setDate(date.getDate() + 4);
+  date.setHours(18, 0, 0, 0);
+  return date;
+};
+
 const INITIAL_FORM_DATA: NewPlanViewModel = {
   basicInfo: {
     name: "",
     destination: "",
-    start_date: null,
-    end_date: null,
+    start_date: getDefaultStartDate(),
+    end_date: getDefaultEndDate(),
     notes: "",
   },
   fixedPoints: [],
@@ -64,8 +80,8 @@ export function useNewPlanForm() {
       const planCommand: CreatePlanCommand = {
         name: formData.basicInfo.name || `${formData.basicInfo.destination} trip`,
         destination: formData.basicInfo.destination,
-        start_date: formData.basicInfo.start_date?.toISOString() || null,
-        end_date: formData.basicInfo.end_date?.toISOString() || null,
+        start_date: formData.basicInfo.start_date.toISOString(),
+        end_date: formData.basicInfo.end_date.toISOString(),
         notes: formData.basicInfo.notes || null,
       };
 
