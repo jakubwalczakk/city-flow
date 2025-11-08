@@ -175,6 +175,8 @@ export type CreatePlanCommand = {
 export type UpdatePlanCommand = {
   name?: string;
   notes?: string | null;
+  status?: PlanStatus;
+  generated_content?: Json | null;
 };
 
 // ============================================================================

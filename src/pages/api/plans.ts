@@ -5,6 +5,9 @@ import { createPlan, getPlans } from "@/lib/services/plan.service";
 import { ValidationError } from "@/lib/errors/app-error";
 import { handleApiError, successResponse } from "@/lib/utils/error-handler";
 import { logger } from "@/lib/utils/logger";
+import { ForbiddenError } from "@/lib/errors/app-error";
+
+export const prerender = false;
 
 /**
  * GET /api/plans
@@ -57,16 +60,20 @@ export const GET: APIRoute = async ({ url, locals }) => {
 
 /**
  * POST /api/plans
- * Creates a new travel plan for the authenticated user.
+ * Creates a new travel plan.
  *
  * Request body should conform to CreatePlanCommand schema.
  * Returns the created plan with status 201 on success.
  */
 export const POST: APIRoute = async ({ request, locals }) => {
+  const { supabase } = locals;
+  // TODO: Replace with actual user from session once auth is implemented
+  const user = { id: DEFAULT_USER_ID };
+
   try {
-    // In development, use a default user ID since we are not handling authorization yet.
-    const supabase = locals.supabase;
-    const user = { id: DEFAULT_USER_ID };
+    if (!user) {
+      throw new ForbiddenError("You must be logged in to create a plan.");
+    }
 
     logger.debug("Received request to create plan", { userId: user.id });
 

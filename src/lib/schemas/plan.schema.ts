@@ -102,7 +102,11 @@ export const basicInfoSchema = z
 export const fixedPointSchema = z.object({
   location: z.string().min(1, "Location is required"),
   event_at: z.string().min(1, "Date and time is required"),
-  event_duration: z.number().min(0, "Duration must be positive"),
+  event_duration: z
+    .number()
+    .positive("Duration must be a positive number.")
+    .nullable()
+    .optional(),
   description: z.string().nullable().optional(),
 });
 

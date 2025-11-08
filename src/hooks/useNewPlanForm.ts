@@ -62,7 +62,7 @@ export function useNewPlanForm() {
     try {
       // Step 1: Create the plan draft
       const planCommand: CreatePlanCommand = {
-        name: formData.basicInfo.name,
+        name: formData.basicInfo.name || `${formData.basicInfo.destination} trip`,
         destination: formData.basicInfo.destination,
         start_date: formData.basicInfo.start_date?.toISOString() || null,
         end_date: formData.basicInfo.end_date?.toISOString() || null,
@@ -98,16 +98,25 @@ export function useNewPlanForm() {
 
         if (failedPoints.length > 0) {
           console.error("Some fixed points failed to save:", failedPoints);
-          throw new Error(
-            "Plan created, but some fixed points failed to save"
-          );
+          // Non-fatal error, we can still proceed to generation
+          setError("Plan draft created, but some fixed points failed to save.");
         }
       }
 
-      // Success! Redirect to plan details
+      // Step 3: Trigger the AI generation
+      const generationResponse = await fetch(`/api/plans/${planId}/generate`, {
+        method: "POST",
+      });
+
+      if (!generationResponse.ok) {
+        const errorData = await generationResponse.json();
+        throw new Error(errorData.error || "Failed to generate the plan itinerary.");
+      }
+
+      // Success! Redirect to the newly generated plan details page
       window.location.href = `/plans/${planId}`;
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
+      setError(err instanceof Error ? err.message : "An unexpected error occurred");
       setIsLoading(false);
     }
   };

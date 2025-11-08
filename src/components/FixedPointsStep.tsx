@@ -27,7 +27,7 @@ export function FixedPointsStep({
   const [newPoint, setNewPoint] = useState<CreateFixedPointCommand>({
     location: "",
     event_at: "",
-    event_duration: 60,
+    event_duration: null,
     description: null,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -47,7 +47,7 @@ export function FixedPointsStep({
       setNewPoint({
         location: "",
         event_at: "",
-        event_duration: 60,
+        event_duration: null,
         description: null,
       });
       setErrors({});
@@ -125,8 +125,12 @@ export function FixedPointsStep({
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Clock className="h-4 w-4" />
                       <span>{formatDateTime(point.event_at)}</span>
-                      <span>•</span>
-                      <span>{point.event_duration} minutes</span>
+                      {point.event_duration && (
+                        <>
+                          <span>•</span>
+                          <span>{point.event_duration} minutes</span>
+                        </>
+                      )}
                     </div>
                   </div>
                   <Button
@@ -194,11 +198,13 @@ export function FixedPointsStep({
                   id="event_duration"
                   type="number"
                   min="0"
-                  value={newPoint.event_duration}
+                  value={newPoint.event_duration ?? ""}
                   onChange={(e) =>
                     setNewPoint({
                       ...newPoint,
-                      event_duration: parseInt(e.target.value) || 0,
+                      event_duration: e.target.value
+                        ? parseInt(e.target.value, 10)
+                        : null,
                     })
                   }
                   className={errors.event_duration ? "border-destructive" : ""}
@@ -243,7 +249,7 @@ export function FixedPointsStep({
                   setNewPoint({
                     location: "",
                     event_at: "",
-                    event_duration: 60,
+                    event_duration: null,
                     description: null,
                   });
                 }}

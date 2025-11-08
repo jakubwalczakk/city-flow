@@ -12,7 +12,10 @@ export const createFixedPointSchema = z.object({
     message: "Event date must be a valid ISO 8601 datetime string.",
   }),
   event_duration: z
-    .number({ required_error: "Event duration is required." })
+    .number({
+      required_error: "Event duration is required.",
+      invalid_type_error: "Event duration must be a number.",
+    })
     .int({ message: "Event duration must be an integer." })
     .positive({ message: "Event duration must be positive." }),
   description: z.string().optional().nullable(),
@@ -31,7 +34,8 @@ export const updateFixedPointSchema = z.object({
     .number()
     .int({ message: "Event duration must be an integer." })
     .positive({ message: "Event duration must be positive." })
-    .optional(),
+    .optional()
+    .nullable(),
   description: z.string().optional().nullable(),
 });
 
