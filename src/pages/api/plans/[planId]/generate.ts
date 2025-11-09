@@ -183,16 +183,24 @@ Please generate the travel plan now based on the provided details. Ensure the ou
       days: generatedContent.itinerary.days.map((day) => ({
         date: day.date,
         // The database expects an 'items' array, not 'activities'
-        items: day.activities.map((activity) => ({
-          // Add required fields for the DB check constraint
-          id: crypto.randomUUID(),
-          // Map AI response fields to DB fields
-          title: activity.activity,
-          time: activity.time,
-          category: activity.category,
-          description: activity.description,
-          estimated_price: activity.estimated_price,
-        })),
+        items: day.activities.map((activity) => {
+          // Map category to type for database validation
+          const type = activity.category === 'food' ? 'meal' : 
+                       activity.category === 'transport' ? 'transport' : 
+                       'activity';
+          
+          return {
+            // Add required fields for the DB check constraint
+            id: crypto.randomUUID(),
+            type: type, // Required by database constraint
+            // Map AI response fields to DB fields
+            title: activity.activity,
+            time: activity.time,
+            category: activity.category,
+            description: activity.description,
+            estimated_price: activity.estimated_price,
+          };
+        }),
       })),
     };
 

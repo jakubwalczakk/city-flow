@@ -4,6 +4,7 @@ import { BasicInfoStep } from "@/components/BasicInfoStep";
 import { FixedPointsStep } from "@/components/FixedPointsStep";
 import { SummaryStep } from "@/components/SummaryStep";
 import { Card, CardContent } from "@/components/ui/card";
+import { PlanGenerationLoading } from "@/components/PlanGenerationLoading";
 import type { PlanListItemDto } from "@/types";
 
 const STEPS = ["Basic Info", "Fixed Points", "Review"];
@@ -19,6 +20,7 @@ export default function NewPlanForm({
     currentStep,
     formData,
     isLoading,
+    isGenerating,
     error,
     updateBasicInfo,
     addFixedPoint,
@@ -32,10 +34,17 @@ export default function NewPlanForm({
 
   return (
     <div className="w-full">
-      <StepIndicator currentStep={currentStep} steps={STEPS} />
+      {/* Show loading animation when generating */}
+      {isGenerating ? (
+        <PlanGenerationLoading
+          planName={formData.basicInfo.name || `${formData.basicInfo.destination} trip`}
+        />
+      ) : (
+        <>
+          <StepIndicator currentStep={currentStep} steps={STEPS} />
 
-      <Card>
-        <CardContent className="pt-6">
+          <Card>
+            <CardContent className="pt-6">
           {currentStep === 1 && (
             <BasicInfoStep
               formData={formData.basicInfo}
@@ -72,8 +81,10 @@ export default function NewPlanForm({
               error={error}
             />
           )}
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+        </>
+      )}
     </div>
   );
 }

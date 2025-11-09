@@ -119,8 +119,22 @@ export const fixedPointSchema = z.object({
  */
 export const updatePlanSchema = z.object({
   name: z.string().min(1, "Name cannot be empty.").optional(),
+  start_date: z.string().datetime({ message: "Start date must be a valid datetime." }).optional(),
+  end_date: z.string().datetime({ message: "End date must be a valid datetime." }).optional(),
   notes: z.string().optional().nullable(),
-});
+}).refine(
+  (data) => {
+    // If both dates are provided, end_date must be after or equal to start_date
+    if (data.start_date && data.end_date) {
+      return new Date(data.end_date) >= new Date(data.start_date);
+    }
+    return true;
+  },
+  {
+    message: "End date must be equal to or after start date.",
+    path: ["end_date"],
+  }
+);
 
 export type BasicInfoFormData = z.infer<typeof basicInfoSchema>;
 export type FixedPointFormData = z.infer<typeof fixedPointSchema>;

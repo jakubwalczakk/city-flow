@@ -1,7 +1,8 @@
 import type { APIRoute } from "astro";
 import { z } from "zod";
 import { planSchema } from "@/lib/schemas/plan.schema";
-import { updatePlan } from "@/lib/services/plan.service";
+import { updatePlan, deletePlan } from "@/lib/services/plan.service";
+import { handleApiError } from "@/lib/errors";
 
 const updatePlanSchema = planSchema.pick({
   name: true,
@@ -40,5 +41,31 @@ export const PUT: APIRoute = async ({ request, params, locals }) => {
       JSON.stringify({ error: "Failed to update plan" }),
       { status: 500, headers: { "Content-Type": "application/json" } }
     );
+  }
+};
+
+export const DELETE: APIRoute = async ({ params, locals }) => {
+  const { planId } = params;
+
+  if (!planId) {
+    return new Response(
+      JSON.stringify({ error: "Plan ID is required" }),
+      { status: 400, headers: { "Content-Type": "application/json" } }
+    );
+  }
+
+  if (!locals.user) {
+    return new Response(
+      JSON.stringify({ error: "Unauthorized" }),
+      { status: 401, headers: { "Content-Type": "application/json" } }
+    );
+  }
+
+  try {
+    await deletePlan(locals.supabase, planId, locals.user.id);
+
+    return new Response(null, { status: 204 });
+  } catch (error) {
+    return handleApiError(error);
   }
 };

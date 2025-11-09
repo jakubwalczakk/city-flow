@@ -41,6 +41,7 @@ export function useNewPlanForm({
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<NewPlanViewModel>(INITIAL_FORM_DATA);
   const [isLoading, setIsLoading] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [planId, setPlanId] = useState<string | null>(
     editingPlan ? editingPlan.id : null
@@ -83,7 +84,14 @@ export function useNewPlanForm({
             throw new Error("Failed to fetch fixed points");
           }
           const fixedPoints = await response.json();
-          setFormData((prev) => ({ ...prev, fixedPoints }));
+          // Convert FixedPointDto to CreateFixedPointCommand format (without id/plan_id)
+          const fixedPointCommands = fixedPoints.map((fp: any) => ({
+            location: fp.location,
+            event_at: fp.event_at,
+            event_duration: fp.event_duration,
+            description: fp.description,
+          }));
+          setFormData((prev) => ({ ...prev, fixedPoints: fixedPointCommands }));
         } catch (err) {
           setError(
             err instanceof Error ? err.message : "Could not load draft details"
@@ -130,43 +138,83 @@ export function useNewPlanForm({
     }));
   };
 
-  const saveStep1 = async () => {
-    const planCommand: CreatePlanCommand = {
-      name:
-        formData.basicInfo.name || `${formData.basicInfo.destination} trip`,
-      destination: formData.basicInfo.destination,
-      start_date: formData.basicInfo.start_date.toISOString(),
-      end_date: formData.basicInfo.end_date.toISOString(),
-      notes: formData.basicInfo.notes || null,
-    };
+  const saveStep1 = async (): Promise<string> => {
+    if (planId) {
+      // Update existing plan - only send allowed fields for PATCH
+      const updateCommand = {
+        name: formData.basicInfo.name || `${formData.basicInfo.destination} trip`,
+        start_date: formData.basicInfo.start_date.toISOString(),
+        end_date: formData.basicInfo.end_date.toISOString(),
+        notes: formData.basicInfo.notes || null,
+      };
 
-    const url = planId ? `/api/plans/${planId}` : "/api/plans";
-    const method = planId ? "PUT" : "POST";
+      const response = await fetch(`/api/plans/${planId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updateCommand),
+      });
 
-    const response = await fetch(url, {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(planCommand),
-    });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to update plan");
+      }
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || "Failed to save plan");
-    }
+      return planId;
+    } else {
+      // Create new plan
+      const createCommand: CreatePlanCommand = {
+        name: formData.basicInfo.name || `${formData.basicInfo.destination} trip`,
+        destination: formData.basicInfo.destination,
+        start_date: formData.basicInfo.start_date.toISOString(),
+        end_date: formData.basicInfo.end_date.toISOString(),
+        notes: formData.basicInfo.notes || null,
+      };
 
-    if (!planId) {
+      const response = await fetch("/api/plans", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(createCommand),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to create plan");
+      }
+
       const createdPlan: PlanDetailsDto = await response.json();
       setPlanId(createdPlan.id);
+      return createdPlan.id;
     }
   };
 
-  const saveStep2 = async () => {
-    if (!planId) return;
+  const saveStep2 = async (currentPlanId: string) => {
+    if (!currentPlanId) return;
 
+    // First, delete all existing fixed points for this plan
+    // This ensures we don't create duplicates when editing an existing draft
+    try {
+      const existingPointsResponse = await fetch(`/api/plans/${currentPlanId}/fixed-points`);
+      if (existingPointsResponse.ok) {
+        const existingPoints = await existingPointsResponse.json();
+        
+        // Delete all existing fixed points
+        const deletePromises = existingPoints.map((point: any) =>
+          fetch(`/api/plans/${currentPlanId}/fixed-points/${point.id}`, {
+            method: "DELETE",
+          })
+        );
+        await Promise.all(deletePromises);
+      }
+    } catch (err) {
+      console.error("Failed to clear existing fixed points:", err);
+      // Continue anyway - we'll try to create the new ones
+    }
+
+    // Now create all fixed points from the form
     // TODO: This should be a bulk update, not a series of individual requests
     if (formData.fixedPoints.length > 0) {
       const fixedPointPromises = formData.fixedPoints.map((point) =>
-        fetch(`/api/plans/${planId}/fixed-points`, {
+        fetch(`/api/plans/${currentPlanId}/fixed-points`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(point),
@@ -190,7 +238,10 @@ export function useNewPlanForm({
       if (currentStep === 1) {
         await saveStep1();
       } else if (currentStep === 2) {
-        await saveStep2();
+        const currentPlanId = planId;
+        if (currentPlanId) {
+          await saveStep2(currentPlanId);
+        }
       }
       if (onFinished) {
         onFinished();
@@ -215,16 +266,32 @@ export function useNewPlanForm({
   };
 
   const handleSubmit = async () => {
-    if (!planId) {
-      setError("Please save the plan before generating.");
-      return;
-    }
     setIsLoading(true);
     setError(null);
 
     try {
+      // Save the plan first if it hasn't been saved yet, and get the plan ID
+      let currentPlanId = planId;
+      if (!currentPlanId) {
+        currentPlanId = await saveStep1();
+      }
+      
+      // Save fixed points if any exist
+      if (currentPlanId && formData.fixedPoints.length > 0) {
+        await saveStep2(currentPlanId);
+      }
+
+      // Ensure we have a planId after saving
+      if (!currentPlanId) {
+        throw new Error("Failed to save the plan. Please try again.");
+      }
+
+      // Switch to generating state to show the loading animation
+      setIsLoading(false);
+      setIsGenerating(true);
+
       // Trigger the AI generation
-      const generationResponse = await fetch(`/api/plans/${planId}/generate`, {
+      const generationResponse = await fetch(`/api/plans/${currentPlanId}/generate`, {
         method: "POST",
       });
 
@@ -238,9 +305,10 @@ export function useNewPlanForm({
       if (onFinished) {
         onFinished();
       } else {
-        window.location.href = `/plans/${planId}`;
+        window.location.href = `/plans/${currentPlanId}`;
       }
     } catch (err) {
+      setIsGenerating(false);
       setError(
         err instanceof Error ? err.message : "An unexpected error occurred"
       );
@@ -253,6 +321,7 @@ export function useNewPlanForm({
     currentStep,
     formData,
     isLoading,
+    isGenerating,
     error,
     updateBasicInfo,
     addFixedPoint,

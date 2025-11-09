@@ -10,6 +10,7 @@ type PlanListProps = {
   isLoading: boolean;
   error: string | null;
   onPlanClick: (plan: PlanListItemDto) => void;
+  onPlanDelete: (planId: string) => void;
 };
 
 /**
@@ -21,6 +22,7 @@ export const PlanList = ({
   isLoading,
   error,
   onPlanClick,
+  onPlanDelete,
 }: PlanListProps) => {
   // Loading state
   if (isLoading) {
@@ -62,6 +64,7 @@ export const PlanList = ({
           key={plan.id}
           plan={plan}
           onClick={() => onPlanClick(plan)}
+          onDelete={onPlanDelete}
         />
       ))}
     </div>

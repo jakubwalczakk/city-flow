@@ -75,6 +75,24 @@ export const PlansDashboard = () => {
     }
   };
 
+  const handlePlanDelete = async (planId: string) => {
+    try {
+      const response = await fetch(`/api/plans/${planId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete plan");
+      }
+
+      // Refetch plans after successful deletion
+      refetchPlans();
+    } catch (error) {
+      console.error("Error deleting plan:", error);
+      // You could add a toast notification here to inform the user
+    }
+  };
+
   const plans = data?.data ?? [];
   const pagination = data?.pagination;
   const showPagination = pagination && pagination.total > limit;
@@ -94,11 +112,6 @@ export const PlansDashboard = () => {
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-4xl">
-            <DialogHeader>
-              <DialogTitle>
-                {editingPlan ? "Edit Draft" : "Create a New Travel Plan"}
-              </DialogTitle>
-            </DialogHeader>
             <NewPlanForm
               onFinished={handleModalClose}
               editingPlan={editingPlan}
@@ -121,6 +134,7 @@ export const PlansDashboard = () => {
             isLoading={isLoading}
             error={error}
             onPlanClick={handlePlanClick}
+            onPlanDelete={handlePlanDelete}
           />
           {showPagination && (
             <div className="mt-8">
@@ -136,6 +150,7 @@ export const PlansDashboard = () => {
             isLoading={isLoading}
             error={error}
             onPlanClick={handlePlanClick}
+            onPlanDelete={handlePlanDelete}
           />
           {showPagination && (
             <div className="mt-8">
