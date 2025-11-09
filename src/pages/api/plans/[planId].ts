@@ -2,7 +2,7 @@ import type { APIRoute } from "astro";
 import { z } from "zod";
 import { planSchema } from "@/lib/schemas/plan.schema";
 import { updatePlan, deletePlan } from "@/lib/services/plan.service";
-import { handleApiError } from "@/lib/errors";
+import { handleApiError } from "@/lib/utils/error-handler";
 
 const updatePlanSchema = planSchema.pick({
   name: true,

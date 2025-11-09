@@ -89,7 +89,9 @@ export const getFeedback = async (
 
   if (error) {
     if (error.code === "PGRST116") {
-      logger.debug("No feedback found", {
+      // This is expected for newly generated plans - no feedback yet
+      // Only log at debug level to avoid noise in logs
+      logger.debug("No feedback found for plan (expected for new plans)", {
         planId,
         userId,
       });

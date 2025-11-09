@@ -27,13 +27,21 @@ export default function FeedbackModule({ planId }: FeedbackModuleProps) {
         const response = await fetch(`/api/plans/${planId}/feedback`);
         
         if (response.ok) {
-          const data: FeedbackDto = await response.json();
-          setFeedback(data);
-          setSelectedRating(data.rating);
-          setComment(data.comment || "");
-        } else if (response.status === 404) {
-          // No feedback yet, that's okay
-          setFeedback(null);
+          const data: FeedbackDto | null = await response.json();
+          
+          // Handle the case where no feedback exists yet (API returns null)
+          if (data === null) {
+            setFeedback(null);
+            setSelectedRating(null);
+            setComment("");
+          } else {
+            setFeedback(data);
+            setSelectedRating(data.rating);
+            setComment(data.comment || "");
+          }
+        } else {
+          // Only log actual errors (not expected null responses)
+          console.error("Failed to fetch feedback:", response.statusText);
         }
       } catch (error) {
         console.error("Failed to fetch feedback:", error);

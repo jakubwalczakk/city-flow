@@ -2,7 +2,7 @@ import type { APIRoute } from "astro";
 import { DEFAULT_USER_ID } from "@/db/supabase.client";
 import { submitFeedbackSchema } from "@/lib/schemas/feedback.schema";
 import { submitFeedback, getFeedback } from "@/lib/services/feedback.service";
-import { ValidationError } from "@/lib/errors/app-error";
+import { ValidationError, NotFoundError } from "@/lib/errors/app-error";
 import { handleApiError, successResponse } from "@/lib/utils/error-handler";
 import { logger } from "@/lib/utils/logger";
 
@@ -11,7 +11,7 @@ import { logger } from "@/lib/utils/logger";
  * Retrieves the user's feedback for a specific plan.
  *
  * Returns the feedback with status 200 on success.
- * Returns 404 if no feedback has been submitted yet.
+ * Returns 200 with null if no feedback has been submitted yet.
  */
 export const GET: APIRoute = async ({ params, locals }) => {
   try {
@@ -32,6 +32,16 @@ export const GET: APIRoute = async ({ params, locals }) => {
 
     return successResponse(feedback, 200);
   } catch (error) {
+    // If feedback doesn't exist yet, return null instead of error
+    // This is a normal state for newly generated plans
+    if (error instanceof NotFoundError) {
+      logger.debug("No feedback found for plan, returning null", {
+        userId: DEFAULT_USER_ID,
+        planId: params.planId,
+      });
+      return successResponse(null, 200);
+    }
+    
     return handleApiError(error, {
       endpoint: "GET /api/plans/[planId]/feedback",
       userId: DEFAULT_USER_ID,
