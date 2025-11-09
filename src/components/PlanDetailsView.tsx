@@ -1,10 +1,20 @@
+import { useState } from "react";
 import { usePlanDetails } from "@/hooks/usePlanDetails";
 import PlanHeader from "@/components/PlanHeader";
 import DraftPlanView from "@/components/DraftPlanView";
 import GeneratedPlanView from "@/components/GeneratedPlanView";
+import ActivityForm from "@/components/ActivityForm";
+import type { TimelineItem } from "@/types";
 
 type PlanDetailsViewProps = {
   planId: string;
+};
+
+type ActivityFormState = {
+  isOpen: boolean;
+  mode: "add" | "edit";
+  date: string | null;
+  item: TimelineItem | null;
 };
 
 /**
@@ -12,7 +22,65 @@ type PlanDetailsViewProps = {
  * Fetches plan data and renders the appropriate view based on the plan's status.
  */
 export default function PlanDetailsView({ planId }: PlanDetailsViewProps) {
-  const { plan, isLoading, error, updatePlanName, deletePlan } = usePlanDetails(planId);
+  const { plan, isLoading, error, updatePlanName, deletePlan, addActivity, updateActivity, deleteActivity } =
+    usePlanDetails(planId);
+
+  const [activityFormState, setActivityFormState] = useState<ActivityFormState>({
+    isOpen: false,
+    mode: "add",
+    date: null,
+    item: null,
+  });
+
+  const handleAddActivity = (date: string) => {
+    setActivityFormState({
+      isOpen: true,
+      mode: "add",
+      date,
+      item: null,
+    });
+  };
+
+  const handleEditActivity = (date: string, item: TimelineItem) => {
+    setActivityFormState({
+      isOpen: true,
+      mode: "edit",
+      date,
+      item,
+    });
+  };
+
+  const handleDeleteActivity = async (date: string, itemId: string) => {
+    try {
+      await deleteActivity(date, itemId);
+    } catch (error) {
+      console.error("Failed to delete activity:", error);
+      alert(error instanceof Error ? error.message : "Failed to delete activity");
+    }
+  };
+
+  const handleActivityFormSubmit = async (activity: Partial<TimelineItem>) => {
+    try {
+      if (activityFormState.mode === "add" && activityFormState.date) {
+        await addActivity(activityFormState.date, activity);
+      } else if (activityFormState.mode === "edit" && activityFormState.date && activityFormState.item) {
+        await updateActivity(activityFormState.date, activityFormState.item.id, activity);
+      }
+    } catch (error) {
+      console.error("Failed to save activity:", error);
+      alert(error instanceof Error ? error.message : "Failed to save activity");
+      throw error; // Re-throw to prevent form from closing
+    }
+  };
+
+  const handleActivityFormClose = () => {
+    setActivityFormState({
+      isOpen: false,
+      mode: "add",
+      date: null,
+      item: null,
+    });
+  };
 
   // Loading state
   if (isLoading) {
@@ -108,7 +176,23 @@ export default function PlanDetailsView({ planId }: PlanDetailsViewProps) {
       <PlanHeader plan={plan} onUpdate={updatePlanName} onDelete={deletePlan} />
 
       {plan.status === "draft" && <DraftPlanView plan={plan} />}
-      {plan.status === "generated" && <GeneratedPlanView plan={plan} />}
+      {plan.status === "generated" && (
+        <>
+          <GeneratedPlanView
+            plan={plan}
+            onAddActivity={handleAddActivity}
+            onEditActivity={handleEditActivity}
+            onDeleteActivity={handleDeleteActivity}
+          />
+          <ActivityForm
+            isOpen={activityFormState.isOpen}
+            onClose={handleActivityFormClose}
+            onSubmit={handleActivityFormSubmit}
+            initialData={activityFormState.item || undefined}
+            mode={activityFormState.mode}
+          />
+        </>
+      )}
       {plan.status === "archived" && (
         <div className="rounded-lg border border-muted bg-muted/20 p-6 text-center">
           <p className="text-muted-foreground">This plan has been archived.</p>

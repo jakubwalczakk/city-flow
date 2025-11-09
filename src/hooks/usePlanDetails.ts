@@ -1,5 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
-import type { PlanDetailsDto, UpdatePlanCommand } from "@/types";
+import type {
+  PlanDetailsDto,
+  UpdatePlanCommand,
+  AddActivityCommand,
+  UpdateActivityCommand,
+  TimelineItem,
+} from "@/types";
 
 /**
  * Result type returned by the usePlanDetails hook.
@@ -10,6 +16,9 @@ export type UsePlanDetailsResult = {
   error: string | null;
   updatePlanName: (newName: string) => Promise<void>;
   deletePlan: () => Promise<void>;
+  addActivity: (date: string, activity: Partial<TimelineItem>) => Promise<void>;
+  updateActivity: (date: string, itemId: string, activity: Partial<TimelineItem>) => Promise<void>;
+  deleteActivity: (date: string, itemId: string) => Promise<void>;
   refetch: () => void;
 };
 
@@ -96,6 +105,109 @@ export const usePlanDetails = (planId: string): UsePlanDetailsResult => {
     }
   }, [planId]);
 
+  /**
+   * Adds a new activity to a specific day in the plan.
+   *
+   * @param date - The date of the day (e.g., "2025-11-10")
+   * @param activity - The activity data to add
+   * @throws Error if the operation fails
+   */
+  const addActivity = useCallback(
+    async (date: string, activity: Partial<TimelineItem>): Promise<void> => {
+      // Convert TimelineItem to AddActivityCommand format
+      const command: AddActivityCommand = {
+        time: activity.time,
+        title: activity.title || "",
+        description: activity.description,
+        location: activity.location,
+        duration: activity.duration,
+        category: activity.category || "other",
+        estimated_cost: activity.estimated_price,
+      };
+
+      const response = await fetch(`/api/plans/${planId}/days/${date}/items`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(command),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to add activity");
+      }
+
+      const updatedPlan: PlanDetailsDto = await response.json();
+      setPlan(updatedPlan);
+    },
+    [planId]
+  );
+
+  /**
+   * Updates an existing activity in the plan.
+   *
+   * @param date - The date of the day (e.g., "2025-11-10")
+   * @param itemId - The ID of the activity to update
+   * @param activity - The updated activity data
+   * @throws Error if the operation fails
+   */
+  const updateActivity = useCallback(
+    async (date: string, itemId: string, activity: Partial<TimelineItem>): Promise<void> => {
+      // Convert TimelineItem to UpdateActivityCommand format
+      const command: UpdateActivityCommand = {
+        time: activity.time,
+        title: activity.title,
+        description: activity.description,
+        location: activity.location,
+        duration: activity.duration,
+        category: activity.category,
+        estimated_cost: activity.estimated_price,
+      };
+
+      const response = await fetch(`/api/plans/${planId}/days/${date}/items/${itemId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(command),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to update activity");
+      }
+
+      const updatedPlan: PlanDetailsDto = await response.json();
+      setPlan(updatedPlan);
+    },
+    [planId]
+  );
+
+  /**
+   * Deletes an activity from the plan.
+   *
+   * @param date - The date of the day (e.g., "2025-11-10")
+   * @param itemId - The ID of the activity to delete
+   * @throws Error if the operation fails
+   */
+  const deleteActivity = useCallback(
+    async (date: string, itemId: string): Promise<void> => {
+      const response = await fetch(`/api/plans/${planId}/days/${date}/items/${itemId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to delete activity");
+      }
+
+      const updatedPlan: PlanDetailsDto = await response.json();
+      setPlan(updatedPlan);
+    },
+    [planId]
+  );
+
   // Fetch plan on mount or when planId changes
   useEffect(() => {
     fetchPlan();
@@ -107,6 +219,9 @@ export const usePlanDetails = (planId: string): UsePlanDetailsResult => {
     error,
     updatePlanName,
     deletePlan,
+    addActivity,
+    updateActivity,
+    deleteActivity,
     refetch: fetchPlan,
   };
 };

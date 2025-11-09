@@ -1,4 +1,4 @@
-import type { PlanDetailsDto, GeneratedContentViewModel, DayPlan } from "@/types";
+import type { PlanDetailsDto, GeneratedContentViewModel, DayPlan, TimelineItem } from "@/types";
 import {
   Accordion,
   AccordionContent,
@@ -7,11 +7,16 @@ import {
 } from "@/components/ui/accordion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import EventTimeline from "@/components/EventTimeline";
 import FeedbackModule from "@/components/FeedbackModule";
+import { Plus } from "lucide-react";
 
 type GeneratedPlanViewProps = {
   plan: PlanDetailsDto;
+  onAddActivity?: (date: string) => void;
+  onEditActivity?: (date: string, item: TimelineItem) => void;
+  onDeleteActivity?: (date: string, itemId: string) => void;
 };
 
 /**
@@ -44,10 +49,11 @@ function parseGeneratedContent(content: unknown): GeneratedContentViewModel | nu
           );
         }
 
-        // For backward compatibility, provide a default 'other' category if it's missing.
+        // For backward compatibility, provide defaults if missing
         return {
           ...item,
           category: item.category || "other",
+          type: item.type || "activity", // Required by database schema
         };
       });
 
@@ -72,7 +78,12 @@ function parseGeneratedContent(content: unknown): GeneratedContentViewModel | nu
  * Displays the generated plan with daily timeline and feedback module.
  * This view is shown when the plan status is 'generated'.
  */
-export default function GeneratedPlanView({ plan }: GeneratedPlanViewProps) {
+export default function GeneratedPlanView({
+  plan,
+  onAddActivity,
+  onEditActivity,
+  onDeleteActivity,
+}: GeneratedPlanViewProps) {
   const generatedContent = parseGeneratedContent(plan.generated_content);
 
   // If content is not available or invalid
@@ -233,8 +244,33 @@ export default function GeneratedPlanView({ plan }: GeneratedPlanViewProps) {
                     </div>
                   </AccordionTrigger>
                   <AccordionContent>
-                    <div className="pt-4">
-                      <EventTimeline items={day.items} />
+                    <div className="pt-4 space-y-4">
+                      {onAddActivity && (
+                        <div className="flex justify-end">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => onAddActivity(day.date)}
+                            className="gap-2"
+                          >
+                            <Plus className="h-4 w-4" />
+                            Add Activity
+                          </Button>
+                        </div>
+                      )}
+                      <EventTimeline
+                        items={day.items}
+                        onEdit={
+                          onEditActivity
+                            ? (item) => onEditActivity(day.date, item)
+                            : undefined
+                        }
+                        onDelete={
+                          onDeleteActivity
+                            ? (itemId) => onDeleteActivity(day.date, itemId)
+                            : undefined
+                        }
+                      />
                     </div>
                   </AccordionContent>
                 </AccordionItem>

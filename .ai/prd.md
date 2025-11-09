@@ -40,13 +40,11 @@ Obecnie planowanie nawet krótkiego wyjazdu typu city-break jest procesem złoż
 * Obsługa błędów API: W przypadku błędu technicznego po stronie usługi AI, użytkownik widzi jasny komunikat o błędzie, a jego limit darmowych generacji nie zostaje zmniejszony.
 
 ### 3.5. Edycja planu i interakcje
-* Prosta edycja: Użytkownik może usunąć pojedynczy punkt (np. sugerowaną atrakcję) z wygenerowanego planu.
-* Przebudowa dnia: Po usunięciu punktu, użytkownik może użyć funkcji "Przebuduj dzień". AI optymalizuje trasę i czas dla pozostałych punktów w danym dniu, nie dodając nowych sugestii.
-* Zużycie limitu: "Przebudowa dnia" nie zużywa dodatkowego limitu generowania.
+* Elastyczna edycja: Użytkownik może dodawać, edytować i usuwać pojedyncze punkty (np. sugerowane atrakcje) z wygenerowanego planu, aby dostosować go do swoich potrzeb.
 
 ### 3.6. Limity i monetyzacja (MVP)
 * Limity: Każdy zarejestrowany użytkownik otrzymuje 5 darmowych generacji planów miesięcznie.
-* Zużycie: Limit jest zużywany przy każdej *nowej* generacji planu (ale nie przy "przebudowie" istniejącego).
+* Zużycie: Limit jest zużywany przy każdej *nowej* generacji planu. Edycja istniejącego planu (dodawanie, edytowanie, usuwanie aktywności) nie zużywa limitu.
 * Licznik: Interfejs wyraźnie pokazuje użytkownikowi liczbę pozostałych generacji.
 
 ### 3.7. Eksport i historia
@@ -245,7 +243,7 @@ Następujące funkcje są celowo wyłączone z zakresu MVP, aby umożliwić szyb
     2. Obok tytułu każdego punktu w planie wyświetlana jest ikona reprezentująca jego kategorię.
     3. Kategorie są spójne z moimi preferencjami (np. jeśli wybrałem "Sztuka", plan powinien zawierać punkty z kategorią "kultura").
 
-### 5.5. Edycja i przebudowa planu
+### 5.5. Edycja planu
 * ID: US-040
 * Tytuł: Usuwanie punktu z planu
 * Opis: Jako użytkownik, chcę móc usunąć pojedynczy punkt (np. sugerowaną restaurację lub muzeum) z wygenerowanego harmonogramu dnia.
@@ -256,13 +254,23 @@ Następujące funkcje są celowo wyłączone z zakresu MVP, aby umożliwić szyb
     4.  Plan jest automatycznie zapisywany po usunięciu punktu.
 
 * ID: US-041
-* Tytuł: Przebudowa dnia (bez zużycia limitu)
-* Opis: Jako użytkownik, po usunięciu jednego lub więcej punktów z dnia, chcę móc kliknąć "Przebuduj dzień", aby AI zoptymalizowało trasę i godziny dla pozostałych punktów.
+* Tytuł: Dodawanie własnej aktywności do planu
+* Opis: Jako użytkownik, chcę móc dodać własną aktywność do wygenerowanego planu, aby uwzględnić rzeczy, których AI nie zasugerowało.
 * Kryteria akceptacji:
-    1.  Po usunięciu punktu pojawia się przycisk "Przebuduj dzień".
-    2.  Po kliknięciu, AI przelicza trasy i godziny dla *pozostałych* punktów w tym dniu.
-    3.  AI nie dodaje żadnych *nowych* atrakcji podczas przebudowy.
-    4.  Ta operacja nie zmniejsza miesięcznego limitu generacji planów.
+    1.  W każdym dniu dostępny jest przycisk "Dodaj aktywność".
+    2.  Po kliknięciu otwiera się formularz z polami: tytuł, opis, lokalizacja, godzina rozpoczęcia, czas trwania, kategoria.
+    3.  Po zapisaniu, nowa aktywność pojawia się w harmonogramie dnia w odpowiednim miejscu (posortowana chronologicznie).
+    4.  Plan jest automatycznie zapisywany po dodaniu aktywności.
+
+* ID: US-042
+* Tytuł: Edycja istniejącej aktywności w planie
+* Opis: Jako użytkownik, chcę móc edytować szczegóły aktywności w planie (zarówno wygenerowanej przez AI, jak i dodanej przeze mnie), aby dostosować plan do moich potrzeb.
+* Kryteria akceptacji:
+    1.  Każdy element na liście harmonogramu ma widoczną opcję "Edytuj" (np. ikonę ołówka).
+    2.  Po kliknięciu otwiera się formularz z aktualnymi danymi aktywności.
+    3.  Użytkownik może zmienić dowolne pola: tytuł, opis, lokalizację, godzinę, czas trwania, kategorię.
+    4.  Po zapisaniu zmian, zaktualizowana aktywność jest widoczna w harmonogramie.
+    5.  Plan jest automatycznie zapisywany po edycji aktywności.
 
 ### 5.6. Eksport i Historia
 * ID: US-050

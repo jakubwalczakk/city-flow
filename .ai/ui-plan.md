@@ -48,9 +48,9 @@ Aplikacja wita użytkownika pulpitem z listą jego planów, zachęcając do dzia
 - **Główny cel:** Wyświetlanie szczegółów planu. Widok jest dynamiczny i renderuje inną zawartość w zależności od statusu planu (`draft` vs `generated`).
 - **Kluczowe informacje do wyświetlenia:**
     - Dla `draft`: Formularz edycji danych planu.
-    - Dla `generated`: Godzinowa oś czasu dla każdego dnia, opcje edycji (usuwanie, przebudowa dnia), przyciski akcji (eksport, archiwizacja), moduł feedbacku.
-- **Kluczowe komponenty widoku:** `Accordion` (dla dni), `Timeline`, `Button`, `DropdownMenu`, `FeedbackModule`.
-- **UX, dostępność i względy bezpieczeństwa:** Czytelna prezentacja planu. Interakcje (usuwanie, przebudowa) mają natychmiastowe wizualne potwierdzenie. Wyraźne ostrzeżenie, że plan jest sugestią AI.
+    - Dla `generated`: Godzinowa oś czasu dla każdego dnia, opcje edycji (dodawanie, edytowanie, usuwanie aktywności), przyciski akcji (eksport, archiwizacja), moduł feedbacku.
+- **Kluczowe komponenty widoku:** `Accordion` (dla dni), `Timeline`, `Button`, `DropdownMenu`, `Dialog` (dla formularza aktywności), `FeedbackModule`.
+- **UX, dostępność i względy bezpieczeństwa:** Czytelna prezentacja planu. Interakcje (dodawanie, edytowanie, usuwanie) mają natychmiastowe wizualne potwierdzenie. Wyraźne ostrzeżenie, że plan jest sugestią AI.
 
 ### 7. Widok Profilu
 - **Ścieżka widoku:** `/profile`
@@ -72,7 +72,7 @@ Główna ścieżka użytkownika (happy path) obejmuje stworzenie i wygenerowanie
     c.  **Krok 3**: Przegląda podsumowanie i klika "Generuj plan".
 5.  **Generowanie**: Na ekranie pojawia się nakładka z animacją ładowania i komunikatami o postępie.
 6.  **Przeglądanie Planu**: Po zakończeniu generowania, użytkownik jest przekierowywany do widoku szczegółów (`/plans/[id]`), gdzie widzi wygenerowany plan w formie osi czasu.
-7.  **Interakcja**: Użytkownik usuwa jeden z punktów planu. W nagłówku danego dnia pojawia się przycisk "Przebuduj dzień", który klika, aby zoptymalizować resztę dnia.
+7.  **Interakcja**: Użytkownik edytuje plan - usuwa jedną aktywność, dodaje własną (np. wizytę w lokalnej kawiarni), i modyfikuje czas trwania innej aktywności.
 8.  **Finalizacja**: Zadowolony z planu, użytkownik klika "Eksportuj do PDF", aby pobrać plik.
 9.  **Powrót do Dashboardu**: Użytkownik wraca do widoku `Moje Plany`, gdzie widzi nowo utworzony plan z etykietą "Wygenerowany".
 

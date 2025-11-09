@@ -219,6 +219,38 @@ export type SubmitFeedbackCommand = {
   comment?: string | null;
 };
 
+// ============================================================================
+//                              Plan Activities
+// ============================================================================
+
+/**
+ * Command model for adding a new activity to a plan day.
+ * Corresponds to the request body of `POST /plans/{id}/days/{date}/items`.
+ */
+export type AddActivityCommand = {
+  time?: string; // e.g., "14:30"
+  title: string;
+  description?: string;
+  location?: string;
+  duration?: number; // in minutes
+  category: TimelineItemCategory;
+  estimated_cost?: string; // e.g., "5-10 EUR"
+};
+
+/**
+ * Command model for updating an existing activity in a plan. All fields are optional.
+ * Corresponds to the request body of `PATCH /plans/{id}/days/{date}/items/{itemId}`.
+ */
+export type UpdateActivityCommand = {
+  time?: string;
+  title?: string;
+  description?: string;
+  location?: string;
+  duration?: number;
+  category?: TimelineItemCategory;
+  estimated_cost?: string;
+};
+
 // ############################################################################
 // #                              VIEW MODELS                                 #
 // ############################################################################
@@ -281,8 +313,9 @@ export type TimelineItemCategory =
  */
 export type TimelineItem = {
   id: string; // UUID
+  type: 'activity' | 'meal' | 'transport'; // Required by database validation
   time?: string; // e.g., "09:00" (optional)
-  category: TimelineItemCategory; // Required by database validation
+  category: TimelineItemCategory; // For UI display and filtering
   title: string; // Required by database validation
   description?: string;
   location?: string;

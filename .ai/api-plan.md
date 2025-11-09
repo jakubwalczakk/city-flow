@@ -169,24 +169,52 @@ The profile is a singleton resource for the currently authenticated user. The us
   - **Code**: `500 Internal Server Error`
   - **Content**: `{ "error": "An error occurred during plan generation. Your limit has not been affected." }`
 
-#### Delete Generated Item from Plan
+#### Add Activity to Plan
 
-- **Method**: `DELETE`
+- **Method**: `POST`
+- **URL**: `/plans/{id}/days/{date}/items`
+- **Description**: Adds a custom activity to a specific day in the plan.
+- **Request Body**:
+  ```json
+  {
+    "time": "14:30",
+    "title": "Visit local coffee shop",
+    "description": "Try the famous espresso",
+    "location": "Trastevere district",
+    "duration": 60,
+    "category": "food",
+    "estimated_cost": "5-10 EUR"
+  }
+  ```
+- **Success Response**:
+  - **Code**: `201 Created`
+  - **Content**: The updated plan object with the new activity added.
+
+#### Update Activity in Plan
+
+- **Method**: `PATCH`
 - **URL**: `/plans/{id}/days/{date}/items/{itemId}`
-- **Description**: Removes a single item (activity, meal, etc.) from the `generated_content` of a plan for a specific day.
+- **Description**: Updates an existing activity in the plan (both AI-generated and user-added activities can be edited).
+- **Request Body**:
+  ```json
+  {
+    "time": "15:00",
+    "duration": 90,
+    "description": "Updated description"
+  }
+  ```
 - **Success Response**:
   - **Code**: `200 OK`
   - **Content**: The updated plan object.
 
-#### Rebuild Day
+#### Delete Activity from Plan
 
-- **Method**: `POST`
-- **URL**: `/plans/{id}/days/{date}/rebuild`
-- **Description**: Reruns the AI optimization for a specific day after items have been removed. Does not consume a generation credit.
-- **Request Body**: None
+- **Method**: `DELETE`
+- **URL**: `/plans/{id}/days/{date}/items/{itemId}`
+- **Description**: Removes a single activity from the plan.
 - **Success Response**:
   - **Code**: `200 OK`
-  - **Content**: The updated plan object with re-optimized `generated_content` for that day.
+  - **Content**: The updated plan object.
 
 #### Export Plan to PDF
 

@@ -5,10 +5,46 @@ import type {
   PaginatedPlansDto,
   PlanStatus,
   PlanListItemDto,
+  AddActivityCommand,
+  UpdateActivityCommand,
+  GeneratedContentViewModel,
+  DayPlan,
+  TimelineItem,
 } from "@/types";
 import type { SupabaseClient } from "@/db/supabase.client";
 import { DatabaseError, NotFoundError } from "@/lib/errors/app-error";
 import { logger } from "@/lib/utils/logger";
+import { v4 as uuidv4 } from "uuid";
+
+/**
+ * Converts a time string to 24-hour format for proper sorting.
+ * Handles formats like "2:30 PM", "14:30", "2:30PM", etc.
+ */
+function convertTo24Hour(timeStr: string): string {
+  const time = timeStr.trim();
+  
+  // If already in 24-hour format (no AM/PM), return as is
+  if (!/am|pm/i.test(time)) {
+    return time.padStart(5, '0'); // Ensure consistent format like "09:00"
+  }
+  
+  // Parse time with AM/PM
+  const match = time.match(/(\d{1,2}):(\d{2})\s*(am|pm)/i);
+  if (!match) return time; // Return original if can't parse
+  
+  let hours = parseInt(match[1], 10);
+  const minutes = match[2];
+  const period = match[3].toLowerCase();
+  
+  // Convert to 24-hour format
+  if (period === 'pm' && hours !== 12) {
+    hours += 12;
+  } else if (period === 'am' && hours === 12) {
+    hours = 0;
+  }
+  
+  return `${hours.toString().padStart(2, '0')}:${minutes}`;
+}
 
 /**
  * Parameters for listing plans.
@@ -322,4 +358,305 @@ export const deletePlan = async (
     planId,
     userId,
   });
+};
+
+/**
+ * Adds a new activity to a specific day in a plan.
+ *
+ * @param supabase - The Supabase client instance
+ * @param planId - The ID of the plan
+ * @param date - The date of the day (e.g., "2025-11-10")
+ * @param command - The activity data to add
+ * @param userId - The ID of the user who owns the plan
+ * @returns The updated plan with the new activity
+ * @throws {NotFoundError} If the plan is not found or doesn't belong to the user
+ * @throws {DatabaseError} If the database operation fails
+ */
+export const addActivityToPlanDay = async (
+  supabase: SupabaseClient,
+  planId: string,
+  date: string,
+  command: AddActivityCommand,
+  userId: string
+): Promise<PlanDetailsDto> => {
+  logger.debug("Adding activity to plan day", {
+    planId,
+    date,
+    userId,
+  });
+
+  // First, fetch the current plan
+  const plan = await getPlanById(supabase, planId, userId);
+
+  if (plan.status !== "generated") {
+    throw new DatabaseError("Can only add activities to generated plans.");
+  }
+
+  // Parse the generated_content
+  const generatedContent = plan.generated_content as GeneratedContentViewModel | null;
+
+  if (!generatedContent || !generatedContent.days) {
+    throw new DatabaseError("Plan does not have valid generated content.");
+  }
+
+  // Find the day to add the activity to
+  const dayIndex = generatedContent.days.findIndex((day) => day.date === date);
+
+  if (dayIndex === -1) {
+    throw new NotFoundError(`Day ${date} not found in plan.`);
+  }
+
+  // Create the new activity with a unique ID
+  // Map category to type for database validation
+  const type = command.category === 'food' ? 'meal' : 
+               command.category === 'transport' ? 'transport' : 
+               'activity';
+  
+  const newActivity: TimelineItem = {
+    id: uuidv4(),
+    type: type,
+    time: command.time,
+    category: command.category,
+    title: command.title,
+    description: command.description,
+    location: command.location,
+    estimated_price: command.estimated_cost,
+    estimated_duration: command.duration ? `${command.duration} min` : undefined,
+  };
+
+  // Add the activity to the day
+  const updatedDays = [...generatedContent.days];
+  updatedDays[dayIndex] = {
+    ...updatedDays[dayIndex],
+    items: [...updatedDays[dayIndex].items, newActivity],
+  };
+
+  // Sort items by time if time is present
+  updatedDays[dayIndex].items.sort((a, b) => {
+    if (!a.time && !b.time) return 0;
+    if (!a.time) return 1; // Items without time go to the end
+    if (!b.time) return -1;
+    
+    // Convert time to 24-hour format for proper comparison
+    const timeA = convertTo24Hour(a.time);
+    const timeB = convertTo24Hour(b.time);
+    return timeA.localeCompare(timeB);
+  });
+
+  // Update the plan with the new generated_content
+  const updatedContent: GeneratedContentViewModel = {
+    ...generatedContent,
+    days: updatedDays,
+  };
+
+  const updatedPlan = await updatePlan(supabase, planId, {
+    generated_content: updatedContent as any,
+  });
+
+  logger.info("Activity added to plan day successfully", {
+    planId,
+    date,
+    activityId: newActivity.id,
+    userId,
+  });
+
+  return updatedPlan;
+};
+
+/**
+ * Updates an existing activity in a plan day.
+ *
+ * @param supabase - The Supabase client instance
+ * @param planId - The ID of the plan
+ * @param date - The date of the day (e.g., "2025-11-10")
+ * @param itemId - The ID of the activity to update
+ * @param command - The updated activity data
+ * @param userId - The ID of the user who owns the plan
+ * @returns The updated plan
+ * @throws {NotFoundError} If the plan, day, or activity is not found
+ * @throws {DatabaseError} If the database operation fails
+ */
+export const updateActivityInPlanDay = async (
+  supabase: SupabaseClient,
+  planId: string,
+  date: string,
+  itemId: string,
+  command: UpdateActivityCommand,
+  userId: string
+): Promise<PlanDetailsDto> => {
+  logger.debug("Updating activity in plan day", {
+    planId,
+    date,
+    itemId,
+    userId,
+  });
+
+  // First, fetch the current plan
+  const plan = await getPlanById(supabase, planId, userId);
+
+  if (plan.status !== "generated") {
+    throw new DatabaseError("Can only update activities in generated plans.");
+  }
+
+  // Parse the generated_content
+  const generatedContent = plan.generated_content as GeneratedContentViewModel | null;
+
+  if (!generatedContent || !generatedContent.days) {
+    throw new DatabaseError("Plan does not have valid generated content.");
+  }
+
+  // Find the day containing the activity
+  const dayIndex = generatedContent.days.findIndex((day) => day.date === date);
+
+  if (dayIndex === -1) {
+    throw new NotFoundError(`Day ${date} not found in plan.`);
+  }
+
+  // Find the activity to update
+  const itemIndex = generatedContent.days[dayIndex].items.findIndex((item) => item.id === itemId);
+
+  if (itemIndex === -1) {
+    throw new NotFoundError(`Activity ${itemId} not found in day ${date}.`);
+  }
+
+  // Update the activity
+  const updatedDays = [...generatedContent.days];
+  const currentItem = updatedDays[dayIndex].items[itemIndex];
+
+  // Map category to type for database validation if category is being updated
+  const updates: Partial<TimelineItem> = {
+    ...(command.time !== undefined && { time: command.time }),
+    ...(command.title !== undefined && { title: command.title }),
+    ...(command.description !== undefined && { description: command.description }),
+    ...(command.location !== undefined && { location: command.location }),
+    ...(command.category !== undefined && { category: command.category }),
+    ...(command.estimated_cost !== undefined && { estimated_price: command.estimated_cost }),
+    ...(command.duration !== undefined && { estimated_duration: `${command.duration} min` }),
+  };
+
+  // Update type if category changed
+  if (command.category !== undefined) {
+    updates.type = command.category === 'food' ? 'meal' : 
+                   command.category === 'transport' ? 'transport' : 
+                   'activity';
+  }
+
+  updatedDays[dayIndex].items[itemIndex] = {
+    ...currentItem,
+    ...updates,
+  };
+
+  // Sort items by time if time was updated
+  if (command.time !== undefined) {
+    updatedDays[dayIndex].items.sort((a, b) => {
+      if (!a.time && !b.time) return 0;
+      if (!a.time) return 1; // Items without time go to the end
+      if (!b.time) return -1;
+      
+      // Convert time to 24-hour format for proper comparison
+      const timeA = convertTo24Hour(a.time);
+      const timeB = convertTo24Hour(b.time);
+      return timeA.localeCompare(timeB);
+    });
+  }
+
+  // Update the plan with the new generated_content
+  const updatedContent: GeneratedContentViewModel = {
+    ...generatedContent,
+    days: updatedDays,
+  };
+
+  const updatedPlan = await updatePlan(supabase, planId, {
+    generated_content: updatedContent as any,
+  });
+
+  logger.info("Activity updated in plan day successfully", {
+    planId,
+    date,
+    itemId,
+    userId,
+  });
+
+  return updatedPlan;
+};
+
+/**
+ * Deletes an activity from a plan day.
+ *
+ * @param supabase - The Supabase client instance
+ * @param planId - The ID of the plan
+ * @param date - The date of the day (e.g., "2025-11-10")
+ * @param itemId - The ID of the activity to delete
+ * @param userId - The ID of the user who owns the plan
+ * @returns The updated plan
+ * @throws {NotFoundError} If the plan, day, or activity is not found
+ * @throws {DatabaseError} If the database operation fails
+ */
+export const deleteActivityFromPlanDay = async (
+  supabase: SupabaseClient,
+  planId: string,
+  date: string,
+  itemId: string,
+  userId: string
+): Promise<PlanDetailsDto> => {
+  logger.debug("Deleting activity from plan day", {
+    planId,
+    date,
+    itemId,
+    userId,
+  });
+
+  // First, fetch the current plan
+  const plan = await getPlanById(supabase, planId, userId);
+
+  if (plan.status !== "generated") {
+    throw new DatabaseError("Can only delete activities from generated plans.");
+  }
+
+  // Parse the generated_content
+  const generatedContent = plan.generated_content as GeneratedContentViewModel | null;
+
+  if (!generatedContent || !generatedContent.days) {
+    throw new DatabaseError("Plan does not have valid generated content.");
+  }
+
+  // Find the day containing the activity
+  const dayIndex = generatedContent.days.findIndex((day) => day.date === date);
+
+  if (dayIndex === -1) {
+    throw new NotFoundError(`Day ${date} not found in plan.`);
+  }
+
+  // Find the activity to delete
+  const itemIndex = generatedContent.days[dayIndex].items.findIndex((item) => item.id === itemId);
+
+  if (itemIndex === -1) {
+    throw new NotFoundError(`Activity ${itemId} not found in day ${date}.`);
+  }
+
+  // Remove the activity
+  const updatedDays = [...generatedContent.days];
+  updatedDays[dayIndex] = {
+    ...updatedDays[dayIndex],
+    items: updatedDays[dayIndex].items.filter((item) => item.id !== itemId),
+  };
+
+  // Update the plan with the new generated_content
+  const updatedContent: GeneratedContentViewModel = {
+    ...generatedContent,
+    days: updatedDays,
+  };
+
+  const updatedPlan = await updatePlan(supabase, planId, {
+    generated_content: updatedContent as any,
+  });
+
+  logger.info("Activity deleted from plan day successfully", {
+    planId,
+    date,
+    itemId,
+    userId,
+  });
+
+  return updatedPlan;
 };

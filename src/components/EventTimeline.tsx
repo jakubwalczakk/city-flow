@@ -1,8 +1,29 @@
 import type { TimelineItem, TimelineItemCategory } from "@/types";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { useState } from "react";
 
 type EventTimelineProps = {
   items: TimelineItem[];
+  onEdit?: (item: TimelineItem) => void;
+  onDelete?: (itemId: string) => void;
 };
 
 /**
@@ -93,7 +114,22 @@ function getCategoryLabel(category: TimelineItemCategory) {
  * Displays a timeline of items for a single day.
  * Shows time, title, description, location, type, and optional estimated cost/duration for each item.
  */
-export default function EventTimeline({ items }: EventTimelineProps) {
+export default function EventTimeline({ items, onEdit, onDelete }: EventTimelineProps) {
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<TimelineItem | null>(null);
+
+  const handleDeleteClick = (item: TimelineItem) => {
+    setItemToDelete(item);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (itemToDelete && onDelete) {
+      onDelete(itemToDelete.id);
+    }
+    setDeleteDialogOpen(false);
+    setItemToDelete(null);
+  };
   if (!items || items.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
@@ -117,7 +153,7 @@ export default function EventTimeline({ items }: EventTimelineProps) {
           {/* Item card */}
           <div className="rounded-lg border bg-card p-4 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-start justify-between gap-4">
-              <div className="flex-1 min-w-0">
+              <div className="flex-1 min-w-0 space-y-2">
                 <div className="flex items-center gap-2 mb-2 flex-wrap">
                   {/* Time badge */}
                   {item.time && (
@@ -154,11 +190,11 @@ export default function EventTimeline({ items }: EventTimelineProps) {
                 </div>
 
                 {/* Title */}
-                <h4 className="font-semibold text-base mb-2">{item.title}</h4>
+                <h4 className="font-semibold text-base">{item.title}</h4>
 
                 {/* Location */}
                 {item.location && (
-                  <div className="flex items-start gap-1.5 mb-2 text-sm text-muted-foreground">
+                  <div className="flex items-start gap-1.5 text-sm text-muted-foreground">
                     <svg
                       className="h-4 w-4 mt-0.5 flex-shrink-0"
                       fill="none"
@@ -184,7 +220,7 @@ export default function EventTimeline({ items }: EventTimelineProps) {
 
                 {/* Description */}
                 {item.description && (
-                  <p className="text-sm text-muted-foreground leading-relaxed mb-2">
+                  <p className="text-sm text-muted-foreground leading-relaxed">
                     {item.description}
                   </p>
                 )}
@@ -197,18 +233,66 @@ export default function EventTimeline({ items }: EventTimelineProps) {
                 )}
               </div>
 
-              {/* Estimated cost */}
-              {item.estimated_price && (
-                <div className="flex-shrink-0">
+              <div className="flex-shrink-0 flex items-start gap-2">
+                {/* Estimated cost */}
+                {item.estimated_price && (
                   <div className="rounded-md bg-muted px-3 py-1.5 text-sm font-medium">
                     {item.estimated_price}
                   </div>
-                </div>
-              )}
+                )}
+
+                {/* Actions menu */}
+                {(onEdit || onDelete) && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <MoreVertical className="h-4 w-4" />
+                        <span className="sr-only">Open menu</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      {onEdit && (
+                        <DropdownMenuItem onClick={() => onEdit(item)}>
+                          <Pencil className="mr-2 h-4 w-4" />
+                          Edit
+                        </DropdownMenuItem>
+                      )}
+                      {onDelete && (
+                        <DropdownMenuItem
+                          onClick={() => handleDeleteClick(item)}
+                          className="text-destructive focus:text-destructive"
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Delete
+                        </DropdownMenuItem>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+              </div>
             </div>
           </div>
         </div>
       ))}
+
+      {/* Delete confirmation dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Activity</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{itemToDelete?.title}"? This action cannot be
+              undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
