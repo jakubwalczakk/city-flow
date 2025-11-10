@@ -270,7 +270,7 @@ Następujące funkcje są celowo wyłączone z zakresu MVP, aby umożliwić szyb
     2.  Po kliknięciu otwiera się formularz z aktualnymi danymi aktywności.
     3.  Użytkownik może zmienić dowolne pola: tytuł, opis, lokalizację, godzinę, czas trwania, kategorię.
     4.  Po zapisaniu zmian, zaktualizowana aktywność jest widoczna w harmonogramie.
-    5.  Plan jest automatycznie zapisywany po edycji aktywności.
+5.  Plan jest automatycznie zapisywany po edycji aktywności.
 
 ### 5.6. Eksport i Historia
 * ID: US-050

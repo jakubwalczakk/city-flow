@@ -1,71 +1,131 @@
 import type { APIRoute } from "astro";
-import { z } from "zod";
-import { planSchema } from "@/lib/schemas/plan.schema";
-import { updatePlan, deletePlan } from "@/lib/services/plan.service";
-import { handleApiError } from "@/lib/utils/error-handler";
+import { DEFAULT_USER_ID } from "@/db/supabase.client";
+import { updatePlanSchema } from "@/lib/schemas/plan.schema";
+import { getPlanById, updatePlan, deletePlan } from "@/lib/services/plan.service";
+import { ValidationError } from "@/lib/errors/app-error";
+import { handleApiError, successResponse } from "@/lib/utils/error-handler";
+import { logger } from "@/lib/utils/logger";
 
-const updatePlanSchema = planSchema.pick({
-  name: true,
-  destination: true,
-  start_date: true,
-  end_date: true,
-  notes: true,
-});
-
-export const PUT: APIRoute = async ({ request, params, locals }) => {
-  const { planId } = params;
-
-  if (!planId) {
-    return new Response(
-      JSON.stringify({ error: "Plan ID is required" }),
-      { status: 400, headers: { "Content-Type": "application/json" } }
-    );
-  }
-
+/**
+ * GET /api/plans/[planId]
+ * Retrieves detailed information about a specific travel plan.
+ *
+ * Returns the plan with status 200 on success.
+ * Returns 404 if the plan is not found.
+ */
+export const GET: APIRoute = async ({ params, locals }) => {
   try {
-    const data = await request.json();
-    const validatedData = updatePlanSchema.parse(data);
+    const supabase = locals.supabase;
+    const user = { id: DEFAULT_USER_ID };
+    const planId = params.planId;
 
-    await updatePlan(locals.supabase, planId, validatedData);
-
-    return new Response(null, { status: 204 });
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return new Response(
-        JSON.stringify({ error: "Invalid input", details: error.errors }),
-        { status: 400, headers: { "Content-Type": "application/json" } }
-      );
+    if (!planId) {
+      throw new ValidationError("Plan ID is required");
     }
-    console.error("Error updating plan:", error);
-    return new Response(
-      JSON.stringify({ error: "Failed to update plan" }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
-    );
+
+    logger.debug("Received request to get plan details", {
+      userId: user.id,
+      planId,
+    });
+
+    const plan = await getPlanById(supabase, planId, user.id);
+
+    return successResponse(plan, 200);
+  } catch (error) {
+    return handleApiError(error, {
+      endpoint: "GET /api/plans/[planId]",
+      userId: DEFAULT_USER_ID,
+    });
   }
 };
 
-export const DELETE: APIRoute = async ({ params, locals }) => {
-  const { planId } = params;
-
-  if (!planId) {
-    return new Response(
-      JSON.stringify({ error: "Plan ID is required" }),
-      { status: 400, headers: { "Content-Type": "application/json" } }
-    );
-  }
-
-  if (!locals.user) {
-    return new Response(
-      JSON.stringify({ error: "Unauthorized" }),
-      { status: 401, headers: { "Content-Type": "application/json" } }
-    );
-  }
-
+/**
+ * PATCH /api/plans/[planId]
+ * Updates an existing travel plan.
+ *
+ * Request body should conform to UpdatePlanCommand schema.
+ * Returns the updated plan with status 200 on success.
+ * Returns 404 if the plan is not found.
+ */
+export const PATCH: APIRoute = async ({ params, request, locals }) => {
   try {
-    await deletePlan(locals.supabase, planId, locals.user.id);
+    const supabase = locals.supabase;
+    const user = { id: DEFAULT_USER_ID };
+    const planId = params.planId;
+
+    if (!planId) {
+      throw new ValidationError("Plan ID is required");
+    }
+
+    logger.debug("Received request to update plan", {
+      userId: user.id,
+      planId,
+    });
+
+    // Parse request body
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch (parseError) {
+      logger.warn("Failed to parse request body", {
+        error: parseError instanceof Error ? parseError.message : String(parseError),
+      });
+      throw new ValidationError("Invalid JSON in request body");
+    }
+
+    // Validate request body
+    const validation = updatePlanSchema.safeParse(body);
+
+    if (!validation.success) {
+      logger.debug("Request validation failed", {
+        errors: validation.error.flatten(),
+      });
+      throw new ValidationError("Validation failed", validation.error.flatten());
+    }
+
+    // Update the plan
+    const plan = await updatePlan(supabase, planId, validation.data);
+
+    return successResponse(plan, 200);
+  } catch (error) {
+    return handleApiError(error, {
+      endpoint: "PATCH /api/plans/[planId]",
+      userId: DEFAULT_USER_ID,
+    });
+  }
+};
+
+/**
+ * DELETE /api/plans/[planId]
+ * Deletes a travel plan.
+ *
+ * Returns 204 No Content on success.
+ * Returns 404 if the plan is not found.
+ */
+export const DELETE: APIRoute = async ({ params, locals }) => {
+  try {
+    const supabase = locals.supabase;
+    const user = { id: DEFAULT_USER_ID };
+    const planId = params.planId;
+
+    if (!planId) {
+      throw new ValidationError("Plan ID is required");
+    }
+
+    logger.debug("Received request to delete plan", {
+      userId: user.id,
+      planId,
+    });
+
+    await deletePlan(supabase, planId, user.id);
 
     return new Response(null, { status: 204 });
   } catch (error) {
-    return handleApiError(error);
+    return handleApiError(error, {
+      endpoint: "DELETE /api/plans/[planId]",
+      userId: DEFAULT_USER_ID,
+    });
   }
 };
+
+export const prerender = false;

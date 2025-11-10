@@ -18,6 +18,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import ExportPlanButton from "@/components/plan-actions/ExportPlanButton";
 
 type PlanHeaderProps = {
   plan: PlanDetailsDto;
@@ -197,9 +198,15 @@ export default function PlanHeader({ plan, onUpdate, onDelete }: PlanHeaderProps
           </div>
         </div>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="icon">
+        <div className="flex items-center gap-2">
+          {/* Export button - only show for generated plans */}
+          {plan.status === "generated" && (
+            <ExportPlanButton planId={plan.id} planName={plan.name} />
+          )}
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="icon">
               <svg
                 className="h-5 w-5"
                 fill="none"
@@ -238,6 +245,7 @@ export default function PlanHeader({ plan, onUpdate, onDelete }: PlanHeaderProps
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+        </div>
       </div>
 
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
