@@ -129,9 +129,10 @@ export function FixedPointsStep({
   const formatDateTime = (dateTimeString: string) => {
     try {
       const date = new Date(dateTimeString);
-      return date.toLocaleString("en-US", {
+      return date.toLocaleString("pl-PL", {
         dateStyle: "medium",
         timeStyle: "short",
+        hour12: false,
       });
     } catch {
       return dateTimeString;
@@ -142,17 +143,17 @@ export function FixedPointsStep({
     <Card>
       <CardHeader>
         <CardTitle className="text-base">
-          {isAdding ? "Add Fixed Point" : "Edit Fixed Point"}
+          {isAdding ? "Dodaj stały punkt" : "Edytuj stały punkt"}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="location">
-            Location <span className="text-destructive">*</span>
+            Lokalizacja <span className="text-destructive">*</span>
           </Label>
           <Input
             id="location"
-            placeholder="e.g., Charles de Gaulle Airport"
+            placeholder="np. Lotnisko Chopina"
             value={currentPoint.location}
             onChange={(e) =>
               setCurrentPoint({ ...currentPoint, location: e.target.value })
@@ -167,7 +168,7 @@ export function FixedPointsStep({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="event_at">
-              Date & Time <span className="text-destructive">*</span>
+              Data i godzina <span className="text-destructive">*</span>
             </Label>
             <Input
               id="event_at"
@@ -184,18 +185,19 @@ export function FixedPointsStep({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="event_duration">Duration (minutes)</Label>
+            <Label htmlFor="event_duration">Czas trwania (minuty) - opcjonalnie</Label>
             <Input
               id="event_duration"
               type="number"
               min="0"
-              value={currentPoint.event_duration}
+              value={currentPoint.event_duration || ""}
               onChange={(e) =>
                 setCurrentPoint({
                   ...currentPoint,
-                  event_duration: parseInt(e.target.value, 10) || 0,
+                  event_duration: e.target.value ? parseInt(e.target.value, 10) : 0,
                 })
               }
+              placeholder="np. 120"
               className={errors.event_duration ? "border-destructive" : ""}
             />
             {errors.event_duration && (
@@ -207,10 +209,10 @@ export function FixedPointsStep({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="description">Description (optional)</Label>
+          <Label htmlFor="description">Opis (opcjonalnie)</Label>
           <Textarea
             id="description"
-            placeholder="e.g., Flight arrival, hotel check-in"
+            placeholder="np. Przylot, zameldowanie w hotelu"
             value={currentPoint.description || ""}
             onChange={(e) =>
               setCurrentPoint({
@@ -228,10 +230,10 @@ export function FixedPointsStep({
             disabled={!isFormValid()}
             className="flex-1"
           >
-            {isAdding ? "Add Point" : "Save Changes"}
+            {isAdding ? "Dodaj punkt" : "Zapisz zmiany"}
           </Button>
           <Button variant="outline" onClick={resetForm}>
-            Cancel
+            Anuluj
           </Button>
         </div>
       </CardContent>
@@ -241,10 +243,10 @@ export function FixedPointsStep({
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-semibold mb-2">Fixed Points</h3>
+        <h3 className="text-lg font-semibold mb-2">Stałe punkty</h3>
         <p className="text-sm text-muted-foreground mb-4">
-          Add any fixed commitments like flights, hotel check-ins, or event
-          tickets. These will be locked in your itinerary.
+          Dodaj wszelkie stałe zobowiązania, takie jak loty, zameldowania w hotelu czy bilety na wydarzenia.
+          Będą one zablokowane w Twoim planie.
         </p>
       </div>
 
@@ -276,7 +278,7 @@ export function FixedPointsStep({
                         {point.event_duration && (
                           <>
                             <span>•</span>
-                            <span>{point.event_duration} minutes</span>
+                            <span>{point.event_duration} minut</span>
                           </>
                         )}
                       </div>
@@ -316,7 +318,7 @@ export function FixedPointsStep({
           className="w-full"
         >
           <Plus className="mr-2 h-4 w-4" />
-          Add Fixed Point
+          Dodaj stały punkt
         </Button>
       )}
 
@@ -327,7 +329,7 @@ export function FixedPointsStep({
       {/* Navigation buttons */}
       <div className="flex justify-between pt-4">
         <Button variant="outline" onClick={goToPrevStep}>
-          Back
+          Wstecz
         </Button>
         <div>
           <Button
@@ -336,9 +338,9 @@ export function FixedPointsStep({
             disabled={isLoading || isAdding || editingIndex !== null}
             className="mr-2"
           >
-            {isLoading ? "Saving..." : "Save as draft"}
+            {isLoading ? "Zapisywanie..." : "Zapisz jako szkic"}
           </Button>
-          <Button onClick={goToNextStep}>Next</Button>
+          <Button onClick={goToNextStep}>Dalej</Button>
         </div>
       </div>
     </div>

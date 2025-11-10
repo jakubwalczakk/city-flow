@@ -66,6 +66,11 @@ export const PlansDashboard = () => {
     refetchPlans();
   };
 
+  const handleCreatePlan = () => {
+    setEditingPlan(null);
+    setIsModalOpen(true);
+  };
+
   const handlePlanClick = (plan: PlanListItemDto) => {
     if (plan.status === "draft") {
       setEditingPlan(plan);
@@ -144,6 +149,7 @@ export const PlansDashboard = () => {
             error={error}
             onPlanClick={handlePlanClick}
             onPlanDelete={handlePlanDelete}
+            onCreatePlan={handleCreatePlan}
           />
           {showPagination && (
             <div className="mt-8">
@@ -160,6 +166,7 @@ export const PlansDashboard = () => {
             error={error}
             onPlanClick={handlePlanClick}
             onPlanDelete={handlePlanDelete}
+            onCreatePlan={handleCreatePlan}
           />
           {showPagination && (
             <div className="mt-8">

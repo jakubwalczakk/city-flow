@@ -91,11 +91,11 @@ export function BasicInfoStep({
     <div className="space-y-6">
       <div className="space-y-2">
         <Label htmlFor="name">
-          Plan Name <span className="text-destructive">*</span>
+          Nazwa planu <span className="text-destructive">*</span>
         </Label>
         <Input
           id="name"
-          placeholder="e.g., Weekend in Paris"
+          placeholder="np. Weekend w Paryżu"
           value={formData.name}
           onChange={(e) => updateFormData({ name: e.target.value })}
           className={errors.name ? "border-destructive" : ""}
@@ -107,11 +107,11 @@ export function BasicInfoStep({
 
       <div className="space-y-2">
         <Label htmlFor="destination">
-          Destination <span className="text-destructive">*</span>
+          Miejsce docelowe <span className="text-destructive">*</span>
         </Label>
         <Input
           id="destination"
-          placeholder="e.g., Paris, France"
+          placeholder="np. Paryż, Francja"
           value={formData.destination}
           onChange={(e) => updateFormData({ destination: e.target.value })}
           className={errors.destination ? "border-destructive" : ""}
@@ -124,7 +124,7 @@ export function BasicInfoStep({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="start_date">
-            Start Date & Time <span className="text-destructive">*</span>
+            Data i godzina rozpoczęcia <span className="text-destructive">*</span>
           </Label>
           <Input
             id="start_date"
@@ -142,7 +142,7 @@ export function BasicInfoStep({
 
         <div className="space-y-2">
           <Label htmlFor="end_date">
-            End Date & Time <span className="text-destructive">*</span>
+            Data i godzina zakończenia <span className="text-destructive">*</span>
           </Label>
           <Input
             id="end_date"
@@ -161,17 +161,17 @@ export function BasicInfoStep({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="notes">Notes</Label>
+        <Label htmlFor="notes">Notatki</Label>
         <Textarea
           id="notes"
-          placeholder="Add any additional notes or preferences for your trip..."
+          placeholder="Dodaj dodatkowe notatki lub preferencje dotyczące podróży..."
           value={formData.notes}
           onChange={(e) => updateFormData({ notes: e.target.value })}
           rows={4}
         />
         <p className="text-sm text-muted-foreground">
-          Include any preferences, special requirements, or ideas you have for
-          this trip.
+          Uwzględnij wszelkie preferencje, specjalne wymagania lub pomysły dotyczące
+          tej podróży.
         </p>
       </div>
 
@@ -179,7 +179,7 @@ export function BasicInfoStep({
 
       <div className="flex justify-between pt-4">
         <Button variant="outline" onClick={onCancel}>
-          Cancel
+          Anuluj
         </Button>
         <div>
           <Button
@@ -188,13 +188,13 @@ export function BasicInfoStep({
             disabled={!isFormValid() || isLoading}
             className="mr-2"
           >
-            {isLoading ? "Saving..." : "Save as draft"}
+            {isLoading ? "Zapisywanie..." : "Zapisz jako szkic"}
           </Button>
           <Button
             onClick={validateAndProceed}
             disabled={!isFormValid() || isLoading}
           >
-            Next
+            Dalej
           </Button>
         </div>
       </div>

@@ -4,9 +4,18 @@ import { Button } from "@/components/ui/button";
  * Component displayed when user has no plans.
  * Encourages the user to create their first plan.
  */
-export const EmptyState = () => {
+type EmptyStateProps = {
+  onCreatePlan?: () => void;
+};
+
+export const EmptyState = ({ onCreatePlan }: EmptyStateProps) => {
   const handleCreatePlan = () => {
-    window.location.href = "/plans/new";
+    if (onCreatePlan) {
+      onCreatePlan();
+    } else {
+      // Fallback to navigation if no callback provided
+      window.location.href = "/plans/new";
+    }
   };
 
   return (

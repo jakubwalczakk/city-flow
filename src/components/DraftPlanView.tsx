@@ -58,43 +58,43 @@ export default function DraftPlanView({ plan }: DraftPlanViewProps) {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Draft Plan</CardTitle>
+          <CardTitle>Plan w wersji roboczej</CardTitle>
           <CardDescription>
-            This plan is in draft status. Add your notes and preferences, then generate your
-            personalized itinerary.
+            Ten plan jest w statusie roboczym. Dodaj swoje notatki i preferencje, a następnie wygeneruj
+            spersonalizowany plan podróży.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label className="text-base font-medium">Destination</Label>
+              <Label className="text-base font-medium">Miejsce docelowe</Label>
             </div>
             <div className="rounded-md bg-muted p-3">
               <p className="text-sm">{plan.destination}</p>
             </div>
             <p className="text-xs text-muted-foreground">
-              The destination cannot be changed after plan creation.
+              Miejsca docelowego nie można zmienić po utworzeniu planu.
             </p>
           </div>
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label htmlFor="notes" className="text-base font-medium">
-                Travel Notes & Preferences
+                Notatki i preferencje podróży
               </Label>
             </div>
             <Textarea
               id="notes"
-              placeholder="Add notes about your travel style, interests, budget, dietary restrictions, or anything else that will help create your perfect itinerary..."
+              placeholder="Dodaj notatki o swoim stylu podróżowania, zainteresowaniach, budżecie, ograniczeniach dietetycznych lub czymkolwiek innym, co pomoże stworzyć idealny plan..."
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={8}
               className="resize-none"
             />
             <p className="text-xs text-muted-foreground">
-              Share your preferences to help us create a personalized travel plan. Include things
-              like: Must-see attractions, food preferences, activity levels, budget considerations,
-              or any special requirements.
+              Podziel się swoimi preferencjami, aby pomóc nam stworzyć spersonalizowany plan podróży. Uwzględnij takie rzeczy
+              jak: obowiązkowe atrakcje, preferencje żywieniowe, poziom aktywności, kwestie budżetowe
+              lub inne specjalne wymagania.
             </p>
           </div>
 
@@ -116,7 +116,7 @@ export default function DraftPlanView({ plan }: DraftPlanViewProps) {
               disabled={!hasChanges || isSaving}
               variant="outline"
             >
-              {isSaving ? "Saving..." : "Save Changes"}
+              {isSaving ? "Zapisywanie..." : "Zapisz zmiany"}
             </Button>
 
             <Button
@@ -126,7 +126,7 @@ export default function DraftPlanView({ plan }: DraftPlanViewProps) {
               }}
               size="lg"
             >
-              Generate Plan
+              Wygeneruj plan
               <svg
                 className="ml-2 h-4 w-4"
                 fill="none"
@@ -147,7 +147,7 @@ export default function DraftPlanView({ plan }: DraftPlanViewProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Travel Dates & Times</CardTitle>
+          <CardTitle className="text-base">Daty i godziny podróży</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col gap-3 text-sm">
@@ -166,14 +166,15 @@ export default function DraftPlanView({ plan }: DraftPlanViewProps) {
                 />
               </svg>
               <div className="flex flex-col">
-                <span className="text-xs text-muted-foreground">Start</span>
+                <span className="text-xs text-muted-foreground">Początek</span>
                 <span className="font-medium">
-                  {new Date(plan.start_date).toLocaleString("en-US", {
+                  {new Date(plan.start_date).toLocaleString("pl-PL", {
                     month: "long",
                     day: "numeric",
                     year: "numeric",
                     hour: "2-digit",
                     minute: "2-digit",
+                    hour12: false,
                   })}
                 </span>
               </div>
@@ -193,14 +194,15 @@ export default function DraftPlanView({ plan }: DraftPlanViewProps) {
                 />
               </svg>
               <div className="flex flex-col">
-                <span className="text-xs text-muted-foreground">End</span>
+                <span className="text-xs text-muted-foreground">Koniec</span>
                 <span className="font-medium">
-                  {new Date(plan.end_date).toLocaleString("en-US", {
+                  {new Date(plan.end_date).toLocaleString("pl-PL", {
                     month: "long",
                     day: "numeric",
                     year: "numeric",
                     hour: "2-digit",
                     minute: "2-digit",
+                    hour12: false,
                   })}
                 </span>
               </div>

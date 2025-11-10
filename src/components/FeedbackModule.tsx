@@ -212,23 +212,24 @@ export default function FeedbackModule({ planId }: FeedbackModuleProps) {
             disabled={!selectedRating || !hasChanges || isSubmitting}
           >
             {isSubmitting
-              ? "Submitting..."
+              ? "Wysyłanie..."
               : feedback
-              ? "Update Feedback"
-              : "Submit Feedback"}
+              ? "Zaktualizuj opinię"
+              : "Wyślij opinię"}
           </Button>
         </div>
 
         {/* Last updated timestamp */}
         {feedback && (
           <p className="text-xs text-muted-foreground text-center">
-            Last updated:{" "}
-            {new Date(feedback.updated_at).toLocaleString("en-US", {
+            Ostatnia aktualizacja:{" "}
+            {new Date(feedback.updated_at).toLocaleString("pl-PL", {
               month: "short",
               day: "numeric",
               year: "numeric",
-              hour: "numeric",
+              hour: "2-digit",
               minute: "2-digit",
+              hour12: false,
             })}
           </p>
         )}

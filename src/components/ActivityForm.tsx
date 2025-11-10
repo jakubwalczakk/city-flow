@@ -29,39 +29,23 @@ type ActivityFormProps = {
 };
 
 const CATEGORIES: { value: TimelineItemCategory; label: string }[] = [
-  { value: "history", label: "History" },
-  { value: "food", label: "Food" },
+  { value: "history", label: "Historia" },
+  { value: "food", label: "Jedzenie" },
   { value: "sport", label: "Sport" },
-  { value: "nature", label: "Nature" },
-  { value: "culture", label: "Culture" },
+  { value: "nature", label: "Natura" },
+  { value: "culture", label: "Kultura" },
   { value: "transport", label: "Transport" },
-  { value: "accommodation", label: "Accommodation" },
-  { value: "other", label: "Other" },
+  { value: "accommodation", label: "Zakwaterowanie" },
+  { value: "other", label: "Inne" },
 ];
 
 /**
- * Converts 24-hour time format (HH:mm) to 12-hour format with AM/PM.
- */
-function convertTo12Hour(time24: string): string {
-  const [hoursStr, minutes] = time24.split(':');
-  let hours = parseInt(hoursStr, 10);
-  const period = hours >= 12 ? 'PM' : 'AM';
-  
-  if (hours === 0) {
-    hours = 12;
-  } else if (hours > 12) {
-    hours -= 12;
-  }
-  
-  return `${hours}:${minutes} ${period}`;
-}
-
-/**
- * Converts 12-hour time format with AM/PM to 24-hour format (HH:mm).
+ * Ensures time is in 24-hour format (HH:mm).
+ * Converts from 12-hour format if needed.
  */
 function convertTo24Hour(time12: string): string {
   const match = time12.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
-  if (!match) return time12; // Return original if can't parse
+  if (!match) return time12; // Already in 24h format or invalid
   
   let hours = parseInt(match[1], 10);
   const minutes = match[2];
@@ -101,7 +85,7 @@ export default function ActivityForm({
   // Reset form when dialog opens with new data
   useEffect(() => {
     if (isOpen) {
-      // Convert time from 12-hour format (with AM/PM) to 24-hour format for the input
+      // Ensure time is in 24-hour format for the input
       let timeValue = initialData?.time || "";
       if (timeValue && /AM|PM/i.test(timeValue)) {
         timeValue = convertTo24Hour(timeValue);
@@ -128,11 +112,8 @@ export default function ActivityForm({
       const durationMatch = formData.estimated_duration.match(/(\d+)/);
       const duration = durationMatch ? parseInt(durationMatch[1], 10) : undefined;
 
-      // Convert 24-hour time to 12-hour format with AM/PM if time is provided
-      let formattedTime = formData.time || undefined;
-      if (formattedTime) {
-        formattedTime = convertTo12Hour(formattedTime);
-      }
+      // Keep time in 24-hour format (no conversion needed)
+      const formattedTime = formData.time || undefined;
 
       await onSubmit({
         time: formattedTime,
@@ -160,19 +141,19 @@ export default function ActivityForm({
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>
-            {mode === "add" ? "Add Activity" : "Edit Activity"}
+            {mode === "add" ? "Dodaj aktywność" : "Edytuj aktywność"}
           </DialogTitle>
           <DialogDescription>
             {mode === "add"
-              ? "Add a custom activity to your plan."
-              : "Update the details of this activity."}
+              ? "Dodaj własną aktywność do swojego planu."
+              : "Zaktualizuj szczegóły tej aktywności."}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="title">
-              Title <span className="text-destructive">*</span>
+              Tytuł <span className="text-destructive">*</span>
             </Label>
             <Input
               id="title"
@@ -180,14 +161,14 @@ export default function ActivityForm({
               onChange={(e) =>
                 setFormData({ ...formData, title: e.target.value })
               }
-              placeholder="e.g., Visit local coffee shop"
+              placeholder="np. Wizyta w lokalnej kawiarni"
               required
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="time">Time</Label>
+              <Label htmlFor="time">Godzina</Label>
               <Input
                 id="time"
                 type="time"
@@ -200,7 +181,7 @@ export default function ActivityForm({
 
             <div className="space-y-2">
               <Label htmlFor="category">
-                Category <span className="text-destructive">*</span>
+                Kategoria <span className="text-destructive">*</span>
               </Label>
               <Select
                 value={formData.category}
@@ -209,7 +190,7 @@ export default function ActivityForm({
                 }
               >
                 <SelectTrigger id="category">
-                  <SelectValue placeholder="Select category" />
+                  <SelectValue placeholder="Wybierz kategorię" />
                 </SelectTrigger>
                 <SelectContent>
                   {CATEGORIES.map((cat) => (
@@ -223,33 +204,33 @@ export default function ActivityForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="location">Location</Label>
+            <Label htmlFor="location">Lokalizacja</Label>
             <Input
               id="location"
               value={formData.location}
               onChange={(e) =>
                 setFormData({ ...formData, location: e.target.value })
               }
-              placeholder="e.g., Trastevere district"
+              placeholder="np. Dzielnica Trastevere"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">Opis</Label>
             <Textarea
               id="description"
               value={formData.description}
               onChange={(e) =>
                 setFormData({ ...formData, description: e.target.value })
               }
-              placeholder="Add details about this activity..."
+              placeholder="Dodaj szczegóły dotyczące tej aktywności..."
               rows={3}
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="duration">Duration (minutes)</Label>
+              <Label htmlFor="duration">Czas trwania (minuty)</Label>
               <Input
                 id="duration"
                 type="number"
@@ -265,19 +246,19 @@ export default function ActivityForm({
                     });
                   }
                 }}
-                placeholder="e.g., 60"
+                placeholder="np. 60"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="price">Estimated Cost</Label>
+              <Label htmlFor="price">Szacowany koszt</Label>
               <Input
                 id="price"
                 value={formData.estimated_price}
                 onChange={(e) =>
                   setFormData({ ...formData, estimated_price: e.target.value })
                 }
-                placeholder="e.g., 5-10 EUR"
+                placeholder="np. 20-40 PLN"
               />
             </div>
           </div>
@@ -289,14 +270,14 @@ export default function ActivityForm({
               onClick={onClose}
               disabled={isSubmitting}
             >
-              Cancel
+              Anuluj
             </Button>
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting
-                ? "Saving..."
+                ? "Zapisywanie..."
                 : mode === "add"
-                  ? "Add Activity"
-                  : "Save Changes"}
+                  ? "Dodaj aktywność"
+                  : "Zapisz zmiany"}
             </Button>
           </DialogFooter>
         </form>

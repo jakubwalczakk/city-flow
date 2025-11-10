@@ -98,16 +98,16 @@ function getCategoryIcon(category: TimelineItemCategory) {
  */
 function getCategoryLabel(category: TimelineItemCategory) {
   const labels: Record<TimelineItemCategory, string> = {
-    history: "History",
-    food: "Food",
+    history: "Historia",
+    food: "Jedzenie",
     sport: "Sport",
-    nature: "Nature",
-    culture: "Culture",
+    nature: "Natura",
+    culture: "Kultura",
     transport: "Transport",
-    accommodation: "Accommodation",
-    other: "Other",
+    accommodation: "Zakwaterowanie",
+    other: "Inne",
   };
-  return labels[category] || "Other";
+  return labels[category] || "Inne";
 }
 
 /**
@@ -133,7 +133,7 @@ export default function EventTimeline({ items, onEdit, onDelete }: EventTimeline
   if (!items || items.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
-        No items scheduled for this day.
+        Brak zaplanowanych aktywności na ten dzień.
       </div>
     );
   }
@@ -228,7 +228,7 @@ export default function EventTimeline({ items, onEdit, onDelete }: EventTimeline
                 {/* Notes */}
                 {item.notes && (
                   <div className="mt-2 p-2 bg-muted/50 rounded text-xs text-muted-foreground border-l-2 border-primary/50">
-                    <span className="font-medium">Note:</span> {item.notes}
+                    <span className="font-medium">Notatka:</span> {item.notes}
                   </div>
                 )}
               </div>
@@ -247,14 +247,14 @@ export default function EventTimeline({ items, onEdit, onDelete }: EventTimeline
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="icon" className="h-8 w-8">
                         <MoreVertical className="h-4 w-4" />
-                        <span className="sr-only">Open menu</span>
+                        <span className="sr-only">Otwórz menu</span>
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       {onEdit && (
                         <DropdownMenuItem onClick={() => onEdit(item)}>
                           <Pencil className="mr-2 h-4 w-4" />
-                          Edit
+                          Edytuj
                         </DropdownMenuItem>
                       )}
                       {onDelete && (
@@ -263,7 +263,7 @@ export default function EventTimeline({ items, onEdit, onDelete }: EventTimeline
                           className="text-destructive focus:text-destructive"
                         >
                           <Trash2 className="mr-2 h-4 w-4" />
-                          Delete
+                          Usuń
                         </DropdownMenuItem>
                       )}
                     </DropdownMenuContent>
@@ -279,16 +279,16 @@ export default function EventTimeline({ items, onEdit, onDelete }: EventTimeline
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Activity</AlertDialogTitle>
+            <AlertDialogTitle>Usuń aktywność</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete "{itemToDelete?.title}"? This action cannot be
-              undone.
+              Czy na pewno chcesz usunąć "{itemToDelete?.title}"? Ta akcja jest
+              nieodwracalna.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>Anuluj</AlertDialogCancel>
             <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Delete
+              Usuń
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

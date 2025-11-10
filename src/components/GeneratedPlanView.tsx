@@ -91,19 +91,19 @@ export default function GeneratedPlanView({
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Generated Plan</CardTitle>
+          <CardTitle>Wygenerowany plan</CardTitle>
           <CardDescription>
-            Your plan has been generated, but the content format is invalid or unavailable.
+            Twój plan został wygenerowany, ale format zawartości jest nieprawidłowy lub niedostępny.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
-            Please try regenerating your plan or contact support if the issue persists.
+            Spróbuj ponownie wygenerować plan lub skontaktuj się z pomocą techniczną, jeśli problem będzie się powtarzał.
           </p>
           {plan.generated_content && (
             <details className="mt-4">
               <summary className="cursor-pointer text-sm text-muted-foreground hover:text-foreground">
-                View raw data
+                Pokaż surowe dane
               </summary>
               <pre className="mt-2 p-4 bg-muted rounded text-xs overflow-auto max-h-96">
                 {JSON.stringify(plan.generated_content, null, 2)}
@@ -137,10 +137,10 @@ export default function GeneratedPlanView({
               </svg>
               <div className="flex-1">
                 <CardTitle className="text-amber-900 dark:text-amber-100 text-base">
-                  Important Reminders
+                  Ważne przypomnienia
                 </CardTitle>
                 <CardDescription className="text-amber-800 dark:text-amber-200 mt-1">
-                  Please review these notes before your trip
+                  Przejrzyj te notatki przed podróżą
                 </CardDescription>
               </div>
             </div>
@@ -181,10 +181,10 @@ export default function GeneratedPlanView({
               </svg>
               <div className="flex-1">
                 <CardTitle className="text-blue-900 dark:text-blue-100 text-base">
-                  Plan Adjustments
+                  Dostosowania planu
                 </CardTitle>
                 <CardDescription className="text-blue-800 dark:text-blue-200 mt-1">
-                  Changes made to optimize your itinerary
+                  Zmiany wprowadzone w celu optymalizacji planu
                 </CardDescription>
               </div>
             </div>
@@ -208,9 +208,9 @@ export default function GeneratedPlanView({
       {/* Daily Itinerary */}
       <Card>
         <CardHeader>
-          <CardTitle>Daily Itinerary</CardTitle>
+          <CardTitle>Plan dzienny</CardTitle>
           <CardDescription>
-            Expand each day to see your personalized schedule
+            Rozwiń każdy dzień, aby zobaczyć spersonalizowany harmonogram
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -228,7 +228,7 @@ export default function GeneratedPlanView({
                       <div className="flex items-center gap-3 text-left">
                         <div>
                           <div className="font-semibold">
-                            {new Date(day.date).toLocaleDateString("en-US", {
+                            {new Date(day.date).toLocaleDateString("pl-PL", {
                               weekday: "long",
                               month: "long",
                               day: "numeric",
@@ -236,7 +236,7 @@ export default function GeneratedPlanView({
                           </div>
                           <div className="flex items-center gap-2 mt-1">
                             <span className="text-xs text-muted-foreground">
-                              {activityCount} {activityCount === 1 ? "activity" : "activities"}
+                              {activityCount} {activityCount === 1 ? "aktywność" : activityCount < 5 ? "aktywności" : "aktywności"}
                             </span>
                           </div>
                         </div>
@@ -254,7 +254,7 @@ export default function GeneratedPlanView({
                             className="gap-2"
                           >
                             <Plus className="h-4 w-4" />
-                            Add Activity
+                            Dodaj aktywność
                           </Button>
                         </div>
                       )}

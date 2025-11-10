@@ -23,7 +23,7 @@ export function PlanGenerationLoading({ planName }: PlanGenerationLoadingProps) 
     <div className="w-full">
       <div className="space-y-2 mb-6">
         <h2 className="text-center text-2xl font-semibold">
-          Creating your plan
+          Tworzenie planu
         </h2>
       </div>
       
@@ -141,7 +141,7 @@ export function PlanGenerationLoading({ planName }: PlanGenerationLoadingProps) 
         {/* Loading Text */}
         <div className="text-center space-y-2">
           <p className="text-sm text-muted-foreground animate-pulse">
-            Crafting your perfect itinerary...
+            Tworzenie idealnego planu podróży...
           </p>
           <div className="flex justify-center gap-1">
             <div className="h-2 w-2 animate-bounce rounded-full bg-primary [animation-delay:-0.3s]" />

@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import type { NewPlanViewModel } from "@/types";
 import { Calendar, MapPin, FileText, Clock, Loader2 } from "lucide-react";
 import { format } from "date-fns";
+import { pl } from "date-fns/locale";
 
 interface SummaryStepProps {
   formData: NewPlanViewModel;
@@ -25,9 +26,10 @@ export function SummaryStep({
   const formatDateTime = (dateTimeString: string) => {
     try {
       const date = new Date(dateTimeString);
-      return date.toLocaleString("en-US", {
+      return date.toLocaleString("pl-PL", {
         dateStyle: "medium",
         timeStyle: "short",
+        hour12: false,
       });
     } catch {
       return dateTimeString;
@@ -37,27 +39,27 @@ export function SummaryStep({
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-semibold mb-2">Review Your Plan</h3>
+        <h3 className="text-lg font-semibold mb-2">Przejrzyj swój plan</h3>
         <p className="text-sm text-muted-foreground">
-          Please review all the information before creating your travel plan.
+          Przejrzyj wszystkie informacje przed utworzeniem planu podróży.
         </p>
       </div>
 
       {/* Basic Information Summary */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Basic Information</CardTitle>
+          <CardTitle className="text-base">Podstawowe informacje</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <div>
-            <p className="text-sm text-muted-foreground mb-1">Plan Name</p>
+            <p className="text-sm text-muted-foreground mb-1">Nazwa planu</p>
             <p className="font-medium">{basicInfo.name}</p>
           </div>
 
           <div>
             <p className="text-sm text-muted-foreground mb-1 flex items-center gap-1">
               <MapPin className="h-3 w-3" />
-              Destination
+              Miejsce docelowe
             </p>
             <p className="font-medium">{basicInfo.destination}</p>
           </div>
@@ -65,19 +67,19 @@ export function SummaryStep({
           <div>
             <p className="text-sm text-muted-foreground mb-1 flex items-center gap-1">
               <Calendar className="h-3 w-3" />
-              Travel Dates & Times
+              Daty i godziny podróży
             </p>
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">Start:</span>
+                <span className="text-sm text-muted-foreground">Początek:</span>
                 <span className="font-medium">
-                  {format(basicInfo.start_date, "PPP")} at {format(basicInfo.start_date, "HH:mm")}
+                  {format(basicInfo.start_date, "PPP", { locale: pl })} o {format(basicInfo.start_date, "HH:mm")}
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">End:</span>
+                <span className="text-sm text-muted-foreground">Koniec:</span>
                 <span className="font-medium">
-                  {format(basicInfo.end_date, "PPP")} at {format(basicInfo.end_date, "HH:mm")}
+                  {format(basicInfo.end_date, "PPP", { locale: pl })} o {format(basicInfo.end_date, "HH:mm")}
                 </span>
               </div>
             </div>
@@ -87,7 +89,7 @@ export function SummaryStep({
             <div>
               <p className="text-sm text-muted-foreground mb-1 flex items-center gap-1">
                 <FileText className="h-3 w-3" />
-                Notes
+                Notatki
               </p>
               <p className="text-sm">{basicInfo.notes}</p>
             </div>
@@ -99,14 +101,14 @@ export function SummaryStep({
       <Card>
         <CardHeader>
           <CardTitle className="text-base flex items-center justify-between">
-            <span>Fixed Points</span>
+            <span>Stałe punkty</span>
             <Badge variant="secondary">{fixedPoints.length}</Badge>
           </CardTitle>
         </CardHeader>
         <CardContent>
           {fixedPoints.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              No fixed points added. You can always add them later.
+              Nie dodano stałych punktów. Możesz dodać je później.
             </p>
           ) : (
             <div className="space-y-3">
@@ -147,16 +149,16 @@ export function SummaryStep({
       {/* Navigation buttons */}
       <div className="flex justify-between pt-4">
         <Button variant="outline" onClick={goToPrevStep} disabled={isLoading}>
-          Back
+          Wstecz
         </Button>
         <Button onClick={onSubmit} disabled={isLoading}>
           {isLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Creating Plan...
+              Tworzenie planu...
             </>
           ) : (
-            "Create Plan"
+            "Utwórz plan"
           )}
         </Button>
       </div>

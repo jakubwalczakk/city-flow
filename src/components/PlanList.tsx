@@ -11,6 +11,7 @@ type PlanListProps = {
   error: string | null;
   onPlanClick: (plan: PlanListItemDto) => void;
   onPlanDelete: (planId: string) => void;
+  onCreatePlan?: () => void;
 };
 
 /**
@@ -23,6 +24,7 @@ export const PlanList = ({
   error,
   onPlanClick,
   onPlanDelete,
+  onCreatePlan,
 }: PlanListProps) => {
   // Loading state
   if (isLoading) {
@@ -53,7 +55,7 @@ export const PlanList = ({
 
   // Empty state
   if (plans.length === 0) {
-    return <EmptyState />;
+    return <EmptyState onCreatePlan={onCreatePlan} />;
   }
 
   // Plans grid

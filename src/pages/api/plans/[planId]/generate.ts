@@ -17,7 +17,7 @@ export const prerender = false;
 
 // Define the schema for the AI's structured response
 const aiTimelineEventSchema = z.object({
-  time: z.string().describe("The time of the event in HH:mm AM/PM format."),
+  time: z.string().describe("The time of the event in 24-hour HH:mm format (e.g., 18:00, not 6:00 PM)."),
   activity: z.string().describe("A short, descriptive title for the activity."),
   category: z
     .enum([
@@ -140,7 +140,7 @@ The final JSON object MUST have the following root structure. It is critical tha
         "date": "YYYY-MM-DD",
         "activities": [
           {
-            "time": "HH:mm AM/PM",
+            "time": "HH:mm (24-hour format, e.g., 18:00, NOT 6:00 PM)",
             "activity": "Activity Title",
             "category": "history | food | sport | nature | culture | transport | accommodation | other",
             "description": "Detailed description of the activity.",
@@ -152,13 +152,15 @@ The final JSON object MUST have the following root structure. It is critical tha
   }
 }
 
+IMPORTANT: All times MUST be in 24-hour format (e.g., 09:00, 14:30, 18:00). NEVER use AM/PM format (e.g., NOT 9:00 AM, 2:30 PM, 6:00 PM).
+
 Key requirements for the plan:
 - Destination: ${plan.destination}
-- Start Date & Time: ${new Date(plan.start_date).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}
-- End Date & Time: ${new Date(plan.end_date).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}
+- Start Date & Time: ${new Date(plan.start_date).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short', hour12: false })}
+- End Date & Time: ${new Date(plan.end_date).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short', hour12: false })}
 - User Notes: ${plan.notes || "No special notes provided."}
 - Fixed Points: The user has scheduled the following non-negotiable events. You MUST incorporate them into the plan at the specified times.
-${fixedPoints && fixedPoints.length > 0 ? fixedPoints.map((fp) => `- ${new Date(fp.event_at).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })}: ${fp.location} - ${fp.description || "No description"}`).join("\n") : "No fixed points scheduled."}
+${fixedPoints && fixedPoints.length > 0 ? fixedPoints.map((fp) => `- ${new Date(fp.event_at).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short', hour12: false })}: ${fp.location} - ${fp.description || "No description"}`).join("\n") : "No fixed points scheduled."}
 
 Generate a plan that is logical, engaging, and takes into account travel times between locations. Be creative and suggest interesting activities, restaurants, and sights.
 `;

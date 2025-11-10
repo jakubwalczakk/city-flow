@@ -73,8 +73,8 @@ export const generatePlanPdf = async (
     // Basic Info
     drawText(`Destination: ${plan.destination}`, BODY_SIZE, helvetica);
     
-    const startDate = new Date(plan.start_date).toLocaleDateString();
-    const endDate = new Date(plan.end_date).toLocaleDateString();
+    const startDate = new Date(plan.start_date).toLocaleDateString('pl-PL');
+    const endDate = new Date(plan.end_date).toLocaleDateString('pl-PL');
     drawText(`Dates: ${startDate} - ${endDate}`, BODY_SIZE, helvetica);
     
     if (plan.notes) {
@@ -112,7 +112,7 @@ export const generatePlanPdf = async (
         ensureSpace(60);
         
         // Day heading
-        const dayDate = new Date(day.date).toLocaleDateString('en-US', {
+        const dayDate = new Date(day.date).toLocaleDateString('pl-PL', {
           weekday: 'long',
           year: 'numeric',
           month: 'long',

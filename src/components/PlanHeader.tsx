@@ -75,12 +75,12 @@ export default function PlanHeader({ plan, onUpdate, onDelete }: PlanHeaderProps
 
   const formatDateRange = () => {
     if (!plan.start_date && !plan.end_date) {
-      return "Dates not set";
+      return "Daty nie ustawione";
     }
 
     const formatDate = (dateString: string) => {
       const date = new Date(dateString);
-      return date.toLocaleDateString("en-US", {
+      return date.toLocaleDateString("pl-PL", {
         month: "short",
         day: "numeric",
         year: "numeric",
@@ -92,10 +92,10 @@ export default function PlanHeader({ plan, onUpdate, onDelete }: PlanHeaderProps
     }
 
     if (plan.start_date) {
-      return `From ${formatDate(plan.start_date)}`;
+      return `Od ${formatDate(plan.start_date)}`;
     }
 
-    return `Until ${formatDate(plan.end_date!)}`;
+    return `Do ${formatDate(plan.end_date!)}`;
   };
 
   return (
@@ -124,10 +124,10 @@ export default function PlanHeader({ plan, onUpdate, onDelete }: PlanHeaderProps
                   disabled={!editedName.trim() || isSaving}
                   size="sm"
                 >
-                  {isSaving ? "Saving..." : "Save"}
+                  {isSaving ? "Zapisywanie..." : "Zapisz"}
                 </Button>
                 <Button onClick={handleCancel} variant="outline" size="sm" disabled={isSaving}>
-                  Cancel
+                  Anuluj
                 </Button>
               </div>
             </div>
@@ -241,7 +241,7 @@ export default function PlanHeader({ plan, onUpdate, onDelete }: PlanHeaderProps
                   d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
                 />
               </svg>
-              Delete Plan
+              Usuń plan
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -251,20 +251,19 @@ export default function PlanHeader({ plan, onUpdate, onDelete }: PlanHeaderProps
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>Czy na pewno?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the plan "{plan.name}" and
-              all of its associated data.
+              Ta akcja jest nieodwracalna. Plan "{plan.name}" oraz wszystkie powiązane dane zostaną trwale usunięte.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={isDeleting}>Anuluj</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
               disabled={isDeleting}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {isDeleting ? "Deleting..." : "Delete"}
+              {isDeleting ? "Usuwanie..." : "Usuń"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
