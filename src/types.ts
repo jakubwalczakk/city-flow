@@ -349,3 +349,65 @@ export type GeneratedContentViewModel = {
  * @deprecated Use TimelineItem instead. This type is kept for backward compatibility.
  */
 export type TimelineEvent = TimelineItem;
+
+// ============================================================================
+//                                   Profile View
+// ============================================================================
+
+/**
+ * ViewModel for the profile view.
+ * Manages the state of the entire profile view, including data, loading, and error states.
+ */
+export type ProfileViewModel = {
+  isLoading: boolean;
+  isSaving: boolean;
+  error: string | null;
+  profile: ProfileDto | null;
+};
+
+/**
+ * Type for travel preference keys (stored in database).
+ */
+export type TravelPreference =
+  | "art_museums"
+  | "local_food"
+  | "active_recreation"
+  | "nature_parks"
+  | "nightlife"
+  | "history_culture";
+
+/**
+ * List of available travel preferences (database keys).
+ * Used in the PreferencesSelector component.
+ */
+export const AVAILABLE_PREFERENCES: TravelPreference[] = [
+  "art_museums",
+  "local_food",
+  "active_recreation",
+  "nature_parks",
+  "nightlife",
+  "history_culture",
+];
+
+/**
+ * Human-readable Polish labels for travel preferences.
+ * Maps database keys to display labels.
+ */
+export const PREFERENCE_LABELS: Record<TravelPreference, string> = {
+  art_museums: "Sztuka i Muzea",
+  local_food: "Lokalne Jedzenie",
+  active_recreation: "Aktywny Wypoczynek",
+  nature_parks: "Natura i Parki",
+  nightlife: "Życie Nocne",
+  history_culture: "Historia i Kultura",
+};
+
+/**
+ * Human-readable labels for TravelPace values.
+ * Used in the TravelPaceSelector component.
+ */
+export const TRAVEL_PACE_LABELS: Record<TravelPace, string> = {
+  slow: "Wolne",
+  moderate: "Umiarkowane",
+  intensive: "Intensywne",
+};

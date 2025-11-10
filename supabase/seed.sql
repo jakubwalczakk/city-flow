@@ -139,7 +139,7 @@ INSERT INTO profiles (
 )
 VALUES (
     '17555d06-2387-4f0b-b4f8-0887177cadc1'::uuid,
-    ARRAY['Art & Museums', 'Local Food', 'History'],
+    ARRAY['art_museums', 'local_food', 'history_culture'],
     'moderate',
     5,
     true,
