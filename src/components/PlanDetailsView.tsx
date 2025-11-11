@@ -88,7 +88,7 @@ export default function PlanDetailsView({ planId }: PlanDetailsViewProps) {
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
           <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]" />
-          <p className="mt-4 text-muted-foreground">Loading plan...</p>
+          <p className="mt-4 text-muted-foreground">Ładowanie planu...</p>
         </div>
       </div>
     );
@@ -115,13 +115,13 @@ export default function PlanDetailsView({ planId }: PlanDetailsViewProps) {
               />
             </svg>
           </div>
-          <h2 className="text-xl font-semibold mb-2">Unable to Load Plan</h2>
+          <h2 className="text-xl font-semibold mb-2">Nie można załadować planu</h2>
           <p className="text-muted-foreground mb-6">{error}</p>
           <a
             href="/plans"
             className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
           >
-            ← Back to Plans
+            ← Powrót do planów
           </a>
         </div>
       </div>
@@ -133,15 +133,15 @@ export default function PlanDetailsView({ planId }: PlanDetailsViewProps) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center max-w-md">
-          <h2 className="text-xl font-semibold mb-2">Plan Not Found</h2>
+          <h2 className="text-xl font-semibold mb-2">Plan nie został znaleziony</h2>
           <p className="text-muted-foreground mb-6">
-            The plan you're looking for doesn't exist or has been deleted.
+            Szukany plan nie istnieje lub został usunięty.
           </p>
           <a
             href="/plans"
             className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
           >
-            ← Back to Plans
+            ← Powrót do planów
           </a>
         </div>
       </div>
@@ -169,7 +169,7 @@ export default function PlanDetailsView({ planId }: PlanDetailsViewProps) {
               d="M15 19l-7-7 7-7"
             />
           </svg>
-          Back to Plans
+          Powrót do planów
         </a>
       </div>
 
@@ -195,7 +195,7 @@ export default function PlanDetailsView({ planId }: PlanDetailsViewProps) {
       )}
       {plan.status === "archived" && (
         <div className="rounded-lg border border-muted bg-muted/20 p-6 text-center">
-          <p className="text-muted-foreground">This plan has been archived.</p>
+          <p className="text-muted-foreground">Ten plan został zarchiwizowany.</p>
         </div>
       )}
     </div>

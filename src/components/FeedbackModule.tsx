@@ -83,7 +83,7 @@ export default function FeedbackModule({ planId }: FeedbackModuleProps) {
       setFeedback(updatedFeedback);
       setSubmitMessage({
         type: "success",
-        text: "Thank you for your feedback!",
+        text: "Dziękujemy za opinię!",
       });
 
       // Clear success message after 3 seconds
@@ -92,7 +92,7 @@ export default function FeedbackModule({ planId }: FeedbackModuleProps) {
       console.error("Failed to submit feedback:", error);
       setSubmitMessage({
         type: "error",
-        text: "Failed to submit feedback. Please try again.",
+        text: "Nie udało się wysłać opinii. Spróbuj ponownie.",
       });
     } finally {
       setIsSubmitting(false);
@@ -103,7 +103,7 @@ export default function FeedbackModule({ planId }: FeedbackModuleProps) {
     return (
       <Card>
         <CardContent className="pt-6">
-          <div className="text-center text-muted-foreground">Loading feedback...</div>
+          <div className="text-center text-muted-foreground">Ładowanie opinii...</div>
         </CardContent>
       </Card>
     );
@@ -115,15 +115,15 @@ export default function FeedbackModule({ planId }: FeedbackModuleProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>How was this plan?</CardTitle>
+        <CardTitle>Jak oceniasz ten plan?</CardTitle>
         <CardDescription>
-          Your feedback helps us improve future travel recommendations
+          Twoja opinia pomaga nam udoskonalać przyszłe rekomendacje podróży
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Rating buttons */}
         <div className="flex items-center gap-4">
-          <span className="text-sm font-medium">Rate this plan:</span>
+          <span className="text-sm font-medium">Oceń ten plan:</span>
           <div className="flex gap-2">
             <button
               onClick={() => setSelectedRating("thumbs_up")}
@@ -179,11 +179,11 @@ export default function FeedbackModule({ planId }: FeedbackModuleProps) {
         {/* Comment textarea */}
         <div className="space-y-2">
           <label htmlFor="feedback-comment" className="text-sm font-medium">
-            Additional comments (optional)
+            Dodatkowe uwagi (opcjonalnie)
           </label>
           <Textarea
             id="feedback-comment"
-            placeholder="Tell us what you liked or what could be improved..."
+            placeholder="Powiedz nam, co Ci się podobało lub co można poprawić..."
             value={comment}
             onChange={(e) => setComment(e.target.value)}
             rows={4}
