@@ -193,7 +193,7 @@ export type UpdatePlanCommand = {
 export type CreateFixedPointCommand = {
   location: string;
   event_at: string;
-  event_duration: number;
+  event_duration: number | null;
   description?: string | null;
 };
 
@@ -340,6 +340,8 @@ export type DayPlan = {
  * Corresponds to the database schema validation for generated_content.
  */
 export type GeneratedContentViewModel = {
+  summary: string; // Add the summary field
+  currency: string; // ISO 4217 currency code
   days: DayPlan[];
   modifications?: string[]; // Optional: AI modifications made to the plan
   warnings?: string[]; // Optional: Warnings for the user

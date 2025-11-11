@@ -297,9 +297,11 @@ export function useNewPlanForm({
 
       if (!generationResponse.ok) {
         const errorData = await generationResponse.json();
-        throw new Error(
-          errorData.error || "Failed to generate the plan itinerary."
-        );
+        // Prepend a user-friendly message to the error from the AI
+        const message = errorData.error
+          ? `The plan could not be generated: ${errorData.error}`
+          : "An unknown error occurred during plan generation.";
+        throw new Error(message);
       }
 
       if (onFinished) {

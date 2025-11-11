@@ -64,6 +64,8 @@ function parseGeneratedContent(content: unknown): GeneratedContentViewModel | nu
     });
 
     return {
+      summary: data.summary || "Brak podsumowania.", // Extract summary, provide default
+      currency: data.currency || "PLN", // Extract currency, default to PLN
       days: processedDays,
       modifications: data.modifications,
       warnings: data.warnings,
@@ -117,6 +119,16 @@ export default function GeneratedPlanView({
 
   return (
     <div className="space-y-6">
+      {/* Plan Summary */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Podsumowanie planu</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground">{generatedContent.summary}</p>
+        </CardContent>
+      </Card>
+
       {/* AI Warning Banner */}
       {generatedContent.warnings && generatedContent.warnings.length > 0 && (
         <Card className="border-amber-200 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/20">
@@ -260,6 +272,7 @@ export default function GeneratedPlanView({
                       )}
                       <EventTimeline
                         items={day.items}
+                        currency={generatedContent.currency}
                         onEdit={
                           onEditActivity
                             ? (item) => onEditActivity(day.date, item)

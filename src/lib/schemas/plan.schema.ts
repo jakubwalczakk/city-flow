@@ -107,7 +107,7 @@ export const fixedPointSchema = z.object({
   event_at: z.string().min(1, "Date and time is required"),
   event_duration: z
     .number()
-    .nonnegative("Duration must be zero or a positive number.")
+    .positive("Duration must be a positive number.")
     .nullable()
     .optional(),
   description: z.string().nullable().optional(),

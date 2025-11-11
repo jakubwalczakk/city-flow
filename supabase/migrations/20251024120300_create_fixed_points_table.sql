@@ -23,7 +23,7 @@ CREATE TABLE fixed_points (
     -- Event details
     location TEXT NOT NULL,
     event_at TIMESTAMPTZ NOT NULL,
-    event_duration INTEGER NOT NULL CHECK (event_duration > 0),
+    event_duration INTEGER CHECK (event_duration > 0),
     
     -- Optional user notes
     description TEXT,

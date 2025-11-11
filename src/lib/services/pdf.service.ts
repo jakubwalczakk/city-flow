@@ -1,4 +1,7 @@
 import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
+import fontkit from "@pdf-lib/fontkit";
+import fs from "fs/promises";
+import path from "path";
 import type {
   PlanDetailsDto,
   GeneratedContentViewModel,
@@ -23,9 +26,20 @@ export const generatePlanPdf = async (
     // Create a new PDF document
     const pdfDoc = await PDFDocument.create();
     
+    // Register fontkit to enable custom font embedding
+    pdfDoc.registerFontkit(fontkit);
+
+    // Load font data from file
+    const fontBytes = await fs.readFile(
+      path.resolve(process.cwd(), "src/assets/fonts/Lato-Regular.ttf")
+    );
+    const fontBoldBytes = await fs.readFile(
+      path.resolve(process.cwd(), "src/assets/fonts/Lato-Bold.ttf")
+    );
+
     // Embed fonts
-    const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-    const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const lato = await pdfDoc.embedFont(fontBytes);
+    const latoBold = await pdfDoc.embedFont(fontBoldBytes);
 
     // Constants for layout
     const MARGIN = 50;
@@ -52,11 +66,10 @@ export const generatePlanPdf = async (
     const drawText = (
       text: string,
       size: number,
-      font: typeof helvetica | typeof helveticaBold,
+      font: typeof lato | typeof latoBold,
       color = rgb(0, 0, 0)
     ) => {
-      const sanitized = sanitizeTextForPdf(text);
-      page.drawText(sanitized, {
+      page.drawText(text, {
         x: MARGIN,
         y: yPosition,
         size,
@@ -67,20 +80,20 @@ export const generatePlanPdf = async (
     };
 
     // Title
-    drawText(plan.name, TITLE_SIZE, helveticaBold, rgb(0.2, 0.2, 0.8));
+    drawText(plan.name, TITLE_SIZE, latoBold, rgb(0.2, 0.2, 0.8));
     yPosition -= 10;
 
     // Basic Info
-    drawText(`Destination: ${plan.destination}`, BODY_SIZE, helvetica);
+    drawText(`Cel podróży: ${plan.destination}`, BODY_SIZE, lato);
     
     const startDate = new Date(plan.start_date).toLocaleDateString('pl-PL');
     const endDate = new Date(plan.end_date).toLocaleDateString('pl-PL');
-    drawText(`Dates: ${startDate} - ${endDate}`, BODY_SIZE, helvetica);
+    drawText(`Daty: ${startDate} - ${endDate}`, BODY_SIZE, lato);
     
     if (plan.notes) {
       yPosition -= 5;
-      drawText("Notes:", BODY_SIZE, helveticaBold);
-      drawText(plan.notes, BODY_SIZE, helvetica);
+      drawText("Notatki:", BODY_SIZE, latoBold);
+      drawText(plan.notes, BODY_SIZE, lato);
     }
 
     yPosition -= 20;
@@ -89,19 +102,19 @@ export const generatePlanPdf = async (
     const generatedContent = plan.generated_content as GeneratedContentViewModel | null;
 
     if (!generatedContent || !generatedContent.days || generatedContent.days.length === 0) {
-      drawText("No itinerary generated yet.", BODY_SIZE, helvetica);
+      drawText("Brak wygenerowanego planu.", BODY_SIZE, lato);
     } else {
       // Display warnings if present
       if (generatedContent.warnings && generatedContent.warnings.length > 0) {
         ensureSpace(100);
-        drawText("Important Notices:", HEADING_SIZE, helveticaBold, rgb(0.8, 0.4, 0));
+        drawText("Ważne uwagi:", HEADING_SIZE, latoBold, rgb(0.8, 0.4, 0));
         yPosition += 5;
         
         for (const warning of generatedContent.warnings) {
           ensureSpace(40);
           const lines = splitTextIntoLines(warning, 80);
           for (const line of lines) {
-            drawText(`! ${line}`, SMALL_SIZE, helvetica, rgb(0.6, 0.3, 0));
+            drawText(`! ${line}`, SMALL_SIZE, lato, rgb(0.6, 0.3, 0));
           }
         }
         yPosition -= 15;
@@ -118,12 +131,12 @@ export const generatePlanPdf = async (
           month: 'long',
           day: 'numeric',
         });
-        drawText(dayDate, HEADING_SIZE, helveticaBold, rgb(0.2, 0.4, 0.8));
+        drawText(dayDate, HEADING_SIZE, latoBold, rgb(0.2, 0.4, 0.8));
         yPosition -= 5;
 
         // Check if day has items
         if (!day.items || day.items.length === 0) {
-          drawText("  No activities planned for this day.", BODY_SIZE, helvetica);
+          drawText("  Brak zaplanowanych aktywności na ten dzień.", BODY_SIZE, lato);
           yPosition -= 10;
           continue;
         }
@@ -136,28 +149,26 @@ export const generatePlanPdf = async (
           const timePrefix = item.time ? `${item.time} - ` : "  ";
           const categoryLabel = getCategoryLabel(item.category);
           const titleText = `${timePrefix}${categoryLabel} ${item.title}`;
-          drawText(titleText, BODY_SIZE, helveticaBold);
+          drawText(titleText, BODY_SIZE, latoBold);
 
           // Item details
           if (item.description) {
             const descLines = splitTextIntoLines(item.description, 90);
             for (const line of descLines) {
               ensureSpace(20);
-              drawText(`  ${line}`, SMALL_SIZE, helvetica);
+              drawText(`  ${line}`, SMALL_SIZE, lato);
             }
           }
 
           if (item.location) {
             ensureSpace(20);
-            drawText(`  Location: ${item.location}`, SMALL_SIZE, helvetica);
+            drawText(`  Lokalizacja: ${item.location}`, SMALL_SIZE, lato);
           }
 
-          if (item.estimated_duration || item.estimated_price) {
-            const details = [];
-            if (item.estimated_duration) details.push(`Duration: ${item.estimated_duration}`);
-            if (item.estimated_price) details.push(`Cost: ${item.estimated_price}`);
+          if (item.estimated_price && item.estimated_price !== "0") {
+            const currency = generatedContent?.currency ?? 'PLN';
             ensureSpace(20);
-            drawText(`  ${details.join(" | ")}`, SMALL_SIZE, helvetica);
+            drawText(`  Koszt: ${item.estimated_price} ${currency}`, SMALL_SIZE, lato);
           }
 
           yPosition -= 5;
@@ -169,14 +180,14 @@ export const generatePlanPdf = async (
       // Display modifications if present
       if (generatedContent.modifications && generatedContent.modifications.length > 0) {
         ensureSpace(100);
-        drawText("AI Modifications:", HEADING_SIZE, helveticaBold, rgb(0.3, 0.6, 0.3));
+        drawText("Modyfikacje AI:", HEADING_SIZE, latoBold, rgb(0.3, 0.6, 0.3));
         yPosition += 5;
         
         for (const modification of generatedContent.modifications) {
           ensureSpace(40);
           const lines = splitTextIntoLines(modification, 80);
           for (const line of lines) {
-            drawText(`* ${line}`, SMALL_SIZE, helvetica, rgb(0.2, 0.5, 0.2));
+            drawText(`* ${line}`, SMALL_SIZE, lato, rgb(0.2, 0.5, 0.2));
           }
         }
       }
@@ -188,12 +199,12 @@ export const generatePlanPdf = async (
       const currentPage = pages[i];
       const { height } = currentPage.getSize();
       
-      const footerText = sanitizeTextForPdf(`Generated by CityFlow - Page ${i + 1} of ${pages.length}`);
+      const footerText = `Wygenerowano przez CityFlow - Strona ${i + 1} z ${pages.length}`;
       currentPage.drawText(footerText, {
         x: MARGIN,
         y: 30,
         size: SMALL_SIZE,
-        font: helvetica,
+        font: lato,
         color: rgb(0.5, 0.5, 0.5),
       });
     }
@@ -215,28 +226,6 @@ export const generatePlanPdf = async (
     throw new Error("PDF generation failed");
   }
 };
-
-/**
- * Sanitizes text to be compatible with WinAnsi encoding (standard PDF fonts).
- * Removes or replaces characters that cannot be encoded.
- */
-function sanitizeTextForPdf(text: string): string {
-  if (!text) return text;
-  
-  // Replace common problematic characters with ASCII equivalents
-  return text
-    // Remove emoji and other symbols outside basic Latin
-    .replace(/[\u{1F300}-\u{1F9FF}]/gu, '') // Remove emoji
-    .replace(/[\u{2600}-\u{26FF}]/gu, '') // Remove miscellaneous symbols
-    .replace(/[\u{2700}-\u{27BF}]/gu, '') // Remove dingbats
-    // Normalize Unicode characters to closest ASCII
-    .normalize('NFKD')
-    // Keep only WinAnsi-compatible characters (basic Latin + Latin-1 Supplement)
-    .replace(/[^\x20-\x7E\xA0-\xFF]/g, '')
-    // Clean up multiple spaces
-    .replace(/\s+/g, ' ')
-    .trim();
-}
 
 /**
  * Helper function to get text label for activity category

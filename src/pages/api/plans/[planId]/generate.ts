@@ -3,10 +3,9 @@ import { z } from "zod";
 import {
   AppError,
   ForbiddenError,
-  NotFoundError,
   ExternalServiceError,
+  ConflictError,
 } from "@/lib/errors/app-error";
-import type { FixedPointDto } from "@/types";
 import { getPlanById, updatePlan } from "@/lib/services/plan.service";
 import { OpenRouterService } from "@/lib/services/openrouter.service";
 import { logger } from "@/lib/utils/logger";
@@ -17,7 +16,11 @@ export const prerender = false;
 
 // Define the schema for the AI's structured response
 const aiTimelineEventSchema = z.object({
-  time: z.string().describe("The time of the event in 24-hour HH:mm format (e.g., 18:00, not 6:00 PM)."),
+  time: z
+    .string()
+    .describe(
+      "The time of the event in 24-hour HH:mm format (e.g., 18:00, not 6:00 PM).",
+    ),
   activity: z.string().describe("A short, descriptive title for the activity."),
   category: z
     .enum([
@@ -38,7 +41,13 @@ const aiTimelineEventSchema = z.object({
     .string()
     .nullable()
     .describe(
-      "An estimated cost, including currency symbol (e.g., '€18', 'Free').",
+      "An estimated cost as a numeric string WITHOUT currency symbol (e.g., '18', '0' for free, or null).",
+    ),
+  estimated_duration: z
+    .string()
+    .nullable()
+    .describe(
+      "An estimated duration for the activity (e.g., '2 hours', '30 minutes').",
     ),
 });
 
@@ -51,11 +60,19 @@ const aiDayPlanSchema = z.object({
     .describe("An array of activities for the day."),
 });
 
-const aiGeneratedContentSchema = z.object({
+// Schema for a successful plan generation
+const aiSuccessResponseSchema = z.object({
+  status: z.literal("success"),
   summary: z
     .string()
     .describe(
       "A brief, engaging summary of the entire trip, highlighting the key experiences.",
+    ),
+  currency: z
+    .string()
+    .length(3)
+    .describe(
+      "The ISO 4217 currency code for all monetary values in the plan (e.g., 'EUR', 'PLN', 'USD').",
     ),
   itinerary: z.object({
     destination: z.string(),
@@ -68,6 +85,23 @@ const aiGeneratedContentSchema = z.object({
       .describe("An array of daily plans, one for each day of the trip."),
   }),
 });
+
+// Schema for when the AI detects an error in the user's request
+const aiErrorResponseSchema = z.object({
+  status: z.literal("error"),
+  error_type: z
+    .enum(["unrealistic_plan", "invalid_location"])
+    .describe("The type of error detected."),
+  error_message: z
+    .string()
+    .describe("A user-friendly message explaining the error."),
+});
+
+// Discriminated union to handle both success and error cases
+const aiGeneratedContentSchema = z.discriminatedUnion("status", [
+  aiSuccessResponseSchema,
+  aiErrorResponseSchema,
+]);
 
 /**
  * Endpoint to generate a detailed travel plan using AI.
@@ -106,7 +140,7 @@ export const POST: APIRoute = async ({ params, locals }) => {
     // 3. Fetch Plan Data
     const plan = await getPlanById(supabase, planId, user.id);
     if (plan.status !== "draft") {
-      throw new AppError("This plan has already been generated.", 409);
+      throw new ConflictError("This plan has already been generated.");
     }
 
     // Validate that required dates are present
@@ -125,34 +159,59 @@ export const POST: APIRoute = async ({ params, locals }) => {
 
 
     // 3. Construct the Prompts for the AI
+    const language = import.meta.env.APP_DEFAULT_LANGUAGE || "Polish";
     const systemPrompt = `
 You are an expert travel planner AI. Your task is to generate a detailed, structured travel itinerary based on the user's plan details.
+All text in the response, such as summaries, descriptions, and activity titles, must be in ${language}. The JSON structure and keys must remain in English as specified in the schema.
 The response MUST be a single JSON object and nothing else. Do not include any introductory text, markdown formatting, or explanations.
 
-The final JSON object MUST have the following root structure. It is critical that you include the "summary" field at the top level.
-{
-  "summary": "A brief, engaging summary of the entire trip, highlighting the key experiences.",
-  "itinerary": {
-    "destination": "...",
-    "dates": { "start": "...", "end": "..." },
-    "days": [
-      {
-        "date": "YYYY-MM-DD",
-        "activities": [
+**VERY IMPORTANT: First, you must validate the user's request.**
+1.  **Check for Real Locations**: Verify if the destination is a real, plannable location. If it seems fake, nonsensical, or too broad (e.g., "Europe"), you must return an error.
+2.  **Check for Realistic Plans**: Assess if the plan is realistically achievable in the given timeframe. For example, a trip to "see all of Spain in 3 days" is not realistic. If the plan is not feasible, you must return an error.
+
+**CURRENCY REQUIREMENTS:**
+- You MUST determine the correct local currency for the destination based on the country/region.
+- Use the ISO 4217 three-letter currency code (e.g., "EUR" for Eurozone countries, "USD" for USA, "GBP" for UK, "JPY" for Japan, "PLN" for Poland, "CZK" for Czech Republic, etc.).
+- All price estimates should be in the LOCAL currency of the destination, provided as numeric strings WITHOUT currency symbols.
+- For free activities, use "0" as the price.
+
+**Response Structure:**
+
+*   **If the plan is valid and realistic**, respond with the following JSON structure. IMPORTANT: All times MUST be in 24-hour format (e.g., 09:00, 18:00).
+    \`\`\`json
+    {
+      "status": "success",
+      "summary": "A brief, engaging summary of the entire trip, highlighting the key experiences.",
+      "currency": "ISO 4217 currency code for the destination (e.g., EUR, USD, GBP, PLN, JPY, etc.)",
+      "itinerary": {
+        "destination": "...",
+        "dates": { "start": "...", "end": "..." },
+        "days": [
           {
-            "time": "HH:mm (24-hour format, e.g., 18:00, NOT 6:00 PM)",
-            "activity": "Activity Title",
-            "category": "history | food | sport | nature | culture | transport | accommodation | other",
-            "description": "Detailed description of the activity.",
-            "estimated_price": "e.g., '€18', 'Free', or null"
+            "date": "YYYY-MM-DD",
+            "activities": [
+              {
+                "time": "HH:mm (24-hour format, e.g., 18:00, NOT 6:00 PM)",
+                "activity": "Activity Title",
+                "category": "history | food | sport | nature | culture | transport | accommodation | other",
+                "description": "Detailed description of the activity.",
+                "estimated_price": "e.g., '18', '0' (for free), or null (numeric value as string, WITHOUT currency symbol)",
+                "estimated_duration": "e.g., '2 hours', '30 minutes', or null"
+              }
+            ]
           }
         ]
       }
-    ]
-  }
-}
-
-IMPORTANT: All times MUST be in 24-hour format (e.g., 09:00, 14:30, 18:00). NEVER use AM/PM format (e.g., NOT 9:00 AM, 2:30 PM, 6:00 PM).
+    }
+    \`\`\`
+*   **If the plan is invalid or unrealistic**, respond with this exact JSON structure:
+    \`\`\`json
+    {
+      "status": "error",
+      "error_type": "invalid_location" | "unrealistic_plan",
+      "error_message": "A clear, user-friendly explanation of why the plan could not be generated."
+    }
+    \`\`\`
 
 Key requirements for the plan:
 - Destination: ${plan.destination}
@@ -179,9 +238,15 @@ Please generate the travel plan now based on the provided details. Ensure the ou
       responseSchema: aiGeneratedContentSchema,
     });
 
-    // 5. Transform AI response for database storage
+    // 5. Handle AI Response (Success or Error)
+    if (generatedContent.status === "error") {
+      throw new AppError(generatedContent.error_message, 400);
+    }
+
+    // 6. Transform AI response for database storage
     const contentForDb = {
       summary: generatedContent.summary,
+      currency: generatedContent.currency,
       days: generatedContent.itinerary.days.map((day) => ({
         date: day.date,
         // The database expects an 'items' array, not 'activities'
@@ -201,12 +266,13 @@ Please generate the travel plan now based on the provided details. Ensure the ou
             category: activity.category,
             description: activity.description,
             estimated_price: activity.estimated_price,
+            estimated_duration: activity.estimated_duration,
           };
         }),
       })),
     };
 
-    // 6. Update Database
+    // 7. Update Database
     // This is not a true transaction, but it's a safe sequence for this feature.
     // First, decrement the user's generation credits.
     const { error: profileUpdateError } = await supabase
@@ -230,7 +296,7 @@ Please generate the travel plan now based on the provided details. Ensure the ou
 
     logger.info(`Plan ${planId} generated successfully`, { planId });
 
-    // 7. Return Response
+    // 8. Return Response
     return new Response(JSON.stringify(updatedPlan), {
       status: 200,
       headers: { "Content-Type": "application/json" },

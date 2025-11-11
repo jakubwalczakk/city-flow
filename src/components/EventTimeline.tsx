@@ -22,6 +22,7 @@ import { useState } from "react";
 
 type EventTimelineProps = {
   items: TimelineItem[];
+  currency?: string;
   onEdit?: (item: TimelineItem) => void;
   onDelete?: (itemId: string) => void;
 };
@@ -114,7 +115,7 @@ function getCategoryLabel(category: TimelineItemCategory) {
  * Displays a timeline of items for a single day.
  * Shows time, title, description, location, type, and optional estimated cost/duration for each item.
  */
-export default function EventTimeline({ items, onEdit, onDelete }: EventTimelineProps) {
+export default function EventTimeline({ items, currency = "PLN", onEdit, onDelete }: EventTimelineProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<TimelineItem | null>(null);
 
@@ -180,13 +181,6 @@ export default function EventTimeline({ items, onEdit, onDelete }: EventTimeline
                     {getCategoryIcon(item.category)}
                     {getCategoryLabel(item.category)}
                   </Badge>
-
-                  {/* Duration badge */}
-                  {item.estimated_duration && (
-                    <Badge variant="secondary" className="text-xs">
-                      {item.estimated_duration}
-                    </Badge>
-                  )}
                 </div>
 
                 {/* Title */}
@@ -235,9 +229,9 @@ export default function EventTimeline({ items, onEdit, onDelete }: EventTimeline
 
               <div className="flex-shrink-0 flex items-start gap-2">
                 {/* Estimated cost */}
-                {item.estimated_price && (
+                {item.estimated_price && item.estimated_price !== "0" && (
                   <div className="rounded-md bg-muted px-3 py-1.5 text-sm font-medium">
-                    {item.estimated_price}
+                    {item.estimated_price} {currency}
                   </div>
                 )}
 

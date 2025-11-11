@@ -38,7 +38,7 @@ export function FixedPointsStep({
   const [currentPoint, setCurrentPoint] = useState<CreateFixedPointCommand>({
     location: "",
     event_at: "",
-    event_duration: 0,
+    event_duration: null,
     description: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -70,7 +70,7 @@ export function FixedPointsStep({
     setCurrentPoint({
       location: "",
       event_at: "",
-      event_duration: 0,
+      event_duration: null,
       description: "",
     });
     setErrors({});
@@ -194,7 +194,9 @@ export function FixedPointsStep({
               onChange={(e) =>
                 setCurrentPoint({
                   ...currentPoint,
-                  event_duration: e.target.value ? parseInt(e.target.value, 10) : 0,
+                  event_duration: e.target.value
+                    ? parseInt(e.target.value, 10)
+                    : null,
                 })
               }
               placeholder="np. 120"
