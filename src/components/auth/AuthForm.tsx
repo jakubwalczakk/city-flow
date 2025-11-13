@@ -19,6 +19,7 @@ import {
   type LoginFormData,
   type RegisterFormData,
 } from "@/lib/schemas/auth.schema";
+import { supabaseClient } from "@/db/supabase.client";
 
 type AuthFormProps = {
   mode: "login" | "register";
@@ -52,37 +53,68 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
     setSuccess(null);
 
     try {
-      // TODO: Implement Supabase authentication
-      // For login: await supabase.auth.signInWithPassword({ email, password })
-      // For register: await supabase.auth.signUp({ email, password })
-
-      console.log("Auth form submitted:", { mode, data });
-
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Mock success
       if (isLogin) {
-        setSuccess("Logowanie pomyślne! Przekierowywanie...");
-        // TODO: Redirect to /dashboard
-        setTimeout(() => {
-          window.location.href = "/plans";
-        }, 1500);
+        // Login with email and password
+        const { data: authData, error: authError } =
+          await supabaseClient.auth.signInWithPassword({
+            email: data.email,
+            password: data.password,
+          });
+
+        if (authError) throw authError;
+
+        if (authData.user) {
+          setSuccess("Logowanie pomyślne! Przekierowywanie...");
+          // Use replace to force full page reload with new cookies
+          setTimeout(() => {
+            window.location.replace("/plans");
+          }, 500);
+        }
       } else {
-        setSuccess(
-          "Konto zostało utworzone! Sprawdź swoją skrzynkę email w celu weryfikacji."
-        );
-        // TODO: Optionally redirect to /dashboard or show verification message
+        // Register new user
+        const { data: authData, error: authError } =
+          await supabaseClient.auth.signUp({
+            email: data.email,
+            password: data.password,
+            options: {
+              // Disable email verification for MVP
+              emailRedirectTo: undefined,
+              data: {
+                email_confirmed: true,
+              },
+            },
+          });
+
+        if (authError) throw authError;
+
+        if (authData.user) {
+          setSuccess("Konto zostało utworzone! Przekierowywanie...");
+          // Use replace to force full page reload with new cookies
+          setTimeout(() => {
+            window.location.replace("/plans");
+          }, 500);
+        }
       }
 
       onSuccess?.();
     } catch (err) {
-      // TODO: Handle Supabase errors properly
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Wystąpił błąd podczas przetwarzania żądania"
-      );
+      // Handle Supabase authentication errors
+      if (err && typeof err === "object" && "message" in err) {
+        const errorMessage = err.message as string;
+        
+        // Provide user-friendly error messages
+        if (errorMessage.includes("Invalid login credentials")) {
+          setError("Nieprawidłowy email lub hasło");
+        } else if (errorMessage.includes("User already registered")) {
+          setError("Użytkownik z tym adresem email już istnieje");
+        } else if (errorMessage.includes("Email not confirmed")) {
+          setError("Potwierdź swój adres email przed zalogowaniem");
+        } else {
+          setError(errorMessage);
+        }
+      } else {
+        setError("Wystąpił błąd podczas przetwarzania żądania");
+      }
     } finally {
       setIsLoading(false);
     }

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, AlertCircle } from "lucide-react";
+import { supabaseClient } from "@/db/supabase.client";
 
 type GoogleAuthButtonProps = {
   mode?: "login" | "register";
@@ -20,21 +21,17 @@ export function GoogleAuthButton({ mode = "login" }: GoogleAuthButtonProps) {
     setError(null);
 
     try {
-      // TODO: Implement Supabase Google OAuth
-      // await supabase.auth.signInWithOAuth({
-      //   provider: 'google',
-      //   options: {
-      //     redirectTo: `${window.location.origin}/dashboard`
-      //   }
-      // })
+      const { error } = await supabaseClient.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/plans`,
+        },
+      });
 
-      console.log("Google auth initiated");
+      if (error) throw error;
 
-      // Simulate OAuth redirect
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Mock redirect - in production, Supabase handles this automatically
-      // window.location.href = 'https://accounts.google.com/...';
+      // Note: User will be redirected to Google OAuth page
+      // After successful auth, they'll return to /plans
     } catch (err) {
       setError(
         err instanceof Error

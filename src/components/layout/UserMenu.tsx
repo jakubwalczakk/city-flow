@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -7,49 +8,42 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { User, LogOut, Loader2 } from "lucide-react";
+import { supabaseClient } from "@/db/supabase.client";
 
 type UserMenuProps = {
-  userEmail?: string;
+  userEmail: string;
 };
 
 /**
- * User menu dropdown component for authenticated users.
- * Displays user avatar, profile link, and logout option.
+ * User menu component for authenticated users
+ * Displays user avatar, profile link, and logout button
  */
 export function UserMenu({ userEmail }: UserMenuProps) {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-
-  // Get user initials from email
-  const getInitials = (email?: string) => {
-    if (!email) return "U";
-    return email.charAt(0).toUpperCase();
-  };
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
 
     try {
-      // TODO: Implement Supabase logout
-      // await supabase.auth.signOut()
+      const { error } = await supabaseClient.auth.signOut();
 
-      console.log("User logged out");
+      if (error) throw error;
 
-      // Simulate logout
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
-      // Redirect to home
+      // Redirect to home page after logout
       window.location.href = "/";
-    } catch (error) {
-      console.error("Logout error:", error);
+    } catch (err) {
       setIsLoggingOut(false);
+      // Still redirect even if there's an error
+      window.location.href = "/";
     }
   };
 
-  const handleProfileClick = () => {
-    window.location.href = "/profile";
+  // Get user initials for avatar
+  const getInitials = (email: string) => {
+    const name = email.split("@")[0];
+    return name.substring(0, 2).toUpperCase();
   };
 
   return (
@@ -67,17 +61,17 @@ export function UserMenu({ userEmail }: UserMenuProps) {
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">Moje konto</p>
-            {userEmail && (
-              <p className="text-xs leading-none text-muted-foreground">
-                {userEmail}
-              </p>
-            )}
+            <p className="text-xs leading-none text-muted-foreground">
+              {userEmail}
+            </p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleProfileClick} className="cursor-pointer">
-          <User className="mr-2 h-4 w-4" />
-          <span>Profil</span>
+        <DropdownMenuItem asChild>
+          <a href="/profile" className="cursor-pointer">
+            <User className="mr-2 h-4 w-4" />
+            <span>Profil</span>
+          </a>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
@@ -96,4 +90,3 @@ export function UserMenu({ userEmail }: UserMenuProps) {
     </DropdownMenu>
   );
 }
-

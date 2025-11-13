@@ -10,10 +10,8 @@ interface Props {
 
 const { title = "CityFlow", showHeader = true } = Astro.props;
 
-// TODO: Get user from Astro.locals after middleware is implemented
-// const user = Astro.locals.user;
-const user = null; // Mock: null for non-authenticated, or { email: "user@example.com" } for authenticated
-
+// Get authenticated user from middleware
+const user = Astro.locals.user;
 const isAuthenticated = !!user;
 ---
 
@@ -33,7 +31,7 @@ const isAuthenticated = !!user;
           <div class="container mx-auto px-4">
             <div class="flex h-16 items-center justify-between">
               {/* Logo */}
-              <a href="/" class="text-xl font-bold tracking-tight">
+              <a href={isAuthenticated ? "/plans" : "/"} class="text-xl font-bold tracking-tight">
                 CityFlow
               </a>
 

@@ -1,8 +1,4 @@
 ---
-import MainLayout from "@/layouts/MainLayout.astro";
-import { PlansDashboard } from "@/components/PlansDashboard";
+// Redirect to plans page (middleware will handle auth)
+return Astro.redirect('/plans');
 ---
-
-<MainLayout title="Moje Plany - CityFlow">
-  <PlansDashboard client:visible />
-</MainLayout>
