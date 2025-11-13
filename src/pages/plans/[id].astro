@@ -1,5 +1,5 @@
 ---
-import Layout from "@/layouts/Layout.astro";
+import MainLayout from "@/layouts/MainLayout.astro";
 import PlanDetailsView from "@/components/PlanDetailsView";
 
 // Get the plan ID from the URL params
@@ -11,8 +11,8 @@ if (!id) {
 }
 ---
 
-<Layout title="Plan Details - CityFlow">
-  <main class="container mx-auto px-4 py-8 max-w-5xl">
+<MainLayout title="Plan Details - CityFlow">
+  <div class="container mx-auto px-4 py-8 max-w-5xl">
     <PlanDetailsView planId={id} client:load />
-  </main>
-</Layout>
+  </div>
+</MainLayout>

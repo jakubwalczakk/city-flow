@@ -106,16 +106,7 @@ export const PlansDashboard = () => {
     <div className="container mx-auto px-4 py-8">
       {/* Header */}
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-4">
-          <h1 className="text-3xl font-bold tracking-tight">Moje Plany</h1>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => (window.location.href = "/profile")}
-          >
-            Profil
-          </Button>
-        </div>
+        <h1 className="text-3xl font-bold tracking-tight">Moje Plany</h1>
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
           <DialogTrigger asChild>
             <Button

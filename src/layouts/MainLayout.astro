@@ -1,0 +1,85 @@
+---
+import "../styles/global.css";
+import ToasterWrapper from "@/components/ToasterWrapper";
+import { UserMenu } from "@/components/layout/UserMenu";
+
+interface Props {
+  title?: string;
+  showHeader?: boolean;
+}
+
+const { title = "CityFlow", showHeader = true } = Astro.props;
+
+// TODO: Get user from Astro.locals after middleware is implemented
+// const user = Astro.locals.user;
+const user = null; // Mock: null for non-authenticated, or { email: "user@example.com" } for authenticated
+
+const isAuthenticated = !!user;
+---
+
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+  </head>
+  <body>
+    {
+      showHeader && (
+        <header class="border-b">
+          <div class="container mx-auto px-4">
+            <div class="flex h-16 items-center justify-between">
+              {/* Logo */}
+              <a href="/" class="text-xl font-bold tracking-tight">
+                CityFlow
+              </a>
+
+              {/* Navigation */}
+              <nav class="flex items-center gap-4">
+                {
+                  isAuthenticated ? (
+                    <UserMenu userEmail={user?.email} client:load />
+                  ) : (
+                    <>
+                      <a
+                        href="/login"
+                        class="inline-flex h-9 items-center justify-center gap-2 whitespace-nowrap rounded-md px-4 py-2 text-sm font-medium outline-none transition-all hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50"
+                      >
+                        Zaloguj się
+                      </a>
+                      <a
+                        href="/register"
+                        class="inline-flex h-9 items-center justify-center gap-2 whitespace-nowrap rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground outline-none transition-all hover:bg-primary/90"
+                      >
+                        Zarejestruj się
+                      </a>
+                    </>
+                  )
+                }
+              </nav>
+            </div>
+          </div>
+        </header>
+      )
+    }
+
+    <main>
+      <slot />
+    </main>
+
+    <ToasterWrapper client:only="react" />
+  </body>
+</html>
+
+<style>
+  html,
+  body {
+    margin: 0;
+    width: 100%;
+    min-height: 100%;
+  }
+</style>
+

@@ -78,16 +78,7 @@ export function ProfileView() {
   return (
     <div className="container mx-auto py-8 px-4 max-w-4xl">
       <div className="space-y-8">
-        <div className="flex items-center justify-between">
-          <ProfileHeader />
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => (window.location.href = "/")}
-          >
-            ← Powrót do planów
-          </Button>
-        </div>
+        <ProfileHeader />
 
         {welcomeMessage && (
           <Card className="border-primary/50 bg-primary/5">
