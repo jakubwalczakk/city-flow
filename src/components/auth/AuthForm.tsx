@@ -2,29 +2,17 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, AlertCircle } from "lucide-react";
-import {
-  loginSchema,
-  registerSchema,
-  type LoginFormData,
-  type RegisterFormData,
-} from "@/lib/schemas/auth.schema";
+import { Loader2, AlertCircle, Eye, EyeOff } from "lucide-react";
+import { loginSchema, registerSchema, type LoginFormData, type RegisterFormData } from "@/lib/schemas/auth.schema";
 import { supabaseClient } from "@/db/supabase.client";
 
-type AuthFormProps = {
+interface AuthFormProps {
   mode: "login" | "register";
   onSuccess?: () => void;
-};
+}
 
 /**
  * Unified authentication form component for login and registration.
@@ -34,6 +22,8 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const isLogin = mode === "login";
   const schema = isLogin ? loginSchema : registerSchema;
@@ -55,11 +45,10 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
     try {
       if (isLogin) {
         // Login with email and password
-        const { data: authData, error: authError } =
-          await supabaseClient.auth.signInWithPassword({
-            email: data.email,
-            password: data.password,
-          });
+        const { data: authData, error: authError } = await supabaseClient.auth.signInWithPassword({
+          email: data.email,
+          password: data.password,
+        });
 
         if (authError) throw authError;
 
@@ -71,19 +60,18 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
           }, 500);
         }
       } else {
-        // Register new user
-        const { data: authData, error: authError } =
-          await supabaseClient.auth.signUp({
-            email: data.email,
-            password: data.password,
-            options: {
-              // Disable email verification for MVP
-              emailRedirectTo: undefined,
-              data: {
-                email_confirmed: true,
-              },
+        // Register new user - Supabase will handle duplicate email errors
+        const { data: authData, error: authError } = await supabaseClient.auth.signUp({
+          email: data.email,
+          password: data.password,
+          options: {
+            // Disable email verification for MVP
+            emailRedirectTo: undefined,
+            data: {
+              email_confirmed: true,
             },
-          });
+          },
+        });
 
         if (authError) throw authError;
 
@@ -101,7 +89,6 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
       // Handle Supabase authentication errors
       if (err && typeof err === "object" && "message" in err) {
         const errorMessage = err.message as string;
-        
         // Provide user-friendly error messages
         if (errorMessage.includes("Invalid login credentials")) {
           setError("Nieprawidłowy email lub hasło");
@@ -117,6 +104,14 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
       }
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const togglePasswordVisibility = (target: "password" | "confirmPassword") => {
+    if (target === "password") {
+      setShowPassword(!showPassword);
+    } else {
+      setShowConfirmPassword(!showConfirmPassword);
     }
   };
 
@@ -144,12 +139,7 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input
-                    type="email"
-                    placeholder="twoj.email@example.com"
-                    disabled={isLoading}
-                    {...field}
-                  />
+                  <Input type="email" placeholder="twoj.email@example.com" disabled={isLoading} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -163,14 +153,26 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
               <FormItem>
                 <FormLabel>Hasło</FormLabel>
                 <FormControl>
-                  <Input
-                    type="password"
-                    placeholder={
-                      isLogin ? "Wprowadź hasło" : "Minimum 8 znaków"
-                    }
-                    disabled={isLoading}
-                    {...field}
-                  />
+                  <div className="relative">
+                    <Input
+                      type={showPassword ? "text" : "password"}
+                      placeholder={isLogin ? "Wprowadź hasło" : "Minimum 8 znaków"}
+                      disabled={isLoading}
+                      className="pr-10"
+                      {...field}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                      onClick={() => togglePasswordVisibility("password")}
+                      disabled={isLoading}
+                      aria-label={showPassword ? "Ukryj hasło" : "Pokaż hasło"}
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </Button>
+                  </div>
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -185,12 +187,26 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
                 <FormItem>
                   <FormLabel>Potwierdź hasło</FormLabel>
                   <FormControl>
-                    <Input
-                      type="password"
-                      placeholder="Powtórz hasło"
-                      disabled={isLoading}
-                      {...field}
-                    />
+                    <div className="relative">
+                      <Input
+                        type={showConfirmPassword ? "text" : "password"}
+                        placeholder="Powtórz hasło"
+                        disabled={isLoading}
+                        className="pr-10"
+                        {...field}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                        onClick={() => togglePasswordVisibility("confirmPassword")}
+                        disabled={isLoading}
+                        aria-label={showConfirmPassword ? "Ukryj hasło" : "Pokaż hasło"}
+                      >
+                        {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </Button>
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -200,10 +216,7 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
 
           {isLogin && (
             <div className="flex justify-end">
-              <a
-                href="/forgot-password"
-                className="text-sm text-primary hover:underline"
-              >
+              <a href="/forgot-password" className="text-sm text-primary hover:underline">
                 Zapomniałeś hasła?
               </a>
             </div>
