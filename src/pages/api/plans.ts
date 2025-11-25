@@ -1,11 +1,11 @@
 import type { APIRoute } from "astro";
-import { DEFAULT_USER_ID } from "@/db/supabase.client";
 import { createPlanSchema, listPlansQuerySchema } from "@/lib/schemas/plan.schema";
 import { createPlan, getPlans } from "@/lib/services/plan.service";
 import { ValidationError } from "@/lib/errors/app-error";
 import { handleApiError, successResponse } from "@/lib/utils/error-handler";
 import { logger } from "@/lib/utils/logger";
 import { ForbiddenError } from "@/lib/errors/app-error";
+import { createSupabaseServerInstance } from "@/db/supabase.client";
 
 export const prerender = false;
 
@@ -16,15 +16,22 @@ export const prerender = false;
  * Query parameters should conform to listPlansQuerySchema.
  * Returns a paginated list of plans with status 200 on success.
  */
-export const GET: APIRoute = async ({ url, locals }) => {
+export const GET: APIRoute = async ({ url, request, cookies }) => {
   try {
-    // In development, use a default user ID since we are not handling authorization yet.
-    const supabase = locals.supabase;
-    const user = { id: DEFAULT_USER_ID };
-
-    logger.debug("Received request to list plans", { userId: user.id });
-
-    // Extract and parse query parameters
+    const supabase = createSupabaseServerInstance({
+      headers: request.headers,
+      cookies,
+    });
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+    if (authError || !user) {
+      logger.warn("Unauthenticated request to list plans");
+      throw new ForbiddenError("You must be logged in to view plans.");
+    }
+    const userId = user.id;
+    logger.debug("Received request to list plans", { userId });
     const queryParams = {
       statuses: url.searchParams.get("statuses"),
       sort_by: url.searchParams.get("sort_by"),
@@ -32,28 +39,22 @@ export const GET: APIRoute = async ({ url, locals }) => {
       limit: url.searchParams.get("limit"),
       offset: url.searchParams.get("offset"),
     };
-
-    // Validate query parameters
     const validation = listPlansQuerySchema.safeParse(queryParams);
-
     if (!validation.success) {
       logger.debug("Query parameter validation failed", {
         errors: validation.error.flatten(),
       });
       throw new ValidationError("Invalid query parameters", validation.error.flatten());
     }
-
-    // Fetch the plans
-    const result = await getPlans(supabase, user.id, {
+    const result = await getPlans(supabase, userId, {
       ...validation.data,
       status: validation.data.statuses,
     });
-
     return successResponse(result, 200);
   } catch (error) {
     return handleApiError(error, {
       endpoint: "GET /api/plans",
-      userId: DEFAULT_USER_ID,
+      userId: "unauthenticated",
     });
   }
 };
@@ -65,19 +66,22 @@ export const GET: APIRoute = async ({ url, locals }) => {
  * Request body should conform to CreatePlanCommand schema.
  * Returns the created plan with status 201 on success.
  */
-export const POST: APIRoute = async ({ request, locals }) => {
-  const { supabase } = locals;
-  // TODO: Replace with actual user from session once auth is implemented
-  const user = { id: DEFAULT_USER_ID };
-
+export const POST: APIRoute = async ({ request, cookies }) => {
+  const supabase = createSupabaseServerInstance({
+    headers: request.headers,
+    cookies,
+  });
   try {
-    if (!user) {
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+    if (authError || !user) {
+      logger.warn("Unauthenticated request to create plan");
       throw new ForbiddenError("You must be logged in to create a plan.");
     }
-
-    logger.debug("Received request to create plan", { userId: user.id });
-
-    // Parse request body
+    const userId = user.id;
+    logger.debug("Received request to create plan", { userId });
     let body: unknown;
     try {
       body = await request.json();
@@ -87,25 +91,19 @@ export const POST: APIRoute = async ({ request, locals }) => {
       });
       throw new ValidationError("Invalid JSON in request body");
     }
-
-    // Validate request body
     const validation = createPlanSchema.safeParse(body);
-
     if (!validation.success) {
       logger.debug("Request validation failed", {
         errors: validation.error.flatten(),
       });
       throw new ValidationError("Validation failed", validation.error.flatten());
     }
-
-    // Create the plan
-    const plan = await createPlan(supabase, validation.data, user.id);
-
+    const plan = await createPlan(supabase, validation.data, userId);
     return successResponse(plan, 201);
   } catch (error) {
     return handleApiError(error, {
       endpoint: "POST /api/plans",
-      userId: DEFAULT_USER_ID,
+      userId: "unauthenticated",
     });
   }
 };
