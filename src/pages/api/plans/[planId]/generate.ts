@@ -1,12 +1,8 @@
 import type { APIRoute } from "astro";
 import { z } from "zod";
-import {
-  AppError,
-  ForbiddenError,
-  ExternalServiceError,
-  ConflictError,
-} from "@/lib/errors/app-error";
+import { AppError, ForbiddenError, ExternalServiceError, ConflictError } from "@/lib/errors/app-error";
 import { getPlanById, updatePlan } from "@/lib/services/plan.service";
+import type { UpdatePlanCommand } from "@/types";
 import { OpenRouterService } from "@/lib/services/openrouter.service";
 import { logger } from "@/lib/utils/logger";
 import { handleApiError } from "@/lib/utils/error-handler";
@@ -16,92 +12,54 @@ export const prerender = false;
 
 // Define the schema for the AI's structured response
 const aiTimelineEventSchema = z.object({
-  time: z
-    .string()
-    .describe(
-      "The time of the event in 24-hour HH:mm format (e.g., 18:00, not 6:00 PM).",
-    ),
+  time: z.string().describe("The time of the event in 24-hour HH:mm format (e.g., 18:00, not 6:00 PM)."),
   activity: z.string().describe("A short, descriptive title for the activity."),
   category: z
-    .enum([
-      "history",
-      "food",
-      "sport",
-      "nature",
-      "culture",
-      "transport",
-      "accommodation",
-      "other",
-    ])
+    .enum(["history", "food", "sport", "nature", "culture", "transport", "accommodation", "other"])
     .describe("The category of the activity."),
-  description: z
-    .string()
-    .describe("A detailed description of the activity."),
+  description: z.string().describe("A detailed description of the activity."),
   estimated_price: z
     .string()
     .nullable()
-    .describe(
-      "An estimated cost as a numeric string WITHOUT currency symbol (e.g., '18', '0' for free, or null).",
-    ),
+    .describe("An estimated cost as a numeric string WITHOUT currency symbol (e.g., '18', '0' for free, or null)."),
   estimated_duration: z
     .string()
     .nullable()
-    .describe(
-      "An estimated duration for the activity (e.g., '2 hours', '30 minutes').",
-    ),
+    .describe("An estimated duration for the activity (e.g., '2 hours', '30 minutes')."),
 });
 
 const aiDayPlanSchema = z.object({
-  date: z
-    .string()
-    .describe("The date for this day's plan in YYYY-MM-DD format."),
-  activities: z
-    .array(aiTimelineEventSchema)
-    .describe("An array of activities for the day."),
+  date: z.string().describe("The date for this day's plan in YYYY-MM-DD format."),
+  activities: z.array(aiTimelineEventSchema).describe("An array of activities for the day."),
 });
 
 // Schema for a successful plan generation
 const aiSuccessResponseSchema = z.object({
   status: z.literal("success"),
-  summary: z
-    .string()
-    .describe(
-      "A brief, engaging summary of the entire trip, highlighting the key experiences.",
-    ),
+  summary: z.string().describe("A brief, engaging summary of the entire trip, highlighting the key experiences."),
   currency: z
     .string()
     .length(3)
-    .describe(
-      "The ISO 4217 currency code for all monetary values in the plan (e.g., 'EUR', 'PLN', 'USD').",
-    ),
+    .describe("The ISO 4217 currency code for all monetary values in the plan (e.g., 'EUR', 'PLN', 'USD')."),
   itinerary: z.object({
     destination: z.string(),
     dates: z.object({
       start: z.string(),
       end: z.string(),
     }),
-    days: z
-      .array(aiDayPlanSchema)
-      .describe("An array of daily plans, one for each day of the trip."),
+    days: z.array(aiDayPlanSchema).describe("An array of daily plans, one for each day of the trip."),
   }),
 });
 
 // Schema for when the AI detects an error in the user's request
 const aiErrorResponseSchema = z.object({
   status: z.literal("error"),
-  error_type: z
-    .enum(["unrealistic_plan", "invalid_location"])
-    .describe("The type of error detected."),
-  error_message: z
-    .string()
-    .describe("A user-friendly message explaining the error."),
+  error_type: z.enum(["unrealistic_plan", "invalid_location"]).describe("The type of error detected."),
+  error_message: z.string().describe("A user-friendly message explaining the error."),
 });
 
 // Discriminated union to handle both success and error cases
-const aiGeneratedContentSchema = z.discriminatedUnion("status", [
-  aiSuccessResponseSchema,
-  aiErrorResponseSchema,
-]);
+const aiGeneratedContentSchema = z.discriminatedUnion("status", [aiSuccessResponseSchema, aiErrorResponseSchema]);
 
 /**
  * Endpoint to generate a detailed travel plan using AI.
@@ -149,14 +107,16 @@ export const POST: APIRoute = async ({ params, locals }) => {
     }
 
     const { data: fixedPoints, error: fixedPointsError } = await supabase
-        .from("fixed_points")
-        .select("*")
-        .eq("plan_id", planId);
+      .from("fixed_points")
+      .select("*")
+      .eq("plan_id", planId);
 
     if (fixedPointsError) {
-        throw new ExternalServiceError("Failed to retrieve fixed points for the plan.", new Error(fixedPointsError.message));
+      throw new ExternalServiceError(
+        "Failed to retrieve fixed points for the plan.",
+        new Error(fixedPointsError.message)
+      );
     }
-
 
     // 3. Construct the Prompts for the AI
     const language = import.meta.env.APP_DEFAULT_LANGUAGE || "Polish";
@@ -215,11 +175,11 @@ The response MUST be a single JSON object and nothing else. Do not include any i
 
 Key requirements for the plan:
 - Destination: ${plan.destination}
-- Start Date & Time: ${new Date(plan.start_date).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short', hour12: false })}
-- End Date & Time: ${new Date(plan.end_date).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short', hour12: false })}
+- Start Date & Time: ${new Date(plan.start_date).toLocaleString("en-US", { dateStyle: "full", timeStyle: "short", hour12: false })}
+- End Date & Time: ${new Date(plan.end_date).toLocaleString("en-US", { dateStyle: "full", timeStyle: "short", hour12: false })}
 - User Notes: ${plan.notes || "No special notes provided."}
 - Fixed Points: The user has scheduled the following non-negotiable events. You MUST incorporate them into the plan at the specified times.
-${fixedPoints && fixedPoints.length > 0 ? fixedPoints.map((fp) => `- ${new Date(fp.event_at).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short', hour12: false })}: ${fp.location} - ${fp.description || "No description"}`).join("\n") : "No fixed points scheduled."}
+${fixedPoints && fixedPoints.length > 0 ? fixedPoints.map((fp) => `- ${new Date(fp.event_at).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short", hour12: false })}: ${fp.location} - ${fp.description || "No description"}`).join("\n") : "No fixed points scheduled."}
 
 Generate a plan that is logical, engaging, and takes into account travel times between locations. Be creative and suggest interesting activities, restaurants, and sights.
 `;
@@ -252,10 +212,9 @@ Please generate the travel plan now based on the provided details. Ensure the ou
         // The database expects an 'items' array, not 'activities'
         items: day.activities.map((activity) => {
           // Map category to type for database validation
-          const type = activity.category === 'food' ? 'meal' : 
-                       activity.category === 'transport' ? 'transport' : 
-                       'activity';
-          
+          const type =
+            activity.category === "food" ? "meal" : activity.category === "transport" ? "transport" : "activity";
+
           return {
             // Add required fields for the DB check constraint
             id: crypto.randomUUID(),
@@ -282,16 +241,13 @@ Please generate the travel plan now based on the provided details. Ensure the ou
 
     if (profileUpdateError) {
       // If this fails, the plan remains a draft, and the user can try again.
-      throw new ExternalServiceError(
-        "Failed to update user credits.",
-        new Error(profileUpdateError.message),
-      );
+      throw new ExternalServiceError("Failed to update user credits.", new Error(profileUpdateError.message));
     }
 
     // Then, update the plan with the generated content.
     const updatedPlan = await updatePlan(supabase, planId, {
       status: "generated",
-      generated_content: contentForDb as any, // Cast to any to match Supabase type
+      generated_content: contentForDb as UpdatePlanCommand["generated_content"],
     });
 
     logger.info(`Plan ${planId} generated successfully`, { planId });
@@ -301,7 +257,6 @@ Please generate the travel plan now based on the provided details. Ensure the ou
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
-
   } catch (error) {
     logger.error("Error during plan generation", { error });
     return handleApiError(error, {

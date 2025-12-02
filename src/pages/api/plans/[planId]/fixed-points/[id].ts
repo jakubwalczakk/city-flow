@@ -1,10 +1,7 @@
 import type { APIRoute } from "astro";
 import { DEFAULT_USER_ID } from "@/db/supabase.client";
 import { updateFixedPointSchema } from "@/lib/schemas/fixed-point.schema";
-import {
-  updateFixedPoint,
-  deleteFixedPoint,
-} from "@/lib/services/fixed-point.service";
+import { updateFixedPoint, deleteFixedPoint } from "@/lib/services/fixed-point.service";
 import { ValidationError } from "@/lib/errors/app-error";
 import { handleApiError, successResponse } from "@/lib/utils/error-handler";
 import { logger } from "@/lib/utils/logger";
@@ -38,10 +35,7 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
       body = await request.json();
     } catch (parseError) {
       logger.warn("Failed to parse request body", {
-        error:
-          parseError instanceof Error
-            ? parseError.message
-            : String(parseError),
+        error: parseError instanceof Error ? parseError.message : String(parseError),
       });
       throw new ValidationError("Invalid JSON in request body");
     }
@@ -53,20 +47,11 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
       logger.debug("Request validation failed", {
         errors: validation.error.flatten(),
       });
-      throw new ValidationError(
-        "Validation failed",
-        validation.error.flatten()
-      );
+      throw new ValidationError("Validation failed", validation.error.flatten());
     }
 
     // Update the fixed point
-    const fixedPoint = await updateFixedPoint(
-      supabase,
-      planId,
-      id,
-      validation.data,
-      user.id
-    );
+    const fixedPoint = await updateFixedPoint(supabase, planId, id, validation.data, user.id);
 
     return successResponse(fixedPoint, 200);
   } catch (error) {
@@ -112,4 +97,3 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
 };
 
 export const prerender = false;
-

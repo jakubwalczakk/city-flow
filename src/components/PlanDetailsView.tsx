@@ -6,16 +6,16 @@ import GeneratedPlanView from "@/components/GeneratedPlanView";
 import ActivityForm from "@/components/ActivityForm";
 import type { TimelineItem } from "@/types";
 
-type PlanDetailsViewProps = {
+interface PlanDetailsViewProps {
   planId: string;
-};
+}
 
-type ActivityFormState = {
+interface ActivityFormState {
   isOpen: boolean;
   mode: "add" | "edit";
   date: string | null;
   item: TimelineItem | null;
-};
+}
 
 /**
  * Main component for the plan details view.
@@ -54,7 +54,6 @@ export default function PlanDetailsView({ planId }: PlanDetailsViewProps) {
     try {
       await deleteActivity(date, itemId);
     } catch (error) {
-      console.error("Failed to delete activity:", error);
       alert(error instanceof Error ? error.message : "Failed to delete activity");
     }
   };
@@ -67,7 +66,6 @@ export default function PlanDetailsView({ planId }: PlanDetailsViewProps) {
         await updateActivity(activityFormState.date, activityFormState.item.id, activity);
       }
     } catch (error) {
-      console.error("Failed to save activity:", error);
       alert(error instanceof Error ? error.message : "Failed to save activity");
       throw error; // Re-throw to prevent form from closing
     }
@@ -134,9 +132,7 @@ export default function PlanDetailsView({ planId }: PlanDetailsViewProps) {
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center max-w-md">
           <h2 className="text-xl font-semibold mb-2">Plan nie został znaleziony</h2>
-          <p className="text-muted-foreground mb-6">
-            Szukany plan nie istnieje lub został usunięty.
-          </p>
+          <p className="text-muted-foreground mb-6">Szukany plan nie istnieje lub został usunięty.</p>
           <a
             href="/plans"
             className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
@@ -156,18 +152,8 @@ export default function PlanDetailsView({ planId }: PlanDetailsViewProps) {
           href="/plans"
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
-          <svg
-            className="h-4 w-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 19l-7-7 7-7"
-            />
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
           Powrót do planów
         </a>
@@ -201,4 +187,3 @@ export default function PlanDetailsView({ planId }: PlanDetailsViewProps) {
     </div>
   );
 }
-

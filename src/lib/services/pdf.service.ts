@@ -1,13 +1,8 @@
-import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
+import { PDFDocument, rgb } from "pdf-lib";
 import fontkit from "@pdf-lib/fontkit";
 import fs from "fs/promises";
 import path from "path";
-import type {
-  PlanDetailsDto,
-  GeneratedContentViewModel,
-  DayPlan,
-  TimelineItem,
-} from "@/types";
+import type { PlanDetailsDto, GeneratedContentViewModel } from "@/types";
 import { logger } from "@/lib/utils/logger";
 
 /**
@@ -17,25 +12,19 @@ import { logger } from "@/lib/utils/logger";
  * @returns A Buffer containing the PDF data
  * @throws Error if PDF generation fails
  */
-export const generatePlanPdf = async (
-  plan: PlanDetailsDto
-): Promise<Buffer> => {
+export const generatePlanPdf = async (plan: PlanDetailsDto): Promise<Buffer> => {
   logger.debug("Starting PDF generation", { planId: plan.id });
 
   try {
     // Create a new PDF document
     const pdfDoc = await PDFDocument.create();
-    
+
     // Register fontkit to enable custom font embedding
     pdfDoc.registerFontkit(fontkit);
 
     // Load font data from file
-    const fontBytes = await fs.readFile(
-      path.resolve(process.cwd(), "src/assets/fonts/Lato-Regular.ttf")
-    );
-    const fontBoldBytes = await fs.readFile(
-      path.resolve(process.cwd(), "src/assets/fonts/Lato-Bold.ttf")
-    );
+    const fontBytes = await fs.readFile(path.resolve(process.cwd(), "src/assets/fonts/Lato-Regular.ttf"));
+    const fontBoldBytes = await fs.readFile(path.resolve(process.cwd(), "src/assets/fonts/Lato-Bold.ttf"));
 
     // Embed fonts
     const lato = await pdfDoc.embedFont(fontBytes);
@@ -43,7 +32,6 @@ export const generatePlanPdf = async (
 
     // Constants for layout
     const MARGIN = 50;
-    const LINE_HEIGHT = 20;
     const TITLE_SIZE = 24;
     const HEADING_SIZE = 16;
     const BODY_SIZE = 11;
@@ -51,7 +39,7 @@ export const generatePlanPdf = async (
 
     // Add first page
     let page = pdfDoc.addPage();
-    const { width, height } = page.getSize();
+    const { height } = page.getSize();
     let yPosition = height - MARGIN;
 
     // Helper function to add a new page if needed
@@ -63,12 +51,7 @@ export const generatePlanPdf = async (
     };
 
     // Helper function to draw text (sanitizes for PDF compatibility)
-    const drawText = (
-      text: string,
-      size: number,
-      font: typeof lato | typeof latoBold,
-      color = rgb(0, 0, 0)
-    ) => {
+    const drawText = (text: string, size: number, font: typeof lato | typeof latoBold, color = rgb(0, 0, 0)) => {
       page.drawText(text, {
         x: MARGIN,
         y: yPosition,
@@ -85,11 +68,11 @@ export const generatePlanPdf = async (
 
     // Basic Info
     drawText(`Cel podróży: ${plan.destination}`, BODY_SIZE, lato);
-    
-    const startDate = new Date(plan.start_date).toLocaleDateString('pl-PL');
-    const endDate = new Date(plan.end_date).toLocaleDateString('pl-PL');
+
+    const startDate = new Date(plan.start_date).toLocaleDateString("pl-PL");
+    const endDate = new Date(plan.end_date).toLocaleDateString("pl-PL");
     drawText(`Daty: ${startDate} - ${endDate}`, BODY_SIZE, lato);
-    
+
     if (plan.notes) {
       yPosition -= 5;
       drawText("Notatki:", BODY_SIZE, latoBold);
@@ -109,7 +92,7 @@ export const generatePlanPdf = async (
         ensureSpace(100);
         drawText("Ważne uwagi:", HEADING_SIZE, latoBold, rgb(0.8, 0.4, 0));
         yPosition += 5;
-        
+
         for (const warning of generatedContent.warnings) {
           ensureSpace(40);
           const lines = splitTextIntoLines(warning, 80);
@@ -123,13 +106,13 @@ export const generatePlanPdf = async (
       // Iterate through each day
       for (const day of generatedContent.days) {
         ensureSpace(60);
-        
+
         // Day heading
-        const dayDate = new Date(day.date).toLocaleDateString('pl-PL', {
-          weekday: 'long',
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
+        const dayDate = new Date(day.date).toLocaleDateString("pl-PL", {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
         });
         drawText(dayDate, HEADING_SIZE, latoBold, rgb(0.2, 0.4, 0.8));
         yPosition -= 5;
@@ -144,7 +127,7 @@ export const generatePlanPdf = async (
         // Draw each item
         for (const item of day.items) {
           ensureSpace(80);
-          
+
           // Item time and title
           const timePrefix = item.time ? `${item.time} - ` : "  ";
           const categoryLabel = getCategoryLabel(item.category);
@@ -166,7 +149,7 @@ export const generatePlanPdf = async (
           }
 
           if (item.estimated_price && item.estimated_price !== "0") {
-            const currency = generatedContent?.currency ?? 'PLN';
+            const currency = generatedContent?.currency ?? "PLN";
             ensureSpace(20);
             drawText(`  Koszt: ${item.estimated_price} ${currency}`, SMALL_SIZE, lato);
           }
@@ -182,7 +165,7 @@ export const generatePlanPdf = async (
         ensureSpace(100);
         drawText("Modyfikacje AI:", HEADING_SIZE, latoBold, rgb(0.3, 0.6, 0.3));
         yPosition += 5;
-        
+
         for (const modification of generatedContent.modifications) {
           ensureSpace(40);
           const lines = splitTextIntoLines(modification, 80);
@@ -197,8 +180,7 @@ export const generatePlanPdf = async (
     const pages = pdfDoc.getPages();
     for (let i = 0; i < pages.length; i++) {
       const currentPage = pages[i];
-      const { height } = currentPage.getSize();
-      
+
       const footerText = `Wygenerowano przez CityFlow - Strona ${i + 1} z ${pages.length}`;
       currentPage.drawText(footerText, {
         x: MARGIN,
@@ -263,7 +245,6 @@ function splitTextIntoLines(text: string, maxLength: number): string[] {
   }
 
   if (currentLine) lines.push(currentLine);
-  
+
   return lines;
 }
-

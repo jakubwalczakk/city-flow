@@ -20,11 +20,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import ExportPlanButton from "@/components/plan-actions/ExportPlanButton";
 
-type PlanHeaderProps = {
+interface PlanHeaderProps {
   plan: PlanDetailsDto;
   onUpdate: (newName: string) => Promise<void>;
   onDelete: () => Promise<void>;
-};
+}
 
 /**
  * Header component for the plan details view.
@@ -46,8 +46,7 @@ export default function PlanHeader({ plan, onUpdate, onDelete }: PlanHeaderProps
     try {
       await onUpdate(editedName);
       setIsEditing(false);
-    } catch (error) {
-      console.error("Failed to update plan name:", error);
+    } catch {
       // Reset to original name on error
       setEditedName(plan.name);
     } finally {
@@ -66,8 +65,7 @@ export default function PlanHeader({ plan, onUpdate, onDelete }: PlanHeaderProps
       await onDelete();
       // Redirect to plans list after successful deletion
       window.location.href = "/plans";
-    } catch (error) {
-      console.error("Failed to delete plan:", error);
+    } catch {
       setIsDeleting(false);
       setShowDeleteDialog(false);
     }
@@ -95,7 +93,11 @@ export default function PlanHeader({ plan, onUpdate, onDelete }: PlanHeaderProps
       return `Od ${formatDate(plan.start_date)}`;
     }
 
-    return `Do ${formatDate(plan.end_date!)}`;
+    if (plan.end_date) {
+      return `Do ${formatDate(plan.end_date)}`;
+    }
+
+    return "";
   };
 
   return (
@@ -109,7 +111,6 @@ export default function PlanHeader({ plan, onUpdate, onDelete }: PlanHeaderProps
                 onChange={(e) => setEditedName(e.target.value)}
                 placeholder="Plan name"
                 className="text-2xl font-bold h-auto py-2"
-                autoFocus
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     handleSave();
@@ -119,11 +120,7 @@ export default function PlanHeader({ plan, onUpdate, onDelete }: PlanHeaderProps
                 }}
               />
               <div className="flex gap-2">
-                <Button
-                  onClick={handleSave}
-                  disabled={!editedName.trim() || isSaving}
-                  size="sm"
-                >
+                <Button onClick={handleSave} disabled={!editedName.trim() || isSaving} size="sm">
                   {isSaving ? "Zapisywanie..." : "Zapisz"}
                 </Button>
                 <Button onClick={handleCancel} variant="outline" size="sm" disabled={isSaving}>
@@ -139,12 +136,7 @@ export default function PlanHeader({ plan, onUpdate, onDelete }: PlanHeaderProps
                 className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-muted rounded"
                 aria-label="Edit plan name"
               >
-                <svg
-                  className="h-5 w-5 text-muted-foreground"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
+                <svg className="h-5 w-5 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -158,12 +150,7 @@ export default function PlanHeader({ plan, onUpdate, onDelete }: PlanHeaderProps
 
           <div className="mt-2 flex items-center gap-4 text-sm text-muted-foreground">
             <div className="flex items-center gap-1">
-              <svg
-                className="h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -174,12 +161,7 @@ export default function PlanHeader({ plan, onUpdate, onDelete }: PlanHeaderProps
               <span>{formatDateRange()}</span>
             </div>
             <div className="flex items-center gap-1">
-              <svg
-                className="h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -200,51 +182,39 @@ export default function PlanHeader({ plan, onUpdate, onDelete }: PlanHeaderProps
 
         <div className="flex items-center gap-2">
           {/* Export button - only show for generated plans */}
-          {plan.status === "generated" && (
-            <ExportPlanButton planId={plan.id} planName={plan.name} />
-          )}
+          {plan.status === "generated" && <ExportPlanButton planId={plan.id} planName={plan.name} />}
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="icon">
-              <svg
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
+                  />
+                </svg>
+                <span className="sr-only">Open menu</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                className="text-destructive focus:text-destructive"
+                onClick={() => setShowDeleteDialog(true)}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
-                />
-              </svg>
-              <span className="sr-only">Open menu</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem
-              className="text-destructive focus:text-destructive"
-              onClick={() => setShowDeleteDialog(true)}
-            >
-              <svg
-                className="mr-2 h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                />
-              </svg>
-              Usuń plan
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+                <svg className="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                  />
+                </svg>
+                Usuń plan
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
@@ -253,7 +223,8 @@ export default function PlanHeader({ plan, onUpdate, onDelete }: PlanHeaderProps
           <AlertDialogHeader>
             <AlertDialogTitle>Czy na pewno?</AlertDialogTitle>
             <AlertDialogDescription>
-              Ta akcja jest nieodwracalna. Plan "{plan.name}" oraz wszystkie powiązane dane zostaną trwale usunięte.
+              Ta akcja jest nieodwracalna. Plan &quot;{plan.name}&quot; oraz wszystkie powiązane dane zostaną trwale
+              usunięte.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -271,4 +242,3 @@ export default function PlanHeader({ plan, onUpdate, onDelete }: PlanHeaderProps
     </>
   );
 }
-

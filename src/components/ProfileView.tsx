@@ -24,9 +24,7 @@ export function ProfileView() {
       await updateProfile(data);
       toast.success("Profil został zaktualizowany");
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Nie udało się zapisać zmian"
-      );
+      toast.error(error instanceof Error ? error.message : "Nie udało się zapisać zmian");
     }
   };
 
@@ -52,9 +50,7 @@ export function ProfileView() {
         <div className="flex items-center justify-center min-h-[400px]">
           <Card className="max-w-md w-full">
             <CardHeader>
-              <CardTitle className="text-destructive">
-                ⚠️ Nie udało się załadować profilu
-              </CardTitle>
+              <CardTitle className="text-destructive">⚠️ Nie udało się załadować profilu</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-muted-foreground">{error}</p>
@@ -71,9 +67,7 @@ export function ProfileView() {
 
   // New user without profile (404 case)
   const isNewUser = !profile;
-  const welcomeMessage = isNewUser
-    ? "Witaj! Uzupełnij swój profil, aby AI mogło tworzyć lepsze plany."
-    : null;
+  const welcomeMessage = isNewUser ? "Witaj! Uzupełnij swój profil, aby AI mogło tworzyć lepsze plany." : null;
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-4xl">
@@ -94,9 +88,7 @@ export function ProfileView() {
             <CardTitle>Twoje statystyki</CardTitle>
           </CardHeader>
           <CardContent>
-            <GenerationsCounter
-              generationsRemaining={profile?.generations_remaining ?? 5}
-            />
+            <GenerationsCounter generationsRemaining={profile?.generations_remaining ?? 5} />
           </CardContent>
         </Card>
 
@@ -120,4 +112,3 @@ export function ProfileView() {
     </div>
   );
 }
-

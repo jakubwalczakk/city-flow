@@ -1,12 +1,5 @@
 import type { PlanListItemDto, PlanStatus } from "@/types";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,11 +18,11 @@ import { Trash2 } from "lucide-react";
 /**
  * Props for the PlanCard component.
  */
-type PlanCardProps = {
+interface PlanCardProps {
   plan: PlanListItemDto;
   onClick: () => void;
   onDelete: (planId: string) => void;
-};
+}
 
 /**
  * Map plan status to human-readable label and badge variant.
@@ -101,7 +94,7 @@ export const PlanCard = ({ plan, onClick, onDelete }: PlanCardProps) => {
             <AlertDialogHeader>
               <AlertDialogTitle>Czy na pewno chcesz usunąć ten plan?</AlertDialogTitle>
               <AlertDialogDescription>
-                Ta akcja jest nieodwracalna. Plan "{plan.name}" zostanie trwale usunięty.
+                Ta akcja jest nieodwracalna. Plan &quot;{plan.name}&quot; zostanie trwale usunięty.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
@@ -141,4 +134,3 @@ export const PlanCard = ({ plan, onClick, onDelete }: PlanCardProps) => {
     </Card>
   );
 };
-

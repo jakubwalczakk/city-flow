@@ -20,12 +20,12 @@ import {
 import { MoreVertical, Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
 
-type EventTimelineProps = {
+interface EventTimelineProps {
   items: TimelineItem[];
   currency?: string;
   onEdit?: (item: TimelineItem) => void;
   onDelete?: (itemId: string) => void;
-};
+}
 
 /**
  * Returns the appropriate icon for an item category.
@@ -37,7 +37,11 @@ function getCategoryIcon(category: TimelineItemCategory) {
       return (
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className={iconClass}>
           <path d="M8.5 4.75a.75.75 0 0 0-1.5 0V7.5h.75A2.75 2.75 0 0 0 10.5 4.75h-2Z" />
-          <path fillRule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14Zm0-1.5A5.5 5.5 0 1 0 8 2.5a5.5 5.5 0 0 0 0 11Z" clipRule="evenodd" />
+          <path
+            fillRule="evenodd"
+            d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14Zm0-1.5A5.5 5.5 0 1 0 8 2.5a5.5 5.5 0 0 0 0 11Z"
+            clipRule="evenodd"
+          />
         </svg>
       );
     case "food":
@@ -48,25 +52,33 @@ function getCategoryIcon(category: TimelineItemCategory) {
         </svg>
       );
     case "sport":
-        return (
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className={iconClass}>
-                <path d="M8.5 2.25a.75.75 0 0 0-1.5 0v3.835a2.25 2.25 0 0 0-1.331 2.058 2.5 2.5 0 0 0 4.162 1.852l.004-.003.876.876a.75.75 0 0 0 1.06-1.06l-.875-.875a2.5 2.5 0 0 0-1.853-4.162A2.25 2.25 0 0 0 8.5 6.085V2.25Z" />
-                <path d="M3.75 9.5a4.5 4.5 0 0 1 4.25-4.475v.016a3.75 3.75 0 0 1 3.484 3.484h.016a4.5 4.5 0 0 1-7.75 1.01V9.5Z" />
-            </svg>
-        );
+      return (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className={iconClass}>
+          <path d="M8.5 2.25a.75.75 0 0 0-1.5 0v3.835a2.25 2.25 0 0 0-1.331 2.058 2.5 2.5 0 0 0 4.162 1.852l.004-.003.876.876a.75.75 0 0 0 1.06-1.06l-.875-.875a2.5 2.5 0 0 0-1.853-4.162A2.25 2.25 0 0 0 8.5 6.085V2.25Z" />
+          <path d="M3.75 9.5a4.5 4.5 0 0 1 4.25-4.475v.016a3.75 3.75 0 0 1 3.484 3.484h.016a4.5 4.5 0 0 1-7.75 1.01V9.5Z" />
+        </svg>
+      );
     case "nature":
-        return (
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className={iconClass}>
-                <path fillRule="evenodd" d="M8.455.516a.75.75 0 0 0-.91 0l-6.25 4.5a.75.75 0 0 0 .41 1.348h.295v5.386A2.25 2.25 0 0 0 4.25 14h7.5a2.25 2.25 0 0 0 2.25-2.25V6.364h.295a.75.75 0 0 0 .41-1.348l-6.25-4.5ZM9.5 8.75a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" clipRule="evenodd" />
-            </svg>
-        );
+      return (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className={iconClass}>
+          <path
+            fillRule="evenodd"
+            d="M8.455.516a.75.75 0 0 0-.91 0l-6.25 4.5a.75.75 0 0 0 .41 1.348h.295v5.386A2.25 2.25 0 0 0 4.25 14h7.5a2.25 2.25 0 0 0 2.25-2.25V6.364h.295a.75.75 0 0 0 .41-1.348l-6.25-4.5ZM9.5 8.75a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z"
+            clipRule="evenodd"
+          />
+        </svg>
+      );
     case "culture":
-        return (
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className={iconClass}>
-                <path fillRule="evenodd" d="M5.5 1a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1h-5ZM4 3.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5ZM2.5 5a.5.5 0 0 0 0 1h11a.5.5 0 0 0 0-1h-11ZM1 7.5a.5.5 0 0 1 .5-.5h13a.5.5 0 0 1 0 1h-13a.5.5 0 0 1-.5-.5Zm-.5 2a.5.5 0 0 0 0 1h15a.5.5 0 0 0 0-1H.5Z" clipRule="evenodd" />
-                <path d="M2.5 11a.5.5 0 0 0-.5.5v2a.5.5 0 0 0 1 0v-2a.5.5 0 0 0-.5-.5Zm11 0a.5.5 0 0 0-.5.5v2a.5.5 0 0 0 1 0v-2a.5.5 0 0 0-.5-.5Z" />
-            </svg>
-        );
+      return (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className={iconClass}>
+          <path
+            fillRule="evenodd"
+            d="M5.5 1a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1h-5ZM4 3.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5ZM2.5 5a.5.5 0 0 0 0 1h11a.5.5 0 0 0 0-1h-11ZM1 7.5a.5.5 0 0 1 .5-.5h13a.5.5 0 0 1 0 1h-13a.5.5 0 0 1-.5-.5Zm-.5 2a.5.5 0 0 0 0 1h15a.5.5 0 0 0 0-1H.5Z"
+            clipRule="evenodd"
+          />
+          <path d="M2.5 11a.5.5 0 0 0-.5.5v2a.5.5 0 0 0 1 0v-2a.5.5 0 0 0-.5-.5Zm11 0a.5.5 0 0 0-.5.5v2a.5.5 0 0 0 1 0v-2a.5.5 0 0 0-.5-.5Z" />
+        </svg>
+      );
     case "transport":
       return (
         <svg className={iconClass} fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -79,18 +91,22 @@ function getCategoryIcon(category: TimelineItemCategory) {
         </svg>
       );
     case "accommodation":
-        return (
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className={iconClass}>
-                <path d="M3.5 1.75a.75.75 0 0 0-1.5 0V10a.75.75 0 0 0 .75.75h10.5a.75.75 0 0 0 .75-.75V1.75a.75.75 0 0 0-1.5 0V3h-2.25V1.75a.75.75 0 0 0-1.5 0V3H6.25V1.75a.75.75 0 0 0-1.5 0V3H3.5V1.75Z" />
-                <path d="M2.5 12.25a.75.75 0 0 0-1.5 0v.25a.75.75 0 0 0 .75.75h11.5a.75.75 0 0 0 .75-.75v-.25a.75.75 0 0 0-1.5 0v.25H2.5v-.25Z" />
-            </svg>
-        );
+      return (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className={iconClass}>
+          <path d="M3.5 1.75a.75.75 0 0 0-1.5 0V10a.75.75 0 0 0 .75.75h10.5a.75.75 0 0 0 .75-.75V1.75a.75.75 0 0 0-1.5 0V3h-2.25V1.75a.75.75 0 0 0-1.5 0V3H6.25V1.75a.75.75 0 0 0-1.5 0V3H3.5V1.75Z" />
+          <path d="M2.5 12.25a.75.75 0 0 0-1.5 0v.25a.75.75 0 0 0 .75.75h11.5a.75.75 0 0 0 .75-.75v-.25a.75.75 0 0 0-1.5 0v.25H2.5v-.25Z" />
+        </svg>
+      );
     case "other":
-        return (
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className={iconClass}>
-                <path fillRule="evenodd" d="M8 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8ZM2 8a6 6 0 1 1 12 0A6 6 0 0 1 2 8Z" clipRule="evenodd" />
-            </svg>
-        );
+      return (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className={iconClass}>
+          <path
+            fillRule="evenodd"
+            d="M8 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8ZM2 8a6 6 0 1 1 12 0A6 6 0 0 1 2 8Z"
+            clipRule="evenodd"
+          />
+        </svg>
+      );
   }
 }
 
@@ -132,11 +148,7 @@ export default function EventTimeline({ items, currency = "PLN", onEdit, onDelet
     setItemToDelete(null);
   };
   if (!items || items.length === 0) {
-    return (
-      <div className="text-center py-8 text-muted-foreground">
-        Brak zaplanowanych aktywności na ten dzień.
-      </div>
-    );
+    return <div className="text-center py-8 text-muted-foreground">Brak zaplanowanych aktywności na ten dzień.</div>;
   }
 
   return (
@@ -159,12 +171,7 @@ export default function EventTimeline({ items, currency = "PLN", onEdit, onDelet
                   {/* Time badge */}
                   {item.time && (
                     <div className="inline-flex items-center gap-1.5 rounded-md bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
-                      <svg
-                        className="h-3 w-3"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
+                      <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path
                           strokeLinecap="round"
                           strokeLinejoin="round"
@@ -189,12 +196,7 @@ export default function EventTimeline({ items, currency = "PLN", onEdit, onDelet
                 {/* Location */}
                 {item.location && (
                   <div className="flex items-start gap-1.5 text-sm text-muted-foreground">
-                    <svg
-                      className="h-4 w-4 mt-0.5 flex-shrink-0"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
+                    <svg className="h-4 w-4 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -214,9 +216,7 @@ export default function EventTimeline({ items, currency = "PLN", onEdit, onDelet
 
                 {/* Description */}
                 {item.description && (
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    {item.description}
-                  </p>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{item.description}</p>
                 )}
 
                 {/* Notes */}
@@ -275,13 +275,15 @@ export default function EventTimeline({ items, currency = "PLN", onEdit, onDelet
           <AlertDialogHeader>
             <AlertDialogTitle>Usuń aktywność</AlertDialogTitle>
             <AlertDialogDescription>
-              Czy na pewno chcesz usunąć "{itemToDelete?.title}"? Ta akcja jest
-              nieodwracalna.
+              Czy na pewno chcesz usunąć &quot;{itemToDelete?.title}&quot;? Ta akcja jest nieodwracalna.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Anuluj</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
               Usuń
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -290,4 +292,3 @@ export default function EventTimeline({ items, currency = "PLN", onEdit, onDelet
     </div>
   );
 }
-

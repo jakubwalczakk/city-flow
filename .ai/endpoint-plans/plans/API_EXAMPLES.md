@@ -3,6 +3,7 @@
 ## Successful Request
 
 ### Request
+
 ```bash
 curl -X POST http://localhost:4321/api/plans \
   -H "Content-Type: application/json" \
@@ -16,6 +17,7 @@ curl -X POST http://localhost:4321/api/plans \
 ```
 
 ### Response (201 Created)
+
 ```json
 {
   "id": "550e8400-e29b-41d4-a716-446655440000",
@@ -37,6 +39,7 @@ curl -X POST http://localhost:4321/api/plans \
 ### Missing Required Field
 
 #### Request
+
 ```bash
 curl -X POST http://localhost:4321/api/plans \
   -H "Content-Type: application/json" \
@@ -46,6 +49,7 @@ curl -X POST http://localhost:4321/api/plans \
 ```
 
 #### Response (400 Bad Request)
+
 ```json
 {
   "error": "Validation failed",
@@ -61,6 +65,7 @@ curl -X POST http://localhost:4321/api/plans \
 ### Invalid Date Format
 
 #### Request
+
 ```bash
 curl -X POST http://localhost:4321/api/plans \
   -H "Content-Type: application/json" \
@@ -73,6 +78,7 @@ curl -X POST http://localhost:4321/api/plans \
 ```
 
 #### Response (400 Bad Request)
+
 ```json
 {
   "error": "Validation failed",
@@ -89,6 +95,7 @@ curl -X POST http://localhost:4321/api/plans \
 ### End Date Before Start Date
 
 #### Request
+
 ```bash
 curl -X POST http://localhost:4321/api/plans \
   -H "Content-Type: application/json" \
@@ -101,6 +108,7 @@ curl -X POST http://localhost:4321/api/plans \
 ```
 
 #### Response (400 Bad Request)
+
 ```json
 {
   "error": "Validation failed",
@@ -116,6 +124,7 @@ curl -X POST http://localhost:4321/api/plans \
 ### Empty Required Field
 
 #### Request
+
 ```bash
 curl -X POST http://localhost:4321/api/plans \
   -H "Content-Type: application/json" \
@@ -126,6 +135,7 @@ curl -X POST http://localhost:4321/api/plans \
 ```
 
 #### Response (400 Bad Request)
+
 ```json
 {
   "error": "Validation failed",
@@ -141,6 +151,7 @@ curl -X POST http://localhost:4321/api/plans \
 ## Malformed JSON
 
 ### Request
+
 ```bash
 curl -X POST http://localhost:4321/api/plans \
   -H "Content-Type: application/json" \
@@ -152,6 +163,7 @@ curl -X POST http://localhost:4321/api/plans \
 ```
 
 ### Response (400 Bad Request)
+
 ```json
 {
   "error": "Invalid JSON in request body"
@@ -161,6 +173,7 @@ curl -X POST http://localhost:4321/api/plans \
 ## Minimal Valid Request
 
 ### Request
+
 ```bash
 curl -X POST http://localhost:4321/api/plans \
   -H "Content-Type: application/json" \
@@ -171,6 +184,7 @@ curl -X POST http://localhost:4321/api/plans \
 ```
 
 ### Response (201 Created)
+
 ```json
 {
   "id": "660e8400-e29b-41d4-a716-446655440001",
@@ -190,6 +204,7 @@ curl -X POST http://localhost:4321/api/plans \
 ## Full Request with All Optional Fields
 
 ### Request
+
 ```bash
 curl -X POST http://localhost:4321/api/plans \
   -H "Content-Type: application/json" \
@@ -203,6 +218,7 @@ curl -X POST http://localhost:4321/api/plans \
 ```
 
 ### Response (201 Created)
+
 ```json
 {
   "id": "770e8400-e29b-41d4-a716-446655440002",
@@ -250,10 +266,9 @@ try {
     end_date: "2026-03-08T00:00:00.000Z",
     notes: "See the Brandenburg Gate and eat currywurst.",
   });
-  
+
   console.log("Plan created:", newPlan);
 } catch (error) {
   console.error("Failed to create plan:", error);
 }
 ```
-

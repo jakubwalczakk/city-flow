@@ -7,8 +7,10 @@ This document explains the dependency chain and execution order of database migr
 The migrations **MUST** be executed in this exact order due to dependencies:
 
 ### 1. `20251024115900_create_trigger_functions.sql`
+
 **Dependencies:** None  
 **Creates:**
+
 - `update_updated_at_column()` function (used by all tables)
 
 **Why first:** All subsequent tables depend on this trigger function.
@@ -16,10 +18,12 @@ The migrations **MUST** be executed in this exact order due to dependencies:
 ---
 
 ### 2. `20251024120000_create_enums.sql`
+
 **Dependencies:** None  
 **Creates:**
+
 - `travel_pace_enum` → used by `profiles` table
-- `plan_status_enum` → used by `plans` table  
+- `plan_status_enum` → used by `plans` table
 - `feedback_rating_enum` → used by `feedback` table
 
 **Why second:** Tables need these ENUMs to exist before referencing them in column definitions.
@@ -27,11 +31,14 @@ The migrations **MUST** be executed in this exact order due to dependencies:
 ---
 
 ### 3. `20251024120100_create_profiles_table.sql`
-**Dependencies:** 
+
+**Dependencies:**
+
 - `travel_pace_enum` (from migration #2)
 - `update_updated_at_column()` (from migration #1)
 
 **Creates:**
+
 - `profiles` table
 - Trigger on `profiles` using `update_updated_at_column()`
 - RLS policies for `profiles`
@@ -41,12 +48,15 @@ The migrations **MUST** be executed in this exact order due to dependencies:
 ---
 
 ### 4. `20251024120200_create_plans_table.sql`
+
 **Dependencies:**
+
 - `auth.users` (Supabase Auth - pre-existing)
 - `plan_status_enum` (from migration #2)
 - `update_updated_at_column()` (from migration #1)
 
 **Creates:**
+
 - `plans` table (referenced by `fixed_points` and `feedback`)
 - Trigger on `plans` using `update_updated_at_column()`
 - RLS policies for `plans`
@@ -55,11 +65,14 @@ The migrations **MUST** be executed in this exact order due to dependencies:
 
 ---
 
-### 5. `20251024120250_add_generated_content_validation.sql` *(OPTIONAL)*
+### 5. `20251024120250_add_generated_content_validation.sql` _(OPTIONAL)_
+
 **Dependencies:**
+
 - `plans` table (from migration #4)
 
 **Creates:**
+
 - `validate_generated_content()` function
 - CHECK constraint on `plans.generated_content` column
 
@@ -68,11 +81,14 @@ The migrations **MUST** be executed in this exact order due to dependencies:
 ---
 
 ### 6. `20251024120300_create_fixed_points_table.sql`
+
 **Dependencies:**
+
 - `plans` table (from migration #4) - **CRITICAL:** Uses `REFERENCES plans(id)`
 - `update_updated_at_column()` (from migration #1)
 
 **Creates:**
+
 - `fixed_points` table
 - Trigger on `fixed_points` using `update_updated_at_column()`
 - RLS policies for `fixed_points` (with EXISTS checks against `plans`)
@@ -82,13 +98,16 @@ The migrations **MUST** be executed in this exact order due to dependencies:
 ---
 
 ### 7. `20251024120400_create_feedback_table.sql`
+
 **Dependencies:**
+
 - `plans` table (from migration #4) - **CRITICAL:** Uses `REFERENCES plans(id)`
 - `auth.users` (Supabase Auth - pre-existing)
 - `feedback_rating_enum` (from migration #2)
 - `update_updated_at_column()` (from migration #1)
 
 **Creates:**
+
 - `feedback` table
 - Trigger on `feedback` using `update_updated_at_column()`
 - RLS policies for `feedback` (with EXISTS checks against `plans`)
@@ -98,11 +117,14 @@ The migrations **MUST** be executed in this exact order due to dependencies:
 ---
 
 ### 8. `20251024120500_setup_pg_cron_jobs.sql`
+
 **Dependencies:**
+
 - `profiles` table (from migration #3) - Updates `generations_remaining`
 - `plans` table (from migration #4) - Updates `status` to `archived`
 
 **Creates:**
+
 - `pg_cron` extension
 - Scheduled job: `reset_monthly_generations`
 - Scheduled job: `auto_archive_completed_plans`
@@ -206,5 +228,3 @@ Before running migrations in production:
 - All tables have RLS enabled with granular policies
 - Trigger functions are shared across tables for consistency
 - pg_cron jobs require the extension to be enabled (may need Supabase dashboard)
-
-

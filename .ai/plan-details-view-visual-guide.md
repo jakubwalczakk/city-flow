@@ -68,6 +68,7 @@
 ```
 
 **Colors**:
+
 - Background: `bg-amber-50` (light) / `bg-amber-950/20` (dark)
 - Border: `border-amber-200` (light) / `border-amber-900` (dark)
 - Icon: `text-amber-600` (light) / `text-amber-500` (dark)
@@ -90,6 +91,7 @@
 ```
 
 **Colors**:
+
 - Background: `bg-blue-50` (light) / `bg-blue-950/20` (dark)
 - Border: `border-blue-200` (light) / `border-blue-900` (dark)
 - Icon: `text-blue-600` (light) / `text-blue-500` (dark)
@@ -106,6 +108,7 @@
 ```
 
 **Elements**:
+
 - Day number badge: Circular, `bg-primary/10`, `text-primary`
 - Date: Semibold, formatted as "Weekday, Month Day, Year"
 - Statistics: Badge + muted text
@@ -139,6 +142,7 @@
 ```
 
 **Elements**:
+
 - Timeline dot: Small circle with primary border
 - Time badge: `bg-primary/10`, `text-primary`, clock icon
 - Type badge: Outlined, with type-specific icon
@@ -180,6 +184,7 @@
 ## Type Icons
 
 ### Activity (📍)
+
 ```svg
 <svg> <!-- Location pin icon -->
   <path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
@@ -188,6 +193,7 @@
 ```
 
 ### Meal (🛒)
+
 ```svg
 <svg> <!-- Shopping cart icon -->
   <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
@@ -195,6 +201,7 @@
 ```
 
 ### Transport (↔️)
+
 ```svg
 <svg> <!-- Arrows icon -->
   <path d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
@@ -204,18 +211,21 @@
 ## Responsive Behavior
 
 ### Desktop (> 1024px)
+
 - Full width container (max-w-5xl)
 - Side-by-side layout for badges
 - Price aligned to the right
 - Comfortable spacing
 
 ### Tablet (640px - 1024px)
+
 - Slightly narrower container
 - Badges may wrap to multiple lines
 - Price still visible on the right
 - Reduced spacing
 
 ### Mobile (< 640px)
+
 - Full width with padding
 - Badges stack vertically
 - Price moves below description
@@ -225,17 +235,20 @@
 ## Color Palette
 
 ### Primary Colors
+
 - Primary: Theme-defined (typically blue/purple)
 - Primary/10: Very light primary for backgrounds
 - Primary/50: Light primary for hover states
 
 ### Semantic Colors
+
 - **Success**: Green (not used in current implementation)
 - **Warning**: Amber/Yellow (for warnings banner)
 - **Info**: Blue (for modifications banner)
 - **Error**: Red (for error states)
 
 ### Neutral Colors
+
 - **Foreground**: Main text color
 - **Muted Foreground**: Secondary text (60% opacity)
 - **Border**: Subtle borders
@@ -280,6 +293,7 @@
 ## Dark Mode Support
 
 All components support dark mode through Tailwind's `dark:` variants:
+
 - Backgrounds adjust automatically
 - Text colors invert appropriately
 - Borders remain subtle
@@ -289,9 +303,9 @@ All components support dark mode through Tailwind's `dark:` variants:
 ## Print Styles (Future Enhancement)
 
 Suggested print styles:
+
 - Expand all accordions
 - Remove interactive elements
 - Optimize for A4/Letter paper
 - Black and white friendly
 - Page breaks between days
-

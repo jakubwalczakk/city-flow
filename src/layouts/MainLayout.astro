@@ -37,26 +37,24 @@ const isAuthenticated = !!user;
 
               {/* Navigation */}
               <nav class="flex items-center gap-4">
-                {
-                  isAuthenticated ? (
-                    <UserMenu userEmail={user?.email} client:load />
-                  ) : (
-                    <>
-                      <a
-                        href="/login"
-                        class="inline-flex h-9 items-center justify-center gap-2 whitespace-nowrap rounded-md px-4 py-2 text-sm font-medium outline-none transition-all hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50"
-                      >
-                        Zaloguj się
-                      </a>
-                      <a
-                        href="/register"
-                        class="inline-flex h-9 items-center justify-center gap-2 whitespace-nowrap rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground outline-none transition-all hover:bg-primary/90"
-                      >
-                        Zarejestruj się
-                      </a>
-                    </>
-                  )
-                }
+                {isAuthenticated ? (
+                  <UserMenu userEmail={user?.email} client:load />
+                ) : (
+                  <>
+                    <a
+                      href="/login"
+                      class="inline-flex h-9 items-center justify-center gap-2 whitespace-nowrap rounded-md px-4 py-2 text-sm font-medium outline-none transition-all hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50"
+                    >
+                      Zaloguj się
+                    </a>
+                    <a
+                      href="/register"
+                      class="inline-flex h-9 items-center justify-center gap-2 whitespace-nowrap rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground outline-none transition-all hover:bg-primary/90"
+                    >
+                      Zarejestruj się
+                    </a>
+                  </>
+                )}
               </nav>
             </div>
           </div>
@@ -80,4 +78,3 @@ const isAuthenticated = !!user;
     min-height: 100%;
   }
 </style>
-

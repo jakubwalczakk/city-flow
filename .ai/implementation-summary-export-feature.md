@@ -1,20 +1,25 @@
 # Podsumowanie implementacji: Funkcja eksportu planu do PDF
 
 ## Data implementacji
+
 10 listopada 2025
 
 ## Status
+
 ✅ **Zaimplementowano i gotowe do testowania**
 
 ## Przegląd
+
 Zaimplementowano funkcję eksportu wygenerowanych planów podróży do formatu PDF. Użytkownicy mogą teraz pobierać swoje plany jako eleganckie dokumenty PDF za pomocą jednego kliknięcia.
 
 ## Zaimplementowane komponenty
 
 ### 1. ExportPlanButton (`src/components/plan-actions/ExportPlanButton.tsx`)
+
 Główny komponent funkcjonalności eksportu.
 
 **Funkcjonalności:**
+
 - ✅ Przycisk z ikoną Download i tekstem "Eksportuj do PDF"
 - ✅ Stan ładowania z animowanym spinnerem
 - ✅ Tooltip z opisem funkcji
@@ -26,42 +31,50 @@ Główny komponent funkcjonalności eksportu.
 - ✅ Powiadomienia toast (sukces i błąd)
 
 **Propsy:**
+
 ```typescript
 interface ExportPlanButtonProps {
-  planId: string;      // ID planu do eksportu
-  planName: string;    // Nazwa planu (fallback dla nazwy pliku)
-  className?: string;  // Opcjonalne klasy CSS
+  planId: string; // ID planu do eksportu
+  planName: string; // Nazwa planu (fallback dla nazwy pliku)
+  className?: string; // Opcjonalne klasy CSS
 }
 ```
 
 **Walidacja:**
+
 - Przycisk jest nieaktywny gdy brak `planId`
 - Przycisk jest nieaktywny podczas procesu eksportowania
 - Przycisk wyświetla się tylko dla planów ze statusem `"generated"`
 
 ### 2. ToasterWrapper (`src/components/ToasterWrapper.tsx`)
+
 Wrapper dla komponentu Sonner Toaster.
 
 **Cel:**
+
 - Umożliwia wyświetlanie eleganckich powiadomień toast w całej aplikacji
 - Zintegrowany z głównym layoutem
 
 ### 3. Zmiany w istniejących komponentach
 
 #### PlanHeader.tsx
+
 - ✅ Dodano import `ExportPlanButton`
 - ✅ Dodano przycisk eksportu obok menu dropdown
 - ✅ Przycisk widoczny tylko dla planów `status === "generated"`
 - ✅ Przekazywane propsy: `planId` i `planName`
 
 #### Layout.astro
+
 - ✅ Dodano import `ToasterWrapper`
 - ✅ Dodano `<ToasterWrapper client:only="react" />` do body
 
 ## Zainstalowane zależności
 
 ### Shadcn/ui komponenty
+
 1. **Tooltip** - dla lepszego UX przycisku
+
    ```bash
    npx shadcn@latest add tooltip
    ```
@@ -93,14 +106,15 @@ Wrapper dla komponentu Sonner Toaster.
 
 Komponent obsługuje następujące scenariusze błędów:
 
-| Typ błędu | Status HTTP | Komunikat |
-|-----------|-------------|-----------|
-| Plan nie znaleziony | 404 | "Nie znaleziono podanego planu." |
-| Błąd serwera | 500 | "Wystąpił błąd po stronie serwera. Prosimy spróbować ponownie później." |
-| Błąd sieciowy | - | "Nie udało się wyeksportować planu." |
-| Inny błąd | 4xx/5xx | "Błąd eksportu: {status}" |
+| Typ błędu           | Status HTTP | Komunikat                                                               |
+| ------------------- | ----------- | ----------------------------------------------------------------------- |
+| Plan nie znaleziony | 404         | "Nie znaleziono podanego planu."                                        |
+| Błąd serwera        | 500         | "Wystąpił błąd po stronie serwera. Prosimy spróbować ponownie później." |
+| Błąd sieciowy       | -           | "Nie udało się wyeksportować planu."                                    |
+| Inny błąd           | 4xx/5xx     | "Błąd eksportu: {status}"                                               |
 
 Wszystkie błędy są:
+
 - Logowane do konsoli dla debugowania
 - Wyświetlane użytkownikowi przez toast error z Sonner
 - Zapisywane w stanie komponentu (`error` state)
@@ -110,16 +124,19 @@ Wszystkie błędy są:
 **Endpoint:** `GET /api/plans/[id]/export?format=pdf`
 
 **Parametry:**
+
 - `id` - ID planu (w URL)
 - `format` - Format eksportu, musi być "pdf" (query param)
 
 **Odpowiedź (sukces):**
+
 - Status: 200 OK
 - Content-Type: application/pdf
 - Content-Disposition: attachment; filename="[nazwa-planu]-plan.pdf"
 - Body: Binary PDF data
 
 **Odpowiedzi (błędy):**
+
 - 400: Brak parametru format lub nieprawidłowy format
 - 404: Plan nie znaleziony
 - 409: Plan nie jest w statusie "generated"
@@ -151,11 +168,13 @@ src/
 ### Testowanie manualne
 
 1. **Uruchom aplikację w trybie dev:**
+
    ```bash
    npm run dev
    ```
 
 2. **Przejdź do listy planów:**
+
    ```
    http://localhost:4321/plans
    ```
@@ -235,6 +254,7 @@ src/
 ## Zgodność z planem
 
 ✅ Wszystkie punkty z planu implementacji zostały zrealizowane:
+
 - [x] Krok 1: Utworzenie pliku komponentu
 - [x] Krok 2: Implementacja szkieletu z propsami
 - [x] Krok 3: Dodanie lokalnego stanu
@@ -247,4 +267,3 @@ src/
 ## Zakończenie
 
 Implementacja funkcji eksportu do PDF została zakończona zgodnie z planem. Wszystkie wymagania funkcjonalne i techniczne zostały spełnione. Funkcja jest gotowa do testowania manualnego i dalszego developmentu.
-

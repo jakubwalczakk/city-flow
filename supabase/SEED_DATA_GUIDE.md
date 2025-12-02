@@ -35,15 +35,18 @@ supabase start
 ## What Gets Created?
 
 ### 1. Auth User (`auth.users`)
+
 - Creates a user in Supabase Auth with the specified ID
 - Email: `dev@cityflow.local`
 - Password: `password123` (hashed)
 
 ### 2. Auth Identity (`auth.identities`)
+
 - Links the user to the email provider
 - Required for email/password authentication
 
 ### 3. User Profile (`profiles`)
+
 - Creates a profile with test preferences:
   - Preferences: Art & Museums, Local Food, History
   - Travel Pace: Moderate
@@ -76,6 +79,7 @@ export const DEFAULT_USER_ID = "your-new-uuid-here";
 ### Foreign Key Constraint Violations
 
 If you see errors like:
+
 ```
 violates foreign key constraint "plans_user_id_fkey"
 ```
@@ -98,12 +102,12 @@ You can verify the user was created:
 
 ```sql
 -- Check auth user
-SELECT id, email FROM auth.users 
+SELECT id, email FROM auth.users
 WHERE id = '17555d06-2387-4f0b-b4f8-0887177cadc1';
 
 -- Check profile
-SELECT id, preferences, travel_pace, generations_remaining 
-FROM profiles 
+SELECT id, preferences, travel_pace, generations_remaining
+FROM profiles
 WHERE id = '17555d06-2387-4f0b-b4f8-0887177cadc1';
 ```
 
@@ -112,6 +116,7 @@ WHERE id = '17555d06-2387-4f0b-b4f8-0887177cadc1';
 ⚠️ **CRITICAL**: The seed file should NEVER run in production!
 
 Supabase automatically handles this:
+
 - Seed files only run in local development
 - They are NOT deployed to hosted Supabase projects
 - Production users are created through your authentication flow
@@ -154,9 +159,9 @@ ON CONFLICT DO NOTHING;
 ## Summary
 
 The seed file ensures you always have a working test user in development. It:
+
 - ✅ Matches the `DEFAULT_USER_ID` constant
 - ✅ Runs automatically on database reset
 - ✅ Is safe to run multiple times
 - ✅ Only affects local development
 - ✅ Includes a complete user profile with test data
-

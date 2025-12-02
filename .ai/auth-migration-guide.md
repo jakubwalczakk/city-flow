@@ -25,6 +25,7 @@ Ten dokument opisuje jak przeprowadzić migrację z obecnego systemu używające
 ### Co wymaga migracji
 
 Wszystkie pozostałe endpointy API, które obecnie używają wzorca:
+
 ```typescript
 const user = { id: DEFAULT_USER_ID };
 ```
@@ -42,9 +43,10 @@ Obecnie middleware tylko dodaje klienta Supabase do `locals`. Aby obsługiwać J
 **Plik do zmiany:** `src/middleware/index.ts`
 
 **Obecna implementacja:**
+
 ```typescript
-import { defineMiddleware } from 'astro:middleware';
-import { supabaseClient } from '../db/supabase.client';
+import { defineMiddleware } from "astro:middleware";
+import { supabaseClient } from "../db/supabase.client";
 
 export const onRequest = defineMiddleware((context, next) => {
   context.locals.supabase = supabaseClient;
@@ -53,42 +55,46 @@ export const onRequest = defineMiddleware((context, next) => {
 ```
 
 **Docelowa implementacja:**
+
 ```typescript
-import { defineMiddleware } from 'astro:middleware';
-import { supabaseClient } from '../db/supabase.client';
-import { logger } from '../lib/utils/logger';
+import { defineMiddleware } from "astro:middleware";
+import { supabaseClient } from "../db/supabase.client";
+import { logger } from "../lib/utils/logger";
 
 export const onRequest = defineMiddleware(async (context, next) => {
   context.locals.supabase = supabaseClient;
 
   // Skip authentication for public routes
-  const publicRoutes = ['/login', '/register', '/'];
-  if (publicRoutes.some(route => context.url.pathname.startsWith(route))) {
+  const publicRoutes = ["/login", "/register", "/"];
+  if (publicRoutes.some((route) => context.url.pathname.startsWith(route))) {
     return next();
   }
 
   // Try to get the session from cookies or Authorization header
-  const authHeader = context.request.headers.get('Authorization');
+  const authHeader = context.request.headers.get("Authorization");
   let token: string | null = null;
 
-  if (authHeader?.startsWith('Bearer ')) {
+  if (authHeader?.startsWith("Bearer ")) {
     token = authHeader.substring(7);
   } else {
     // Try to get token from cookies (for SSR pages)
     const cookies = context.cookies;
-    token = cookies.get('sb-access-token')?.value || null;
+    token = cookies.get("sb-access-token")?.value || null;
   }
 
   if (token) {
     try {
-      const { data: { user }, error } = await supabaseClient.auth.getUser(token);
-      
+      const {
+        data: { user },
+        error,
+      } = await supabaseClient.auth.getUser(token);
+
       if (user && !error) {
         context.locals.user = user;
-        logger.debug('User authenticated via middleware', { userId: user.id });
+        logger.debug("User authenticated via middleware", { userId: user.id });
       }
     } catch (error) {
-      logger.warn('Failed to authenticate user in middleware', { error });
+      logger.warn("Failed to authenticate user in middleware", { error });
     }
   }
 
@@ -97,6 +103,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
 ```
 
 **Wymagane typy** (dodać do `src/env.d.ts`):
+
 ```typescript
 declare namespace App {
   interface Locals {
@@ -114,6 +121,7 @@ declare namespace App {
 Każdy endpoint powinien zostać zaktualizowany, aby używał `getAuthenticatedUser()`.
 
 **Przed:**
+
 ```typescript
 import { DEFAULT_USER_ID } from "@/db/supabase.client";
 
@@ -124,6 +132,7 @@ export const GET: APIRoute = async ({ locals }) => {
 ```
 
 **Po:**
+
 ```typescript
 import { getAuthenticatedUser } from "@/lib/utils/auth";
 
@@ -158,17 +167,14 @@ Frontend będzie musiał:
 
 ```typescript
 // src/lib/utils/api-client.ts
-export async function authenticatedFetch(
-  url: string,
-  options: RequestInit = {}
-): Promise<Response> {
+export async function authenticatedFetch(url: string, options: RequestInit = {}): Promise<Response> {
   const token = getStoredToken(); // z localStorage lub cookies
-  
+
   const headers = new Headers(options.headers);
   if (token) {
-    headers.set('Authorization', `Bearer ${token}`);
+    headers.set("Authorization", `Bearer ${token}`);
   }
-  headers.set('Content-Type', 'application/json');
+  headers.set("Content-Type", "application/json");
 
   const response = await fetch(url, {
     ...options,
@@ -184,7 +190,7 @@ export async function authenticatedFetch(
       return authenticatedFetch(url, options);
     } else {
       // Redirect to login
-      window.location.href = '/login';
+      window.location.href = "/login";
     }
   }
 
@@ -196,11 +202,11 @@ export async function authenticatedFetch(
 
 ```typescript
 // src/components/ProfileForm.tsx
-import { authenticatedFetch } from '@/lib/utils/api-client';
+import { authenticatedFetch } from "@/lib/utils/api-client";
 
 async function updateProfile(data: UpdateProfileCommand) {
-  const response = await authenticatedFetch('/api/profiles', {
-    method: 'PATCH',
+  const response = await authenticatedFetch("/api/profiles", {
+    method: "PATCH",
     body: JSON.stringify(data),
   });
 
@@ -249,21 +255,21 @@ import OnboardingForm from '@/components/OnboardingForm';
 
 ```typescript
 // src/components/OnboardingForm.tsx
-import { authenticatedFetch } from '@/lib/utils/api-client';
+import { authenticatedFetch } from "@/lib/utils/api-client";
 
 export default function OnboardingForm() {
   const handleSubmit = async (data) => {
-    await authenticatedFetch('/api/profiles', {
-      method: 'PATCH',
+    await authenticatedFetch("/api/profiles", {
+      method: "PATCH",
       body: JSON.stringify({
         preferences: data.preferences,
         travel_pace: data.travel_pace,
         onboarding_completed: true,
       }),
     });
-    
+
     // Redirect to dashboard
-    window.location.href = '/dashboard';
+    window.location.href = "/dashboard";
   };
 
   // ... form implementation
@@ -273,6 +279,7 @@ export default function OnboardingForm() {
 ### Krok 6: Testowanie migracji
 
 #### Test 1: Tryb deweloperski (obecny)
+
 ```bash
 # DEV=true (domyślnie w dev mode)
 npm run dev
@@ -282,6 +289,7 @@ curl http://localhost:3000/api/profiles
 ```
 
 #### Test 2: Tryb produkcyjny z JWT
+
 ```bash
 # Ustaw NODE_ENV=production
 export NODE_ENV=production
@@ -299,6 +307,7 @@ curl http://localhost:4321/api/profiles \
 ```
 
 #### Test 3: End-to-end flow
+
 1. Zarejestruj nowego użytkownika
 2. Zaloguj się
 3. Ukończ onboarding
@@ -345,12 +354,14 @@ Podobne polityki można utworzyć dla tabel `plans`, `fixed_points`, `feedback`.
 ### Refresh tokens
 
 Supabase automatycznie obsługuje refresh tokeny. Upewnij się, że:
+
 - Refresh token jest przechowywany w bezpiecznym miejscu (httpOnly cookie)
 - Frontend automatycznie odświeża token przed wygaśnięciem
 
 ### Monitoring i logging
 
 Po wdrożeniu, monitoruj:
+
 - Liczbę błędów 401 (problemy z autentykacją)
 - Czas odpowiedzi endpointów (czy walidacja JWT nie spowalnia)
 - Nieudane próby logowania (bezpieczeństwo)
@@ -364,8 +375,8 @@ Po wdrożeniu, monitoruj:
 ## Wsparcie
 
 W przypadku problemów:
+
 1. Sprawdź logi serwera (`logger.debug/error`)
 2. Sprawdź Supabase Dashboard → Authentication → Users
 3. Zweryfikuj token JWT na [jwt.io](https://jwt.io)
 4. Sprawdź czy zmienne środowiskowe są poprawnie ustawione
-

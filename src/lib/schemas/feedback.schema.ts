@@ -11,4 +11,3 @@ export const submitFeedbackSchema = z.object({
 });
 
 export type SubmitFeedbackFormData = z.infer<typeof submitFeedbackSchema>;
-

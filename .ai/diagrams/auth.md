@@ -1,25 +1,29 @@
- <architecture_analysis>
+<architecture_analysis>
 Na podstawie dostarczonych dokumentów (`prd.md`, `auth-spec.md`) oraz analizy kodu, zidentyfikowano kluczowe elementy architektury UI dla modułu autentykacji.
 
 ### 1. Wypis komponentów i stron
 
 #### Nowe Strony:
+
 - **`/login`**: Strona publiczna renderująca formularz logowania.
 - **`/register`**: Strona publiczna renderująca formularz rejestracji.
 - **`/forgot-password`**: Strona publiczna do inicjowania resetu hasła.
 - **`/update-password`**: Strona publiczna do ustawiania nowego hasła po resecie.
 
 #### Modyfikowane Strony i Layouty:
+
 - **`src/layouts/MainLayout.astro`**: Główny layout aplikacji. Zostanie zaktualizowany, aby warunkowo wyświetlać linki "Zaloguj" / "Zarejestruj" dla gości lub komponent `UserMenu` dla zalogowanych użytkowników.
 - **`src/pages/plans.astro`**: Strona główna z planami. Dostęp zostanie ograniczony tylko dla zalogowanych użytkowników.
 - **`src/pages/profile.astro`**: Strona profilu. Dostęp zostanie ograniczony tylko dla zalogowanych użytkowników.
 
 #### Nowe Komponenty:
+
 - **`AuthForm.tsx`**: Klientowski komponent React do obsługi formularzy logowania i rejestracji, włączając walidację (zod, react-hook-form) i komunikację z Supabase.
 - **`GoogleAuthButton.tsx`**: Przycisk do logowania za pomocą Google OAuth.
 - **`UserMenu.tsx`**: Dropdown menu w nagłówku dla zalogowanych użytkowników, zawierający link do profilu i przycisk wylogowania.
 
 #### Modyfikowane Komponenty:
+
 - **`PlansDashboard.tsx`**: Komponent zostanie uproszczony – usunięty zostanie z niego przycisk "Profil", ponieważ ta funkcjonalność zostanie przeniesiona do globalnego `UserMenu.tsx`.
 
 ### 2. Główne strony i ich komponenty
@@ -47,69 +51,68 @@ Na podstawie dostarczonych dokumentów (`prd.md`, `auth-spec.md`) oraz analizy k
 
 </architecture_analysis>
 
- 
- ```mermaid
+```mermaid
 sequenceDiagram
-    autonumber
+   autonumber
 
-    actor Użytkownik
-    participant Browser
-    participant "Astro Middleware" as Middleware
-    participant "Chroniona strona" as ProtectedPage
-    participant "Supabase (Auth)" as Supabase
+   actor Użytkownik
+   participant Browser
+   participant "Astro Middleware" as Middleware
+   participant "Chroniona strona" as ProtectedPage
+   participant "Supabase (Auth)" as Supabase
 
-    %% --- Rejestracja ---
-    Użytkownik->>Browser: Wypełnia formularz rejestracji
-    Browser->>Supabase: supabase.auth.signUp(email, password)
-    activate Supabase
-    alt Sukces
-        Supabase-->>Browser: Sesja utworzona (JWT w cookie)
-        Note right of Browser: Przekierowanie do /plans
-    else Błąd
-        Supabase-->>Browser: Błąd (np. użytkownik już istnieje)
-        Browser->>Użytkownik: Wyświetla komunikat o błędzie
-    end
-    deactivate Supabase
+   %% --- Rejestracja ---
+   Użytkownik->>Browser: Wypełnia formularz rejestracji
+   Browser->>Supabase: supabase.auth.signUp(email, password)
+   activate Supabase
+   alt Sukces
+       Supabase-->>Browser: Sesja utworzona (JWT w cookie)
+       Note right of Browser: Przekierowanie do /plans
+   else Błąd
+       Supabase-->>Browser: Błąd (np. użytkownik już istnieje)
+       Browser->>Użytkownik: Wyświetla komunikat o błędzie
+   end
+   deactivate Supabase
 
-    %% --- Logowanie ---
-    Użytkownik->>Browser: Wypełnia formularz logowania
-    Browser->>Supabase: supabase.auth.signInWithPassword(email, password)
-    activate Supabase
-    alt Sukces
-        Supabase-->>Browser: Sesja utworzona (JWT w cookie)
-        Note right of Browser: Przekierowanie do /plans
-    else Błąd
-        Supabase-->>Browser: Błąd (np. nieprawidłowe hasło)
-        Browser->>Użytkownik: Wyświetla komunikat o błędzie
-    end
-    deactivate Supabase
+   %% --- Logowanie ---
+   Użytkownik->>Browser: Wypełnia formularz logowania
+   Browser->>Supabase: supabase.auth.signInWithPassword(email, password)
+   activate Supabase
+   alt Sukces
+       Supabase-->>Browser: Sesja utworzona (JWT w cookie)
+       Note right of Browser: Przekierowanie do /plans
+   else Błąd
+       Supabase-->>Browser: Błąd (np. nieprawidłowe hasło)
+       Browser->>Użytkownik: Wyświetla komunikat o błędzie
+   end
+   deactivate Supabase
 
-    %% --- Dostęp do chronionej strony ---
-    Użytkownik->>Browser: Próba wejścia na /plans
-    Browser->>Middleware: GET /plans (z cookie JWT)
-    activate Middleware
-    Middleware->>Supabase: Weryfikacja JWT z cookie
-    activate Supabase
-    alt Token poprawny
-        Supabase-->>Middleware: Dane użytkownika
-        Middleware->>ProtectedPage: Renderuj stronę z danymi usera
-        activate ProtectedPage
-        ProtectedPage-->>Browser: Zwraca HTML strony
-        deactivate ProtectedPage
-        Browser->>Użytkownik: Wyświetla stronę /plans
-    else Token niepoprawny/brak
-        Supabase-->>Middleware: Błąd autoryzacji
-        Middleware-->>Browser: Przekierowanie (Redirect) na /login
-    end
-    deactivate Supabase
-    deactivate Middleware
+   %% --- Dostęp do chronionej strony ---
+   Użytkownik->>Browser: Próba wejścia na /plans
+   Browser->>Middleware: GET /plans (z cookie JWT)
+   activate Middleware
+   Middleware->>Supabase: Weryfikacja JWT z cookie
+   activate Supabase
+   alt Token poprawny
+       Supabase-->>Middleware: Dane użytkownika
+       Middleware->>ProtectedPage: Renderuj stronę z danymi usera
+       activate ProtectedPage
+       ProtectedPage-->>Browser: Zwraca HTML strony
+       deactivate ProtectedPage
+       Browser->>Użytkownik: Wyświetla stronę /plans
+   else Token niepoprawny/brak
+       Supabase-->>Middleware: Błąd autoryzacji
+       Middleware-->>Browser: Przekierowanie (Redirect) na /login
+   end
+   deactivate Supabase
+   deactivate Middleware
 
-    %% --- Wylogowanie ---
-    Użytkownik->>Browser: Klika "Wyloguj"
-    Browser->>Supabase: supabase.auth.signOut()
-    activate Supabase
-    Supabase-->>Browser: Sesja usunięta, cookie wyczyszczone
-    Note right of Browser: Przekierowanie do /
-    deactivate Supabase
+   %% --- Wylogowanie ---
+   Użytkownik->>Browser: Klika "Wyloguj"
+   Browser->>Supabase: supabase.auth.signOut()
+   activate Supabase
+   Supabase-->>Browser: Sesja usunięta, cookie wyczyszczone
+   Note right of Browser: Przekierowanie do /
+   deactivate Supabase
 
 ```

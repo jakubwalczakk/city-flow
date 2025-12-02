@@ -32,10 +32,7 @@ export function GenerationsCounter({ generationsRemaining }: GenerationsCounterP
 
       <Progress value={progressValue} className="h-2" />
 
-      <p className="text-xs text-muted-foreground">
-        Limit odnowi się {resetDate}
-      </p>
+      <p className="text-xs text-muted-foreground">Limit odnowi się {resetDate}</p>
     </div>
   );
 }
-

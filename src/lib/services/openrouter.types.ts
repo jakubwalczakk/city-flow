@@ -25,10 +25,9 @@ export interface GetStructuredResponseOptions<T extends z.ZodTypeAny> {
  * OpenRouter API response structure.
  */
 export interface OpenRouterResponse {
-  choices: Array<{
+  choices: {
     message: {
       content: string;
     };
-  }>;
+  }[];
 }
-

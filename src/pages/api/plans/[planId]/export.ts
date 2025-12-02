@@ -31,7 +31,7 @@ export const GET: APIRoute = async ({ params, url, locals }) => {
 
     // Validate format query parameter
     const format = url.searchParams.get("format");
-    
+
     if (!format) {
       throw new ValidationError("Query parameter 'format' is required");
     }
@@ -56,9 +56,7 @@ export const GET: APIRoute = async ({ params, url, locals }) => {
         planId,
         status: plan.status,
       });
-      throw new ConflictError(
-        "Only plans with 'generated' status can be exported. Please generate the plan first."
-      );
+      throw new ConflictError("Only plans with 'generated' status can be exported. Please generate the plan first.");
     }
 
     // Generate PDF
@@ -71,7 +69,7 @@ export const GET: APIRoute = async ({ params, url, locals }) => {
       .replace(/-+/g, "-")
       .toLowerCase()
       .substring(0, 50);
-    
+
     const filename = `${sanitizedName}-plan.pdf`;
 
     logger.info("Plan exported successfully", {
@@ -100,4 +98,3 @@ export const GET: APIRoute = async ({ params, url, locals }) => {
 };
 
 export const prerender = false;
-

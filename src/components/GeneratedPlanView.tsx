@@ -1,77 +1,92 @@
 import type { PlanDetailsDto, GeneratedContentViewModel, DayPlan, TimelineItem } from "@/types";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import EventTimeline from "@/components/EventTimeline";
 import FeedbackModule from "@/components/FeedbackModule";
 import { Plus } from "lucide-react";
 
-type GeneratedPlanViewProps = {
+interface GeneratedPlanViewProps {
   plan: PlanDetailsDto;
   onAddActivity?: (date: string) => void;
   onEditActivity?: (date: string, item: TimelineItem) => void;
   onDeleteActivity?: (date: string, itemId: string) => void;
-};
+}
 
 /**
  * Parses the generated_content JSON into a structured view model.
  * Validates the structure and provides default values for backward compatibility.
  */
+interface RawDay {
+  date: unknown;
+  items?: unknown;
+}
+
+interface RawItem {
+  id: unknown;
+  title: unknown;
+  category?: unknown;
+  type?: unknown;
+  [key: string]: unknown;
+}
+
+interface RawGeneratedContent {
+  days?: unknown;
+  summary?: unknown;
+  currency?: unknown;
+  modifications?: unknown;
+  warnings?: unknown;
+}
+
 function parseGeneratedContent(content: unknown): GeneratedContentViewModel | null {
   if (!content || typeof content !== "object") {
     return null;
   }
 
   try {
-    const data = content as any;
+    const data = content as RawGeneratedContent;
 
     if (!data.days || !Array.isArray(data.days)) {
-      console.error("Invalid content structure: 'days' array is missing or not an array.");
       return null;
     }
 
     // Process days and items, adding default category if missing
-    const processedDays: DayPlan[] = data.days.map((day: any, dayIndex: number) => {
-      if (!day.date || !day.items || !Array.isArray(day.items)) {
+    const processedDays: DayPlan[] = data.days.map((day: unknown, dayIndex: number) => {
+      const dayObj = day as RawDay;
+      if (!dayObj.date || typeof dayObj.date !== "string" || !dayObj.items || !Array.isArray(dayObj.items)) {
         throw new Error(`Day object at index ${dayIndex} is malformed.`);
       }
 
-      const processedItems = day.items.map((item: any, itemIndex: number) => {
-        if (!item.id || !item.title) {
-          throw new Error(
-            `Item object at index ${itemIndex} in day ${dayIndex} is missing required fields.`
-          );
+      const processedItems = dayObj.items.map((item: unknown, itemIndex: number) => {
+        const itemObj = item as RawItem;
+        if (!itemObj.id || !itemObj.title || typeof itemObj.id !== "string" || typeof itemObj.title !== "string") {
+          throw new Error(`Item object at index ${itemIndex} in day ${dayIndex} is missing required fields.`);
         }
 
         // For backward compatibility, provide defaults if missing
         return {
-          ...item,
-          category: item.category || "other",
-          type: item.type || "activity", // Required by database schema
+          ...itemObj,
+          id: itemObj.id as string,
+          title: itemObj.title as string,
+          category: (itemObj.category as string) || "other",
+          type: (itemObj.type as string) || "activity", // Required by database schema
         };
       });
 
       return {
-        ...day,
+        date: dayObj.date as string,
         items: processedItems,
       };
     });
 
     return {
-      summary: data.summary || "Brak podsumowania.", // Extract summary, provide default
-      currency: data.currency || "PLN", // Extract currency, default to PLN
+      summary: typeof data.summary === "string" ? data.summary : "Brak podsumowania.", // Extract summary, provide default
+      currency: typeof data.currency === "string" ? data.currency : "PLN", // Extract currency, default to PLN
       days: processedDays,
-      modifications: data.modifications,
-      warnings: data.warnings,
+      modifications: Array.isArray(data.modifications) ? (data.modifications as string[]) : undefined,
+      warnings: Array.isArray(data.warnings) ? (data.warnings as string[]) : undefined,
     };
-  } catch (error) {
-    console.error("Failed to parse generated content:", error);
+  } catch {
     return null;
   }
 }
@@ -100,7 +115,8 @@ export default function GeneratedPlanView({
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
-            Spróbuj ponownie wygenerować plan lub skontaktuj się z pomocą techniczną, jeśli problem będzie się powtarzał.
+            Spróbuj ponownie wygenerować plan lub skontaktuj się z pomocą techniczną, jeśli problem będzie się
+            powtarzał.
           </p>
           {plan.generated_content && (
             <details className="mt-4">
@@ -148,9 +164,7 @@ export default function GeneratedPlanView({
                 />
               </svg>
               <div className="flex-1">
-                <CardTitle className="text-amber-900 dark:text-amber-100 text-base">
-                  Ważne przypomnienia
-                </CardTitle>
+                <CardTitle className="text-amber-900 dark:text-amber-100 text-base">Ważne przypomnienia</CardTitle>
                 <CardDescription className="text-amber-800 dark:text-amber-200 mt-1">
                   Przejrzyj te notatki przed podróżą
                 </CardDescription>
@@ -160,10 +174,7 @@ export default function GeneratedPlanView({
           <CardContent>
             <ul className="space-y-2">
               {generatedContent.warnings.map((warning, index) => (
-                <li
-                  key={index}
-                  className="text-sm text-amber-900 dark:text-amber-100 flex items-start gap-2"
-                >
+                <li key={index} className="text-sm text-amber-900 dark:text-amber-100 flex items-start gap-2">
                   <span className="text-amber-600 dark:text-amber-500 mt-0.5">•</span>
                   <span>{warning}</span>
                 </li>
@@ -192,9 +203,7 @@ export default function GeneratedPlanView({
                 />
               </svg>
               <div className="flex-1">
-                <CardTitle className="text-blue-900 dark:text-blue-100 text-base">
-                  Dostosowania planu
-                </CardTitle>
+                <CardTitle className="text-blue-900 dark:text-blue-100 text-base">Dostosowania planu</CardTitle>
                 <CardDescription className="text-blue-800 dark:text-blue-200 mt-1">
                   Zmiany wprowadzone w celu optymalizacji planu
                 </CardDescription>
@@ -204,10 +213,7 @@ export default function GeneratedPlanView({
           <CardContent>
             <ul className="space-y-2">
               {generatedContent.modifications.map((modification, index) => (
-                <li
-                  key={index}
-                  className="text-sm text-blue-900 dark:text-blue-100 flex items-start gap-2"
-                >
+                <li key={index} className="text-sm text-blue-900 dark:text-blue-100 flex items-start gap-2">
                   <span className="text-blue-600 dark:text-blue-500 mt-0.5">•</span>
                   <span>{modification}</span>
                 </li>
@@ -221,9 +227,7 @@ export default function GeneratedPlanView({
       <Card>
         <CardHeader>
           <CardTitle>Plan dzienny</CardTitle>
-          <CardDescription>
-            Rozwiń każdy dzień, aby zobaczyć spersonalizowany harmonogram
-          </CardDescription>
+          <CardDescription>Rozwiń każdy dzień, aby zobaczyć spersonalizowany harmonogram</CardDescription>
         </CardHeader>
         <CardContent>
           <Accordion type="single" collapsible className="w-full">
@@ -248,7 +252,8 @@ export default function GeneratedPlanView({
                           </div>
                           <div className="flex items-center gap-2 mt-1">
                             <span className="text-xs text-muted-foreground">
-                              {activityCount} {activityCount === 1 ? "aktywność" : activityCount < 5 ? "aktywności" : "aktywności"}
+                              {activityCount}{" "}
+                              {activityCount === 1 ? "aktywność" : activityCount < 5 ? "aktywności" : "aktywności"}
                             </span>
                           </div>
                         </div>
@@ -259,12 +264,7 @@ export default function GeneratedPlanView({
                     <div className="pt-4 space-y-4">
                       {onAddActivity && (
                         <div className="flex justify-end">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => onAddActivity(day.date)}
-                            className="gap-2"
-                          >
+                          <Button variant="outline" size="sm" onClick={() => onAddActivity(day.date)} className="gap-2">
                             <Plus className="h-4 w-4" />
                             Dodaj aktywność
                           </Button>
@@ -273,16 +273,8 @@ export default function GeneratedPlanView({
                       <EventTimeline
                         items={day.items}
                         currency={generatedContent.currency}
-                        onEdit={
-                          onEditActivity
-                            ? (item) => onEditActivity(day.date, item)
-                            : undefined
-                        }
-                        onDelete={
-                          onDeleteActivity
-                            ? (itemId) => onDeleteActivity(day.date, itemId)
-                            : undefined
-                        }
+                        onEdit={onEditActivity ? (item) => onEditActivity(day.date, item) : undefined}
+                        onDelete={onDeleteActivity ? (itemId) => onDeleteActivity(day.date, itemId) : undefined}
                       />
                     </div>
                   </AccordionContent>
@@ -298,4 +290,3 @@ export default function GeneratedPlanView({
     </div>
   );
 }
-

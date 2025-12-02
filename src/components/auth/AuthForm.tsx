@@ -249,4 +249,3 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
     </div>
   );
 }
-

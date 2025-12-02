@@ -1,8 +1,4 @@
-import type {
-  CreateFixedPointCommand,
-  UpdateFixedPointCommand,
-  FixedPointDto,
-} from "@/types";
+import type { CreateFixedPointCommand, UpdateFixedPointCommand, FixedPointDto } from "@/types";
 import type { SupabaseClient } from "@/db/supabase.client";
 import { DatabaseError, NotFoundError } from "@/lib/errors/app-error";
 import { logger } from "@/lib/utils/logger";
@@ -57,10 +53,7 @@ export const createFixedPoint = async (
       errorCode: error.code,
       errorMessage: error.message,
     });
-    throw new DatabaseError(
-      "Failed to create fixed point. Please try again later.",
-      new Error(error.message)
-    );
+    throw new DatabaseError("Failed to create fixed point. Please try again later.", new Error(error.message));
   }
 
   logger.info("Fixed point created successfully", {
@@ -120,10 +113,7 @@ export const getFixedPoints = async (
       errorCode: error.code,
       errorMessage: error.message,
     });
-    throw new DatabaseError(
-      "Failed to retrieve fixed points. Please try again later.",
-      new Error(error.message)
-    );
+    throw new DatabaseError("Failed to retrieve fixed points. Please try again later.", new Error(error.message));
   }
 
   logger.info("Fixed points fetched successfully", {
@@ -199,10 +189,7 @@ export const updateFixedPoint = async (
       errorCode: error.code,
       errorMessage: error.message,
     });
-    throw new DatabaseError(
-      "Failed to update fixed point. Please try again later.",
-      new Error(error.message)
-    );
+    throw new DatabaseError("Failed to update fixed point. Please try again later.", new Error(error.message));
   }
 
   if (!data) {
@@ -254,11 +241,7 @@ export const deleteFixedPoint = async (
   }
 
   // Delete the fixed point
-  const { error } = await supabase
-    .from("fixed_points")
-    .delete()
-    .eq("id", fixedPointId)
-    .eq("plan_id", planId);
+  const { error } = await supabase.from("fixed_points").delete().eq("id", fixedPointId).eq("plan_id", planId);
 
   if (error) {
     logger.error("Failed to delete fixed point", {
@@ -268,10 +251,7 @@ export const deleteFixedPoint = async (
       errorCode: error.code,
       errorMessage: error.message,
     });
-    throw new DatabaseError(
-      "Failed to delete fixed point. Please try again later.",
-      new Error(error.message)
-    );
+    throw new DatabaseError("Failed to delete fixed point. Please try again later.", new Error(error.message));
   }
 
   logger.info("Fixed point deleted successfully", {
@@ -280,4 +260,3 @@ export const deleteFixedPoint = async (
     userId,
   });
 };
-

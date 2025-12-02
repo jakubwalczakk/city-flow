@@ -1,26 +1,26 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import type { PaginatedPlansDto, PlanStatus } from "@/types";
 
 /**
  * Parameters for fetching plans.
  */
-export type UsePlansParams = {
+export interface UsePlansParams {
   status?: PlanStatus | PlanStatus[];
   limit: number;
   offset: number;
   sortBy?: "created_at" | "name";
   order?: "asc" | "desc";
-};
+}
 
 /**
  * Result type returned by the usePlans hook.
  */
-export type UsePlansResult = {
+export interface UsePlansResult {
   data: PaginatedPlansDto | null;
   isLoading: boolean;
   error: string | null;
   refetch: () => void;
-};
+}
 
 /**
  * Custom hook for fetching plans from the API.
@@ -34,7 +34,7 @@ export const usePlans = (params: UsePlansParams): UsePlansResult => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchPlans = async () => {
+  const fetchPlans = useCallback(async () => {
     setIsLoading(true);
     setError(null);
 
@@ -69,27 +69,18 @@ export const usePlans = (params: UsePlansParams): UsePlansResult => {
       const result: PaginatedPlansDto = await response.json();
       setData(result);
     } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "An unknown error occurred while fetching plans.";
+      const errorMessage = err instanceof Error ? err.message : "An unknown error occurred while fetching plans.";
       setError(errorMessage);
       setData(null);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [params.status, params.limit, params.offset, params.sortBy, params.order]);
 
   // Refetch when parameters change
   useEffect(() => {
     fetchPlans();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    // Stringify status array to avoid infinite loop from array reference changes
-    JSON.stringify(params.status),
-    params.limit,
-    params.offset,
-    params.sortBy,
-    params.order,
-  ]);
+  }, [fetchPlans]);
 
   return {
     data,
@@ -98,4 +89,3 @@ export const usePlans = (params: UsePlansParams): UsePlansResult => {
     refetch: fetchPlans,
   };
 };
-

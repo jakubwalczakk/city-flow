@@ -1,9 +1,11 @@
 # API Endpoint Implementation Plan: Add Fixed Point
 
 ## 1. Endpoint Overview
+
 This endpoint allows an authenticated user to add a new fixed point to one of their existing travel plans.
 
 ## 2. Request Details
+
 - **HTTP Method**: `POST`
 - **URL Structure**: `/api/plans/{planId}/fixed-points`
 - **URL Parameters**:
@@ -19,15 +21,18 @@ This endpoint allows an authenticated user to add a new fixed point to one of th
   ```
 
 ## 3. Types Used
+
 - **Command Model (Request)**: `CreateFixedPointCommand` from `src/types.ts`.
 - **DTO (Response)**: `FixedPointDto` from `src/types.ts`.
 
 ## 4. Response Details
+
 - **Success Response (`201 Created`)**: Returns the newly created fixed point object.
 - **Error Response (`400 Bad Request`)**: Returned for an invalid request body.
 - **Error Response (`404 Not Found`)**: Returned if the parent plan does not exist or does not belong to the user.
 
 ## 5. Data Flow
+
 1. The client sends a `POST` request to `/api/plans/{planId}/fixed-points` with the new fixed point data.
 2. Astro middleware verifies the user's token.
 3. The API handler in `src/pages/api/plans/[planId]/fixed-points/index.ts` receives the request.
@@ -40,22 +45,26 @@ This endpoint allows an authenticated user to add a new fixed point to one of th
 10. The handler sends a `201 Created` response with the new fixed point object.
 
 ## 6. Security Considerations
+
 - **Authentication**: Requires a valid JWT.
 - **Authorization**: Ownership of the parent `plan` resource must be verified before the `INSERT` operation is performed.
 - **RLS**: Policies on `fixed_points` should be set up to leverage a join with the `plans` table to check for ownership, allowing an `INSERT` only if the `plan`'s `user_id` matches `auth.uid()`.
 - **Input Validation**: All fields in the request body must be strictly validated.
 
 ## 7. Error Handling
+
 - **`400 Bad Request`**: For invalid request body data.
 - **`401 Unauthorized`**: Unauthenticated user.
 - **`404 Not Found`**: If the parent plan is not found for the authenticated user.
 - **`500 Internal Server Error`**: For database errors.
 
 ## 8. Performance Considerations
+
 - A simple `INSERT` operation, which is very fast.
 - The `plan_id` column in `fixed_points` should be indexed.
 
 ## 9. Implementation Steps
+
 1. **Create Validation Schema**:
    - Create a new file `src/lib/schemas/fixed-point.schema.ts`.
    - Define a Zod schema for `CreateFixedPointCommand`.

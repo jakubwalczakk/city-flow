@@ -34,6 +34,7 @@ START
 ```
 
 **Alternatywnie - Google OAuth:**
+
 ```
 /register
   ↓
@@ -61,6 +62,7 @@ START
 ```
 
 **Alternatywnie - Google OAuth:**
+
 ```
 /login
   ↓
@@ -136,6 +138,7 @@ Dowolna strona (zalogowany)
 ## Komponenty na Poszczególnych Stronach
 
 ### `/login`
+
 - **Layout**: Layout.astro (bez headera)
 - **Komponenty**:
   - AuthForm (mode="login")
@@ -143,6 +146,7 @@ Dowolna strona (zalogowany)
   - Linki: → /register, → /, → /forgot-password
 
 ### `/register`
+
 - **Layout**: Layout.astro (bez headera)
 - **Komponenty**:
   - AuthForm (mode="register")
@@ -151,24 +155,28 @@ Dowolna strona (zalogowany)
   - Informacja o regulaminie
 
 ### `/forgot-password`
+
 - **Layout**: Layout.astro (bez headera)
 - **Komponenty**:
   - ForgotPasswordForm
   - Linki: → /login, → /
 
 ### `/update-password`
+
 - **Layout**: Layout.astro (bez headera)
 - **Komponenty**:
   - UpdatePasswordForm
   - Link: → /
 
 ### `/plans` (dashboard)
+
 - **Layout**: MainLayout.astro (z headerem)
 - **Komponenty**:
   - PlansDashboard
   - UserMenu (w headerze, tylko dla zalogowanych)
 
 ### `/profile`
+
 - **Layout**: MainLayout.astro (z headerem)
 - **Komponenty**:
   - ProfileView
@@ -179,11 +187,13 @@ Dowolna strona (zalogowany)
 ### Middleware (`src/middleware/index.ts`)
 
 Będzie chroniło następujące trasy:
+
 - ✅ `/plans` → wymaga autentykacji
 - ✅ `/plans/:id` → wymaga autentykacji
 - ✅ `/profile` → wymaga autentykacji
 
 Przekierowania:
+
 - Jeśli niezalogowany → `/login`
 - Jeśli zalogowany i na `/login` lub `/register` → `/plans`
 
@@ -195,9 +205,11 @@ const isAuthenticated = !!user;
 ```
 
 Jeśli `isAuthenticated === true`:
+
 - Pokazuj UserMenu z emailem użytkownika
 
 Jeśli `isAuthenticated === false`:
+
 - Pokazuj przyciski "Zaloguj się" i "Zarejestruj się"
 
 ## Zmienne Środowiskowe
@@ -213,17 +225,20 @@ SUPABASE_SERVICE_ROLE_KEY=eyJxxx...
 ## Konfiguracja Supabase
 
 ### Google OAuth
+
 1. Dodać Google jako providera w Supabase Dashboard
 2. Skonfigurować Redirect URLs:
    - `http://localhost:4321/auth/callback` (dev)
    - `https://your-domain.com/auth/callback` (prod)
 
 ### Email Templates
+
 Dostosować szablony emaili w Supabase Dashboard:
+
 - Email weryfikacyjny (sign up)
 - Email resetujący hasło (password recovery)
 
 ### Auth Settings
+
 - Email Confirmation: włączone/wyłączone (MVP może być wyłączone)
 - Password Requirements: min. 8 znaków (zgodne ze schematem)
-

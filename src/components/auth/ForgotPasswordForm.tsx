@@ -2,21 +2,11 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
-import {
-  forgotPasswordSchema,
-  type ForgotPasswordFormData,
-} from "@/lib/schemas/auth.schema";
+import { forgotPasswordSchema, type ForgotPasswordFormData } from "@/lib/schemas/auth.schema";
 
 /**
  * Forgot password form component.
@@ -34,7 +24,7 @@ export function ForgotPasswordForm() {
     },
   });
 
-  const onSubmit = async (data: ForgotPasswordFormData) => {
+  const onSubmit = async () => {
     setIsLoading(true);
     setError(null);
     setSuccess(false);
@@ -45,19 +35,13 @@ export function ForgotPasswordForm() {
       //   redirectTo: `${window.location.origin}/update-password`
       // })
 
-      console.log("Password reset requested for:", data.email);
-
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
       setSuccess(true);
       form.reset();
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Nie udało się wysłać emaila resetującego hasło"
-      );
+      setError(err instanceof Error ? err.message : "Nie udało się wysłać emaila resetującego hasło");
     } finally {
       setIsLoading(false);
     }
@@ -71,8 +55,7 @@ export function ForgotPasswordForm() {
           <AlertDescription>
             <p className="font-medium">Email został wysłany!</p>
             <p className="mt-2 text-sm">
-              Sprawdź swoją skrzynkę odbiorczą i kliknij w link, aby zresetować hasło.
-              Link jest ważny przez 1 godzinę.
+              Sprawdź swoją skrzynkę odbiorczą i kliknij w link, aby zresetować hasło. Link jest ważny przez 1 godzinę.
             </p>
           </AlertDescription>
         </Alert>
@@ -80,17 +63,11 @@ export function ForgotPasswordForm() {
         <div className="text-center space-y-4">
           <p className="text-sm text-muted-foreground">
             Nie otrzymałeś emaila?{" "}
-            <button
-              onClick={() => setSuccess(false)}
-              className="text-primary hover:underline"
-            >
+            <button onClick={() => setSuccess(false)} className="text-primary hover:underline">
               Spróbuj ponownie
             </button>
           </p>
-          <a
-            href="/login"
-            className="inline-block text-sm text-primary hover:underline"
-          >
+          <a href="/login" className="inline-block text-sm text-primary hover:underline">
             ← Powrót do logowania
           </a>
         </div>
@@ -116,12 +93,7 @@ export function ForgotPasswordForm() {
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input
-                    type="email"
-                    placeholder="twoj.email@example.com"
-                    disabled={isLoading}
-                    {...field}
-                  />
+                  <Input type="email" placeholder="twoj.email@example.com" disabled={isLoading} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -146,4 +118,3 @@ export function ForgotPasswordForm() {
     </div>
   );
 }
-

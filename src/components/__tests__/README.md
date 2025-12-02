@@ -7,6 +7,7 @@ Ten katalog zawiera testy jednostkowe dla komponentów React w aplikacji CityFlo
 ## Dostępne Testy
 
 ### NewPlanForm.test.tsx
+
 Kompleksowy zestaw testów dla komponentu `NewPlanForm` - głównego komponentu odpowiedzialnego za tworzenie i edycję planów podróży.
 
 **Pokrycie**: 26 testów
@@ -16,15 +17,17 @@ Kompleksowy zestaw testów dla komponentu `NewPlanForm` - głównego komponentu 
 ## Konwencje Testowe
 
 ### Struktura Plików
+
 - Testy są umieszczane obok testowanych komponentów z rozszerzeniem `.test.tsx`
 - Dokumentacja testów jest w plikach `.test.md`
 - Testy pomocnicze i mocki są w katalogu `__tests__/`
 
 ### Naming Convention
+
 ```typescript
-describe('ComponentName', () => {
-  describe('Feature Group', () => {
-    it('should do something specific', () => {
+describe("ComponentName", () => {
+  describe("Feature Group", () => {
+    it("should do something specific", () => {
       // Arrange
       // Act
       // Assert
@@ -34,16 +37,17 @@ describe('ComponentName', () => {
 ```
 
 ### Wzorzec AAA (Arrange-Act-Assert)
+
 Wszystkie testy używają wzorca AAA dla lepszej czytelności:
 
 ```typescript
 it('should render component', () => {
   // Arrange - przygotowanie danych i mocków
   const props = { ... };
-  
+
   // Act - wykonanie akcji
   render(<Component {...props} />);
-  
+
   // Assert - sprawdzenie rezultatu
   expect(screen.getByText('...')).toBeInTheDocument();
 });
@@ -52,26 +56,31 @@ it('should render component', () => {
 ## Uruchamianie Testów
 
 ### Wszystkie testy jednostkowe:
+
 ```bash
 npm run test:unit
 ```
 
 ### Testy w trybie watch:
+
 ```bash
 npm run test:unit -- --watch
 ```
 
 ### Testy z interfejsem UI:
+
 ```bash
 npm run test:unit:ui
 ```
 
 ### Konkretny plik testowy:
+
 ```bash
 npm run test:unit -- NewPlanForm.test.tsx
 ```
 
 ### Z pokryciem kodu:
+
 ```bash
 npx vitest run --coverage
 ```
@@ -79,27 +88,32 @@ npx vitest run --coverage
 ## Konfiguracja
 
 ### vitest.config.ts
+
 Główna konfiguracja Vitest znajduje się w `vitest.config.ts` w katalogu głównym projektu.
 
 **Kluczowe ustawienia:**
+
 - Environment: `jsdom`
 - Setup file: `test/setup.ts`
 - Coverage thresholds: 70% dla wszystkich metryk
 - Alias: `@` wskazuje na `./src`
 
 ### test/setup.ts
+
 Plik setup importuje `@testing-library/jest-dom/vitest` dla dodatkowych matcherów DOM.
 
 ## Mockowanie
 
 ### Custom Hooks
+
 ```typescript
-vi.mock('@/hooks/useCustomHook', () => ({
+vi.mock("@/hooks/useCustomHook", () => ({
   useCustomHook: vi.fn(),
 }));
 ```
 
 ### Komponenty
+
 ```typescript
 vi.mock('@/components/ChildComponent', () => ({
   ChildComponent: ({ onClick }: Props) => (
@@ -109,11 +123,12 @@ vi.mock('@/components/ChildComponent', () => ({
 ```
 
 ### API Calls
+
 ```typescript
 global.fetch = vi.fn(() =>
   Promise.resolve({
     ok: true,
-    json: () => Promise.resolve({ data: 'test' }),
+    json: () => Promise.resolve({ data: "test" }),
   })
 ) as any;
 ```
@@ -121,34 +136,42 @@ global.fetch = vi.fn(() =>
 ## Najlepsze Praktyki
 
 ### 1. Testuj zachowanie, nie implementację
+
 ❌ **Źle:**
+
 ```typescript
 expect(component.state.count).toBe(1);
 ```
 
 ✅ **Dobrze:**
+
 ```typescript
-expect(screen.getByText('Count: 1')).toBeInTheDocument();
+expect(screen.getByText("Count: 1")).toBeInTheDocument();
 ```
 
 ### 2. Używaj user-event zamiast fireEvent
+
 ❌ **Źle:**
+
 ```typescript
 fireEvent.click(button);
 ```
 
 ✅ **Dobrze:**
+
 ```typescript
 const user = userEvent.setup();
 await user.click(button);
 ```
 
 ### 3. Mockuj na odpowiednim poziomie
+
 - Mockuj zależności zewnętrzne (API, hooki)
 - Nie mockuj wewnętrznej logiki testowanego komponentu
 - Mockuj komponenty potomne dla testów jednostkowych
 
 ### 4. Czyszczenie po testach
+
 ```typescript
 beforeEach(() => {
   vi.clearAllMocks();
@@ -160,13 +183,15 @@ afterEach(() => {
 ```
 
 ### 5. Używaj waitFor dla operacji asynchronicznych
+
 ```typescript
 await waitFor(() => {
-  expect(screen.getByText('Loaded')).toBeInTheDocument();
+  expect(screen.getByText("Loaded")).toBeInTheDocument();
 });
 ```
 
 ### 6. Testuj przypadki brzegowe
+
 - Puste dane
 - Wartości null/undefined
 - Błędy API
@@ -200,6 +225,7 @@ Progi pokrycia kodu są skonfigurowane w `vitest.config.ts`:
 - **Statements**: 70%
 
 ### Wyłączenia z pokrycia:
+
 - Pliki testowe (`*.test.tsx`, `*.spec.tsx`)
 - Pliki definicji typów (`*.d.ts`)
 - Komponenty UI z Shadcn (`src/components/ui/**`)
@@ -207,22 +233,26 @@ Progi pokrycia kodu są skonfigurowane w `vitest.config.ts`:
 ## Debugowanie Testów
 
 ### 1. Wyświetl renderowany DOM:
+
 ```typescript
-import { screen } from '@testing-library/react';
+import { screen } from "@testing-library/react";
 screen.debug();
 ```
 
 ### 2. Użyj UI mode:
+
 ```bash
 npm run test:unit:ui
 ```
 
 ### 3. Filtruj testy:
+
 ```bash
 npm run test:unit -- -t "should render"
 ```
 
 ### 4. Verbose output:
+
 ```bash
 npm run test:unit -- --reporter=verbose
 ```
@@ -301,7 +331,7 @@ describe('MyComponent', () => {
 ## Kontakt
 
 W razie pytań dotyczących testów, sprawdź:
+
 1. Dokumentację w `.cursor/rules/vitest-unit-testing.mdc`
 2. Przykłady w `src/components/NewPlanForm.test.tsx`
 3. Ten README
-

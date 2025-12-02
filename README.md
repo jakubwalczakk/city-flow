@@ -38,10 +38,10 @@ CityFlow is an AI-powered web application (MVP) designed to simplify the process
 
 ### Testing
 
--   **Test Runner**: [Vitest](https://vitest.dev/)
--   **Component Testing**: [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/)
--   **E2E Testing**: [Playwright](https://playwright.dev/)
--   **API Testing**: [Supertest](https://github.com/ladjs/supertest)
+- **Test Runner**: [Vitest](https://vitest.dev/)
+- **Component Testing**: [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/)
+- **E2E Testing**: [Playwright](https://playwright.dev/)
+- **API Testing**: [Supertest](https://github.com/ladjs/supertest)
 
 ### Hosting & CI/CD
 
@@ -87,7 +87,7 @@ CityFlow is an AI-powered web application (MVP) designed to simplify the process
     ```bash
     # Start Supabase (first time)
     supabase start
-    
+
     # Or reset the database (if already started)
     supabase db reset
     ```
@@ -105,39 +105,42 @@ CityFlow is an AI-powered web application (MVP) designed to simplify the process
 ## Available Scripts
 
 ### Development
--   `npm run dev`: Starts the development server.
--   `npm run build`: Builds the application for production.
--   `npm run preview`: Serves the production build locally for preview.
+
+- `npm run dev`: Starts the development server.
+- `npm run build`: Builds the application for production.
+- `npm run preview`: Serves the production build locally for preview.
 
 ### Code Quality
--   `npm run lint`: Lints the code using ESLint.
--   `npm run lint:fix`: Lints the code and automatically fixes issues.
--   `npm run format`: Formats the code using Prettier.
+
+- `npm run lint`: Lints the code using ESLint.
+- `npm run lint:fix`: Lints the code and automatically fixes issues.
+- `npm run format`: Formats the code using Prettier.
 
 ### Testing
--   `npm run test:unit`: Runs unit tests with Vitest.
--   `npm run test:unit:ui`: Runs unit tests with Vitest UI.
--   `npm run test:e2e`: Runs end-to-end tests with Playwright.
--   `npm run test:e2e:ui`: Runs end-to-end tests with Playwright UI.
+
+- `npm run test:unit`: Runs unit tests with Vitest.
+- `npm run test:unit:ui`: Runs unit tests with Vitest UI.
+- `npm run test:e2e`: Runs end-to-end tests with Playwright.
+- `npm run test:e2e:ui`: Runs end-to-end tests with Playwright UI.
 
 ## Project Scope
 
 ### Key Features
 
--   **AI-Powered Itinerary Generation**: Converts user notes, preferences, and fixed points into a detailed, hour-by-hour travel plan.
--   **User Authentication & Profiles**: Secure user registration and login (Email/Password, Google OAuth) with profiles for storing travel preferences.
--   **Plan Management (CRUD)**: Create, read, update, and delete travel plans.
--   **Simple Plan Editing**: Users can remove items from a generated plan and trigger the AI to rebuild and optimize the day's schedule.
--   **PDF Export**: Export the final itinerary to a clean, text-only PDF for offline use.
--   **Usage Limits**: As an MVP, registered users receive 5 free plan generations per month.
--   **Fully Responsive Design**: A seamless experience across desktop and mobile devices.
+- **AI-Powered Itinerary Generation**: Converts user notes, preferences, and fixed points into a detailed, hour-by-hour travel plan.
+- **User Authentication & Profiles**: Secure user registration and login (Email/Password, Google OAuth) with profiles for storing travel preferences.
+- **Plan Management (CRUD)**: Create, read, update, and delete travel plans.
+- **Simple Plan Editing**: Users can remove items from a generated plan and trigger the AI to rebuild and optimize the day's schedule.
+- **PDF Export**: Export the final itinerary to a clean, text-only PDF for offline use.
+- **Usage Limits**: As an MVP, registered users receive 5 free plan generations per month.
+- **Fully Responsive Design**: A seamless experience across desktop and mobile devices.
 
 ### Out of Scope for MVP
 
--   Native mobile applications.
--   Integrations with external booking services (flights, hotels).
--   Advanced social features like sharing or commenting on plans.
--   Multimedia support (e.g., uploading photos).
+- Native mobile applications.
+- Integrations with external booking services (flights, hotels).
+- Advanced social features like sharing or commenting on plans.
+- Multimedia support (e.g., uploading photos).
 
 ## Project Status
 

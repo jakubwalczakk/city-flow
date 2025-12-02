@@ -22,11 +22,9 @@ export function PlanGenerationLoading({ planName }: PlanGenerationLoadingProps) 
   return (
     <div className="w-full">
       <div className="space-y-2 mb-6">
-        <h2 className="text-center text-2xl font-semibold">
-          Tworzenie planu
-        </h2>
+        <h2 className="text-center text-2xl font-semibold">Tworzenie planu</h2>
       </div>
-      
+
       <div className="space-y-6 py-6">
         {/* Plan Name */}
         <div className="text-center">
@@ -46,14 +44,10 @@ export function PlanGenerationLoading({ planName }: PlanGenerationLoadingProps) 
               <div className="absolute top-8 left-10 h-12 w-20 animate-float-slow rounded-full bg-white/80 blur-sm" />
               <div className="absolute top-16 right-16 h-10 w-16 animate-float-slower rounded-full bg-white/70 blur-sm" />
               <div className="absolute top-24 left-1/3 h-8 w-14 animate-float rounded-full bg-white/60 blur-sm" />
-              
+
               {/* Airplane */}
               <div className="absolute bottom-8 left-0 animate-plane-takeoff">
-                <svg
-                  className="h-12 w-12 text-blue-600"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
+                <svg className="h-12 w-12 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" />
                 </svg>
               </div>
@@ -69,10 +63,10 @@ export function PlanGenerationLoading({ planName }: PlanGenerationLoadingProps) 
             <div className="relative h-full w-full bg-gradient-to-b from-sky-300 to-blue-200">
               {/* Sun */}
               <div className="absolute top-4 right-8 h-16 w-16 animate-pulse-slow rounded-full bg-yellow-400 shadow-lg shadow-yellow-300/50" />
-              
+
               {/* Beach */}
               <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-amber-200 to-amber-100" />
-              
+
               {/* Palm Trees */}
               <div className="absolute bottom-20 left-12 animate-sway">
                 <div className="relative">
@@ -85,7 +79,7 @@ export function PlanGenerationLoading({ planName }: PlanGenerationLoadingProps) 
                   </div>
                 </div>
               </div>
-              
+
               <div className="absolute bottom-20 right-16 animate-sway-delayed">
                 <div className="relative">
                   {/* Trunk */}
@@ -115,7 +109,7 @@ export function PlanGenerationLoading({ planName }: PlanGenerationLoadingProps) 
             <div className="relative h-full w-full bg-gradient-to-b from-orange-300 via-pink-300 to-purple-400">
               {/* Sun setting */}
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-20 w-20 animate-pulse-slow rounded-full bg-gradient-to-b from-orange-400 to-red-400 shadow-2xl shadow-orange-500/50" />
-              
+
               {/* Sun reflection on water */}
               <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-purple-500/30 to-transparent">
                 <div className="absolute top-8 left-1/2 -translate-x-1/2 h-16 w-1 animate-shimmer bg-gradient-to-b from-orange-300/80 to-transparent" />
@@ -140,9 +134,7 @@ export function PlanGenerationLoading({ planName }: PlanGenerationLoadingProps) 
 
         {/* Loading Text */}
         <div className="text-center space-y-2">
-          <p className="text-sm text-muted-foreground animate-pulse">
-            Tworzenie idealnego planu podróży...
-          </p>
+          <p className="text-sm text-muted-foreground animate-pulse">Tworzenie idealnego planu podróży...</p>
           <div className="flex justify-center gap-1">
             <div className="h-2 w-2 animate-bounce rounded-full bg-primary [animation-delay:-0.3s]" />
             <div className="h-2 w-2 animate-bounce rounded-full bg-primary [animation-delay:-0.15s]" />
@@ -153,4 +145,3 @@ export function PlanGenerationLoading({ planName }: PlanGenerationLoadingProps) 
     </div>
   );
 }
-

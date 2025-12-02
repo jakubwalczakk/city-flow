@@ -33,9 +33,12 @@ export const createFixedPointSchema = z.object({
  */
 export const updateFixedPointSchema = z.object({
   location: z.string().min(1, { message: "Location cannot be empty." }).optional(),
-  event_at: z.string().datetime({
-    message: "Event date must be a valid ISO 8601 datetime string.",
-  }).optional(),
+  event_at: z
+    .string()
+    .datetime({
+      message: "Event date must be a valid ISO 8601 datetime string.",
+    })
+    .optional(),
   event_duration: z
     .number()
     .int({ message: "Event duration must be an integer." })
@@ -44,4 +47,3 @@ export const updateFixedPointSchema = z.object({
     .nullable(),
   description: z.string().optional().nullable(),
 });
-

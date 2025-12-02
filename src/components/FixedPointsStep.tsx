@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { fixedPointSchema } from "@/lib/schemas/plan.schema";
 import type { CreateFixedPointCommand } from "@/types";
 import { Trash2, Plus, MapPin, Clock, Pencil } from "lucide-react";
+import { ZodError } from "zod";
 
 interface FixedPointsStepProps {
   fixedPoints: CreateFixedPointCommand[];
@@ -28,7 +29,7 @@ export function FixedPointsStep({
   updateFixedPoint,
   goToNextStep,
   goToPrevStep,
-  onCancel,
+  onCancel: _onCancel, // eslint-disable-line @typescript-eslint/no-unused-vars
   isLoading,
   error,
   onSave,
@@ -46,21 +47,20 @@ export function FixedPointsStep({
   const validateAndGetPoint = () => {
     const pointToValidate = {
       ...currentPoint,
-      event_at: currentPoint.event_at
-        ? new Date(currentPoint.event_at).toISOString()
-        : "",
+      event_at: currentPoint.event_at ? new Date(currentPoint.event_at).toISOString() : "",
     };
     fixedPointSchema.parse(pointToValidate);
     return pointToValidate;
   };
 
   const handleError = (error: unknown) => {
-    if (error instanceof Error && "errors" in error) {
-      const zodError = error as any;
+    if (error instanceof ZodError) {
       const newErrors: Record<string, string> = {};
-      zodError.errors.forEach((err: any) => {
+      error.errors.forEach((err) => {
         const path = err.path[0];
-        newErrors[path] = err.message;
+        if (typeof path === "string") {
+          newErrors[path] = err.message;
+        }
       });
       setErrors(newErrors);
     }
@@ -105,9 +105,7 @@ export function FixedPointsStep({
     setIsAdding(false);
     setCurrentPoint({
       ...point,
-      event_at: point.event_at
-        ? new Date(point.event_at).toISOString().slice(0, 16)
-        : "",
+      event_at: point.event_at ? new Date(point.event_at).toISOString().slice(0, 16) : "",
     });
     setErrors({});
   };
@@ -142,9 +140,7 @@ export function FixedPointsStep({
   const renderForm = () => (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">
-          {isAdding ? "Dodaj stały punkt" : "Edytuj stały punkt"}
-        </CardTitle>
+        <CardTitle className="text-base">{isAdding ? "Dodaj stały punkt" : "Edytuj stały punkt"}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
@@ -155,14 +151,10 @@ export function FixedPointsStep({
             id="location"
             placeholder="np. Lotnisko Chopina"
             value={currentPoint.location}
-            onChange={(e) =>
-              setCurrentPoint({ ...currentPoint, location: e.target.value })
-            }
+            onChange={(e) => setCurrentPoint({ ...currentPoint, location: e.target.value })}
             className={errors.location ? "border-destructive" : ""}
           />
-          {errors.location && (
-            <p className="text-sm text-destructive">{errors.location}</p>
-          )}
+          {errors.location && <p className="text-sm text-destructive">{errors.location}</p>}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -174,14 +166,10 @@ export function FixedPointsStep({
               id="event_at"
               type="datetime-local"
               value={currentPoint.event_at}
-              onChange={(e) =>
-                setCurrentPoint({ ...currentPoint, event_at: e.target.value })
-              }
+              onChange={(e) => setCurrentPoint({ ...currentPoint, event_at: e.target.value })}
               className={errors.event_at ? "border-destructive" : ""}
             />
-            {errors.event_at && (
-              <p className="text-sm text-destructive">{errors.event_at}</p>
-            )}
+            {errors.event_at && <p className="text-sm text-destructive">{errors.event_at}</p>}
           </div>
 
           <div className="space-y-2">
@@ -194,19 +182,13 @@ export function FixedPointsStep({
               onChange={(e) =>
                 setCurrentPoint({
                   ...currentPoint,
-                  event_duration: e.target.value
-                    ? parseInt(e.target.value, 10)
-                    : null,
+                  event_duration: e.target.value ? parseInt(e.target.value, 10) : null,
                 })
               }
               placeholder="np. 120"
               className={errors.event_duration ? "border-destructive" : ""}
             />
-            {errors.event_duration && (
-              <p className="text-sm text-destructive">
-                {errors.event_duration}
-              </p>
-            )}
+            {errors.event_duration && <p className="text-sm text-destructive">{errors.event_duration}</p>}
           </div>
         </div>
 
@@ -227,11 +209,7 @@ export function FixedPointsStep({
         </div>
 
         <div className="flex gap-2">
-          <Button
-            onClick={isAdding ? handleAddPoint : handleUpdatePoint}
-            disabled={!isFormValid()}
-            className="flex-1"
-          >
+          <Button onClick={isAdding ? handleAddPoint : handleUpdatePoint} disabled={!isFormValid()} className="flex-1">
             {isAdding ? "Dodaj punkt" : "Zapisz zmiany"}
           </Button>
           <Button variant="outline" onClick={resetForm}>
@@ -247,8 +225,8 @@ export function FixedPointsStep({
       <div>
         <h3 className="text-lg font-semibold mb-2">Stałe punkty</h3>
         <p className="text-sm text-muted-foreground mb-4">
-          Dodaj wszelkie stałe zobowiązania, takie jak loty, zameldowania w hotelu czy bilety na wydarzenia.
-          Będą one zablokowane w Twoim planie.
+          Dodaj wszelkie stałe zobowiązania, takie jak loty, zameldowania w hotelu czy bilety na wydarzenia. Będą one
+          zablokowane w Twoim planie.
         </p>
       </div>
 
@@ -267,11 +245,7 @@ export function FixedPointsStep({
                         <MapPin className="h-4 w-4 mt-1 text-muted-foreground" />
                         <div>
                           <p className="font-medium">{point.location}</p>
-                          {point.description && (
-                            <p className="text-sm text-muted-foreground">
-                              {point.description}
-                            </p>
-                          )}
+                          {point.description && <p className="text-sm text-muted-foreground">{point.description}</p>}
                         </div>
                       </div>
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -286,11 +260,7 @@ export function FixedPointsStep({
                       </div>
                     </div>
                     <div className="flex items-center">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleEditClick(index)}
-                      >
+                      <Button variant="ghost" size="icon" onClick={() => handleEditClick(index)}>
                         <Pencil className="h-4 w-4" />
                       </Button>
                       <Button
@@ -314,19 +284,13 @@ export function FixedPointsStep({
       {isAdding ? (
         renderForm()
       ) : (
-        <Button
-          variant="outline"
-          onClick={handleAddClick}
-          className="w-full"
-        >
+        <Button variant="outline" onClick={handleAddClick} className="w-full">
           <Plus className="mr-2 h-4 w-4" />
           Dodaj stały punkt
         </Button>
       )}
 
-      {error && (
-        <p className="text-sm text-destructive text-center my-2">{error}</p>
-      )}
+      {error && <p className="text-sm text-destructive text-center my-2">{error}</p>}
 
       {/* Navigation buttons */}
       <div className="flex justify-between pt-4">
@@ -348,4 +312,3 @@ export function FixedPointsStep({
     </div>
   );
 }
-

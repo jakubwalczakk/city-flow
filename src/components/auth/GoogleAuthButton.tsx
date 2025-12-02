@@ -4,9 +4,9 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, AlertCircle } from "lucide-react";
 import { supabaseClient } from "@/db/supabase.client";
 
-type GoogleAuthButtonProps = {
+interface GoogleAuthButtonProps {
   mode?: "login" | "register";
-};
+}
 
 /**
  * Button component for Google OAuth authentication.
@@ -33,11 +33,7 @@ export function GoogleAuthButton({ mode = "login" }: GoogleAuthButtonProps) {
       // Note: User will be redirected to Google OAuth page
       // After successful auth, they'll return to /plans
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Nie udało się zainicjować logowania przez Google"
-      );
+      setError(err instanceof Error ? err.message : "Nie udało się zainicjować logowania przez Google");
       setIsLoading(false);
     }
   };
@@ -51,13 +47,7 @@ export function GoogleAuthButton({ mode = "login" }: GoogleAuthButtonProps) {
         </Alert>
       )}
 
-      <Button
-        type="button"
-        variant="outline"
-        className="w-full"
-        onClick={handleGoogleAuth}
-        disabled={isLoading}
-      >
+      <Button type="button" variant="outline" className="w-full" onClick={handleGoogleAuth} disabled={isLoading}>
         {isLoading ? (
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
         ) : (
@@ -76,11 +66,8 @@ export function GoogleAuthButton({ mode = "login" }: GoogleAuthButtonProps) {
             />
           </svg>
         )}
-        {mode === "login"
-          ? "Zaloguj się przez Google"
-          : "Zarejestruj się przez Google"}
+        {mode === "login" ? "Zaloguj się przez Google" : "Zarejestruj się przez Google"}
       </Button>
     </div>
   );
 }
-

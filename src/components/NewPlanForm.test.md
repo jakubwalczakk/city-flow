@@ -20,75 +20,95 @@ Testy są zorganizowane według wzorca **Arrange-Act-Assert** i pogrupowane w na
 ## Grupy Testów
 
 ### 1. Rendering (4 testy)
+
 Testuje podstawowe renderowanie komponentu i jego elementów składowych.
 
 **Pokryte scenariusze:**
+
 - Renderowanie wskaźnika kroków (StepIndicator)
 - Renderowanie odpowiedniego komponentu kroku w zależności od `currentStep`
 - Renderowanie komponentu Card opakowującego kroki
 
 ### 2. Generation Loading State (3 testy)
+
 Testuje stan ładowania podczas generowania planu przez AI.
 
 **Pokryte scenariusze:**
+
 - Wyświetlanie animacji ładowania gdy `isGenerating = true`
 - Używanie nazwy destynacji jako fallback gdy nazwa planu jest pusta
 - Ukrywanie wskaźnika kroków i karty podczas generowania
 
 ### 3. Callback Handling (2 testy)
+
 Testuje obsługę funkcji callback `onFinished`.
 
 **Pokryte scenariusze:**
+
 - Wywoływanie callbacku `onFinished` gdy jest dostarczony
 - Brak błędów gdy callback nie jest dostarczony
 
 ### 4. Editing Mode (2 testy)
+
 Testuje tryb edycji istniejącego planu.
 
 **Pokryte scenariusze:**
+
 - Przekazywanie `editingPlan` do hooka `useNewPlanForm`
 - Działanie w trybie tworzenia gdy `editingPlan` jest null
 
 ### 5. Step Navigation (3 testy)
+
 Testuje nawigację między krokami formularza.
 
 **Pokryte scenariusze:**
+
 - Przekazywanie funkcji `nextStep` do BasicInfoStep
 - Przekazywanie funkcji `prevStep` do FixedPointsStep
 - Przekazywanie funkcji `handleSubmit` do SummaryStep
 
 ### 6. Data Management (2 testy)
+
 Testuje zarządzanie danymi formularza.
 
 **Pokryte scenariusze:**
+
 - Przekazywanie `formData` do wszystkich komponentów kroków
 - Przekazywanie funkcji aktualizujących dane (updateBasicInfo, addFixedPoint, etc.)
 
 ### 7. Loading and Error States (2 testy)
+
 Testuje stany ładowania i błędów.
 
 **Pokryte scenariusze:**
+
 - Przekazywanie stanu `isLoading` do komponentów kroków
 - Przekazywanie stanu `error` do komponentów kroków
 
 ### 8. Draft Saving (2 testy)
+
 Testuje funkcjonalność zapisywania szkiców.
 
 **Pokryte scenariusze:**
+
 - Przekazywanie funkcji `saveDraft` do BasicInfoStep
 - Przekazywanie funkcji `saveDraft` do FixedPointsStep
 
 ### 9. Integration (2 testy)
+
 Testuje integrację między różnymi częściami komponentu.
 
 **Pokryte scenariusze:**
+
 - Utrzymywanie stanu formularza podczas przejść między krokami
 - Kompletny workflow od kroku 1 do generowania planu
 
 ### 10. Edge Cases (4 testy)
+
 Testuje przypadki brzegowe i nietypowe scenariusze.
 
 **Pokryte scenariusze:**
+
 - Obsługa undefined `onFinished`
 - Obsługa pustych danych formularza
 - Obsługa nieprawidłowego numeru kroku (poza zakresem)
@@ -113,21 +133,25 @@ Testuje przypadki brzegowe i nietypowe scenariusze.
 ## Uruchamianie Testów
 
 ### Uruchomienie wszystkich testów dla NewPlanForm:
+
 ```bash
 npm run test:unit -- NewPlanForm.test.tsx
 ```
 
 ### Uruchomienie w trybie watch:
+
 ```bash
 npm run test:unit -- NewPlanForm.test.tsx --watch
 ```
 
 ### Uruchomienie z interfejsem UI:
+
 ```bash
 npm run test:unit:ui
 ```
 
 ### Uruchomienie z pokryciem kodu:
+
 ```bash
 npx vitest run src/components/NewPlanForm.test.tsx --coverage
 ```
@@ -164,4 +188,3 @@ Potencjalne obszary do rozszerzenia testów w przyszłości:
 - Wszystkie mocki są resetowane przed każdym testem
 - Testy nie wymagają rzeczywistego API ani bazy danych
 - Komponenty UI (Card, CardContent) są również zamockowane dla uproszczenia
-

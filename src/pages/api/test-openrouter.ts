@@ -8,7 +8,7 @@ export const prerender = false;
 /**
  * Test endpoint for OpenRouter service.
  * This endpoint can be used to verify the OpenRouter integration is working correctly.
- * 
+ *
  * Usage: GET /api/test-openrouter
  */
 export const GET: APIRoute = async () => {
@@ -20,7 +20,7 @@ export const GET: APIRoute = async () => {
         JSON.stringify({
           error: "OPENROUTER_API_KEY environment variable is not configured.",
         }),
-        { 
+        {
           status: 500,
           headers: { "Content-Type": "application/json" },
         }
@@ -49,11 +49,15 @@ export const GET: APIRoute = async () => {
 
     // Return the successful result
     return new Response(
-      JSON.stringify({
-        success: true,
-        data: result,
-        message: "OpenRouter service is working correctly!",
-      }, null, 2),
+      JSON.stringify(
+        {
+          success: true,
+          data: result,
+          message: "OpenRouter service is working correctly!",
+        },
+        null,
+        2
+      ),
       {
         status: 200,
         headers: { "Content-Type": "application/json" },
@@ -63,4 +67,3 @@ export const GET: APIRoute = async () => {
     return handleApiError(error, { endpoint: "GET /api/test-openrouter" });
   }
 };
-

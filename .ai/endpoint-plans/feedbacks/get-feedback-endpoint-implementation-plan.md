@@ -1,9 +1,11 @@
 # API Endpoint Implementation Plan: Get Feedback
 
 ## 1. Endpoint Overview
+
 This endpoint retrieves the feedback submitted by the currently authenticated user for a specific plan.
 
 ## 2. Request Details
+
 - **HTTP Method**: `GET`
 - **URL Structure**: `/api/plans/{planId}/feedbacks`
 - **URL Parameters**:
@@ -11,9 +13,11 @@ This endpoint retrieves the feedback submitted by the currently authenticated us
 - **Request Body**: None
 
 ## 3. Types Used
+
 - **DTO (Response)**: `FeedbackDto` from `src/types.ts`.
 
 ## 4. Response Details
+
 - **Success Response (`200 OK`)**: Returns the user's feedback object for the plan.
   ```json
   {
@@ -28,6 +32,7 @@ This endpoint retrieves the feedback submitted by the currently authenticated us
   ```
 
 ## 5. Data Flow
+
 1. The client sends a `GET` request to `/api/plans/{planId}/feedbacks`.
 2. Astro middleware verifies the user's token.
 3. The API handler in `src/pages/api/plans/[planId]/feedbacks/index.ts` receives the request.
@@ -42,19 +47,23 @@ This endpoint retrieves the feedback submitted by the currently authenticated us
     - If `null` is returned, it sends a `404 Not Found` response.
 
 ## 6. Security Considerations
+
 - **Authentication**: Requires a valid JWT.
 - **Authorization**: The database query is filtered by both `planId` and `userId` from the session, ensuring users can only see their own feedback.
 - **RLS**: A `SELECT` policy on the `feedback` table must enforce that `user_id = auth.uid()`.
 
 ## 7. Error Handling
+
 - **`401 Unauthorized`**: Unauthenticated user.
 - **`404 Not Found`**: If the parent plan doesn't exist, or if feedback for it hasn't been submitted by the user.
 - **`500 Internal Server Error`**: For database errors.
 
 ## 8. Performance Considerations
+
 - The query uses the composite primary key (`plan_id`, `user_id`), making it very efficient.
 
 ## 9. Implementation Steps
+
 1. **Implement the Service**:
    - In `src/lib/services/feedback.service.ts`, implement `getFeedback(userId: string, planId: string): Promise<FeedbackDto | null>`.
 2. **Implement the API Endpoint**:

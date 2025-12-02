@@ -38,7 +38,7 @@ export const createPlanSchema = planSchema.refine(
 /**
  * Schema for validating query parameters for listing plans.
  * Ensures pagination, filtering, and sorting parameters are valid.
- * 
+ *
  * Uses `statuses` parameter for filtering by status (supports single or multiple values).
  */
 export const listPlansQuerySchema = z.object({
@@ -46,17 +46,17 @@ export const listPlansQuerySchema = z.object({
     (val) => {
       // Handle null or undefined
       if (!val) return undefined;
-      
+
       // If it's a string with commas, split it
       if (typeof val === "string" && val.includes(",")) {
-        return val.split(",").map(s => s.trim());
+        return val.split(",").map((s) => s.trim());
       }
-      
+
       // Otherwise return as-is (single value as array)
       if (typeof val === "string") {
         return [val];
       }
-      
+
       return val;
     },
     z.array(z.enum(["draft", "generated", "archived"])).optional()
@@ -69,11 +69,7 @@ export const listPlansQuerySchema = z.object({
     .min(1, { message: "Limit must be at least 1." })
     .max(100, { message: "Limit cannot exceed 100." })
     .default(20),
-  offset: z.coerce
-    .number()
-    .int()
-    .min(0, { message: "Offset must be non-negative." })
-    .default(0),
+  offset: z.coerce.number().int().min(0, { message: "Offset must be non-negative." }).default(0),
 });
 
 /**
@@ -105,11 +101,7 @@ export const basicInfoSchema = z
 export const fixedPointSchema = z.object({
   location: z.string().min(1, "Location is required"),
   event_at: z.string().min(1, "Date and time is required"),
-  event_duration: z
-    .number()
-    .positive("Duration must be a positive number.")
-    .nullable()
-    .optional(),
+  event_duration: z.number().positive("Duration must be a positive number.").nullable().optional(),
   description: z.string().nullable().optional(),
 });
 
@@ -117,24 +109,26 @@ export const fixedPointSchema = z.object({
  * Schema for validating plan update requests.
  * Ensures that all fields are properly formatted.
  */
-export const updatePlanSchema = z.object({
-  name: z.string().min(1, "Name cannot be empty.").optional(),
-  start_date: z.string().datetime({ message: "Start date must be a valid datetime." }).optional(),
-  end_date: z.string().datetime({ message: "End date must be a valid datetime." }).optional(),
-  notes: z.string().optional().nullable(),
-}).refine(
-  (data) => {
-    // If both dates are provided, end_date must be after or equal to start_date
-    if (data.start_date && data.end_date) {
-      return new Date(data.end_date) >= new Date(data.start_date);
+export const updatePlanSchema = z
+  .object({
+    name: z.string().min(1, "Name cannot be empty.").optional(),
+    start_date: z.string().datetime({ message: "Start date must be a valid datetime." }).optional(),
+    end_date: z.string().datetime({ message: "End date must be a valid datetime." }).optional(),
+    notes: z.string().optional().nullable(),
+  })
+  .refine(
+    (data) => {
+      // If both dates are provided, end_date must be after or equal to start_date
+      if (data.start_date && data.end_date) {
+        return new Date(data.end_date) >= new Date(data.start_date);
+      }
+      return true;
+    },
+    {
+      message: "End date must be equal to or after start date.",
+      path: ["end_date"],
     }
-    return true;
-  },
-  {
-    message: "End date must be equal to or after start date.",
-    path: ["end_date"],
-  }
-);
+  );
 
 export type BasicInfoFormData = z.infer<typeof basicInfoSchema>;
 export type FixedPointFormData = z.infer<typeof fixedPointSchema>;

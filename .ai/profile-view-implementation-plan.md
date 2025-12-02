@@ -36,7 +36,7 @@ profile.astro (Astro page)
 ### ProfileView (główny komponent widoku)
 
 - **Opis komponentu**: Główny kontener widoku profilu, zarządzający stanem całego formularza i komunikacją z API. Odpowiada za pobieranie danych profilu, zarządzanie edycją oraz zapisywanie zmian.
-- **Główne elementy**: 
+- **Główne elementy**:
   - Nagłówek strony (`ProfileHeader`)
   - Sekcja licznika generacji (`GenerationsCounter`) w komponencie `Card`
   - Sekcja formularza preferencji (`PreferencesForm`) w komponencie `Card`
@@ -52,7 +52,7 @@ profile.astro (Astro page)
 ### ProfileHeader
 
 - **Opis komponentu**: Prosty komponent nagłówkowy wyświetlający tytuł strony i opcjonalny opis.
-- **Główne elementy**: 
+- **Główne elementy**:
   - `<h1>` z tytułem "Profil"
   - `<p>` z opisem "Zarządzaj swoimi preferencjami i danymi konta"
 - **Obsługiwane interakcje**: Brak
@@ -192,7 +192,7 @@ export type TravelPace = "slow" | "moderate" | "intensive";
 ```typescript
 /**
  * ViewModel dla widoku profilu.
- * Zarządza stanem całego widoku, w tym danymi profilu, 
+ * Zarządza stanem całego widoku, w tym danymi profilu,
  * stanem ładowania i błędami.
  */
 export type ProfileViewModel = {
@@ -234,6 +234,7 @@ Widok będzie wykorzystywał dedykowany custom hook `useProfile`, który enkapsu
 **Lokalizacja**: `src/hooks/useProfile.ts`
 
 **Odpowiedzialności**:
+
 - Pobieranie danych profilu z API przy montowaniu komponentu
 - Zarządzanie stanem ładowania i błędów
 - Obsługa zapisywania zmian profilu
@@ -272,6 +273,7 @@ export function useProfile() {
 ```
 
 **Zwracane wartości**:
+
 - `isLoading: boolean` - czy trwa ładowanie danych profilu
 - `isSaving: boolean` - czy trwa zapisywanie zmian
 - `error: string | null` - komunikat błędu (jeśli wystąpił)
@@ -301,6 +303,7 @@ export function useProfile() {
 ```
 
 **Obsługa błędów**:
+
 - `404 Not Found`: Profil nie istnieje (nowy użytkownik) - wyświetlić komunikat z sugestią wypełnienia profilu
 - `401 Unauthorized`: Użytkownik niezalogowany - przekierowanie do strony logowania
 - `500 Internal Server Error`: Błąd serwera - wyświetlić ogólny komunikat błędu
@@ -322,6 +325,7 @@ export function useProfile() {
 **Typ odpowiedzi**: `ProfileDto` (zaktualizowany profil)
 
 **Obsługa błędów**:
+
 - `400 Bad Request`: Błąd walidacji (np. niewłaściwa liczba preferencji) - wyświetlić szczegóły błędu pod odpowiednimi polami formularza
 - `401 Unauthorized`: Użytkownik niezalogowany - przekierowanie do strony logowania
 - `500 Internal Server Error`: Błąd serwera - wyświetlić komunikat błędu i umożliwić ponowną próbę
@@ -329,11 +333,11 @@ export function useProfile() {
 **Przykład wywołania**:
 
 ```typescript
-const response = await fetch('/api/profiles', {
-  method: 'PATCH',
+const response = await fetch("/api/profiles", {
+  method: "PATCH",
   headers: {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${token}`,
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`,
   },
   body: JSON.stringify({
     preferences: ["Sztuka i Muzea", "Lokalne Jedzenie", "Historia i Kultura"],
@@ -343,7 +347,7 @@ const response = await fetch('/api/profiles', {
 
 if (!response.ok) {
   const error = await response.json();
-  throw new Error(error.error || 'Failed to update profile');
+  throw new Error(error.error || "Failed to update profile");
 }
 
 const updatedProfile: ProfileDto = await response.json();
@@ -356,6 +360,7 @@ const updatedProfile: ProfileDto = await response.json();
 **Akcja użytkownika**: Użytkownik klika "Profil" w nawigacji
 
 **Oczekiwany wynik**:
+
 1. Przekierowanie do `/profile`
 2. Wyświetlenie stanu ładowania (spinner lub skeleton)
 3. Wykonanie żądania GET /api/profiles
@@ -367,6 +372,7 @@ const updatedProfile: ProfileDto = await response.json();
 **Akcja użytkownika**: Użytkownik otwiera dropdown "Tempo zwiedzania" i wybiera opcję
 
 **Oczekiwany wynik**:
+
 1. Dropdown rozwija się, pokazując 3 opcje
 2. Po wyborze opcji, dropdown się zamyka
 3. Wybrana wartość jest wyświetlana w polu
@@ -378,12 +384,12 @@ const updatedProfile: ProfileDto = await response.json();
 **Akcja użytkownika**: Użytkownik klika na badge preferencji
 
 **Oczekiwany wynik**:
+
 - **Jeśli tag nie był wybrany**:
   1. Tag zostaje dodany do listy wybranych
   2. Badge zmienia wygląd na "aktywny" (np. inny kolor tła)
   3. Jeśli wybrano już 5 tagów, pozostałe nieaktywne badge'e są zablokowane
   4. Stan formularza jest aktualizowany lokalnie
-  
 - **Jeśli tag był wybrany**:
   1. Tag zostaje usunięty z listy wybranych
   2. Badge wraca do wyglądu "nieaktywnego"
@@ -395,6 +401,7 @@ const updatedProfile: ProfileDto = await response.json();
 **Akcja użytkownika**: Użytkownik klika przycisk "Zapisz zmiany"
 
 **Oczekiwany wynik**:
+
 1. Walidacja formularza po stronie klienta:
    - Sprawdzenie, czy wybrano 2-5 preferencji
    - Sprawdzenie, czy wybrano tempo zwiedzania
@@ -418,6 +425,7 @@ const updatedProfile: ProfileDto = await response.json();
 **Akcja użytkownika**: Użytkownik zapisuje formularz, ale API zwraca błąd 400 (walidacja)
 
 **Oczekiwany wynik**:
+
 1. Parsowanie szczegółów błędu z odpowiedzi API
 2. Wyświetlenie komunikatów błędów pod odpowiednimi polami formularza
 3. Wyświetlenie ogólnego powiadomienia toast: "Nie udało się zapisać zmian"
@@ -434,12 +442,14 @@ const updatedProfile: ProfileDto = await response.json();
 **Komponenty, których dotyczy**: `PreferencesSelector`, `PreferencesForm`
 
 **Wpływ na UI**:
+
 - Jeśli wybrano < 2 preferencji: wyświetlenie komunikatu błędu "Wybierz co najmniej 2 preferencje"
 - Jeśli wybrano > 5 preferencji: niemożliwe (zablokowane w UI)
 - Podczas wybierania: licznik "Wybrano X/5" (opcjonalnie)
 - Przycisk "Zapisz" jest nieaktywny, jeśli warunek nie jest spełniony
 
 **Implementacja**:
+
 ```typescript
 const validatePreferences = (preferences: string[]): string | null => {
   if (preferences.length < 2) {
@@ -459,11 +469,13 @@ const validatePreferences = (preferences: string[]): string | null => {
 **Komponenty, których dotyczy**: `TravelPaceSelector`, `PreferencesForm`
 
 **Wpływ na UI**:
+
 - Warunek zawsze spełniony, jeśli użytkownik wybierze opcję z dropdownu
 - Jeśli wartość jest null (nie wybrano): wyświetlenie komunikatu "Wybierz tempo zwiedzania"
 - Przycisk "Zapisz" jest nieaktywny, jeśli tempo nie zostało wybrane
 
 **Implementacja**:
+
 ```typescript
 const validateTravelPace = (pace: TravelPace | null): string | null => {
   if (!pace) {
@@ -487,6 +499,7 @@ API wykonuje dodatkową walidację i może zwrócić błąd `400 Bad Request` z 
 ```
 
 **Obsługa w UI**:
+
 1. Parsowanie obiektu `details` z odpowiedzi
 2. Mapowanie kluczy (`preferences`, `travel_pace`) na odpowiednie pola formularza
 3. Wyświetlenie komunikatów błędów pod polami
@@ -495,6 +508,7 @@ API wykonuje dodatkową walidację i może zwrócić błąd `400 Bad Request` z 
 ### Stan formularza
 
 **Przycisk "Zapisz zmiany" jest aktywny tylko wtedy, gdy**:
+
 1. Formularz przeszedł walidację kliencką
 2. Nastąpiła zmiana w stosunku do początkowych wartości (opcjonalnie, dla lepszego UX)
 3. Nie trwa obecnie zapisywanie (`isSaving === false`)
@@ -506,17 +520,20 @@ API wykonuje dodatkową walidację i może zwrócić błąd `400 Bad Request` z 
 **Scenariusz**: Nie udało się pobrać danych profilu przy inicjalizacji widoku
 
 **Przyczyny**:
+
 - Błąd sieci
 - Błąd serwera (500)
 - Użytkownik niezalogowany (401)
 - Profil nie istnieje (404)
 
 **Obsługa**:
+
 - **401 Unauthorized**: Automatyczne przekierowanie do strony logowania
 - **404 Not Found**: Wyświetlenie komunikatu "Nie znaleziono profilu. Uzupełnij swoje preferencje poniżej." + pokazanie pustego formularza
 - **500 / błąd sieci**: Wyświetlenie komunikatu błędu z przyciskiem "Spróbuj ponownie", który ponownie wywołuje `fetchProfile()`
 
 **UI**:
+
 ```
 ┌─────────────────────────────────────┐
 │  ⚠️  Nie udało się załadować profilu │
@@ -530,26 +547,27 @@ API wykonuje dodatkową walidację i może zwrócić błąd `400 Bad Request` z 
 **Scenariusz**: Nie udało się zapisać zmian w profilu
 
 **Przyczyny**:
+
 - Błąd walidacji (400)
 - Błąd sieci
 - Błąd serwera (500)
 - Użytkownik niezalogowany (401)
 
 **Obsługa**:
-- **400 Bad Request**: 
+
+- **400 Bad Request**:
   - Parsowanie szczegółów błędu z `response.details`
   - Wyświetlenie komunikatów pod odpowiednimi polami formularza
   - Toast: "Popraw błędy w formularzu"
-  
-- **401 Unauthorized**: 
+- **401 Unauthorized**:
   - Przekierowanie do strony logowania
   - Toast: "Sesja wygasła. Zaloguj się ponownie."
-  
-- **500 / błąd sieci**: 
+- **500 / błąd sieci**:
   - Toast: "Nie udało się zapisać zmian. Spróbuj ponownie."
   - Formularz pozostaje wypełniony, użytkownik może ponowić próbę
 
 **UI**:
+
 - Komunikaty błędów inline pod polami formularza
 - Toast notification w prawym górnym rogu
 - Przycisk "Zapisz" wraca do stanu aktywnego po błędzie
@@ -559,6 +577,7 @@ API wykonuje dodatkową walidację i może zwrócić błąd `400 Bad Request` z 
 **Scenariusz**: Użytkownik dopiero się zarejestrował i nie ma jeszcze profilu (404)
 
 **Obsługa**:
+
 - Wyświetlenie komunikatu informacyjnego: "Witaj! Uzupełnij swój profil, aby AI mogło tworzyć lepsze plany."
 - Pokazanie formularza z pustymi wartościami
 - Po zapisaniu: ustawienie `onboarding_completed: true`
@@ -568,6 +587,7 @@ API wykonuje dodatkową walidację i może zwrócić błąd `400 Bad Request` z 
 **Scenariusz**: Użytkownik traci połączenie z internetem podczas zapisywania
 
 **Obsługa**:
+
 - Wykrycie błędu sieci (network error)
 - Toast: "Brak połączenia z internetem. Sprawdź połączenie i spróbuj ponownie."
 - Dane w formularzu pozostają nietknięte
@@ -578,6 +598,7 @@ API wykonuje dodatkową walidację i może zwrócić błąd `400 Bad Request` z 
 **Scenariusz**: Żądanie do API trwa zbyt długo (> 30s)
 
 **Obsługa**:
+
 - Anulowanie żądania po przekroczeniu timeoutu
 - Toast: "Żądanie trwało zbyt długo. Spróbuj ponownie."
 - Przycisk wraca do stanu aktywnego
@@ -731,4 +752,3 @@ API wykonuje dodatkową walidację i może zwrócić błąd `400 Bad Request` z 
 4. Zmergować do głównej gałęzi
 5. Wdrożyć na środowisko produkcyjne
 6. Zweryfikować działanie na produkcji
-

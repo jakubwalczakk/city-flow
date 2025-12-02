@@ -1,9 +1,11 @@
 # API Endpoint Implementation Plan: List Plans
 
 ## 1. Endpoint Overview
+
 This endpoint retrieves a paginated list of all travel plans for the authenticated user. It supports filtering by status and sorting by various fields.
 
 ## 2. Request Details
+
 - **HTTP Method**: `GET`
 - **URL Structure**: `/api/plans`
 - **Query Parameters**:
@@ -15,9 +17,11 @@ This endpoint retrieves a paginated list of all travel plans for the authenticat
 - **Request Body**: None
 
 ## 3. Types Used
+
 - **DTO (Response)**: `PaginatedPlansDto`, `PlanListItemDto` from `src/types.ts`.
 
 ## 4. Response Details
+
 - **Success Response (`200 OK`)**: Returns a paginated list of plans.
   ```json
   {
@@ -42,6 +46,7 @@ This endpoint retrieves a paginated list of all travel plans for the authenticat
 - **Error Response (`400 Bad Request`)**: Returned if query parameters fail validation.
 
 ## 5. Data Flow
+
 1. The client sends a `GET` request to `/api/plans` with optional query parameters.
 2. Astro middleware verifies the user's authentication token.
 3. The API handler in `src/pages/api/plans/index.ts` receives the request.
@@ -57,21 +62,25 @@ This endpoint retrieves a paginated list of all travel plans for the authenticat
 9. The handler sends a `200 OK` response with the paginated data.
 
 ## 6. Security Considerations
+
 - **Authentication**: Endpoint is protected and requires a valid JWT.
 - **Authorization**: The query is strictly filtered by the `user_id` from the session token, ensuring users only see their own plans. RLS policies provide a second layer of defense.
 - **Input Validation**: Query parameters are validated to prevent invalid database queries and ensure values are within acceptable ranges (e.g., `limit`).
 
 ## 7. Error Handling
+
 - **`400 Bad Request`**: Returned for invalid query parameters (e.g., `limit=200`, `status=unknown`).
 - **`401 Unauthorized`**: Returned by middleware if the user is not authenticated.
 - **`500 Internal Server Error`**: Returned for unexpected server-side errors.
 
 ## 8. Performance Considerations
+
 - Proper indexing on the `plans` table is crucial for performance. An index should exist on `(user_id, status)` and `(user_id, created_at)`.
 - The `limit` parameter is capped to prevent excessively large queries.
 - Fetching the total count and the data in separate queries is a common and acceptable pattern for pagination.
 
 ## 9. Implementation Steps
+
 1. **Create Validation Schema**:
    - In `src/lib/schemas/plan.schema.ts`, define a Zod schema for the query parameters of the list endpoint.
 2. **Implement the Service**:

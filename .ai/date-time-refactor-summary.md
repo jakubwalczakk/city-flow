@@ -1,11 +1,13 @@
 # Date & Time Refactor Summary
 
 ## Overview
+
 This refactor makes `start_date` and `end_date` mandatory fields for plans and ensures they capture both date and time information. This is critical for the AI plan generator to create accurate itineraries with proper timing.
 
 ## Changes Made
 
 ### 1. DateTime Input Pattern
+
 **Approach:** Reused existing pattern from `FixedPointsStep`
 
 - Uses native HTML5 `datetime-local` input with shadcn/ui `Input` component
@@ -18,6 +20,7 @@ This refactor makes `start_date` and `end_date` mandatory fields for plans and e
   - Works seamlessly with existing styling
 
 ### 2. Type Definitions
+
 **File:** `src/types.ts`
 
 Updated the following types to make dates required (non-nullable):
@@ -28,6 +31,7 @@ Updated the following types to make dates required (non-nullable):
 - `NewPlanViewModel.basicInfo`: Changed `start_date` and `end_date` from `Date | null` to `Date`
 
 ### 3. Validation Schemas
+
 **File:** `src/lib/schemas/plan.schema.ts`
 
 - `createPlanSchema`: Made `start_date` and `end_date` required with `.datetime()` validation
@@ -37,16 +41,18 @@ Updated the following types to make dates required (non-nullable):
 ### 4. UI Components
 
 #### BasicInfoStep
+
 **File:** `src/components/BasicInfoStep.tsx`
 
 - Replaced `DatePicker` with native `datetime-local` input (consistent with `FixedPointsStep`)
 - Added helper functions to convert between Date objects and datetime-local strings
-- Added asterisks (*) to indicate required fields
+- Added asterisks (\*) to indicate required fields
 - Updated labels to "Start Date & Time" and "End Date & Time"
 - Uses `min` attribute on end date to prevent selecting dates before start date
 - Removed null handling since dates are now always present
 
 #### SummaryStep
+
 **File:** `src/components/SummaryStep.tsx`
 
 - Updated to display both date and time for start and end dates
@@ -54,6 +60,7 @@ Updated the following types to make dates required (non-nullable):
 - Improved layout to show start and end separately with labels
 
 #### PlanCard
+
 **File:** `src/components/PlanCard.tsx`
 
 - Updated `formatDate` to `formatDateTime` to include time
@@ -61,6 +68,7 @@ Updated the following types to make dates required (non-nullable):
 - Uses Polish locale (`pl-PL`) for formatting
 
 #### DraftPlanView
+
 **File:** `src/components/DraftPlanView.tsx`
 
 - Removed conditional rendering of dates section (always shown now)
@@ -68,6 +76,7 @@ Updated the following types to make dates required (non-nullable):
 - Improved layout with separate start/end sections
 
 ### 5. Form Hook
+
 **File:** `src/hooks/useNewPlanForm.ts`
 
 - Added helper functions to generate default dates:
@@ -78,6 +87,7 @@ Updated the following types to make dates required (non-nullable):
 - Changed `.toISOString() || null` to `.toISOString()` (always returns a value)
 
 ### 6. API Endpoint
+
 **File:** `src/pages/api/plans/[planId]/generate.ts`
 
 - Added validation to ensure both dates are present before generation
@@ -86,6 +96,7 @@ Updated the following types to make dates required (non-nullable):
 - Better error handling for missing dates
 
 ### 7. Database Migration
+
 **File:** `supabase/migrations/20251108000000_update_plans_dates_to_timestamptz.sql`
 
 - Changed `start_date` and `end_date` from `DATE` to `TIMESTAMPTZ`
@@ -95,6 +106,7 @@ Updated the following types to make dates required (non-nullable):
 - Updated column comments to reflect new requirements
 
 ### 8. Seed Data
+
 **File:** `supabase/seed.sql`
 
 - Created seed file to automatically initialize default development user
@@ -120,6 +132,7 @@ Updated the following types to make dates required (non-nullable):
 ## Default Behavior
 
 When creating a new plan, the form now initializes with sensible defaults:
+
 - **Start Date**: Tomorrow at 9:00 AM
 - **End Date**: 4 days from tomorrow at 6:00 PM (3-day trip)
 
@@ -179,4 +192,3 @@ const dateTimeLocalToDate = (dateTimeLocal: string): Date => { ... }
 2. **Duration Display**: Show trip duration in days/hours
 3. **Date Validation**: Add business logic to prevent unrealistic date ranges
 4. **Calendar Integration**: Allow importing from/exporting to calendar apps
-

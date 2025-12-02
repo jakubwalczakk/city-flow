@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { ProfileService } from "@/lib/services/profile.service";
+import { findProfileByUserId, updateProfile } from "@/lib/services/profile.service";
 import { handleApiError, successResponse } from "@/lib/utils/error-handler";
 import { logger } from "@/lib/utils/logger";
 import { NotFoundError, ValidationError } from "@/lib/errors/app-error";
@@ -21,13 +21,13 @@ export const GET: APIRoute = async (context) => {
   try {
     const { locals } = context;
     const supabase = locals.supabase;
-    
+
     // Authenticate the user
     const user = await getAuthenticatedUser(context);
     logger.debug("Received request to get user profile", { userId: user.id });
 
     // Fetch the profile
-    const profile = await ProfileService.findProfileByUserId(supabase, user.id);
+    const profile = await findProfileByUserId(supabase, user.id);
 
     if (!profile) {
       logger.debug("Profile not found", { userId: user.id });
@@ -51,29 +51,29 @@ export const GET: APIRoute = async (context) => {
  *
  * @route PATCH /api/profiles
  * @security Requires valid JWT token (in production) or uses DEFAULT_USER_ID (in development)
- * 
+ *
  * @requestBody {UpdateProfileCommand} - Optional fields:
  *   - preferences: string[] (2-5 items) - User's travel preferences
  *   - travel_pace: "slow" | "moderate" | "intensive" - Desired travel pace
  *   - onboarding_completed: boolean - Marks onboarding as complete
- * 
+ *
  * @returns {ProfileDto} 200 - Successfully updated profile with all fields
  * @returns {ValidationError} 400 - Validation failed with detailed error messages
  * @returns {UnauthorizedError} 401 - User is not authenticated
  * @returns {DatabaseError} 500 - Database operation failed
- * 
+ *
  * @example
  * // Request
  * PATCH /api/profiles
  * Content-Type: application/json
  * Authorization: Bearer <jwt-token>
- * 
+ *
  * {
  *   "preferences": ["Art & Museums", "Local Food"],
  *   "travel_pace": "intensive",
  *   "onboarding_completed": true
  * }
- * 
+ *
  * // Response
  * 200 OK
  * {
@@ -89,7 +89,7 @@ export const PATCH: APIRoute = async (context) => {
   try {
     const { request, locals } = context;
     const supabase = locals.supabase;
-    
+
     // Authenticate the user
     const user = await getAuthenticatedUser(context);
     logger.debug("Received request to update user profile", { userId: user.id });
@@ -110,11 +110,7 @@ export const PATCH: APIRoute = async (context) => {
     }
 
     // Update the profile
-    const updatedProfile = await ProfileService.updateProfile(
-      supabase,
-      user.id,
-      validatedData
-    );
+    const updatedProfile = await updateProfile(supabase, user.id, validatedData);
 
     return successResponse(updatedProfile, 200);
   } catch (error) {
@@ -123,4 +119,3 @@ export const PATCH: APIRoute = async (context) => {
     });
   }
 };
-

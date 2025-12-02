@@ -125,4 +125,3 @@ export function useProfile() {
     refetch: fetchProfile,
   };
 }
-

@@ -17,6 +17,7 @@ The development migration grants unrestricted access to all data, which would be
 ## Current State
 
 After running all migrations, RLS is in **DEVELOPMENT MODE** by default:
+
 - ✅ All users can read/write all data
 - ✅ No authentication required for testing
 - ⚠️ **NOT SECURE** - only for local development
@@ -26,6 +27,7 @@ After running all migrations, RLS is in **DEVELOPMENT MODE** by default:
 ## Migration Overview
 
 ### Development Mode
+
 **Migration:** `20251024120600_disable_rls_for_development.sql`
 
 - Replaces restrictive RLS policies with permissive ones
@@ -35,6 +37,7 @@ After running all migrations, RLS is in **DEVELOPMENT MODE** by default:
 - **Status:** ✅ Active in development (`.sql` extension)
 
 ### Production Mode
+
 **Migration:** `99999999999999_enable_rls_for_production.sql.template`
 
 - Restores secure RLS policies
@@ -50,6 +53,7 @@ After running all migrations, RLS is in **DEVELOPMENT MODE** by default:
 ### Scenario 1: Local Development (Current State)
 
 You're currently in **development mode** after running migrations. This is perfect for:
+
 - Testing without authentication
 - Seeding test data
 - Debugging database queries
@@ -111,10 +115,11 @@ supabase db push --linked  # or your deployment command
 ```
 
 After deployment, verify security:
+
 ```sql
 -- Check that production policies are active
-SELECT tablename, policyname 
-FROM pg_policies 
+SELECT tablename, policyname
+FROM pg_policies
 WHERE tablename IN ('profiles', 'plans', 'fixed_points', 'feedback')
 ORDER BY tablename, policyname;
 
@@ -131,6 +136,7 @@ ORDER BY tablename, policyname;
 #### Option A: Environment-based migration control
 
 Create a `.env` file:
+
 ```bash
 # .env.local (for development)
 ENABLE_DEV_RLS=true
@@ -207,8 +213,8 @@ supabase migration up
 
 # 2. Verify RLS is active:
 supabase db execute "
-SELECT schemaname, tablename, policyname 
-FROM pg_policies 
+SELECT schemaname, tablename, policyname
+FROM pg_policies
 WHERE policyname LIKE '%dev%';" --linked
 
 # Should return 0 rows (no dev policies)
@@ -225,16 +231,16 @@ WHERE policyname LIKE '%dev%';" --linked
 
 ```sql
 -- List all policies
-SELECT 
+SELECT
     schemaname,
     tablename,
     policyname,
-    CASE 
+    CASE
         WHEN policyname LIKE '%dev%' THEN '🚧 DEVELOPMENT'
         WHEN policyname LIKE '%own%' THEN '✅ PRODUCTION'
         ELSE '❓ UNKNOWN'
     END AS security_mode
-FROM pg_policies 
+FROM pg_policies
 WHERE tablename IN ('profiles', 'plans', 'fixed_points', 'feedback')
 ORDER BY tablename, policyname;
 ```
@@ -242,6 +248,7 @@ ORDER BY tablename, policyname;
 ### Expected Output:
 
 **Development Mode:**
+
 ```
  tablename     | policyname              | security_mode
 ---------------+-------------------------+---------------
@@ -251,6 +258,7 @@ ORDER BY tablename, policyname;
 ```
 
 **Production Mode:**
+
 ```
  tablename     | policyname         | security_mode
 ---------------+--------------------+---------------
@@ -279,11 +287,11 @@ SELECT * FROM profiles;  -- ✅ Should return ONLY user A's profile
 SELECT * FROM plans WHERE user_id = 'user-a-uuid';  -- ✅ Should return 0 rows
 
 -- Try to insert data for another user
-INSERT INTO plans (user_id, name, destination) 
+INSERT INTO plans (user_id, name, destination)
 VALUES ('user-a-uuid', 'Test', 'Paris');  -- ❌ Should FAIL
 
 -- Try to update another user's data
-UPDATE profiles SET preferences = ARRAY['test'] 
+UPDATE profiles SET preferences = ARRAY['test']
 WHERE id = 'user-a-uuid';  -- ❌ Should affect 0 rows
 ```
 
@@ -291,37 +299,41 @@ WHERE id = 'user-a-uuid';  -- ❌ Should affect 0 rows
 
 ## Quick Reference
 
-| Action | Development | Production |
-|--------|-------------|------------|
-| **View any user's data** | ✅ Allowed | ❌ Forbidden |
-| **Insert data for others** | ✅ Allowed | ❌ Forbidden |
-| **Update others' data** | ✅ Allowed | ❌ Forbidden |
-| **Anonymous access** | ✅ Full access | ❌ No access |
-| **Auth required** | ❌ No | ✅ Yes |
-| **Security** | ⚠️ NONE | ✅ Full |
+| Action                     | Development    | Production   |
+| -------------------------- | -------------- | ------------ |
+| **View any user's data**   | ✅ Allowed     | ❌ Forbidden |
+| **Insert data for others** | ✅ Allowed     | ❌ Forbidden |
+| **Update others' data**    | ✅ Allowed     | ❌ Forbidden |
+| **Anonymous access**       | ✅ Full access | ❌ No access |
+| **Auth required**          | ❌ No          | ✅ Yes       |
+| **Security**               | ⚠️ NONE        | ✅ Full      |
 
 ---
 
 ## Migration File Management
 
 ### ✅ Include in version control:
+
 - `20251024120600_disable_rls_for_development.sql` (with clear comments)
 - `20251024120700_enable_rls_for_production.sql` (CRITICAL)
 
 ### ⚠️ Production deployment strategy:
 
 **Option 1: Include both, rely on order**
+
 - Both migrations in repo
 - 120600 runs first (dev mode)
 - 120700 runs second (prod mode)
 - Final state: Production ✅
 
 **Option 2: Exclude dev migration from production**
+
 - Use `.supabaseignore` or deployment scripts
 - Only deploy production-safe migrations
 - Cleaner, more explicit
 
 **Option 3: Environment-specific migration folders** (recommended)
+
 ```
 supabase/migrations/
 ├── common/              # Always run these
@@ -344,4 +356,3 @@ supabase/migrations/
 ⚠️ **Never:** Deploy dev RLS to production without re-enabling production RLS
 
 **When in doubt:** Check policies with the SQL query above. If you see `*_dev_*` policies in production, **immediately run migration 120700!**
-

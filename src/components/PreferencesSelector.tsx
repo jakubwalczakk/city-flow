@@ -13,11 +13,7 @@ interface PreferencesSelectorProps {
  * Displays preferences as clickable badges that can be activated/deactivated.
  * Uses English keys internally but displays Polish labels.
  */
-export function PreferencesSelector({
-  value,
-  onChange,
-  error,
-}: PreferencesSelectorProps) {
+export function PreferencesSelector({ value, onChange, error }: PreferencesSelectorProps) {
   const maxPreferences = 5;
   const minPreferences = 2;
 
@@ -73,4 +69,3 @@ export function PreferencesSelector({
     </div>
   );
 }
-

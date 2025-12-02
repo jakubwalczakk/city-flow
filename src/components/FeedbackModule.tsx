@@ -4,9 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
-type FeedbackModuleProps = {
+interface FeedbackModuleProps {
   planId: string;
-};
+}
 
 /**
  * Module for collecting and displaying user feedback on a generated plan.
@@ -25,10 +25,10 @@ export default function FeedbackModule({ planId }: FeedbackModuleProps) {
     const fetchFeedback = async () => {
       try {
         const response = await fetch(`/api/plans/${planId}/feedback`);
-        
+
         if (response.ok) {
           const data: FeedbackDto | null = await response.json();
-          
+
           // Handle the case where no feedback exists yet (API returns null)
           if (data === null) {
             setFeedback(null);
@@ -39,12 +39,9 @@ export default function FeedbackModule({ planId }: FeedbackModuleProps) {
             setSelectedRating(data.rating);
             setComment(data.comment || "");
           }
-        } else {
-          // Only log actual errors (not expected null responses)
-          console.error("Failed to fetch feedback:", response.statusText);
         }
-      } catch (error) {
-        console.error("Failed to fetch feedback:", error);
+      } catch {
+        // Error handling is done via UI feedback
       } finally {
         setIsLoading(false);
       }
@@ -88,8 +85,7 @@ export default function FeedbackModule({ planId }: FeedbackModuleProps) {
 
       // Clear success message after 3 seconds
       setTimeout(() => setSubmitMessage(null), 3000);
-    } catch (error) {
-      console.error("Failed to submit feedback:", error);
+    } catch {
       setSubmitMessage({
         type: "error",
         text: "Nie udało się wysłać opinii. Spróbuj ponownie.",
@@ -109,16 +105,13 @@ export default function FeedbackModule({ planId }: FeedbackModuleProps) {
     );
   }
 
-  const hasChanges =
-    selectedRating !== feedback?.rating || comment !== (feedback?.comment || "");
+  const hasChanges = selectedRating !== feedback?.rating || comment !== (feedback?.comment || "");
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Jak oceniasz ten plan?</CardTitle>
-        <CardDescription>
-          Twoja opinia pomaga nam udoskonalać przyszłe rekomendacje podróży
-        </CardDescription>
+        <CardDescription>Twoja opinia pomaga nam udoskonalać przyszłe rekomendacje podróży</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Rating buttons */}
@@ -207,15 +200,8 @@ export default function FeedbackModule({ planId }: FeedbackModuleProps) {
 
         {/* Submit button */}
         <div className="flex justify-end">
-          <Button
-            onClick={handleSubmit}
-            disabled={!selectedRating || !hasChanges || isSubmitting}
-          >
-            {isSubmitting
-              ? "Wysyłanie..."
-              : feedback
-              ? "Zaktualizuj opinię"
-              : "Wyślij opinię"}
+          <Button onClick={handleSubmit} disabled={!selectedRating || !hasChanges || isSubmitting}>
+            {isSubmitting ? "Wysyłanie..." : feedback ? "Zaktualizuj opinię" : "Wyślij opinię"}
           </Button>
         </div>
 
@@ -237,4 +223,3 @@ export default function FeedbackModule({ planId }: FeedbackModuleProps) {
     </Card>
   );
 }
-

@@ -2,12 +2,7 @@ import { useState } from "react";
 import { Download, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface ExportPlanButtonProps {
   planId: string;
@@ -19,13 +14,8 @@ interface ExportPlanButtonProps {
  * Button component for exporting a plan to PDF.
  * Handles the export process, loading states, and error handling.
  */
-export default function ExportPlanButton({
-  planId,
-  planName,
-  className,
-}: ExportPlanButtonProps) {
+export default function ExportPlanButton({ planId, planName, className }: ExportPlanButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const handleExport = async () => {
     if (!planId) {
@@ -33,14 +23,13 @@ export default function ExportPlanButton({
     }
 
     setIsLoading(true);
-    setError(null);
 
     try {
       // Make API request to export endpoint
       const response = await fetch(`/api/plans/${planId}/export?format=pdf`, {
         method: "GET",
         headers: {
-          "Accept": "application/pdf",
+          Accept: "application/pdf",
         },
       });
 
@@ -88,9 +77,7 @@ export default function ExportPlanButton({
       });
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Nie udało się wyeksportować planu.";
-      setError(errorMessage);
-      console.error("Export error:", err);
-      
+
       // Show error toast
       toast.error("Błąd eksportu", {
         description: errorMessage,
@@ -107,13 +94,7 @@ export default function ExportPlanButton({
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleExport}
-            disabled={isDisabled}
-            className={className}
-          >
+          <Button variant="outline" size="sm" onClick={handleExport} disabled={isDisabled} className={className}>
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -134,4 +115,3 @@ export default function ExportPlanButton({
     </TooltipProvider>
   );
 }
-

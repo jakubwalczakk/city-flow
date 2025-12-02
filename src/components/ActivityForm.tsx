@@ -12,21 +12,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-type ActivityFormProps = {
+interface ActivityFormProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (activity: Partial<TimelineItem>) => Promise<void>;
   initialData?: Partial<TimelineItem>;
   mode: "add" | "edit";
-};
+}
 
 const CATEGORIES: { value: TimelineItemCategory; label: string }[] = [
   { value: "history", label: "Historia" },
@@ -46,31 +40,25 @@ const CATEGORIES: { value: TimelineItemCategory; label: string }[] = [
 function convertTo24Hour(time12: string): string {
   const match = time12.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
   if (!match) return time12; // Already in 24h format or invalid
-  
+
   let hours = parseInt(match[1], 10);
   const minutes = match[2];
   const period = match[3].toUpperCase();
-  
-  if (period === 'PM' && hours !== 12) {
+
+  if (period === "PM" && hours !== 12) {
     hours += 12;
-  } else if (period === 'AM' && hours === 12) {
+  } else if (period === "AM" && hours === 12) {
     hours = 0;
   }
-  
-  return `${hours.toString().padStart(2, '0')}:${minutes}`;
+
+  return `${hours.toString().padStart(2, "0")}:${minutes}`;
 }
 
 /**
  * A form component for adding or editing activities in a plan.
  * Displays in a modal dialog and handles validation.
  */
-export default function ActivityForm({
-  isOpen,
-  onClose,
-  onSubmit,
-  initialData,
-  mode,
-}: ActivityFormProps) {
+export default function ActivityForm({ isOpen, onClose, onSubmit, initialData, mode }: ActivityFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     time: initialData?.time || "",
@@ -128,8 +116,7 @@ export default function ActivityForm({
       });
 
       onClose();
-    } catch (error) {
-      console.error("Failed to submit activity:", error);
+    } catch {
       // Error handling is done by the parent component
     } finally {
       setIsSubmitting(false);
@@ -140,13 +127,9 @@ export default function ActivityForm({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>
-            {mode === "add" ? "Dodaj aktywność" : "Edytuj aktywność"}
-          </DialogTitle>
+          <DialogTitle>{mode === "add" ? "Dodaj aktywność" : "Edytuj aktywność"}</DialogTitle>
           <DialogDescription>
-            {mode === "add"
-              ? "Dodaj własną aktywność do swojego planu."
-              : "Zaktualizuj szczegóły tej aktywności."}
+            {mode === "add" ? "Dodaj własną aktywność do swojego planu." : "Zaktualizuj szczegóły tej aktywności."}
           </DialogDescription>
         </DialogHeader>
 
@@ -158,9 +141,7 @@ export default function ActivityForm({
             <Input
               id="title"
               value={formData.title}
-              onChange={(e) =>
-                setFormData({ ...formData, title: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               placeholder="np. Wizyta w lokalnej kawiarni"
               required
             />
@@ -173,9 +154,7 @@ export default function ActivityForm({
                 id="time"
                 type="time"
                 value={formData.time}
-                onChange={(e) =>
-                  setFormData({ ...formData, time: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, time: e.target.value })}
               />
             </div>
 
@@ -185,9 +164,7 @@ export default function ActivityForm({
               </Label>
               <Select
                 value={formData.category}
-                onValueChange={(value: TimelineItemCategory) =>
-                  setFormData({ ...formData, category: value })
-                }
+                onValueChange={(value: TimelineItemCategory) => setFormData({ ...formData, category: value })}
               >
                 <SelectTrigger id="category">
                   <SelectValue placeholder="Wybierz kategorię" />
@@ -208,9 +185,7 @@ export default function ActivityForm({
             <Input
               id="location"
               value={formData.location}
-              onChange={(e) =>
-                setFormData({ ...formData, location: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, location: e.target.value })}
               placeholder="np. Dzielnica Trastevere"
             />
           </div>
@@ -220,9 +195,7 @@ export default function ActivityForm({
             <Textarea
               id="description"
               value={formData.description}
-              onChange={(e) =>
-                setFormData({ ...formData, description: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               placeholder="Dodaj szczegóły dotyczące tej aktywności..."
               rows={3}
             />
@@ -235,14 +208,14 @@ export default function ActivityForm({
                 id="duration"
                 type="number"
                 min="1"
-                value={formData.estimated_duration.replace(/\D/g, '')}
+                value={formData.estimated_duration.replace(/\D/g, "")}
                 onChange={(e) => {
                   const value = e.target.value;
                   // Only allow digits
-                  if (value === '' || /^\d+$/.test(value)) {
+                  if (value === "" || /^\d+$/.test(value)) {
                     setFormData({
                       ...formData,
-                      estimated_duration: value ? `${value} min` : '',
+                      estimated_duration: value ? `${value} min` : "",
                     });
                   }
                 }}
@@ -255,29 +228,18 @@ export default function ActivityForm({
               <Input
                 id="price"
                 value={formData.estimated_price}
-                onChange={(e) =>
-                  setFormData({ ...formData, estimated_price: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, estimated_price: e.target.value })}
                 placeholder="np. 20-40 PLN"
               />
             </div>
           </div>
 
           <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              disabled={isSubmitting}
-            >
+            <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>
               Anuluj
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting
-                ? "Zapisywanie..."
-                : mode === "add"
-                  ? "Dodaj aktywność"
-                  : "Zapisz zmiany"}
+              {isSubmitting ? "Zapisywanie..." : mode === "add" ? "Dodaj aktywność" : "Zapisz zmiany"}
             </Button>
           </DialogFooter>
         </form>
@@ -285,4 +247,3 @@ export default function ActivityForm({
     </Dialog>
   );
 }
-

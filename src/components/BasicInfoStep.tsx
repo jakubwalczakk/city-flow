@@ -3,8 +3,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { basicInfoSchema, type BasicInfoFormData } from "@/lib/schemas/plan.schema";
+import { basicInfoSchema } from "@/lib/schemas/plan.schema";
 import type { NewPlanViewModel } from "@/types";
+import { ZodError } from "zod";
 
 interface BasicInfoStepProps {
   formData: NewPlanViewModel["basicInfo"];
@@ -30,10 +31,10 @@ export function BasicInfoStep({
   // Convert Date to datetime-local string format (YYYY-MM-DDTHH:mm)
   const dateToDateTimeLocal = (date: Date): string => {
     const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
     return `${year}-${month}-${day}T${hours}:${minutes}`;
   };
 
@@ -48,12 +49,13 @@ export function BasicInfoStep({
       setErrors({});
       goToNextStep();
     } catch (error) {
-      if (error instanceof Error && "errors" in error) {
-        const zodError = error as any;
+      if (error instanceof ZodError) {
         const newErrors: Record<string, string> = {};
-        zodError.errors.forEach((err: any) => {
+        error.errors.forEach((err) => {
           const path = err.path[0];
-          newErrors[path] = err.message;
+          if (typeof path === "string") {
+            newErrors[path] = err.message;
+          }
         });
         setErrors(newErrors);
       }
@@ -66,12 +68,13 @@ export function BasicInfoStep({
       setErrors({});
       onSave();
     } catch (error) {
-      if (error instanceof Error && "errors" in error) {
-        const zodError = error as any;
+      if (error instanceof ZodError) {
         const newErrors: Record<string, string> = {};
-        zodError.errors.forEach((err: any) => {
+        error.errors.forEach((err) => {
           const path = err.path[0];
-          newErrors[path] = err.message;
+          if (typeof path === "string") {
+            newErrors[path] = err.message;
+          }
         });
         setErrors(newErrors);
       }
@@ -100,9 +103,7 @@ export function BasicInfoStep({
           onChange={(e) => updateFormData({ name: e.target.value })}
           className={errors.name ? "border-destructive" : ""}
         />
-        {errors.name && (
-          <p className="text-sm text-destructive">{errors.name}</p>
-        )}
+        {errors.name && <p className="text-sm text-destructive">{errors.name}</p>}
       </div>
 
       <div className="space-y-2">
@@ -116,9 +117,7 @@ export function BasicInfoStep({
           onChange={(e) => updateFormData({ destination: e.target.value })}
           className={errors.destination ? "border-destructive" : ""}
         />
-        {errors.destination && (
-          <p className="text-sm text-destructive">{errors.destination}</p>
-        )}
+        {errors.destination && <p className="text-sm text-destructive">{errors.destination}</p>}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -130,14 +129,10 @@ export function BasicInfoStep({
             id="start_date"
             type="datetime-local"
             value={dateToDateTimeLocal(formData.start_date)}
-            onChange={(e) =>
-              updateFormData({ start_date: dateTimeLocalToDate(e.target.value) })
-            }
+            onChange={(e) => updateFormData({ start_date: dateTimeLocalToDate(e.target.value) })}
             className={errors.start_date ? "border-destructive" : ""}
           />
-          {errors.start_date && (
-            <p className="text-sm text-destructive">{errors.start_date}</p>
-          )}
+          {errors.start_date && <p className="text-sm text-destructive">{errors.start_date}</p>}
         </div>
 
         <div className="space-y-2">
@@ -148,15 +143,11 @@ export function BasicInfoStep({
             id="end_date"
             type="datetime-local"
             value={dateToDateTimeLocal(formData.end_date)}
-            onChange={(e) =>
-              updateFormData({ end_date: dateTimeLocalToDate(e.target.value) })
-            }
+            onChange={(e) => updateFormData({ end_date: dateTimeLocalToDate(e.target.value) })}
             min={dateToDateTimeLocal(formData.start_date)}
             className={errors.end_date ? "border-destructive" : ""}
           />
-          {errors.end_date && (
-            <p className="text-sm text-destructive">{errors.end_date}</p>
-          )}
+          {errors.end_date && <p className="text-sm text-destructive">{errors.end_date}</p>}
         </div>
       </div>
 
@@ -170,8 +161,7 @@ export function BasicInfoStep({
           rows={4}
         />
         <p className="text-sm text-muted-foreground">
-          Uwzględnij wszelkie preferencje, specjalne wymagania lub pomysły dotyczące
-          tej podróży.
+          Uwzględnij wszelkie preferencje, specjalne wymagania lub pomysły dotyczące tej podróży.
         </p>
       </div>
 
@@ -182,18 +172,10 @@ export function BasicInfoStep({
           Anuluj
         </Button>
         <div>
-          <Button
-            variant="outline"
-            onClick={handleSave}
-            disabled={!isFormValid() || isLoading}
-            className="mr-2"
-          >
+          <Button variant="outline" onClick={handleSave} disabled={!isFormValid() || isLoading} className="mr-2">
             {isLoading ? "Zapisywanie..." : "Zapisz jako szkic"}
           </Button>
-          <Button
-            onClick={validateAndProceed}
-            disabled={!isFormValid() || isLoading}
-          >
+          <Button onClick={validateAndProceed} disabled={!isFormValid() || isLoading}>
             Dalej
           </Button>
         </div>
@@ -201,4 +183,3 @@ export function BasicInfoStep({
     </div>
   );
 }
-

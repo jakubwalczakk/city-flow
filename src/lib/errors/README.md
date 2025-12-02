@@ -11,7 +11,6 @@ The system is built around custom error classes that extend the native JavaScrip
 - **`AppError`** - Base class for all application errors
   - Includes HTTP status code
   - Distinguishes between operational and programming errors
-  
 - **`ValidationError`** (400) - For input validation failures
 - **`UnauthorizedError`** (401) - For authentication failures
 - **`ForbiddenError`** (403) - For authorization failures
@@ -28,7 +27,6 @@ Provides utilities for handling errors in API endpoints:
   - Logs errors with contextual information
   - Hides sensitive details in production
   - Returns user-friendly error messages
-  
 - **`successResponse(data, status)`** - Creates standardized success responses
 
 ## Usage
@@ -40,18 +38,11 @@ import { DatabaseError } from "@/lib/errors/app-error";
 import { logger } from "@/lib/utils/logger";
 
 export const createResource = async (data) => {
-  const { data: result, error } = await supabase
-    .from("table")
-    .insert(data)
-    .select()
-    .single();
+  const { data: result, error } = await supabase.from("table").insert(data).select().single();
 
   if (error) {
     logger.error("Database operation failed", { errorCode: error.code });
-    throw new DatabaseError(
-      "Failed to create resource",
-      new Error(error.message)
-    );
+    throw new DatabaseError("Failed to create resource", new Error(error.message));
   }
 
   return result;
@@ -110,9 +101,9 @@ All API errors return JSON in this format:
 ## Logging
 
 Errors are automatically logged with:
+
 - Timestamp
 - Error level (warn for operational, error for programming errors)
 - Error message
 - Additional context (endpoint, user ID, etc.)
 - Stack trace (for non-operational errors)
-

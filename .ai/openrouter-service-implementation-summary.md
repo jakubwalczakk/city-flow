@@ -3,12 +3,15 @@
 ## ✅ Zrealizowane Zadania
 
 ### 1. Konfiguracja środowiska
+
 - ✅ Zainstalowano zależność `zod-to-json-schema`
 - ✅ Dodano konfigurację zmiennej środowiskowej `OPENROUTER_API_KEY` do `.env.example`
 - ⚠️ **Uwaga**: Należy dodać `OPENROUTER_API_KEY` do lokalnego pliku `.env`
 
 ### 2. Struktura plików
+
 Utworzono następujące pliki:
+
 - `src/lib/services/openrouter.service.ts` - główna implementacja serwisu
 - `src/lib/services/openrouter.types.ts` - typy i interfejsy
 - `src/pages/api/test-openrouter.ts` - endpoint testowy
@@ -16,6 +19,7 @@ Utworzono następujące pliki:
 ### 3. Implementacja serwisu
 
 #### Typy i interfejsy (`openrouter.types.ts`)
+
 ```typescript
 - OpenRouterConfig - konfiguracja serwisu
 - GetStructuredResponseOptions<T> - opcje dla strukturalnych odpowiedzi
@@ -25,15 +29,18 @@ Utworzono następujące pliki:
 #### Klasa OpenRouterService (`openrouter.service.ts`)
 
 **Konstruktor:**
+
 - Walidacja klucza API
 - Konfiguracja baseUrl (domyślnie: `https://openrouter.ai/api/v1`)
 - Opcjonalne ustawienia domyślnego modelu i parametrów
 - Integracja z loggerem
 
 **Metoda publiczna:**
+
 - `getStructuredResponse<T>()` - generuje strukturalną odpowiedź zgodną ze schematem Zod
 
 **Metody prywatne:**
+
 - `buildRequestBody()` - buduje ciało żądania z konwersją Zod → JSON Schema
 - `sendRequest()` - wysyła żądania HTTP do OpenRouter API
 - `parseAndValidateResponse()` - parsuje i waliduje odpowiedzi
@@ -43,16 +50,19 @@ Utworzono następujące pliki:
 Zaimplementowano kompleksową obsługę błędów:
 
 #### Błędy HTTP:
+
 - `401 Unauthorized` → "Invalid API key"
 - `429 Too Many Requests` → "Rate limit exceeded"
 - `400 Bad Request` → "Invalid request parameters"
 - `5xx Server Error` → "OpenRouter service is temporarily unavailable"
 
 #### Typy błędów:
+
 - `ExternalServiceError` - błędy API i sieci
 - `ValidationError` - błędy walidacji odpowiedzi z Zod
 
 #### Logowanie:
+
 - `logger.debug()` - szczegóły żądań
 - `logger.info()` - sukces operacji
 - `logger.error()` - błędy z pełnym kontekstem
@@ -60,6 +70,7 @@ Zaimplementowano kompleksową obsługę błędów:
 ### 5. Endpoint testowy
 
 Utworzono `GET /api/test-openrouter` do weryfikacji:
+
 - Sprawdzenie konfiguracji API key
 - Test generowania planu podróży do Paryża (3 dni)
 - Walidacja odpowiedzi zgodnie ze schematem Zod
@@ -70,20 +81,20 @@ Utworzono `GET /api/test-openrouter` do weryfikacji:
 ### Inicjalizacja serwisu
 
 ```typescript
-import { OpenRouterService } from '@/lib/services/openrouter.service';
+import { OpenRouterService } from "@/lib/services/openrouter.service";
 
 const service = new OpenRouterService({
   apiKey: import.meta.env.OPENROUTER_API_KEY,
   // Opcjonalnie:
-  defaultModel: 'anthropic/claude-3.5-sonnet',
-  defaultParams: { temperature: 0.7 }
+  defaultModel: "anthropic/claude-3.5-sonnet",
+  defaultParams: { temperature: 0.7 },
 });
 ```
 
 ### Generowanie strukturalnej odpowiedzi
 
 ```typescript
-import { z } from 'zod';
+import { z } from "zod";
 
 const schema = z.object({
   destination: z.string(),
@@ -91,12 +102,12 @@ const schema = z.object({
 });
 
 const result = await service.getStructuredResponse({
-  systemPrompt: 'You are a travel assistant.',
-  userPrompt: 'Plan a trip to Paris.',
+  systemPrompt: "You are a travel assistant.",
+  userPrompt: "Plan a trip to Paris.",
   responseSchema: schema,
   // Opcjonalnie:
-  model: 'anthropic/claude-3.5-sonnet',
-  params: { temperature: 0.7 }
+  model: "anthropic/claude-3.5-sonnet",
+  params: { temperature: 0.7 },
 });
 
 // result jest typu: { destination: string; activities: string[] }
@@ -121,13 +132,13 @@ curl http://localhost:4321/api/test-openrouter
 
 ```typescript
 // src/pages/api/plans.ts
-import { OpenRouterService } from '@/lib/services/openrouter.service';
+import { OpenRouterService } from "@/lib/services/openrouter.service";
 
 export const POST: APIRoute = async ({ locals }) => {
   const service = new OpenRouterService({
     apiKey: import.meta.env.OPENROUTER_API_KEY!,
   });
-  
+
   // Użycie serwisu...
 };
 ```
@@ -135,12 +146,14 @@ export const POST: APIRoute = async ({ locals }) => {
 ## 🔒 Bezpieczeństwo
 
 ✅ **Zaimplementowano:**
+
 - Klucz API przechowywany w zmiennych środowiskowych
 - Używanie `import.meta.env` (dostępne tylko po stronie serwera)
 - Walidacja wszystkich odpowiedzi z API przez Zod
 - Szczegółowe logowanie błędów bez ujawniania wrażliwych danych
 
 ⚠️ **Należy pamiętać:**
+
 - Nigdy nie commitować pliku `.env` do repozytorium
 - Ustawić limity API w panelu OpenRouter
 - Monitorować użycie API
@@ -158,6 +171,7 @@ Serwis jest gotowy do użycia w produkcji. Możliwe rozszerzenia:
 ## 🎯 Zgodność z planem implementacji
 
 ✅ Wszystkie punkty z planu implementacji zostały zrealizowane:
+
 - [x] Struktura serwisu zgodna z planem
 - [x] Konstruktor z walidacją
 - [x] Publiczne metody (getStructuredResponse)
@@ -175,4 +189,3 @@ Serwis jest gotowy do użycia w produkcji. Możliwe rozszerzenia:
 - Pełne wsparcie TypeScript z generycznymi typami
 - Kod zgodny z zasadami projektu (early returns, guard clauses)
 - Brak błędów lintera
-

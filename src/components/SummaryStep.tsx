@@ -14,13 +14,7 @@ interface SummaryStepProps {
   error: string | null;
 }
 
-export function SummaryStep({
-  formData,
-  goToPrevStep,
-  onSubmit,
-  isLoading,
-  error,
-}: SummaryStepProps) {
+export function SummaryStep({ formData, goToPrevStep, onSubmit, isLoading, error }: SummaryStepProps) {
   const { basicInfo, fixedPoints } = formData;
 
   const formatDateTime = (dateTimeString: string) => {
@@ -40,9 +34,7 @@ export function SummaryStep({
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-semibold mb-2">Przejrzyj swój plan</h3>
-        <p className="text-sm text-muted-foreground">
-          Przejrzyj wszystkie informacje przed utworzeniem planu podróży.
-        </p>
+        <p className="text-sm text-muted-foreground">Przejrzyj wszystkie informacje przed utworzeniem planu podróży.</p>
       </div>
 
       {/* Basic Information Summary */}
@@ -107,24 +99,15 @@ export function SummaryStep({
         </CardHeader>
         <CardContent>
           {fixedPoints.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              Nie dodano stałych punktów. Możesz dodać je później.
-            </p>
+            <p className="text-sm text-muted-foreground">Nie dodano stałych punktów. Możesz dodać je później.</p>
           ) : (
             <div className="space-y-3">
               {fixedPoints.map((point, index) => (
-                <div
-                  key={index}
-                  className="flex items-start gap-3 pb-3 border-b last:border-b-0 last:pb-0"
-                >
+                <div key={index} className="flex items-start gap-3 pb-3 border-b last:border-b-0 last:pb-0">
                   <MapPin className="h-4 w-4 mt-1 text-muted-foreground flex-shrink-0" />
                   <div className="flex-1 min-w-0">
                     <p className="font-medium">{point.location}</p>
-                    {point.description && (
-                      <p className="text-sm text-muted-foreground">
-                        {point.description}
-                      </p>
-                    )}
+                    {point.description && <p className="text-sm text-muted-foreground">{point.description}</p>}
                     <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
                       <Clock className="h-3 w-3" />
                       <span>{formatDateTime(point.event_at)}</span>
@@ -140,11 +123,7 @@ export function SummaryStep({
       </Card>
 
       {/* Error message */}
-      {error && (
-        <div className="rounded-lg bg-destructive/15 p-4 text-sm text-destructive">
-          {error}
-        </div>
-      )}
+      {error && <div className="rounded-lg bg-destructive/15 p-4 text-sm text-destructive">{error}</div>}
 
       {/* Navigation buttons */}
       <div className="flex justify-between pt-4">
@@ -165,4 +144,3 @@ export function SummaryStep({
     </div>
   );
 }
-

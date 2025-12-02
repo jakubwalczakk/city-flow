@@ -1,9 +1,11 @@
 # API Endpoint Implementation Plan: Generate Plan
 
 ## 1. Endpoint Overview
+
 This endpoint triggers the AI generation process for a specific draft plan. It transforms a user's notes and preferences into a structured itinerary. This is a potentially long-running, synchronous operation.
 
 ## 2. Request Details
+
 - **HTTP Method**: `POST`
 - **URL Structure**: `/api/plans/{id}/generate`
 - **URL Parameters**:
@@ -11,9 +13,11 @@ This endpoint triggers the AI generation process for a specific draft plan. It t
 - **Request Body**: None
 
 ## 3. Types Used
+
 - **DTO (Response)**: `PlanDetailsDto` from `src/types.ts`.
 
 ## 4. Response Details
+
 - **Success Response (`200 OK`)**: Returns the full plan object with the `generated_content` field populated and the `status` updated to `generated`.
 - **Error Response (`402 Payment Required`)**: Returned if the user has no remaining generation credits.
   ```json
@@ -24,6 +28,7 @@ This endpoint triggers the AI generation process for a specific draft plan. It t
 - **Error Response (`500 Internal Server Error`)**: Returned for failures during the AI generation process.
 
 ## 5. Data Flow
+
 1. The client sends a `POST` request to `/api/plans/{id}/generate`.
 2. Astro middleware verifies the user's authentication token.
 3. The API handler in `src/pages/api/plans/[id]/generate.ts` receives the request.
@@ -41,11 +46,13 @@ This endpoint triggers the AI generation process for a specific draft plan. It t
 9. The handler returns `200 OK` with the updated plan or a corresponding error response.
 
 ## 6. Security Considerations
+
 - **Authentication & Authorization**: Standard checks are in place to ensure only the plan's owner can trigger generation.
 - **Resource Management**: The process must be wrapped in a transaction to ensure the user's generation credit is only consumed if the entire process succeeds.
 - **Third-Party API Keys**: The key for Openrouter.ai must be stored securely as an environment variable and never exposed on the client side.
 
 ## 7. Error Handling
+
 - **`401 Unauthorized`**: Unauthenticated user.
 - **`402 Payment Required`**: No generation credits left.
 - **`404 Not Found`**: Plan not found for the user.
@@ -53,9 +60,11 @@ This endpoint triggers the AI generation process for a specific draft plan. It t
 - **`500 Internal Server Error`**: Generic error for issues during generation. The response should clarify that the user's credit was not used.
 
 ## 8. Performance Considerations
+
 - This can be a long-running request. The client should be prepared to wait and show a loading state. For a future version, this could be converted to an asynchronous operation with polling or websockets, but for now, a synchronous request is acceptable.
 
 ## 9. Implementation Steps
+
 1. **Create AI Service**:
    - Create a new file `src/lib/services/ai.service.ts`.
    - Implement a function that takes plan and profile data, formats it into a prompt, and calls the Openrouter.ai API. It should handle parsing the response.

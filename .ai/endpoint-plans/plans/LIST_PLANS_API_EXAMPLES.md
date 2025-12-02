@@ -3,6 +3,7 @@
 This document contains practical examples for testing the `GET /api/plans` endpoint.
 
 ## Base URL
+
 ```
 http://localhost:4321/api/plans
 ```
@@ -10,12 +11,15 @@ http://localhost:4321/api/plans
 ## Positive Test Cases
 
 ### 1. Get all plans with default parameters
+
 **Request:**
+
 ```bash
 curl -X GET "http://localhost:4321/api/plans"
 ```
 
 **Expected Response (200 OK):**
+
 ```json
 {
   "data": [
@@ -49,12 +53,15 @@ curl -X GET "http://localhost:4321/api/plans"
 ---
 
 ### 2. Filter by status (draft)
+
 **Request:**
+
 ```bash
 curl -X GET "http://localhost:4321/api/plans?status=draft"
 ```
 
 **Expected Response (200 OK):**
+
 ```json
 {
   "data": [
@@ -79,12 +86,15 @@ curl -X GET "http://localhost:4321/api/plans?status=draft"
 ---
 
 ### 3. Filter by status (generated)
+
 **Request:**
+
 ```bash
 curl -X GET "http://localhost:4321/api/plans?status=generated"
 ```
 
 **Expected Response (200 OK):**
+
 ```json
 {
   "data": [
@@ -109,12 +119,15 @@ curl -X GET "http://localhost:4321/api/plans?status=generated"
 ---
 
 ### 4. Sort by name ascending
+
 **Request:**
+
 ```bash
 curl -X GET "http://localhost:4321/api/plans?sort_by=name&order=asc"
 ```
 
 **Expected Response (200 OK):**
+
 ```json
 {
   "data": [
@@ -148,12 +161,15 @@ curl -X GET "http://localhost:4321/api/plans?sort_by=name&order=asc"
 ---
 
 ### 5. Pagination - first page with limit 1
+
 **Request:**
+
 ```bash
 curl -X GET "http://localhost:4321/api/plans?limit=1&offset=0"
 ```
 
 **Expected Response (200 OK):**
+
 ```json
 {
   "data": [
@@ -178,12 +194,15 @@ curl -X GET "http://localhost:4321/api/plans?limit=1&offset=0"
 ---
 
 ### 6. Pagination - second page with limit 1
+
 **Request:**
+
 ```bash
 curl -X GET "http://localhost:4321/api/plans?limit=1&offset=1"
 ```
 
 **Expected Response (200 OK):**
+
 ```json
 {
   "data": [
@@ -208,12 +227,15 @@ curl -X GET "http://localhost:4321/api/plans?limit=1&offset=1"
 ---
 
 ### 7. Combined filters and sorting
+
 **Request:**
+
 ```bash
 curl -X GET "http://localhost:4321/api/plans?status=draft&sort_by=created_at&order=asc&limit=10&offset=0"
 ```
 
 **Expected Response (200 OK):**
+
 ```json
 {
   "data": [
@@ -238,12 +260,15 @@ curl -X GET "http://localhost:4321/api/plans?status=draft&sort_by=created_at&ord
 ---
 
 ### 8. Empty result set (no plans match filter)
+
 **Request:**
+
 ```bash
 curl -X GET "http://localhost:4321/api/plans?status=archived"
 ```
 
 **Expected Response (200 OK):**
+
 ```json
 {
   "data": [],
@@ -260,20 +285,21 @@ curl -X GET "http://localhost:4321/api/plans?status=archived"
 ## Negative Test Cases
 
 ### 1. Invalid status value
+
 **Request:**
+
 ```bash
 curl -X GET "http://localhost:4321/api/plans?status=invalid_status"
 ```
 
 **Expected Response (400 Bad Request):**
+
 ```json
 {
   "error": "Invalid query parameters",
   "details": {
     "fieldErrors": {
-      "status": [
-        "Invalid enum value. Expected 'draft' | 'generated' | 'archived', received 'invalid_status'"
-      ]
+      "status": ["Invalid enum value. Expected 'draft' | 'generated' | 'archived', received 'invalid_status'"]
     },
     "formErrors": []
   }
@@ -283,20 +309,21 @@ curl -X GET "http://localhost:4321/api/plans?status=invalid_status"
 ---
 
 ### 2. Invalid sort_by field
+
 **Request:**
+
 ```bash
 curl -X GET "http://localhost:4321/api/plans?sort_by=invalid_field"
 ```
 
 **Expected Response (400 Bad Request):**
+
 ```json
 {
   "error": "Invalid query parameters",
   "details": {
     "fieldErrors": {
-      "sort_by": [
-        "Invalid enum value. Expected 'created_at' | 'name', received 'invalid_field'"
-      ]
+      "sort_by": ["Invalid enum value. Expected 'created_at' | 'name', received 'invalid_field'"]
     },
     "formErrors": []
   }
@@ -306,20 +333,21 @@ curl -X GET "http://localhost:4321/api/plans?sort_by=invalid_field"
 ---
 
 ### 3. Invalid order value
+
 **Request:**
+
 ```bash
 curl -X GET "http://localhost:4321/api/plans?order=invalid_order"
 ```
 
 **Expected Response (400 Bad Request):**
+
 ```json
 {
   "error": "Invalid query parameters",
   "details": {
     "fieldErrors": {
-      "order": [
-        "Invalid enum value. Expected 'asc' | 'desc', received 'invalid_order'"
-      ]
+      "order": ["Invalid enum value. Expected 'asc' | 'desc', received 'invalid_order'"]
     },
     "formErrors": []
   }
@@ -329,20 +357,21 @@ curl -X GET "http://localhost:4321/api/plans?order=invalid_order"
 ---
 
 ### 4. Limit exceeds maximum (101)
+
 **Request:**
+
 ```bash
 curl -X GET "http://localhost:4321/api/plans?limit=101"
 ```
 
 **Expected Response (400 Bad Request):**
+
 ```json
 {
   "error": "Invalid query parameters",
   "details": {
     "fieldErrors": {
-      "limit": [
-        "Limit cannot exceed 100."
-      ]
+      "limit": ["Limit cannot exceed 100."]
     },
     "formErrors": []
   }
@@ -352,20 +381,21 @@ curl -X GET "http://localhost:4321/api/plans?limit=101"
 ---
 
 ### 5. Limit is zero
+
 **Request:**
+
 ```bash
 curl -X GET "http://localhost:4321/api/plans?limit=0"
 ```
 
 **Expected Response (400 Bad Request):**
+
 ```json
 {
   "error": "Invalid query parameters",
   "details": {
     "fieldErrors": {
-      "limit": [
-        "Limit must be at least 1."
-      ]
+      "limit": ["Limit must be at least 1."]
     },
     "formErrors": []
   }
@@ -375,20 +405,21 @@ curl -X GET "http://localhost:4321/api/plans?limit=0"
 ---
 
 ### 6. Negative offset
+
 **Request:**
+
 ```bash
 curl -X GET "http://localhost:4321/api/plans?offset=-1"
 ```
 
 **Expected Response (400 Bad Request):**
+
 ```json
 {
   "error": "Invalid query parameters",
   "details": {
     "fieldErrors": {
-      "offset": [
-        "Offset must be non-negative."
-      ]
+      "offset": ["Offset must be non-negative."]
     },
     "formErrors": []
   }
@@ -398,20 +429,21 @@ curl -X GET "http://localhost:4321/api/plans?offset=-1"
 ---
 
 ### 7. Non-numeric limit value
+
 **Request:**
+
 ```bash
 curl -X GET "http://localhost:4321/api/plans?limit=abc"
 ```
 
 **Expected Response (400 Bad Request):**
+
 ```json
 {
   "error": "Invalid query parameters",
   "details": {
     "fieldErrors": {
-      "limit": [
-        "Expected number, received nan"
-      ]
+      "limit": ["Expected number, received nan"]
     },
     "formErrors": []
   }
@@ -421,26 +453,23 @@ curl -X GET "http://localhost:4321/api/plans?limit=abc"
 ---
 
 ### 8. Multiple validation errors
+
 **Request:**
+
 ```bash
 curl -X GET "http://localhost:4321/api/plans?status=invalid&limit=200&offset=-5"
 ```
 
 **Expected Response (400 Bad Request):**
+
 ```json
 {
   "error": "Invalid query parameters",
   "details": {
     "fieldErrors": {
-      "status": [
-        "Invalid enum value. Expected 'draft' | 'generated' | 'archived', received 'invalid'"
-      ],
-      "limit": [
-        "Limit cannot exceed 100."
-      ],
-      "offset": [
-        "Offset must be non-negative."
-      ]
+      "status": ["Invalid enum value. Expected 'draft' | 'generated' | 'archived', received 'invalid'"],
+      "limit": ["Limit cannot exceed 100."],
+      "offset": ["Offset must be non-negative."]
     },
     "formErrors": []
   }
@@ -497,4 +526,3 @@ curl -s "$BASE_URL?offset=-1" | jq .
 
 echo "Tests completed!"
 ```
-

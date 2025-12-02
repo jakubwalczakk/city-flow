@@ -70,11 +70,7 @@ export const submitFeedback = async (
  * @throws {NotFoundError} If no feedback exists for this plan
  * @throws {DatabaseError} If the database operation fails
  */
-export const getFeedback = async (
-  supabase: SupabaseClient,
-  planId: string,
-  userId: string
-): Promise<FeedbackDto> => {
+export const getFeedback = async (supabase: SupabaseClient, planId: string, userId: string): Promise<FeedbackDto> => {
   logger.debug("Fetching feedback", {
     planId,
     userId,
@@ -115,4 +111,3 @@ export const getFeedback = async (
 
   return data;
 };
-

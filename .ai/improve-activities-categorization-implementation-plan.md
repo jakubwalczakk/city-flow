@@ -6,14 +6,14 @@ Celem jest dodanie kategoryzacji do każdego punktu w wygenerowanym planie podr�
 
 Na podstawie Twojej prośby i analizy `prd.md`, zdefiniowano następujące kategorie:
 
--   `history`: Zabytki historyczne
--   `food`: Jedzenie i gastronomia
--   `sport`: Aktywności sportowe
--   `nature`: Atrakcje związane z naturą
--   `culture`: Kultura i sztuka (np. muzea, teatry, oceanaria)
--   `transport`: Logistyka i transport (np. lot, pociąg, autobus)
--   `accommodation`: Zakwaterowanie (np. zameldowanie w hotelu)
--   `other`: Inne
+- `history`: Zabytki historyczne
+- `food`: Jedzenie i gastronomia
+- `sport`: Aktywności sportowe
+- `nature`: Atrakcje związane z naturą
+- `culture`: Kultura i sztuka (np. muzea, teatry, oceanaria)
+- `transport`: Logistyka i transport (np. lot, pociąg, autobus)
+- `accommodation`: Zakwaterowanie (np. zameldowanie w hotelu)
+- `other`: Inne
 
 Dodałem kategorię `accommodation`, która wydaje się przydatna w kontekście planowania podróży.
 
@@ -21,28 +21,28 @@ Dodałem kategorię `accommodation`, która wydaje się przydatna w kontekście 
 
 ### 2.1. Aktualizacja schematu bazy danych (`.ai/db-plan.md`)
 
--   W strukturze `generated_content` (JSONB) w tabeli `plans`, do każdego obiektu w tablicy `items` zostanie dodane pole `category` typu `TEXT`.
--   Zostanie dodana sekcja opisująca zdefiniowane kategorie.
+- W strukturze `generated_content` (JSONB) w tabeli `plans`, do każdego obiektu w tablicy `items` zostanie dodane pole `category` typu `TEXT`.
+- Zostanie dodana sekcja opisująca zdefiniowane kategorie.
 
 ### 2.2. Aktualizacja dokumentu wymagań produktu (`.ai/prd.md`)
 
--   Do sekcji `5.4. Generowanie planu (AI Core)` zostanie dodana nowa historyjka użytkownika (`US-037`) opisująca wymaganie wyświetlania kategorii (i ikon) dla punktów planu.
+- Do sekcji `5.4. Generowanie planu (AI Core)` zostanie dodana nowa historyjka użytkownika (`US-037`) opisująca wymaganie wyświetlania kategorii (i ikon) dla punktów planu.
 
 ## 3. Aktualizacja kodu źródłowego
 
 ### 3.1. Aktualizacja typów TypeScript (`src/types.ts`)
 
--   Zostanie zdefiniowany nowy typ `TimelineItemCategory` jako unia literałów tekstowych dla zdefiniowanych kategorii.
--   Do interfejsu `TimelineItem` zostanie dodane pole `category: TimelineItemCategory`.
+- Zostanie zdefiniowany nowy typ `TimelineItemCategory` jako unia literałów tekstowych dla zdefiniowanych kategorii.
+- Do interfejsu `TimelineItem` zostanie dodane pole `category: TimelineItemCategory`.
 
 ### 3.2. Modyfikacja logiki generowania planu (backend)
 
--   Należy zaktualizować prompt wysyłany do AI (w `openrouter.service.ts` lub podobnym), aby w odpowiedzi JSON dla każdego punktu planu zawierał pole `category` z jedną ze zdefiniowanych wartości. To jest kluczowy krok, aby dane faktycznie pojawiały się w systemie.
+- Należy zaktualizować prompt wysyłany do AI (w `openrouter.service.ts` lub podobnym), aby w odpowiedzi JSON dla każdego punktu planu zawierał pole `category` z jedną ze zdefiniowanych wartości. To jest kluczowy krok, aby dane faktycznie pojawiały się w systemie.
 
 ### 3.3. Aktualizacja komponentów UI (frontend)
 
--   Komponenty odpowiedzialne za wyświetlanie planu (np. `GeneratedPlanView.tsx` i `EventTimeline.tsx`) będą musiały zostać zaktualizowane, aby odczytywać nowe pole `category`.
--   Należy przygotować zestaw ikon odpowiadających każdej kategorii i wyświetlać je obok nazwy atrakcji.
+- Komponenty odpowiedzialne za wyświetlanie planu (np. `GeneratedPlanView.tsx` i `EventTimeline.tsx`) będą musiały zostać zaktualizowane, aby odczytywać nowe pole `category`.
+- Należy przygotować zestaw ikon odpowiadających każdej kategorii i wyświetlać je obok nazwy atrakcji.
 
 ## 4. Planowane kroki
 

@@ -5,9 +5,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
-type DraftPlanViewProps = {
+interface DraftPlanViewProps {
   plan: PlanDetailsDto;
-};
+}
 
 /**
  * Displays the draft plan view with an editable form.
@@ -38,14 +38,13 @@ export default function DraftPlanView({ plan }: DraftPlanViewProps) {
       }
 
       setSaveMessage({ type: "success", text: "Changes saved successfully!" });
-      
+
       // Clear success message after 3 seconds
       setTimeout(() => setSaveMessage(null), 3000);
-    } catch (error) {
-      console.error("Failed to save notes:", error);
-      setSaveMessage({ 
-        type: "error", 
-        text: "Failed to save changes. Please try again." 
+    } catch {
+      setSaveMessage({
+        type: "error",
+        text: "Failed to save changes. Please try again.",
       });
     } finally {
       setIsSaving(false);
@@ -60,8 +59,8 @@ export default function DraftPlanView({ plan }: DraftPlanViewProps) {
         <CardHeader>
           <CardTitle>Plan w wersji roboczej</CardTitle>
           <CardDescription>
-            Ten plan jest w statusie roboczym. Dodaj swoje notatki i preferencje, a następnie wygeneruj
-            spersonalizowany plan podróży.
+            Ten plan jest w statusie roboczym. Dodaj swoje notatki i preferencje, a następnie wygeneruj spersonalizowany
+            plan podróży.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -72,9 +71,7 @@ export default function DraftPlanView({ plan }: DraftPlanViewProps) {
             <div className="rounded-md bg-muted p-3">
               <p className="text-sm">{plan.destination}</p>
             </div>
-            <p className="text-xs text-muted-foreground">
-              Miejsca docelowego nie można zmienić po utworzeniu planu.
-            </p>
+            <p className="text-xs text-muted-foreground">Miejsca docelowego nie można zmienić po utworzeniu planu.</p>
           </div>
 
           <div className="space-y-2">
@@ -92,9 +89,9 @@ export default function DraftPlanView({ plan }: DraftPlanViewProps) {
               className="resize-none"
             />
             <p className="text-xs text-muted-foreground">
-              Podziel się swoimi preferencjami, aby pomóc nam stworzyć spersonalizowany plan podróży. Uwzględnij takie rzeczy
-              jak: obowiązkowe atrakcje, preferencje żywieniowe, poziom aktywności, kwestie budżetowe
-              lub inne specjalne wymagania.
+              Podziel się swoimi preferencjami, aby pomóc nam stworzyć spersonalizowany plan podróży. Uwzględnij takie
+              rzeczy jak: obowiązkowe atrakcje, preferencje żywieniowe, poziom aktywności, kwestie budżetowe lub inne
+              specjalne wymagania.
             </p>
           </div>
 
@@ -111,11 +108,7 @@ export default function DraftPlanView({ plan }: DraftPlanViewProps) {
           )}
 
           <div className="flex items-center justify-between pt-4">
-            <Button
-              onClick={handleSave}
-              disabled={!hasChanges || isSaving}
-              variant="outline"
-            >
+            <Button onClick={handleSave} disabled={!hasChanges || isSaving} variant="outline">
               {isSaving ? "Zapisywanie..." : "Zapisz zmiany"}
             </Button>
 
@@ -127,18 +120,8 @@ export default function DraftPlanView({ plan }: DraftPlanViewProps) {
               size="lg"
             >
               Wygeneruj plan
-              <svg
-                className="ml-2 h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M13 10V3L4 14h7v7l9-11h-7z"
-                />
+              <svg className="ml-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
             </Button>
           </div>
@@ -152,12 +135,7 @@ export default function DraftPlanView({ plan }: DraftPlanViewProps) {
         <CardContent>
           <div className="flex flex-col gap-3 text-sm">
             <div className="flex items-center gap-2">
-              <svg
-                className="h-4 w-4 text-muted-foreground"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
+              <svg className="h-4 w-4 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -180,12 +158,7 @@ export default function DraftPlanView({ plan }: DraftPlanViewProps) {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <svg
-                className="h-4 w-4 text-muted-foreground"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
+              <svg className="h-4 w-4 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -213,4 +186,3 @@ export default function DraftPlanView({ plan }: DraftPlanViewProps) {
     </div>
   );
 }
-

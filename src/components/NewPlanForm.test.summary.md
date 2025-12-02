@@ -7,6 +7,7 @@ Zaimplementowano kompleksowy zestaw testów jednostkowych dla komponentu `NewPla
 ## ✅ Zrealizowane Zadania
 
 ### 1. Konfiguracja Środowiska Testowego
+
 - ✅ Utworzono `vitest.config.ts` z pełną konfiguracją
 - ✅ Skonfigurowano środowisko `jsdom` dla testów komponentów React
 - ✅ Ustawiono aliasy ścieżek (`@` → `./src`)
@@ -14,12 +15,14 @@ Zaimplementowano kompleksowy zestaw testów jednostkowych dla komponentu `NewPla
 - ✅ Wykluczono komponenty UI i pliki testowe z raportów pokrycia
 
 ### 2. Implementacja Testów
+
 - ✅ Utworzono `NewPlanForm.test.tsx` z 26 testami jednostkowymi
 - ✅ Zastosowano wzorzec AAA (Arrange-Act-Assert)
 - ✅ Zaimplementowano mockowanie hooków i komponentów potomnych
 - ✅ Pokryto wszystkie kluczowe funkcjonalności komponentu
 
 ### 3. Dokumentacja
+
 - ✅ Utworzono szczegółową dokumentację testów (`NewPlanForm.test.md`)
 - ✅ Utworzono README dla katalogu testów (`__tests__/README.md`)
 - ✅ Zaktualizowano główny README projektu o sekcję testowania
@@ -35,19 +38,19 @@ Duration:    ~1.28s
 
 ### Pokrycie Funkcjonalności
 
-| Kategoria | Liczba Testów | Opis |
-|-----------|---------------|------|
-| Rendering | 4 | Podstawowe renderowanie komponentu |
-| Generation Loading | 3 | Stan ładowania podczas generowania AI |
-| Callback Handling | 2 | Obsługa funkcji callback |
-| Editing Mode | 2 | Tryb edycji istniejącego planu |
-| Step Navigation | 3 | Nawigacja między krokami |
-| Data Management | 2 | Zarządzanie danymi formularza |
-| Loading & Error States | 2 | Stany ładowania i błędów |
-| Draft Saving | 2 | Zapisywanie szkiców |
-| Integration | 2 | Testy integracyjne |
-| Edge Cases | 4 | Przypadki brzegowe |
-| **RAZEM** | **26** | |
+| Kategoria              | Liczba Testów | Opis                                  |
+| ---------------------- | ------------- | ------------------------------------- |
+| Rendering              | 4             | Podstawowe renderowanie komponentu    |
+| Generation Loading     | 3             | Stan ładowania podczas generowania AI |
+| Callback Handling      | 2             | Obsługa funkcji callback              |
+| Editing Mode           | 2             | Tryb edycji istniejącego planu        |
+| Step Navigation        | 3             | Nawigacja między krokami              |
+| Data Management        | 2             | Zarządzanie danymi formularza         |
+| Loading & Error States | 2             | Stany ładowania i błędów              |
+| Draft Saving           | 2             | Zapisywanie szkiców                   |
+| Integration            | 2             | Testy integracyjne                    |
+| Edge Cases             | 4             | Przypadki brzegowe                    |
+| **RAZEM**              | **26**        |                                       |
 
 ## 🎯 Kluczowe Funkcjonalności Przetestowane
 
@@ -71,6 +74,7 @@ Duration:    ~1.28s
 ## 📝 Najlepsze Praktyki Zastosowane
 
 ### 1. Mockowanie na Odpowiednim Poziomie
+
 ```typescript
 // Hook jest zamockowany
 vi.mock('@/hooks/useNewPlanForm', () => ({
@@ -88,20 +92,22 @@ vi.mock('@/components/BasicInfoStep', () => ({
 ```
 
 ### 2. Wzorzec AAA
+
 ```typescript
 it('should render the form with step indicator', () => {
   // Arrange - przygotowanie
   const props = { ... };
-  
+
   // Act - wykonanie
   render(<NewPlanForm {...props} />);
-  
+
   // Assert - sprawdzenie
   expect(screen.getByTestId('step-indicator')).toBeInTheDocument();
 });
 ```
 
 ### 3. Czyszczenie Mocków
+
 ```typescript
 beforeEach(() => {
   vi.clearAllMocks();
@@ -110,25 +116,27 @@ beforeEach(() => {
 ```
 
 ### 4. Opisowe Nazwy Testów
+
 ```typescript
-describe('Generation Loading State', () => {
-  it('should show loading animation when isGenerating is true', () => {
+describe("Generation Loading State", () => {
+  it("should show loading animation when isGenerating is true", () => {
     // ...
   });
-  
-  it('should use destination as fallback plan name when name is empty', () => {
+
+  it("should use destination as fallback plan name when name is empty", () => {
     // ...
   });
 });
 ```
 
 ### 5. Type Safety
+
 ```typescript
-import type { PlanListItemDto } from '@/types';
+import type { PlanListItemDto } from "@/types";
 
 const editingPlan: PlanListItemDto = {
-  id: 'plan-123',
-  name: 'Existing Plan',
+  id: "plan-123",
+  name: "Existing Plan",
   // ...
 };
 ```
@@ -138,27 +146,31 @@ const editingPlan: PlanListItemDto = {
 1. **vitest.config.ts** - Konfiguracja Vitest
 2. **src/components/NewPlanForm.test.tsx** - Testy jednostkowe (26 testów)
 3. **src/components/NewPlanForm.test.md** - Szczegółowa dokumentacja testów
-4. **src/components/__tests__/README.md** - Przewodnik po testach komponentów
+4. **src/components/**tests**/README.md** - Przewodnik po testach komponentów
 5. **src/components/NewPlanForm.test.summary.md** - Podsumowanie implementacji
 
 ## 🚀 Jak Uruchomić Testy
 
 ### Wszystkie testy:
+
 ```bash
 npm run test:unit
 ```
 
 ### Konkretny plik:
+
 ```bash
 npm run test:unit -- NewPlanForm.test.tsx
 ```
 
 ### Z interfejsem UI:
+
 ```bash
 npm run test:unit:ui
 ```
 
 ### Z pokryciem kodu:
+
 ```bash
 npx vitest run --coverage
 ```
@@ -166,6 +178,7 @@ npx vitest run --coverage
 ## 🔍 Wnioski i Rekomendacje
 
 ### Mocne Strony Implementacji
+
 1. ✅ Kompleksowe pokrycie funkcjonalności (26 testów)
 2. ✅ Czytelna struktura testów z logicznym grupowaniem
 3. ✅ Zastosowanie najlepszych praktyk z Vitest i RTL
@@ -173,6 +186,7 @@ npx vitest run --coverage
 5. ✅ Type safety dzięki TypeScript
 
 ### Możliwe Rozszerzenia
+
 1. 🔄 Testy integracyjne z prawdziwym hookiem `useNewPlanForm`
 2. 🔄 Testy snapshot dla struktury UI
 3. 🔄 Testy accessibility (a11y)
@@ -180,6 +194,7 @@ npx vitest run --coverage
 5. 🔄 Testy z prawdziwymi komponentami potomnymi
 
 ### Następne Kroki
+
 1. Zaimplementować testy dla pozostałych komponentów:
    - `BasicInfoStep.test.tsx`
    - `FixedPointsStep.test.tsx`
@@ -198,6 +213,7 @@ npx vitest run --coverage
 ## 📖 Zgodność z Regułami Projektu
 
 Implementacja jest w pełni zgodna z regułami określonymi w:
+
 - ✅ `.cursor/rules/vitest-unit-testing.mdc`
 - ✅ `.cursor/rules/frontend.mdc`
 - ✅ `.cursor/rules/react.mdc`
@@ -214,6 +230,7 @@ Implementacja jest w pełni zgodna z regułami określonymi w:
 ## ✨ Podsumowanie
 
 Zaimplementowano **kompleksowy, profesjonalny zestaw testów jednostkowych** dla komponentu `NewPlanForm`, który:
+
 - Pokrywa wszystkie kluczowe funkcjonalności (26 testów)
 - Stosuje najlepsze praktyki testowania
 - Jest dobrze udokumentowany
@@ -221,4 +238,3 @@ Zaimplementowano **kompleksowy, profesjonalny zestaw testów jednostkowych** dla
 - Zapewnia wysoką jakość i niezawodność kodu
 
 **Status**: ✅ **ZAKOŃCZONE**
-

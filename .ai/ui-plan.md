@@ -9,6 +9,7 @@ Aplikacja wita użytkownika pulpitem z listą jego planów, zachęcając do dzia
 ## 2. Lista widoków
 
 ### 1. Widok Logowania / Rejestracji
+
 - **Ścieżka widoku:** `/login`, `/register`
 - **Główny cel:** Umożliwienie nowym użytkownikom rejestracji, a powracającym zalogowania się na swoje konto.
 - **Kluczowe informacje do wyświetlenia:** Formularze z polami na e-mail i hasło, przyciski do logowania przez Google.
@@ -16,6 +17,7 @@ Aplikacja wita użytkownika pulpitem z listą jego planów, zachęcając do dzia
 - **UX, dostępność i względy bezpieczeństwa:** Jasne komunikaty o błędach walidacji (np. "Nieprawidłowy e-mail"). Zabezpieczenie przesyłania danych. Widoczne linki do polityki prywatności i odzyskiwania hasła.
 
 ### 2. Widok Onboardingu
+
 - **Ścieżka widoku:** Wyświetlany jako modal po pierwszym zalogowaniu.
 - **Główny cel:** Zebranie od nowego użytkownika podstawowych preferencji podróżniczych w celu personalizacji generowanych planów.
 - **Kluczowe informacje do wyświetlenia:** Wybór tempa zwiedzania, wybór zainteresowań (tagów), informacja o limicie darmowych generacji.
@@ -23,6 +25,7 @@ Aplikacja wita użytkownika pulpitem z listą jego planów, zachęcając do dzia
 - **UX, dostępność i względy bezpieczeństwa:** Proces jest "miękko-wymagany" z dostępną opcją pominięcia. Wizualne wskazanie wybranych opcji.
 
 ### 3. Widok "Moje Plany" (Dashboard)
+
 - **Ścieżka widoku:** `/plans` (domyślny widok po zalogowaniu)
 - **Główny cel:** Wyświetlenie listy wszystkich aktywnych planów użytkownika (szkiców i wygenerowanych) oraz umożliwienie tworzenia nowych.
 - **Kluczowe informacje do wyświetlenia:** Lista planów w formie kart, przycisk do tworzenia nowego planu. W przypadku braku planów, wyświetlany jest stan pusty.
@@ -30,6 +33,7 @@ Aplikacja wita użytkownika pulpitem z listą jego planów, zachęcając do dzia
 - **UX, dostępność i względy bezpieczeństwa:** Każda karta planu ma jasny status ("Szkic", "Wygenerowany") i odpowiednie wezwanie do działania (CTA). Widok jest w pełni responsywny.
 
 ### 4. Widok Historii Planów
+
 - **Ścieżka widoku:** `/plans?status=archived` (dostępny jako zakładka w widoku "Moje Plany")
 - **Główny cel:** Umożliwienie przeglądania zarchiwizowanych, historycznych planów w trybie tylko do odczytu.
 - **Kluczowe informacje do wyświetlenia:** Lista zarchiwizowanych planów w formie kart.
@@ -37,6 +41,7 @@ Aplikacja wita użytkownika pulpitem z listą jego planów, zachęcając do dzia
 - **UX, dostępność i względy bezpieczeństwa:** Plany w historii są wyraźnie oznaczone i nie posiadają akcji edycyjnych.
 
 ### 5. Widok Tworzenia Planu
+
 - **Ścieżka widoku:** `/plans/new`
 - **Główny cel:** Przeprowadzenie użytkownika przez proces tworzenia nowego szkicu planu.
 - **Kluczowe informacje do wyświetlenia:** Kroki procesu (dane podstawowe, stałe punkty, podsumowanie), formularze do wprowadzania danych.
@@ -44,15 +49,17 @@ Aplikacja wita użytkownika pulpitem z listą jego planów, zachęcając do dzia
 - **UX, dostępność i względy bezpieczeństwa:** Podział na kroki zmniejsza obciążenie poznawcze. Walidacja danych na każdym etapie. Jasne instrukcje i etykiety pól.
 
 ### 6. Widok Szczegółów Planu
+
 - **Ścieżka widoku:** `/plans/[id]`
 - **Główny cel:** Wyświetlanie szczegółów planu. Widok jest dynamiczny i renderuje inną zawartość w zależności od statusu planu (`draft` vs `generated`).
 - **Kluczowe informacje do wyświetlenia:**
-    - Dla `draft`: Formularz edycji danych planu.
-    - Dla `generated`: Godzinowa oś czasu dla każdego dnia, opcje edycji (dodawanie, edytowanie, usuwanie aktywności), przyciski akcji (eksport, archiwizacja), moduł feedbacku.
+  - Dla `draft`: Formularz edycji danych planu.
+  - Dla `generated`: Godzinowa oś czasu dla każdego dnia, opcje edycji (dodawanie, edytowanie, usuwanie aktywności), przyciski akcji (eksport, archiwizacja), moduł feedbacku.
 - **Kluczowe komponenty widoku:** `Accordion` (dla dni), `Timeline`, `Button`, `DropdownMenu`, `Dialog` (dla formularza aktywności), `FeedbackModule`.
 - **UX, dostępność i względy bezpieczeństwa:** Czytelna prezentacja planu. Interakcje (dodawanie, edytowanie, usuwanie) mają natychmiastowe wizualne potwierdzenie. Wyraźne ostrzeżenie, że plan jest sugestią AI.
 
 ### 7. Widok Profilu
+
 - **Ścieżka widoku:** `/profile`
 - **Główny cel:** Umożliwienie użytkownikowi zarządzania preferencjami, danymi konta i sprawdzania limitu generacji.
 - **Kluczowe informacje do wyświetlenia:** Formularz edycji preferencji, wskaźnik pozostałych generacji, formularz zmiany hasła.
@@ -67,9 +74,9 @@ Główna ścieżka użytkownika (happy path) obejmuje stworzenie i wygenerowanie
 2.  **Onboarding**: Jeśli to pierwsze logowanie, pojawia się modal onboardingu, w którym użytkownik ustawia swoje preferencje.
 3.  **Dashboard**: Użytkownik ląduje w widoku `Moje Plany` (`/plans`). Widzi pusty stan i klika "Stwórz nowy plan".
 4.  **Tworzenie Planu**: Przechodzi do widoku `/plans/new`. Wypełnia 3 kroki w stepperze:
-    a.  **Krok 1**: Wprowadza miejsce docelowe, daty i notatki.
-    b.  **Krok 2**: Opcjonalnie dodaje stałe punkty (np. rezerwację w restauracji).
-    c.  **Krok 3**: Przegląda podsumowanie i klika "Generuj plan".
+    a. **Krok 1**: Wprowadza miejsce docelowe, daty i notatki.
+    b. **Krok 2**: Opcjonalnie dodaje stałe punkty (np. rezerwację w restauracji).
+    c. **Krok 3**: Przegląda podsumowanie i klika "Generuj plan".
 5.  **Generowanie**: Na ekranie pojawia się nakładka z animacją ładowania i komunikatami o postępie.
 6.  **Przeglądanie Planu**: Po zakończeniu generowania, użytkownik jest przekierowywany do widoku szczegółów (`/plans/[id]`), gdzie widzi wygenerowany plan w formie osi czasu.
 7.  **Interakcja**: Użytkownik edytuje plan - usuwa jedną aktywność, dodaje własną (np. wizytę w lokalnej kawiarni), i modyfikuje czas trwania innej aktywności.
@@ -80,14 +87,14 @@ Główna ścieżka użytkownika (happy path) obejmuje stworzenie i wygenerowanie
 
 - **Główny układ:** Aplikacja wykorzystuje stały układ z panelem bocznym po lewej stronie i obszarem na główną treść po prawej.
 - **Panel boczny (Sidebar):** Zawiera główne linki nawigacyjne:
-    - **Moje Plany** (`/plans`)
-    - **Historia** (`/plans?status=archived`)
-    - **Profil** (`/profile`)
+  - **Moje Plany** (`/plans`)
+  - **Historia** (`/plans?status=archived`)
+  - **Profil** (`/profile`)
 - **Przycisk Wyloguj:** Umieszczony na dole panelu bocznego.
 - **Responsywność:** Na urządzeniach mobilnych (poniżej zdefiniowanego breakpointu), panel boczny zwija się do ikony "hamburgera", która otwiera menu nawigacyjne.
 - **Przekierowania:**
-    - Niezalogowani użytkownicy próbujący uzyskać dostęp do chronionych tras są przekierowywani do `/login`.
-    - Po zalogowaniu użytkownik jest przekierowywany do `/plans`.
+  - Niezalogowani użytkownicy próbujący uzyskać dostęp do chronionych tras są przekierowywani do `/login`.
+  - Po zalogowaniu użytkownik jest przekierowywany do `/plans`.
 
 ## 5. Kluczowe komponenty
 

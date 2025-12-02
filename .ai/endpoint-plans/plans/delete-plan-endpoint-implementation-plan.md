@@ -1,9 +1,11 @@
 # API Endpoint Implementation Plan: Delete Plan
 
 ## 1. Endpoint Overview
+
 This endpoint allows an authenticated user to permanently delete one of their travel plans.
 
 ## 2. Request Details
+
 - **HTTP Method**: `DELETE`
 - **URL Structure**: `/api/plans/{id}`
 - **URL Parameters**:
@@ -11,13 +13,16 @@ This endpoint allows an authenticated user to permanently delete one of their tr
 - **Request Body**: None
 
 ## 3. Types Used
+
 - None.
 
 ## 4. Response Details
+
 - **Success Response (`204 No Content`)**: Returned on successful deletion. The response has no body.
 - **Error Response (`404 Not Found`)**: Returned if the plan does not exist or does not belong to the user.
 
 ## 5. Data Flow
+
 1. The client sends a `DELETE` request to `/api/plans/{id}`.
 2. Astro middleware verifies the user's authentication token.
 3. The API handler in `src/pages/api/plans/[id].ts` receives the request.
@@ -30,19 +35,23 @@ This endpoint allows an authenticated user to permanently delete one of their tr
    - If the service indicates no row was found to delete, it returns a `404 Not Found` response.
 
 ## 6. Security Considerations
+
 - **Authentication**: Requires a valid JWT.
 - **Authorization**: The `delete` operation is conditional on both the plan ID and the user ID from the session, preventing users from deleting others' plans.
 - **RLS**: A `DELETE` policy must be enabled on the `plans` table, allowing deletion only when `user_id = auth.uid()`.
 
 ## 7. Error Handling
+
 - **`401 Unauthorized`**: For unauthenticated requests.
 - **`404 Not Found`**: If no plan with the given ID belongs to the user.
 - **`500 Internal Server Error`**: For database or other unexpected errors.
 
 ## 8. Performance Considerations
+
 - The `delete` query targets a specific row by its primary key, making it highly efficient.
 
 ## 9. Implementation Steps
+
 1. **Implement the Service**:
    - In `src/lib/services/plan.service.ts`, implement `deletePlan(planId: string, userId: string): Promise<boolean>`.
    - The function will execute the delete query and return `true` if a record was deleted, `false` otherwise.

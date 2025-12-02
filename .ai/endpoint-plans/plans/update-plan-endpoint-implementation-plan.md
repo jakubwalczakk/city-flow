@@ -1,9 +1,11 @@
 # API Endpoint Implementation Plan: Update Plan
 
 ## 1. Endpoint Overview
+
 This endpoint allows an authenticated user to update the details of one of their existing plans, such as its name or notes. This is a partial update.
 
 ## 2. Request Details
+
 - **HTTP Method**: `PATCH`
 - **URL Structure**: `/api/plans/{id}`
 - **URL Parameters**:
@@ -17,15 +19,18 @@ This endpoint allows an authenticated user to update the details of one of their
   ```
 
 ## 3. Types Used
+
 - **Command Model (Request)**: `UpdatePlanCommand` from `src/types.ts`.
 - **DTO (Response)**: `PlanDetailsDto` from `src/types.ts`.
 
 ## 4. Response Details
+
 - **Success Response (`200 OK`)**: Returns the complete, updated plan object.
 - **Error Response (`400 Bad Request`)**: Returned if the request body is invalid.
 - **Error Response (`404 Not Found`)**: Returned if the plan does not exist or does not belong to the user.
 
 ## 5. Data Flow
+
 1. The client sends a `PATCH` request to `/api/plans/{id}` with the update data in the body.
 2. Astro middleware verifies the user's authentication token.
 3. The API handler in `src/pages/api/plans/[id].ts` receives the request.
@@ -38,21 +43,25 @@ This endpoint allows an authenticated user to update the details of one of their
 10. The handler returns `200 OK` with the updated plan DTO or `404 Not Found` if the service returned `null`.
 
 ## 6. Security Considerations
+
 - **Authentication**: Requires a valid JWT.
 - **Authorization**: The `update` operation in the service layer is conditional on both the plan ID and the user ID from the session, preventing unauthorized modification of other users' plans.
 - **RLS**: An `UPDATE` policy must be in place on the `plans` table, allowing updates only where `user_id = auth.uid()`.
 - **Input Validation**: The request body is validated to ensure it only contains allowed fields (`name`, `notes`) with the correct data types.
 
 ## 7. Error Handling
+
 - **`400 Bad Request`**: For invalid request body.
 - **`401 Unauthorized`**: For unauthenticated requests.
 - **`404 Not Found`**: If no plan with the given ID belongs to the user.
 - **`500 Internal Server Error`**: For database or other unexpected errors.
 
 ## 8. Performance Considerations
+
 - The `update` query targets a specific row by its primary key, making it highly efficient.
 
 ## 9. Implementation Steps
+
 1. **Create Validation Schema**:
    - In `src/lib/schemas/plan.schema.ts`, define a Zod schema for `UpdatePlanCommand`.
 2. **Implement the Service**:

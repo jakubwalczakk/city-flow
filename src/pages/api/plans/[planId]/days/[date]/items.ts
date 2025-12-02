@@ -14,16 +14,7 @@ const addActivitySchema = z.object({
   description: z.string().optional(),
   location: z.string().optional(),
   duration: z.number().positive().optional(),
-  category: z.enum([
-    "history",
-    "food",
-    "sport",
-    "nature",
-    "culture",
-    "transport",
-    "accommodation",
-    "other",
-  ]),
+  category: z.enum(["history", "food", "sport", "nature", "culture", "transport", "accommodation", "other"]),
   estimated_cost: z.string().optional(),
 });
 
@@ -36,10 +27,10 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
     const { planId, date } = params;
 
     if (!planId || !date) {
-      return new Response(
-        JSON.stringify({ error: "Plan ID and date are required." }),
-        { status: 400, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: "Plan ID and date are required." }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     // Parse and validate request body
@@ -62,20 +53,14 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
     const supabase = locals.supabase;
 
     if (!supabase) {
-      return new Response(
-        JSON.stringify({ error: "Database connection not available." }),
-        { status: 500, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: "Database connection not available." }), {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     // Add the activity to the plan
-    const updatedPlan = await addActivityToPlanDay(
-      supabase,
-      planId,
-      date,
-      command,
-      DEFAULT_USER_ID
-    );
+    const updatedPlan = await addActivityToPlanDay(supabase, planId, date, command, DEFAULT_USER_ID);
 
     return new Response(JSON.stringify(updatedPlan), {
       status: 201,
@@ -85,4 +70,3 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
     return handleApiError(error);
   }
 };
-

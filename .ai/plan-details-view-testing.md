@@ -7,9 +7,10 @@ This document provides testing instructions for the Plan Details view implementa
 ## What Was Implemented
 
 ### 1. Type System Updates
+
 - **Fixed type mismatch**: Updated `TimelineEvent` → `TimelineItem` to match database schema
 - **Corrected structure**: Changed `days[].events` → `days[].items` to align with database validation
-- **Added required fields**: 
+- **Added required fields**:
   - `id` (string/UUID)
   - `type` ("activity" | "meal" | "transport")
   - `title` (string)
@@ -19,6 +20,7 @@ This document provides testing instructions for the Plan Details view implementa
 ### 2. Component Updates
 
 #### EventTimeline Component
+
 - Updated to use `TimelineItem` instead of `TimelineEvent`
 - Added type badges with icons (activity, meal, transport)
 - Added location display with icon
@@ -27,6 +29,7 @@ This document provides testing instructions for the Plan Details view implementa
 - Improved visual hierarchy and accessibility
 
 #### GeneratedPlanView Component
+
 - Updated to parse `days[].items` instead of `days[].events`
 - Added validation for database schema compliance
 - Added warnings banner (amber-themed card)
@@ -35,6 +38,7 @@ This document provides testing instructions for the Plan Details view implementa
 - Improved accordion layout with better visual feedback
 
 ### 3. Page Creation
+
 - Created `/src/pages/plans/[id].astro` for dynamic routing
 - Integrated with existing `PlanDetailsView` component
 - Added proper layout and container styling
@@ -45,6 +49,7 @@ The implementation strictly follows the database validation schema defined in:
 `supabase/migrations/20251024120250_add_generated_content_validation.sql`
 
 ### Required Structure
+
 ```json
 {
   "days": [
@@ -66,8 +71,8 @@ The implementation strictly follows the database validation schema defined in:
       ]
     }
   ],
-  "modifications": ["..."],  // Optional
-  "warnings": ["..."]         // Optional
+  "modifications": ["..."], // Optional
+  "warnings": ["..."] // Optional
 }
 ```
 
@@ -93,6 +98,7 @@ supabase db execute --file supabase/test-generated-plan.sql
 ```
 
 This will create a "Rome Weekend Getaway" plan with:
+
 - 3 days of activities (May 15-17, 2025)
 - 16 total items across all days
 - Mix of activities, meals, and transport
@@ -102,11 +108,13 @@ This will create a "Rome Weekend Getaway" plan with:
 ### Step 3: Access the Plan
 
 The script output will show the plan ID. Navigate to:
+
 ```
 http://localhost:4321/plans/{plan_id}
 ```
 
 Or find the plan in the plans list:
+
 ```
 http://localhost:4321/plans
 ```
@@ -114,6 +122,7 @@ http://localhost:4321/plans
 ### Step 4: Test Scenarios
 
 #### ✅ Visual Testing
+
 - [ ] Plan loads without errors
 - [ ] Warnings banner displays at the top (amber/yellow theme)
 - [ ] Modifications banner displays below warnings (blue theme)
@@ -129,6 +138,7 @@ http://localhost:4321/plans
 - [ ] Feedback module appears at the bottom
 
 #### ✅ Interaction Testing
+
 - [ ] Accordion expands/collapses smoothly
 - [ ] Only one day can be open at a time
 - [ ] Hover effects work on timeline items
@@ -137,6 +147,7 @@ http://localhost:4321/plans
 - [ ] Delete plan functionality works (from PlanHeader)
 
 #### ✅ Responsive Testing
+
 - [ ] Layout works on mobile (< 640px)
 - [ ] Layout works on tablet (640px - 1024px)
 - [ ] Layout works on desktop (> 1024px)
@@ -144,6 +155,7 @@ http://localhost:4321/plans
 - [ ] Badges wrap properly on small screens
 
 #### ✅ Edge Cases
+
 - [ ] Plan with no warnings displays correctly
 - [ ] Plan with no modifications displays correctly
 - [ ] Items without time still display properly
@@ -153,6 +165,7 @@ http://localhost:4321/plans
 - [ ] Empty day (no items) shows appropriate message
 
 #### ✅ Error Handling
+
 - [ ] Invalid plan ID shows error message
 - [ ] Non-existent plan shows "Plan not found"
 - [ ] Invalid generated_content shows error with raw data
@@ -164,6 +177,7 @@ http://localhost:4321/plans
 Create additional test plans with variations:
 
 #### Minimal Plan (Required Fields Only)
+
 ```sql
 INSERT INTO plans (user_id, name, destination, start_date, end_date, status, generated_content)
 VALUES (
@@ -191,25 +205,30 @@ VALUES (
 ```
 
 #### Plan with All Item Types
+
 Test that each type (activity, meal, transport) displays with correct icon and styling.
 
 #### Plan with Long Content
+
 Test that long descriptions, titles, and notes wrap properly and don't break layout.
 
 ## Expected Behavior
 
 ### Type Icons
+
 - **Activity**: Location pin icon
 - **Meal**: Shopping cart icon
 - **Transport**: Arrows icon
 
 ### Color Themes
+
 - **Warnings**: Amber/yellow theme with warning triangle icon
 - **Modifications**: Blue theme with info circle icon
 - **Primary actions**: Default theme color
 - **Timeline dots**: Primary color with border
 
 ### Typography
+
 - **Day titles**: Semibold, larger text
 - **Item titles**: Semibold, base size
 - **Descriptions**: Regular, muted foreground color
@@ -225,22 +244,26 @@ Test that long descriptions, titles, and notes wrap properly and don't break lay
 ## Troubleshooting
 
 ### "Plan not found" Error
+
 - Verify the plan exists in the database
 - Check that the plan belongs to the default user (17555d06-2387-4f0b-b4f8-0887177cadc1)
 - Verify RLS policies are disabled for development
 
 ### "Invalid generated_content" Error
+
 - Check that the JSON structure matches the database schema
 - Verify all required fields are present (id, type, title)
 - Ensure type is one of: "activity", "meal", "transport"
 - Check browser console for detailed error messages
 
 ### Timeline Items Not Displaying
+
 - Verify `items` array exists (not `events`)
 - Check that each item has required fields
 - Look for JavaScript errors in browser console
 
 ### Styling Issues
+
 - Clear browser cache
 - Verify Tailwind is compiling correctly
 - Check that all Shadcn/ui components are installed
@@ -287,4 +310,3 @@ After successful testing:
 - `/src/hooks/usePlanDetails.ts` - Data fetching hook
 - `supabase/migrations/20251024120250_add_generated_content_validation.sql` - Database validation
 - `supabase/test-generated-plan.sql` - Test data script
-

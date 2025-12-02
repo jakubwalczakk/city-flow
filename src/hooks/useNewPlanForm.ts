@@ -5,6 +5,7 @@ import type {
   CreateFixedPointCommand,
   PlanDetailsDto,
   PlanListItemDto,
+  FixedPointDto,
 } from "@/types";
 
 // Helper function to create default start date (tomorrow at 9:00 AM)
@@ -79,9 +80,9 @@ export function useNewPlanForm({
           if (!response.ok) {
             throw new Error("Failed to fetch fixed points");
           }
-          const fixedPoints = await response.json();
+          const fixedPoints = (await response.json()) as FixedPointDto[];
           // Convert FixedPointDto to CreateFixedPointCommand format (without id/plan_id)
-          const fixedPointCommands = fixedPoints.map((fp: any) => ({
+          const fixedPointCommands = fixedPoints.map((fp) => ({
             location: fp.location,
             event_at: fp.event_at,
             event_duration: fp.event_duration,
@@ -187,18 +188,17 @@ export function useNewPlanForm({
     try {
       const existingPointsResponse = await fetch(`/api/plans/${currentPlanId}/fixed-points`);
       if (existingPointsResponse.ok) {
-        const existingPoints = await existingPointsResponse.json();
+        const existingPoints = (await existingPointsResponse.json()) as FixedPointDto[];
 
         // Delete all existing fixed points
-        const deletePromises = existingPoints.map((point: any) =>
+        const deletePromises = existingPoints.map((point) =>
           fetch(`/api/plans/${currentPlanId}/fixed-points/${point.id}`, {
             method: "DELETE",
           })
         );
         await Promise.all(deletePromises);
       }
-    } catch (err) {
-      console.error("Failed to clear existing fixed points:", err);
+    } catch {
       // Continue anyway - we'll try to create the new ones
     }
 
@@ -217,7 +217,6 @@ export function useNewPlanForm({
       const failedPoints = results.filter((r) => r.status === "rejected");
 
       if (failedPoints.length > 0) {
-        console.error("Some fixed points failed to save:", failedPoints);
         setError("Some fixed points failed to save.");
       }
     }

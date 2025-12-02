@@ -11,14 +11,14 @@ import {
 /**
  * Props for the PaginationControls component.
  */
-type PaginationControlsProps = {
+interface PaginationControlsProps {
   pagination: {
     total: number;
     limit: number;
     offset: number;
   };
   onPageChange: (newPage: number) => void;
-};
+}
 
 /**
  * Component for navigating between pages of plans.
@@ -115,13 +115,10 @@ export const PaginationControls = ({ pagination, onPageChange }: PaginationContr
           <PaginationNext
             onClick={() => handlePageClick(currentPage + 1)}
             aria-disabled={currentPage === totalPages}
-            className={
-              currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"
-            }
+            className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
           />
         </PaginationItem>
       </PaginationContent>
     </Pagination>
   );
 };
-

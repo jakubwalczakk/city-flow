@@ -2,13 +2,7 @@
  * A union type representing any valid JSON value.
  * This is used for the `generated_content` field in plans, which can have a flexible structure.
  */
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[];
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 // ############################################################################
 // #                                   ENUMS                                  #
@@ -44,14 +38,14 @@ export type TravelPace = "slow" | "moderate" | "intensive";
  * DTO for retrieving a user's profile.
  * Corresponds to the response of `GET /profile`.
  */
-export type ProfileDto = {
+export interface ProfileDto {
   id: string;
   preferences: string[] | null;
   travel_pace: TravelPace | null;
   generations_remaining: number;
   onboarding_completed: boolean;
   updated_at: string;
-};
+}
 
 // ============================================================================
 //                                    Plans
@@ -62,7 +56,7 @@ export type ProfileDto = {
  * This is a summarized version of a plan for display in lists.
  * Corresponds to items in the response of `GET /plans`.
  */
-export type PlanListItemDto = {
+export interface PlanListItemDto {
   id: string;
   name: string;
   destination: string;
@@ -70,26 +64,26 @@ export type PlanListItemDto = {
   end_date: string;
   status: PlanStatus;
   created_at: string;
-};
+}
 
 /**
  * DTO for the paginated list of plans.
  * Corresponds to the response of `GET /plans`.
  */
-export type PaginatedPlansDto = {
+export interface PaginatedPlansDto {
   data: PlanListItemDto[];
   pagination: {
     total: number;
     limit: number;
     offset: number;
   };
-};
+}
 
 /**
  * DTO for the full details of a single plan, including generated content.
  * Corresponds to the response of `GET /plans/{id}`.
  */
-export type PlanDetailsDto = {
+export interface PlanDetailsDto {
   id: string;
   user_id: string;
   name: string;
@@ -101,7 +95,7 @@ export type PlanDetailsDto = {
   generated_content: Json | null;
   created_at: string;
   updated_at: string;
-};
+}
 
 // ============================================================================
 //                                 Fixed Points
@@ -111,14 +105,14 @@ export type PlanDetailsDto = {
  * DTO for a fixed point (e.g., a flight or hotel booking) associated with a plan.
  * Corresponds to the response of `GET /plans/{planId}/fixed-points`.
  */
-export type FixedPointDto = {
+export interface FixedPointDto {
   id: string;
   plan_id: string;
   location: string;
   event_at: string;
   event_duration: number;
   description: string | null;
-};
+}
 
 // ============================================================================
 //                                   Feedback
@@ -128,11 +122,11 @@ export type FixedPointDto = {
  * DTO for feedback submitted for a plan.
  * Corresponds to the response of `GET /plans/{planId}/feedback`.
  */
-export type FeedbackDto = {
+export interface FeedbackDto {
   rating: FeedbackRating;
   comment: string | null;
   updated_at: string;
-};
+}
 
 // ############################################################################
 // #                               COMMAND MODELS                             #
@@ -146,11 +140,11 @@ export type FeedbackDto = {
  * Command model for updating a user's profile. All fields are optional.
  * Corresponds to the request body of `PATCH /profile`.
  */
-export type UpdateProfileCommand = {
+export interface UpdateProfileCommand {
   preferences?: string[];
   travel_pace?: TravelPace;
   onboarding_completed?: boolean;
-};
+}
 
 // ============================================================================
 //                                    Plans
@@ -161,26 +155,26 @@ export type UpdateProfileCommand = {
  * Corresponds to the request body of `POST /plans`.
  * Note: start_date and end_date are required and must include both date and time in ISO 8601 format.
  */
-export type CreatePlanCommand = {
+export interface CreatePlanCommand {
   name: string;
   destination: string;
   start_date: string;
   end_date: string;
   notes?: string | null;
-};
+}
 
 /**
  * Command model for updating an existing plan. All fields are optional.
  * Corresponds to the request body of `PATCH /plans/{id}`.
  */
-export type UpdatePlanCommand = {
+export interface UpdatePlanCommand {
   name?: string;
   start_date?: string;
   end_date?: string;
   notes?: string | null;
   status?: PlanStatus;
   generated_content?: Json | null;
-};
+}
 
 // ============================================================================
 //                                 Fixed Points
@@ -190,23 +184,23 @@ export type UpdatePlanCommand = {
  * Command model for adding a new fixed point to a plan.
  * Corresponds to the request body of `POST /plans/{planId}/fixed-points`.
  */
-export type CreateFixedPointCommand = {
+export interface CreateFixedPointCommand {
   location: string;
   event_at: string;
   event_duration: number | null;
   description?: string | null;
-};
+}
 
 /**
  * Command model for updating an existing fixed point. All fields are optional.
  * Corresponds to the request body of `PATCH /plans/{planId}/fixed-points/{id}`.
  */
-export type UpdateFixedPointCommand = {
+export interface UpdateFixedPointCommand {
   location?: string;
   event_at?: string;
   event_duration?: number | null;
   description?: string | null;
-};
+}
 
 // ============================================================================
 //                                   Feedback
@@ -216,10 +210,10 @@ export type UpdateFixedPointCommand = {
  * Command model for submitting feedback for a plan.
  * Corresponds to the request body of `POST /plans/{planId}/feedback`.
  */
-export type SubmitFeedbackCommand = {
+export interface SubmitFeedbackCommand {
   rating: FeedbackRating;
   comment?: string | null;
-};
+}
 
 // ============================================================================
 //                              Plan Activities
@@ -229,7 +223,7 @@ export type SubmitFeedbackCommand = {
  * Command model for adding a new activity to a plan day.
  * Corresponds to the request body of `POST /plans/{id}/days/{date}/items`.
  */
-export type AddActivityCommand = {
+export interface AddActivityCommand {
   time?: string; // e.g., "14:30"
   title: string;
   description?: string;
@@ -237,13 +231,13 @@ export type AddActivityCommand = {
   duration?: number; // in minutes
   category: TimelineItemCategory;
   estimated_cost?: string; // e.g., "5-10 EUR"
-};
+}
 
 /**
  * Command model for updating an existing activity in a plan. All fields are optional.
  * Corresponds to the request body of `PATCH /plans/{id}/days/{date}/items/{itemId}`.
  */
-export type UpdateActivityCommand = {
+export interface UpdateActivityCommand {
   time?: string;
   title?: string;
   description?: string;
@@ -251,7 +245,7 @@ export type UpdateActivityCommand = {
   duration?: number;
   category?: TimelineItemCategory;
   estimated_cost?: string;
-};
+}
 
 // ############################################################################
 // #                              VIEW MODELS                                 #
@@ -261,20 +255,20 @@ export type UpdateActivityCommand = {
  * View model representing the complete state of the Plans Dashboard.
  * Used in the PlansDashboard component to manage UI state.
  */
-export type PlansDashboardViewModel = {
+export interface PlansDashboardViewModel {
   isLoading: boolean;
   error: string | null;
   plansData: PaginatedPlansDto | null;
   activeTab: "my-plans" | "history";
   currentPage: number;
-};
+}
 
 /**
  * ViewModel for the new plan creation form.
  * Holds the entire state of the multi-step form on the client-side.
  * Note: Dates are stored as Date objects on the client for easier manipulation.
  */
-export type NewPlanViewModel = {
+export interface NewPlanViewModel {
   basicInfo: {
     name: string;
     destination: string;
@@ -283,17 +277,17 @@ export type NewPlanViewModel = {
     notes: string;
   };
   fixedPoints: CreateFixedPointCommand[];
-};
+}
 
 /**
  * ViewModel for the plan details view.
  * Manages the entire client-side state of the view.
  */
-export type PlanDetailsViewModel = {
+export interface PlanDetailsViewModel {
   isLoading: boolean;
   error: string | null;
   plan: PlanDetailsDto | null;
-};
+}
 
 /**
  * Represents the category of a timeline item.
@@ -313,9 +307,9 @@ export type TimelineItemCategory =
  * Type definition for a single item/event in the generated plan's timeline.
  * Corresponds to the database schema validation for generated_content.
  */
-export type TimelineItem = {
+export interface TimelineItem {
   id: string; // UUID
-  type: 'activity' | 'meal' | 'transport'; // Required by database validation
+  type: "activity" | "meal" | "transport"; // Required by database validation
   time?: string; // e.g., "09:00" (optional)
   category: TimelineItemCategory; // For UI display and filtering
   title: string; // Required by database validation
@@ -324,28 +318,28 @@ export type TimelineItem = {
   estimated_price?: string;
   estimated_duration?: string;
   notes?: string;
-};
+}
 
 /**
  * Type definition for a single day in the generated plan.
  * Corresponds to the database schema validation for generated_content.
  */
-export type DayPlan = {
+export interface DayPlan {
   date: string; // e.g., "2025-12-24"
   items: TimelineItem[]; // Changed from 'events' to 'items' to match database schema
-};
+}
 
 /**
  * ViewModel for the structured generated_content from a plan.
  * Corresponds to the database schema validation for generated_content.
  */
-export type GeneratedContentViewModel = {
+export interface GeneratedContentViewModel {
   summary: string; // Add the summary field
   currency: string; // ISO 4217 currency code
   days: DayPlan[];
   modifications?: string[]; // Optional: AI modifications made to the plan
   warnings?: string[]; // Optional: Warnings for the user
-};
+}
 
 /**
  * @deprecated Use TimelineItem instead. This type is kept for backward compatibility.
@@ -360,12 +354,12 @@ export type TimelineEvent = TimelineItem;
  * ViewModel for the profile view.
  * Manages the state of the entire profile view, including data, loading, and error states.
  */
-export type ProfileViewModel = {
+export interface ProfileViewModel {
   isLoading: boolean;
   isSaving: boolean;
   error: string | null;
   profile: ProfileDto | null;
-};
+}
 
 /**
  * Type for travel preference keys (stored in database).

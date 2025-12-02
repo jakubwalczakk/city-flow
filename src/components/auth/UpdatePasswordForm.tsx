@@ -2,21 +2,11 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
-import {
-  updatePasswordSchema,
-  type UpdatePasswordFormData,
-} from "@/lib/schemas/auth.schema";
+import { updatePasswordSchema, type UpdatePasswordFormData } from "@/lib/schemas/auth.schema";
 
 /**
  * Update password form component.
@@ -49,13 +39,10 @@ export function UpdatePasswordForm() {
         //   }
         // })
 
-        console.log("Verifying password recovery session...");
-
         // Mock session verification
         await new Promise((resolve) => setTimeout(resolve, 500));
         setIsValidSession(true); // Mock valid session
-      } catch (err) {
-        console.error("Session verification error:", err);
+      } catch {
         setIsValidSession(false);
       }
     };
@@ -63,15 +50,13 @@ export function UpdatePasswordForm() {
     verifySession();
   }, []);
 
-  const onSubmit = async (data: UpdatePasswordFormData) => {
+  const onSubmit = async () => {
     setIsLoading(true);
     setError(null);
 
     try {
       // TODO: Implement Supabase password update
       // await supabase.auth.updateUser({ password: data.password })
-
-      console.log("Password updated");
 
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -83,11 +68,7 @@ export function UpdatePasswordForm() {
         window.location.href = "/login";
       }, 2000);
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Nie udało się zaktualizować hasła"
-      );
+      setError(err instanceof Error ? err.message : "Nie udało się zaktualizować hasła");
     } finally {
       setIsLoading(false);
     }
@@ -99,9 +80,7 @@ export function UpdatePasswordForm() {
       <div className="w-full max-w-md space-y-6">
         <div className="flex flex-col items-center justify-center py-8">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="mt-4 text-sm text-muted-foreground">
-            Weryfikacja sesji...
-          </p>
+          <p className="mt-4 text-sm text-muted-foreground">Weryfikacja sesji...</p>
         </div>
       </div>
     );
@@ -116,17 +95,13 @@ export function UpdatePasswordForm() {
           <AlertDescription>
             <p className="font-medium">Link wygasł lub jest nieprawidłowy</p>
             <p className="mt-2 text-sm">
-              Ten link do resetowania hasła wygasł lub został już użyty.
-              Poproś o nowy link.
+              Ten link do resetowania hasła wygasł lub został już użyty. Poproś o nowy link.
             </p>
           </AlertDescription>
         </Alert>
 
         <div className="text-center">
-          <a
-            href="/forgot-password"
-            className="inline-block text-sm text-primary hover:underline"
-          >
+          <a href="/forgot-password" className="inline-block text-sm text-primary hover:underline">
             Wyślij nowy link resetujący
           </a>
         </div>
@@ -143,8 +118,7 @@ export function UpdatePasswordForm() {
           <AlertDescription>
             <p className="font-medium">Hasło zostało zmienione!</p>
             <p className="mt-2 text-sm">
-              Twoje hasło zostało pomyślnie zaktualizowane. Przekierowywanie do
-              logowania...
+              Twoje hasło zostało pomyślnie zaktualizowane. Przekierowywanie do logowania...
             </p>
           </AlertDescription>
         </Alert>
@@ -171,12 +145,7 @@ export function UpdatePasswordForm() {
               <FormItem>
                 <FormLabel>Nowe hasło</FormLabel>
                 <FormControl>
-                  <Input
-                    type="password"
-                    placeholder="Minimum 8 znaków"
-                    disabled={isLoading}
-                    {...field}
-                  />
+                  <Input type="password" placeholder="Minimum 8 znaków" disabled={isLoading} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -190,12 +159,7 @@ export function UpdatePasswordForm() {
               <FormItem>
                 <FormLabel>Potwierdź nowe hasło</FormLabel>
                 <FormControl>
-                  <Input
-                    type="password"
-                    placeholder="Powtórz hasło"
-                    disabled={isLoading}
-                    {...field}
-                  />
+                  <Input type="password" placeholder="Powtórz hasło" disabled={isLoading} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -211,4 +175,3 @@ export function UpdatePasswordForm() {
     </div>
   );
 }
-

@@ -1,9 +1,6 @@
 import type { APIRoute } from "astro";
 import { z } from "zod";
-import {
-  updateActivityInPlanDay,
-  deleteActivityFromPlanDay,
-} from "@/lib/services/plan.service";
+import { updateActivityInPlanDay, deleteActivityFromPlanDay } from "@/lib/services/plan.service";
 import { handleApiError } from "@/lib/utils/error-handler";
 import { DEFAULT_USER_ID } from "@/db/supabase.client";
 import type { UpdateActivityCommand } from "@/types";
@@ -17,18 +14,7 @@ const updateActivitySchema = z.object({
   description: z.string().optional(),
   location: z.string().optional(),
   duration: z.number().positive().optional(),
-  category: z
-    .enum([
-      "history",
-      "food",
-      "sport",
-      "nature",
-      "culture",
-      "transport",
-      "accommodation",
-      "other",
-    ])
-    .optional(),
+  category: z.enum(["history", "food", "sport", "nature", "culture", "transport", "accommodation", "other"]).optional(),
   estimated_cost: z.string().optional(),
 });
 
@@ -69,21 +55,14 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
     const supabase = locals.supabase;
 
     if (!supabase) {
-      return new Response(
-        JSON.stringify({ error: "Database connection not available." }),
-        { status: 500, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: "Database connection not available." }), {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     // Update the activity in the plan
-    const updatedPlan = await updateActivityInPlanDay(
-      supabase,
-      planId,
-      date,
-      itemId,
-      command,
-      DEFAULT_USER_ID
-    );
+    const updatedPlan = await updateActivityInPlanDay(supabase, planId, date, itemId, command, DEFAULT_USER_ID);
 
     return new Response(JSON.stringify(updatedPlan), {
       status: 200,
@@ -115,20 +94,14 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
     const supabase = locals.supabase;
 
     if (!supabase) {
-      return new Response(
-        JSON.stringify({ error: "Database connection not available." }),
-        { status: 500, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: "Database connection not available." }), {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     // Delete the activity from the plan
-    const updatedPlan = await deleteActivityFromPlanDay(
-      supabase,
-      planId,
-      date,
-      itemId,
-      DEFAULT_USER_ID
-    );
+    const updatedPlan = await deleteActivityFromPlanDay(supabase, planId, date, itemId, DEFAULT_USER_ID);
 
     return new Response(JSON.stringify(updatedPlan), {
       status: 200,
@@ -138,4 +111,3 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
     return handleApiError(error);
   }
 };
-

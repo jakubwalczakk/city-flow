@@ -109,8 +109,8 @@ CREATE TRIGGER on_auth_user_created
   EXECUTE FUNCTION public.handle_new_user();
 
 -- Verify
-SELECT trigger_name, event_object_table 
-FROM information_schema.triggers 
+SELECT trigger_name, event_object_table
+FROM information_schema.triggers
 WHERE trigger_name = 'on_auth_user_created';
 ```
 
@@ -120,6 +120,7 @@ WHERE trigger_name = 'on_auth_user_created';
 ## Testowanie
 
 ### Test rejestracji email/hasło:
+
 1. Przejdź do `/register`
 2. Wprowadź email i hasło
 3. Po pomyślnej rejestracji powinieneś być przekierowany do `/plans`
@@ -127,12 +128,14 @@ WHERE trigger_name = 'on_auth_user_created';
 5. Sprawdź w **Table Editor** → **profiles**, czy profil został automatycznie utworzony
 
 ### Test logowania email/hasło:
+
 1. Przejdź do `/login`
 2. Wprowadź dane użytkownika
 3. Po pomyślnym logowaniu powinieneś być przekierowany do `/plans`
 4. W nagłówku powinieneś zobaczyć UserMenu z awatarem
 
 ### Test Google OAuth:
+
 1. Przejdź do `/login` lub `/register`
 2. Kliknij "Zaloguj się przez Google"
 3. Zostaniesz przekierowany do Google OAuth
@@ -140,6 +143,7 @@ WHERE trigger_name = 'on_auth_user_created';
 5. Profil zostanie automatycznie utworzony (jeśli to pierwsza rejestracja)
 
 ### Test wylogowania:
+
 1. Będąc zalogowanym, kliknij na awatar w prawym górnym rogu
 2. Wybierz "Wyloguj się"
 3. Powinieneś być przekierowany do strony głównej `/`
@@ -148,20 +152,24 @@ WHERE trigger_name = 'on_auth_user_created';
 ## Rozwiązywanie problemów
 
 ### Problem: "Invalid login credentials"
+
 - Sprawdź czy użytkownik istnieje w bazie danych
 - Upewnij się, że hasło jest poprawne
 - Jeśli weryfikacja email jest włączona, sprawdź czy email został potwierdzony
 
 ### Problem: "User already registered"
+
 - Użytkownik z tym emailem już istnieje
 - Użyj funkcji logowania zamiast rejestracji
 
 ### Problem: Google OAuth nie działa
+
 - Sprawdź czy Google provider jest włączony w Supabase Dashboard
 - Zweryfikuj Client ID i Client Secret
 - Upewnij się, że Authorized redirect URIs są poprawnie skonfigurowane w Google Cloud Console
 
 ### Problem: Profil nie został utworzony automatycznie
+
 - Sprawdź czy migracja `20251113000000_create_profile_trigger.sql` została zastosowana
 - Sprawdź logi w Supabase Dashboard → **Logs** → **Postgres Logs**
 - Ręcznie sprawdź czy trigger istnieje:
@@ -172,20 +180,25 @@ WHERE trigger_name = 'on_auth_user_created';
 ## Bezpieczeństwo
 
 ### Row Level Security (RLS)
+
 RLS jest włączony na tabeli `profiles`. Użytkownicy mogą:
+
 - Odczytywać tylko swój własny profil
 - Aktualizować tylko swój własny profil
 - Usuwać tylko swój własny profil
 
 ### Cookies
+
 Sesje użytkowników są przechowywane w bezpiecznych cookies z następującymi ustawieniami:
+
 - `httpOnly: true` - Niedostępne dla JavaScript
 - `secure: true` - Tylko przez HTTPS
 - `sameSite: 'lax'` - Ochrona przed CSRF
 
 ### Middleware
+
 Middleware Astro automatycznie:
+
 - Weryfikuje sesję użytkownika na każdym żądaniu
 - Przekierowuje niezalogowanych użytkowników do `/login` dla chronionych tras
 - Udostępnia dane użytkownika w `Astro.locals.user`
-

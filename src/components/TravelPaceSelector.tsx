@@ -1,11 +1,5 @@
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TRAVEL_PACE_LABELS, type TravelPace } from "@/types";
 
 interface TravelPaceSelectorProps {
@@ -23,10 +17,7 @@ export function TravelPaceSelector({ value, onChange }: TravelPaceSelectorProps)
   return (
     <div className="space-y-2">
       <Label htmlFor="travel-pace">Tempo zwiedzania</Label>
-      <Select
-        value={value || undefined}
-        onValueChange={(newValue) => onChange(newValue as TravelPace)}
-      >
+      <Select value={value || undefined} onValueChange={(newValue) => onChange(newValue as TravelPace)}>
         <SelectTrigger id="travel-pace">
           <SelectValue placeholder="Wybierz tempo" />
         </SelectTrigger>
@@ -41,4 +32,3 @@ export function TravelPaceSelector({ value, onChange }: TravelPaceSelectorProps)
     </div>
   );
 }
-

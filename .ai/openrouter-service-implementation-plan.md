@@ -13,7 +13,7 @@ Konstruktor klasy `OpenRouterService` będzie przyjmował obiekt konfiguracyjny,
 ```typescript
 // src/lib/services/openrouter.service.ts
 
-import { z } from 'zod';
+import { z } from "zod";
 
 export interface OpenRouterConfig {
   apiKey: string;
@@ -28,20 +28,20 @@ export class OpenRouterService {
 
   constructor(config: OpenRouterConfig) {
     if (!config.apiKey) {
-      throw new Error('OpenRouter API key is required.');
+      throw new Error("OpenRouter API key is required.");
     }
     this.config = {
       ...config,
-      baseUrl: config.baseUrl || 'https://openrouter.ai/api/v1',
+      baseUrl: config.baseUrl || "https://openrouter.ai/api/v1",
     };
     // Inicjalizacja klienta HTTP, np. z domyślnymi nagłówkami
     this.httpClient = {
       post: async (url: string, body: any, headers: any) => {
         const fullUrl = `${this.config.baseUrl}${url}`;
         const response = await fetch(fullUrl, {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
             ...headers,
           },
           body: JSON.stringify(body),
@@ -61,6 +61,7 @@ export class OpenRouterService {
 Klucz API musi być przechowywany jako zmienna środowiskowa i nigdy nie powinien być umieszczany bezpośrednio w kodzie. W Astro dostęp do zmiennych środowiskowych po stronie serwera uzyskujemy poprzez `import.meta.env`.
 
 Przykład inicjalizacji usługi w kodzie API (np. w `src/pages/api/plans.ts`):
+
 ```typescript
 const openRouterService = new OpenRouterService({
   apiKey: import.meta.env.OPENROUTER_API_KEY,
@@ -154,6 +155,7 @@ private async parseAndValidateResponse<T extends z.ZodTypeAny>(
 Należy zaimplementować solidny mechanizm obsługi błędów, który będzie zgodny z istniejącą w projekcie strukturą (`src/lib/errors/app-error.ts` i `src/lib/utils/error-handler.ts`).
 
 Potencjalne scenariusze błędów:
+
 1.  **Błędy konfiguracyjne:** Brak klucza API.
 2.  **Błędy sieciowe:** Problemy z połączeniem z API OpenRouter.
 3.  **Błędy API OpenRouter:**
@@ -170,16 +172,16 @@ Przykład rozbudowanej obsługi błędów w metodzie publicznej:
 
 try {
   const requestBody = await this.buildRequestBody(options);
-  
-  const apiResponse = await this.httpClient.post('/chat/completions', requestBody, {
-    'Authorization': `Bearer ${this.config.apiKey}`,
+
+  const apiResponse = await this.httpClient.post("/chat/completions", requestBody, {
+    Authorization: `Bearer ${this.config.apiKey}`,
   });
 
   return await this.parseAndValidateResponse(apiResponse, options.responseSchema);
 } catch (error: any) {
   // TODO: Zaimplementować mapowanie błędów na AppError
   // np. na podstawie statusu HTTP lub typu błędu
-  console.error('Error interacting with OpenRouter API:', error);
+  console.error("Error interacting with OpenRouter API:", error);
   // throw new AppError('OpenRouterServiceError', '...');
   throw error; // Tymczasowe rzucenie oryginalnego błędu
 }
@@ -188,7 +190,7 @@ try {
 ## 6. Kwestie bezpieczeństwa
 
 1.  **Zarządzanie kluczem API:** Klucz API musi być przechowywany w zmiennych środowiskowych (`.env`) i nigdy nie być dostępny po stronie klienta. Plik `.env` powinien być dodany do `.gitignore`.
-2.  **Walidacja danych wejściowych:** Wszystkie dane pochodzące od użytkownika (np. `userPrompt`) powinny być traktowane jako niezaufane. Chociaż w tym przypadku są one przekazywane do zewnętrznego API, warto być świadomym ryzyka związanego z atakami typu *prompt injection*.
+2.  **Walidacja danych wejściowych:** Wszystkie dane pochodzące od użytkownika (np. `userPrompt`) powinny być traktowane jako niezaufane. Chociaż w tym przypadku są one przekazywane do zewnętrznego API, warto być świadomym ryzyka związanego z atakami typu _prompt injection_.
 3.  **Ograniczenie uprawnień klucza:** W panelu OpenRouter warto utworzyć dedykowany klucz API dla aplikacji CityFlow z nałożonymi limitami użycia, aby zminimalizować ryzyko nadużyć w przypadku wycieku.
 
 ## 7. Plan wdrożenia krok po kroku
@@ -219,11 +221,12 @@ try {
     - Zdefiniuj prosty schemat Zod i prompt, aby zweryfikować poprawność działania metody `getStructuredResponse`.
 
 Przykład użycia w endpointcie testowym:
+
 ```typescript
 // src/pages/api/test-openrouter.ts
-import type { APIRoute } from 'astro';
-import { z } from 'zod';
-import { OpenRouterService } from '@/lib/services/openrouter.service';
+import type { APIRoute } from "astro";
+import { z } from "zod";
+import { OpenRouterService } from "@/lib/services/openrouter.service";
 
 export const GET: APIRoute = async () => {
   try {
@@ -246,7 +249,7 @@ export const GET: APIRoute = async () => {
     return new Response(JSON.stringify(result, null, 2), { status: 200 });
   } catch (error) {
     console.error(error);
-    return new Response('An error occurred.', { status: 500 });
+    return new Response("An error occurred.", { status: 500 });
   }
 };
 ```

@@ -96,7 +96,8 @@ describe("FixedPointsStep", () => {
     // Act
     const editButtons = screen.getAllByRole("button");
     const firstEditButton = editButtons.find((btn) => btn.querySelector("svg")?.classList.contains("lucide-pencil"));
-    await user.click(firstEditButton!);
+    if (!firstEditButton) throw new Error("Edit button not found");
+    await user.click(firstEditButton);
 
     // Assert
     expect(screen.getByLabelText(/Lokalizacja/)).toHaveValue("Airport");
@@ -110,7 +111,8 @@ describe("FixedPointsStep", () => {
     render(<FixedPointsStep {...defaultProps} />);
     const editButtons = screen.getAllByRole("button");
     const firstEditButton = editButtons.find((btn) => btn.querySelector("svg")?.classList.contains("lucide-pencil"));
-    await user.click(firstEditButton!);
+    if (!firstEditButton) throw new Error("Edit button not found");
+    await user.click(firstEditButton);
 
     // Act
     const locationInput = screen.getByLabelText(/Lokalizacja/);
@@ -132,7 +134,8 @@ describe("FixedPointsStep", () => {
     const firstDeleteButton = deleteButtons.find((btn) =>
       btn.querySelector("svg")?.classList.contains("lucide-trash-2")
     );
-    await user.click(firstDeleteButton!);
+    if (!firstDeleteButton) throw new Error("Delete button not found");
+    await user.click(firstDeleteButton);
 
     // Assert
     expect(mockRemoveFixedPoint).toHaveBeenCalledWith(0);

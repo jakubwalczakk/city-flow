@@ -3,7 +3,7 @@ import { z } from "zod";
 /**
  * Schema for validating profile update requests.
  * All fields are optional to support partial updates (PATCH semantics).
- * 
+ *
  * @property {string[]} [preferences] - Array of user's travel preferences (e.g., "Art & Museums", "Local Food").
  *                                     Must contain between 2 and 5 items when provided.
  * @property {("slow"|"moderate"|"intensive")} [travel_pace] - Desired pace of travel for itinerary generation.
@@ -12,7 +12,7 @@ import { z } from "zod";
  *                                                            - "intensive": Packed itinerary with maximum activities
  * @property {boolean} [onboarding_completed] - Flag indicating whether the user has completed the onboarding process.
  *                                              Set to true after initial profile setup.
- * 
+ *
  * @example
  * // Full update
  * {
@@ -20,7 +20,7 @@ import { z } from "zod";
  *   travel_pace: "intensive",
  *   onboarding_completed: true
  * }
- * 
+ *
  * @example
  * // Partial update (only travel_pace)
  * {
@@ -42,4 +42,3 @@ export const updateProfileSchema = z.object({
  * Inferred from the Zod schema to ensure type safety.
  */
 export type UpdateProfileFormData = z.infer<typeof updateProfileSchema>;
-

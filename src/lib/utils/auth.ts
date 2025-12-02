@@ -6,31 +6,31 @@ import { logger } from "./logger";
 /**
  * User object returned by authentication.
  */
-export type AuthenticatedUser = {
+export interface AuthenticatedUser {
   id: string;
   email?: string;
-};
+}
 
 /**
  * Retrieves the authenticated user from the request context.
- * 
+ *
  * This function abstracts the authentication logic, making it easy to switch
  * from development mode (using DEFAULT_USER_ID) to production mode (using JWT tokens).
- * 
+ *
  * **Current Behavior (Development):**
  * - Returns a mock user with DEFAULT_USER_ID
  * - Does not validate JWT tokens
- * 
+ *
  * **Future Behavior (Production):**
  * - Extract JWT token from Authorization header
  * - Validate token with Supabase
  * - Return user from token payload
  * - Throw UnauthorizedError if token is invalid or missing
- * 
+ *
  * @param context - Astro API context containing request and locals
  * @returns The authenticated user object
  * @throws UnauthorizedError if authentication fails (in production mode)
- * 
+ *
  * @example
  * ```typescript
  * // In an API endpoint
@@ -40,9 +40,7 @@ export type AuthenticatedUser = {
  * };
  * ```
  */
-export async function getAuthenticatedUser(
-  context: APIContext
-): Promise<AuthenticatedUser> {
+export async function getAuthenticatedUser(context: APIContext): Promise<AuthenticatedUser> {
   const isDevelopment = import.meta.env.DEV;
 
   if (isDevelopment) {
@@ -57,17 +55,15 @@ export async function getAuthenticatedUser(
 
 /**
  * Extracts and validates the authenticated user from a JWT token.
- * 
+ *
  * This function is called in production mode to validate the user's identity
  * using the JWT token from the Authorization header.
- * 
+ *
  * @param context - Astro API context
  * @returns The authenticated user from the token
  * @throws UnauthorizedError if token is missing or invalid
  */
-async function getAuthenticatedUserFromToken(
-  context: APIContext
-): Promise<AuthenticatedUser> {
+async function getAuthenticatedUserFromToken(context: APIContext): Promise<AuthenticatedUser> {
   const { request, locals } = context;
   const authHeader = request.headers.get("Authorization");
 
@@ -80,7 +76,10 @@ async function getAuthenticatedUserFromToken(
 
   try {
     // Use Supabase to validate the JWT token
-    const { data: { user }, error } = await locals.supabase.auth.getUser(token);
+    const {
+      data: { user },
+      error,
+    } = await locals.supabase.auth.getUser(token);
 
     if (error || !user) {
       logger.debug("Token validation failed", { error: error?.message });
@@ -103,11 +102,11 @@ async function getAuthenticatedUserFromToken(
 
 /**
  * Optional: Helper to get user ID only (shorthand).
- * 
+ *
  * @param context - Astro API context
  * @returns The authenticated user's ID
  * @throws UnauthorizedError if authentication fails
- * 
+ *
  * @example
  * ```typescript
  * const userId = await getUserId(context);
@@ -121,10 +120,10 @@ export async function getUserId(context: APIContext): Promise<string> {
 /**
  * Checks if a user is authenticated without throwing an error.
  * Useful for optional authentication scenarios.
- * 
+ *
  * @param context - Astro API context
  * @returns The authenticated user or null if not authenticated
- * 
+ *
  * @example
  * ```typescript
  * const user = await tryGetAuthenticatedUser(context);
@@ -135,9 +134,7 @@ export async function getUserId(context: APIContext): Promise<string> {
  * }
  * ```
  */
-export async function tryGetAuthenticatedUser(
-  context: APIContext
-): Promise<AuthenticatedUser | null> {
+export async function tryGetAuthenticatedUser(context: APIContext): Promise<AuthenticatedUser | null> {
   try {
     return await getAuthenticatedUser(context);
   } catch (error) {
@@ -147,4 +144,3 @@ export async function tryGetAuthenticatedUser(
     throw error;
   }
 }
-

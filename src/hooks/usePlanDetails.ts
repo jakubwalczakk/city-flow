@@ -10,7 +10,7 @@ import type {
 /**
  * Result type returned by the usePlanDetails hook.
  */
-export type UsePlanDetailsResult = {
+export interface UsePlanDetailsResult {
   plan: PlanDetailsDto | null;
   isLoading: boolean;
   error: string | null;
@@ -20,7 +20,7 @@ export type UsePlanDetailsResult = {
   updateActivity: (date: string, itemId: string, activity: Partial<TimelineItem>) => Promise<void>;
   deleteActivity: (date: string, itemId: string) => Promise<void>;
   refetch: () => void;
-};
+}
 
 /**
  * Custom hook for managing a single plan's details.
@@ -51,8 +51,7 @@ export const usePlanDetails = (planId: string): UsePlanDetailsResult => {
       const result: PlanDetailsDto = await response.json();
       setPlan(result);
     } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "An unknown error occurred while fetching plan.";
+      const errorMessage = err instanceof Error ? err.message : "An unknown error occurred while fetching plan.";
       setError(errorMessage);
       setPlan(null);
     } finally {
@@ -225,4 +224,3 @@ export const usePlanDetails = (planId: string): UsePlanDetailsResult => {
     refetch: fetchPlan,
   };
 };
-

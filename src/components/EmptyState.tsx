@@ -4,9 +4,9 @@ import { Button } from "@/components/ui/button";
  * Component displayed when user has no plans.
  * Encourages the user to create their first plan.
  */
-type EmptyStateProps = {
+interface EmptyStateProps {
   onCreatePlan?: () => void;
-};
+}
 
 export const EmptyState = ({ onCreatePlan }: EmptyStateProps) => {
   const handleCreatePlan = () => {
@@ -44,8 +44,8 @@ export const EmptyState = ({ onCreatePlan }: EmptyStateProps) => {
 
       {/* Description */}
       <p className="mb-6 max-w-sm text-sm text-muted-foreground">
-        Zacznij planować swoją przygodę! Utwórz swój pierwszy plan podróży i pozwól nam pomóc Ci w
-        organizacji niezapomnianego wypadu.
+        Zacznij planować swoją przygodę! Utwórz swój pierwszy plan podróży i pozwól nam pomóc Ci w organizacji
+        niezapomnianego wypadu.
       </p>
 
       {/* CTA Button */}
@@ -53,4 +53,3 @@ export const EmptyState = ({ onCreatePlan }: EmptyStateProps) => {
     </div>
   );
 };
-

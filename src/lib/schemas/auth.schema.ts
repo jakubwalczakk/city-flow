@@ -8,9 +8,7 @@ export const loginSchema = z.object({
     .string({ required_error: "Email jest wymagany" })
     .min(1, "Email jest wymagany")
     .email("Nieprawidłowy format email"),
-  password: z
-    .string({ required_error: "Hasło jest wymagane" })
-    .min(1, "Hasło jest wymagane"),
+  password: z.string({ required_error: "Hasło jest wymagane" }).min(1, "Hasło jest wymagane"),
 });
 
 /**
@@ -25,10 +23,7 @@ export const registerSchema = z
     password: z
       .string({ required_error: "Hasło jest wymagane" })
       .min(8, "Hasło musi mieć minimum 8 znaków")
-      .regex(
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-        "Hasło musi zawierać wielką literę, małą literę i cyfrę"
-      ),
+      .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, "Hasło musi zawierać wielką literę, małą literę i cyfrę"),
     confirmPassword: z
       .string({ required_error: "Potwierdzenie hasła jest wymagane" })
       .min(1, "Potwierdzenie hasła jest wymagane"),
@@ -56,10 +51,7 @@ export const updatePasswordSchema = z
     password: z
       .string({ required_error: "Hasło jest wymagane" })
       .min(8, "Hasło musi mieć minimum 8 znaków")
-      .regex(
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-        "Hasło musi zawierać wielką literę, małą literę i cyfrę"
-      ),
+      .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, "Hasło musi zawierać wielką literę, małą literę i cyfrę"),
     confirmPassword: z
       .string({ required_error: "Potwierdzenie hasła jest wymagane" })
       .min(1, "Potwierdzenie hasła jest wymagane"),
@@ -73,4 +65,3 @@ export type LoginFormData = z.infer<typeof loginSchema>;
 export type RegisterFormData = z.infer<typeof registerSchema>;
 export type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
 export type UpdatePasswordFormData = z.infer<typeof updatePasswordSchema>;
-

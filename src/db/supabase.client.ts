@@ -1,8 +1,8 @@
-import type { AstroCookies } from 'astro';
-import { createBrowserClient } from '@supabase/ssr';
-import { createServerClient, type CookieOptionsWithName } from '@supabase/ssr';
+import type { AstroCookies } from "astro";
+import { createBrowserClient } from "@supabase/ssr";
+import { createServerClient, type CookieOptionsWithName } from "@supabase/ssr";
 
-import type { Database } from './database.types';
+import type { Database } from "./database.types";
 
 // Client-side variables (available in browser with PUBLIC_ prefix)
 const clientUrl = import.meta.env.PUBLIC_SUPABASE_URL;
@@ -26,10 +26,10 @@ export type SupabaseClient = typeof supabaseClient;
  * Ensures secure session management with proper cookie settings
  */
 export const cookieOptions: CookieOptionsWithName = {
-  path: '/',
+  path: "/",
   secure: false, // Set to false for local development (HTTP)
   httpOnly: true,
-  sameSite: 'lax',
+  sameSite: "lax",
 };
 
 /**
@@ -37,33 +37,28 @@ export const cookieOptions: CookieOptionsWithName = {
  * Required for Supabase SSR cookie handling
  */
 function parseCookieHeader(cookieHeader: string): { name: string; value: string }[] {
-  return cookieHeader.split(';').map((cookie) => {
-    const [name, ...rest] = cookie.trim().split('=');
-    return { name, value: rest.join('=') };
+  return cookieHeader.split(";").map((cookie) => {
+    const [name, ...rest] = cookie.trim().split("=");
+    return { name, value: rest.join("=") };
   });
 }
 
 /**
  * Creates a server-side Supabase client with proper cookie handling
  * Use this in middleware and API endpoints for SSR authentication
- * 
+ *
  * @param context - Object containing Astro headers and cookies
  * @returns Configured Supabase server client
  */
-export const createSupabaseServerInstance = (context: {
-  headers: Headers;
-  cookies: AstroCookies;
-}) => {
+export const createSupabaseServerInstance = (context: { headers: Headers; cookies: AstroCookies }) => {
   const supabase = createServerClient<Database>(serverUrl, serverKey, {
     cookieOptions,
     cookies: {
       getAll() {
-        return parseCookieHeader(context.headers.get('Cookie') ?? '');
+        return parseCookieHeader(context.headers.get("Cookie") ?? "");
       },
       setAll(cookiesToSet) {
-        cookiesToSet.forEach(({ name, value, options }) =>
-          context.cookies.set(name, value, options),
-        );
+        cookiesToSet.forEach(({ name, value, options }) => context.cookies.set(name, value, options));
       },
     },
   });

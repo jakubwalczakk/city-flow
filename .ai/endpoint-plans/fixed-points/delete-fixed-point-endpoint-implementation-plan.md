@@ -1,9 +1,11 @@
 # API Endpoint Implementation Plan: Delete Fixed Point
 
 ## 1. Endpoint Overview
+
 This endpoint allows an authenticated user to permanently delete a fixed point from one of their travel plans.
 
 ## 2. Request Details
+
 - **HTTP Method**: `DELETE`
 - **URL Structure**: `/api/plans/{planId}/fixed-points/{id}`
 - **URL Parameters**:
@@ -12,13 +14,16 @@ This endpoint allows an authenticated user to permanently delete a fixed point f
 - **Request Body**: None
 
 ## 3. Types Used
+
 - None.
 
 ## 4. Response Details
+
 - **Success Response (`204 No Content`)**: Returned on successful deletion, with no response body.
 - **Error Response (`404 Not Found`)**: If the plan or fixed point does not exist for the user.
 
 ## 5. Data Flow
+
 1. The client sends a `DELETE` request to the specific fixed point URL.
 2. Astro middleware verifies the user's token.
 3. The API handler in `src/pages/api/plans/[planId]/fixed-points/[id].ts` receives the request.
@@ -32,19 +37,23 @@ This endpoint allows an authenticated user to permanently delete a fixed point f
    - If `false`, it returns a `404 Not Found` response.
 
 ## 6. Security Considerations
+
 - **Authentication**: Requires a valid JWT.
 - **Authorization**: The service must verify ownership of the parent plan before attempting to delete the sub-resource.
 - **RLS**: A `DELETE` policy on `fixed_points` must verify ownership through a `JOIN` to the `plans` table.
 
 ## 7. Error Handling
+
 - **`401 Unauthorized`**: Unauthenticated user.
 - **`404 Not Found`**: If the parent plan or the specific fixed point is not found for the user.
 - **`500 Internal Server Error`**: For database errors.
 
 ## 8. Performance Considerations
+
 - The `DELETE` operation targets a row by its primary key, making it very fast.
 
 ## 9. Implementation Steps
+
 1. **Implement the Service**:
    - In `src/lib/services/fixed-point.service.ts`, implement `deleteFixedPoint(userId: string, planId: string, fixedPointId: string): Promise<boolean>`.
 2. **Implement the API Endpoint**:

@@ -1,9 +1,11 @@
 # API Endpoint Implementation Plan: Get Profile
 
 ## 1. Przegląd punktu końcowego
+
 Ten punkt końcowy (`GET /api/profiles`) jest przeznaczony do pobierania danych profilowych dla aktualnie uwierzytelnionego użytkownika. Umożliwia klientowi dostęp do preferencji użytkownika, tempa podróży i innych informacji związanych z kontem. Dostęp jest ograniczony tylko do uwierzytelnionych użytkowników, a użytkownicy mogą pobierać tylko własne dane profilowe.
 
 ## 2. Szczegóły żądania
+
 - **Metoda HTTP**: `GET`
 - **Struktura URL**: `/api/profiles`
 - **Parametry**:
@@ -12,6 +14,7 @@ Ten punkt końcowy (`GET /api/profiles`) jest przeznaczony do pobierania danych 
 - **Request Body**: Brak.
 
 ## 3. Wykorzystywane typy
+
 - **DTO**: `ProfileDto` z `src/types.ts` zostanie użyty do strukturyzacji odpowiedzi.
   ```typescript
   export type ProfileDto = {
@@ -25,6 +28,7 @@ Ten punkt końcowy (`GET /api/profiles`) jest przeznaczony do pobierania danych 
   ```
 
 ## 4. Szczegóły odpowiedzi
+
 - **Odpowiedź sukcesu (200 OK)**: Zwraca obiekt `ProfileDto` z danymi profilu użytkownika.
   ```json
   {
@@ -44,6 +48,7 @@ Ten punkt końcowy (`GET /api/profiles`) jest przeznaczony do pobierania danych 
   ```
 
 ## 5. Przepływ danych
+
 1.  Klient wysyła żądanie `GET` na adres `/api/profiles` z prawidłowym tokenem JWT w nagłówku `Authorization`.
 2.  Middleware Astro weryfikuje token JWT i umieszcza informacje o sesji użytkownika w `context.locals`.
 3.  Handler endpointa w `src/pages/api/profiles/index.ts` jest wywoływany.
@@ -55,20 +60,24 @@ Ten punkt końcowy (`GET /api/profiles`) jest przeznaczony do pobierania danych 
 9.  Jeśli dane profilu zostaną zwrócone, handler mapuje je na `ProfileDto` i wysyła odpowiedź `200 OK` z obiektem DTO w formacie JSON.
 
 ## 6. Względy bezpieczeństwa
+
 - **Uwierzytelnianie**: Dostęp do punktu końcowego będzie chroniony i dostępny tylko dla użytkowników z ważną sesją (JWT). Middleware Astro będzie odpowiedzialne za walidację tokena.
 - **Autoryzacja**: Row Level Security (RLS) w Supabase musi być skonfigurowane dla tabeli `profiles`, aby zapewnić, że użytkownicy mogą odpytywać tylko o swój własny profil (`auth.uid() = id`).
 
 ## 7. Obsługa błędów
+
 - **`200 OK`**: Pomyślnie pobrano profil.
 - **`401 Unauthorized`**: Użytkownik nie jest uwierzytelniony lub sesja wygasła.
 - **`404 Not Found`**: Profil dla uwierzytelnionego użytkownika nie został znaleziony.
 - **`500 Internal Server Error`**: Wystąpił nieoczekiwany błąd serwera (np. problem z połączeniem z bazą danych). Błędy te będą logowane za pomocą `loggera` przed zwróceniem ogólnej odpowiedzi o błędzie.
 
 ## 8. Rozważania dotyczące wydajności
+
 - Zapytanie do bazy danych jest operacją wyszukiwania klucza podstawowego (`id`), która jest wysoce zoptymalizowana i wydajna.
 - Nie przewiduje się żadnych wąskich gardeł wydajnościowych dla tego punktu końcowego.
 
 ## 9. Etapy wdrożenia
+
 1.  **Utworzenie pliku serwisu**: Utwórz nowy plik `src/lib/services/profile.service.ts`.
 2.  **Implementacja logiki serwisu**: W `profile.service.ts`, zaimplementuj funkcję asynchroniczną `findProfileByUserId(supabase: SupabaseClient, userId: string)`. Ta funkcja powinna:
     - Przyjmować klienta Supabase i `userId` jako argumenty.

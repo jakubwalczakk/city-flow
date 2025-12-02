@@ -328,8 +328,8 @@ The profile is a singleton resource for the currently authenticated user. The us
     }
     ```
 - **Error Response**:
-    - **Code**: `404 Not Found`
-    - **Content**: `{ "error": "No feedback submitted for this plan." }`
+  - **Code**: `404 Not Found`
+  - **Content**: `{ "error": "No feedback submitted for this plan." }`
 
 ## 3. Authentication and Authorization
 
@@ -342,7 +342,7 @@ The profile is a singleton resource for the currently authenticated user. The us
 
 ## 4. Validation and Business Logic
 
-- **Input Validation**: The API layer is responsible for validating all incoming request bodies and query parameters *before* executing business logic or database queries. This provides immediate, clear error feedback to the client.
+- **Input Validation**: The API layer is responsible for validating all incoming request bodies and query parameters _before_ executing business logic or database queries. This provides immediate, clear error feedback to the client.
 - **Validation Rules**:
   - `profile.preferences`: Must be an array of strings, length between 2 and 5.
   - `profile.travel_pace`: Must be one of `slow`, `moderate`, `intensive`.

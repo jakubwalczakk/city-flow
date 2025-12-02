@@ -12,9 +12,9 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { User, LogOut, Loader2 } from "lucide-react";
 import { supabaseClient } from "@/db/supabase.client";
 
-type UserMenuProps = {
+interface UserMenuProps {
   userEmail: string;
-};
+}
 
 /**
  * User menu component for authenticated users
@@ -33,7 +33,7 @@ export function UserMenu({ userEmail }: UserMenuProps) {
 
       // Redirect to home page after logout
       window.location.href = "/";
-    } catch (err) {
+    } catch {
       setIsLoggingOut(false);
       // Still redirect even if there's an error
       window.location.href = "/";
@@ -51,9 +51,7 @@ export function UserMenu({ userEmail }: UserMenuProps) {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-10 w-10 rounded-full">
           <Avatar className="h-10 w-10">
-            <AvatarFallback className="bg-primary text-primary-foreground">
-              {getInitials(userEmail)}
-            </AvatarFallback>
+            <AvatarFallback className="bg-primary text-primary-foreground">{getInitials(userEmail)}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
@@ -61,9 +59,7 @@ export function UserMenu({ userEmail }: UserMenuProps) {
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">Moje konto</p>
-            <p className="text-xs leading-none text-muted-foreground">
-              {userEmail}
-            </p>
+            <p className="text-xs leading-none text-muted-foreground">{userEmail}</p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
@@ -79,11 +75,7 @@ export function UserMenu({ userEmail }: UserMenuProps) {
           disabled={isLoggingOut}
           className="cursor-pointer text-destructive focus:text-destructive"
         >
-          {isLoggingOut ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : (
-            <LogOut className="mr-2 h-4 w-4" />
-          )}
+          {isLoggingOut ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <LogOut className="mr-2 h-4 w-4" />}
           <span>Wyloguj się</span>
         </DropdownMenuItem>
       </DropdownMenuContent>

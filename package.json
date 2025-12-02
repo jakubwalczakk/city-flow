@@ -13,7 +13,8 @@
     "test:e2e:ui": "playwright test --ui",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "prepare": "husky"
   },
   "dependencies": {
     "@astrojs/node": "^9.4.3",
@@ -87,7 +88,9 @@
   },
   "lint-staged": {
     "*.{ts,tsx,astro}": [
-      "eslint --fix"
+      "eslint --fix",
+      "eslint",
+      "prettier --write"
     ],
     "*.{json,css,md}": [
       "prettier --write"

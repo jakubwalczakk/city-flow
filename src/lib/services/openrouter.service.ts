@@ -1,12 +1,7 @@
 import { z } from "zod";
-import { zodToJsonSchema } from "zod-to-json-schema";
 import { ExternalServiceError, ValidationError } from "@/lib/errors/app-error";
 import { logger } from "@/lib/utils/logger";
-import type {
-  OpenRouterConfig,
-  GetStructuredResponseOptions,
-  OpenRouterResponse,
-} from "./openrouter.types";
+import type { OpenRouterConfig, GetStructuredResponseOptions, OpenRouterResponse } from "./openrouter.types";
 
 /**
  * Service for interacting with the OpenRouter API.
@@ -89,23 +84,8 @@ export class OpenRouterService {
    * @param options - Options containing prompts, schema, and model settings
    * @returns The formatted request body
    */
-  private buildRequestBody<T extends z.ZodTypeAny>(
-    options: GetStructuredResponseOptions<T>
-  ): Record<string, unknown> {
-    const { systemPrompt, userPrompt, responseSchema, model, params } = options;
-
-    // Convert Zod schema to JSON Schema format
-    const jsonSchemaResult = zodToJsonSchema(responseSchema, {
-      name: "responseSchema",
-      target: "openApi3",
-    });
-
-    // Extract the actual schema definition
-    const schemaDefinitions = jsonSchemaResult as Record<string, unknown>;
-    const actualSchema =
-      (schemaDefinitions.$defs as Record<string, unknown>)?.[
-        "responseSchema"
-      ] || schemaDefinitions;
+  private buildRequestBody<T extends z.ZodTypeAny>(options: GetStructuredResponseOptions<T>): Record<string, unknown> {
+    const { systemPrompt, userPrompt, model, params } = options;
 
     return {
       model: model || this.config.defaultModel || "openai/gpt-4o-mini",
@@ -118,7 +98,7 @@ export class OpenRouterService {
         // NOTE: Removing the 'schema' property for broader model compatibility.
         // Some models on OpenRouter support json_object mode but not schema enforcement.
         // The detailed instructions in the system prompt will guide the model.
-        // schema: actualSchema, 
+        // schema: actualSchema,
       },
       ...this.config.defaultParams,
       ...params,
@@ -181,10 +161,7 @@ export class OpenRouterService {
             errorMessage = `OpenRouter API error: ${response.statusText}`;
         }
 
-        throw new ExternalServiceError(
-          errorMessage,
-          new Error(`HTTP ${response.status}: ${errorText}`)
-        );
+        throw new ExternalServiceError(errorMessage, new Error(`HTTP ${response.status}: ${errorText}`));
       }
 
       return await response.json();
@@ -217,8 +194,8 @@ export class OpenRouterService {
   ): Promise<z.infer<T>> {
     const jsonString = apiResponse.choices[0]?.message?.content;
 
-    logger.info("Raw content from OpenRouter API before parsing:", { 
-      content: jsonString 
+    logger.info("Raw content from OpenRouter API before parsing:", {
+      content: jsonString,
     });
 
     if (!jsonString) {
@@ -245,17 +222,10 @@ export class OpenRouterService {
       });
 
       if (error instanceof z.ZodError) {
-        throw new ValidationError(
-          "The response from OpenRouter does not match the expected format.",
-          error.errors
-        );
+        throw new ValidationError("The response from OpenRouter does not match the expected format.", error.errors);
       }
 
-      throw new ValidationError(
-        "Failed to parse the response from OpenRouter API.",
-        error
-      );
+      throw new ValidationError("Failed to parse the response from OpenRouter API.", error);
     }
   }
 }
-

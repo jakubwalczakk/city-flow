@@ -6,13 +6,7 @@ import type { PlansDashboardViewModel } from "@/types";
 import type { PlanListItemDto } from "@/types";
 import { PlanList } from "@/components/PlanList";
 import { PaginationControls } from "@/components/PaginationControls";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import NewPlanForm from "./NewPlanForm";
 
 /**
@@ -20,8 +14,7 @@ import NewPlanForm from "./NewPlanForm";
  * Manages tabs (My Plans / History), pagination, and plan data fetching.
  */
 export const PlansDashboard = () => {
-  const [activeTab, setActiveTab] =
-    useState<PlansDashboardViewModel["activeTab"]>("my-plans");
+  const [activeTab, setActiveTab] = useState<PlansDashboardViewModel["activeTab"]>("my-plans");
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPlan, setEditingPlan] = useState<PlanListItemDto | null>(null);
@@ -92,9 +85,8 @@ export const PlansDashboard = () => {
 
       // Refetch plans after successful deletion
       refetchPlans();
-    } catch (error) {
-      console.error("Error deleting plan:", error);
-      // You could add a toast notification here to inform the user
+    } catch {
+      // Error handling: could add a toast notification here to inform the user
     }
   };
 
@@ -109,18 +101,12 @@ export const PlansDashboard = () => {
         <h1 className="text-3xl font-bold tracking-tight">Moje Plany</h1>
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
           <DialogTrigger asChild>
-            <Button
-              className="w-full sm:w-auto"
-              onClick={() => setEditingPlan(null)}
-            >
+            <Button className="w-full sm:w-auto" onClick={() => setEditingPlan(null)}>
               + Utwórz nowy plan
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-4xl">
-            <NewPlanForm
-              onFinished={handleModalClose}
-              editingPlan={editingPlan}
-            />
+            <NewPlanForm onFinished={handleModalClose} editingPlan={editingPlan} />
           </DialogContent>
         </Dialog>
       </div>
@@ -169,4 +155,3 @@ export const PlansDashboard = () => {
     </div>
   );
 };
-

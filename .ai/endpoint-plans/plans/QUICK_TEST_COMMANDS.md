@@ -1,7 +1,9 @@
 # Quick Test Commands for GET /api/plans
 
 ## Prerequisites
+
 Make sure your dev server is running:
+
 ```bash
 npm run dev
 ```
@@ -104,6 +106,7 @@ curl -s "http://localhost:4321/api/plans?status=invalid&limit=200&offset=-5" | j
 ## Run All Tests at Once
 
 Execute the test script:
+
 ```bash
 ./.ai/endpoint-plans/plans/test-list-plans.sh
 ```
@@ -141,4 +144,3 @@ http GET localhost:4321/api/plans status==draft sort_by==name order==asc
 # Error case
 http GET localhost:4321/api/plans status==invalid
 ```
-

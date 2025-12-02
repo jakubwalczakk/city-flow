@@ -20,18 +20,9 @@ interface FormErrors {
  * Form for editing user preferences: travel pace and tourism tags.
  * Manages local form state, validation, and submission to the API.
  */
-export function PreferencesForm({
-  initialPreferences,
-  initialTravelPace,
-  onSave,
-  isSaving,
-}: PreferencesFormProps) {
-  const [preferences, setPreferences] = useState<string[]>(
-    initialPreferences || []
-  );
-  const [travelPace, setTravelPace] = useState<TravelPace | null>(
-    initialTravelPace
-  );
+export function PreferencesForm({ initialPreferences, initialTravelPace, onSave, isSaving }: PreferencesFormProps) {
+  const [preferences, setPreferences] = useState<string[]>(initialPreferences || []);
+  const [travelPace, setTravelPace] = useState<TravelPace | null>(initialTravelPace);
   const [errors, setErrors] = useState<FormErrors>({});
 
   /**
@@ -66,25 +57,23 @@ export function PreferencesForm({
     setErrors({});
 
     // Validate form
-    if (!validateForm()) {
+    if (!validateForm() || !travelPace) {
       return;
     }
 
     try {
       await onSave({
         preferences,
-        travel_pace: travelPace!,
+        travel_pace: travelPace,
       });
-    } catch (error) {
+    } catch {
       // Error handling is done in the parent component
-      console.error("Failed to save preferences:", error);
     }
   };
 
   // Check if form has changes
   const hasChanges =
-    JSON.stringify(preferences) !== JSON.stringify(initialPreferences || []) ||
-    travelPace !== initialTravelPace;
+    JSON.stringify(preferences) !== JSON.stringify(initialPreferences || []) || travelPace !== initialTravelPace;
 
   // Check if form is valid
   const isValid = preferences.length >= 2 && preferences.length <= 5 && travelPace !== null;
@@ -92,24 +81,13 @@ export function PreferencesForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <TravelPaceSelector value={travelPace} onChange={setTravelPace} />
-      {errors.travelPace && (
-        <p className="text-sm text-destructive -mt-2">{errors.travelPace}</p>
-      )}
+      {errors.travelPace && <p className="text-sm text-destructive -mt-2">{errors.travelPace}</p>}
 
-      <PreferencesSelector
-        value={preferences}
-        onChange={setPreferences}
-        error={errors.preferences}
-      />
+      <PreferencesSelector value={preferences} onChange={setPreferences} error={errors.preferences} />
 
-      <Button
-        type="submit"
-        disabled={!isValid || !hasChanges || isSaving}
-        className="w-full sm:w-auto"
-      >
+      <Button type="submit" disabled={!isValid || !hasChanges || isSaving} className="w-full sm:w-auto">
         {isSaving ? "Zapisywanie..." : "Zapisz zmiany"}
       </Button>
     </form>
   );
 }
-

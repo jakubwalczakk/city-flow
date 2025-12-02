@@ -8,7 +8,6 @@ import type {
   AddActivityCommand,
   UpdateActivityCommand,
   GeneratedContentViewModel,
-  DayPlan,
   TimelineItem,
 } from "@/types";
 import type { SupabaseClient } from "@/db/supabase.client";
@@ -22,40 +21,40 @@ import { v4 as uuidv4 } from "uuid";
  */
 function convertTo24Hour(timeStr: string): string {
   const time = timeStr.trim();
-  
+
   // If already in 24-hour format (no AM/PM), return as is
   if (!/am|pm/i.test(time)) {
-    return time.padStart(5, '0'); // Ensure consistent format like "09:00"
+    return time.padStart(5, "0"); // Ensure consistent format like "09:00"
   }
-  
+
   // Parse time with AM/PM
   const match = time.match(/(\d{1,2}):(\d{2})\s*(am|pm)/i);
   if (!match) return time; // Return original if can't parse
-  
+
   let hours = parseInt(match[1], 10);
   const minutes = match[2];
   const period = match[3].toLowerCase();
-  
+
   // Convert to 24-hour format
-  if (period === 'pm' && hours !== 12) {
+  if (period === "pm" && hours !== 12) {
     hours += 12;
-  } else if (period === 'am' && hours === 12) {
+  } else if (period === "am" && hours === 12) {
     hours = 0;
   }
-  
-  return `${hours.toString().padStart(2, '0')}:${minutes}`;
+
+  return `${hours.toString().padStart(2, "0")}:${minutes}`;
 }
 
 /**
  * Parameters for listing plans.
  */
-export type GetPlansParams = {
+export interface GetPlansParams {
   status?: PlanStatus | PlanStatus[];
   sort_by: "created_at" | "name";
   order: "asc" | "desc";
   limit: number;
   offset: number;
-};
+}
 
 /**
  * Creates a new travel plan in the database.
@@ -213,12 +212,7 @@ export const getPlanById = async (
     userId,
   });
 
-  const { data, error } = await supabase
-    .from("plans")
-    .select("*")
-    .eq("id", planId)
-    .eq("user_id", userId)
-    .single();
+  const { data, error } = await supabase.from("plans").select("*").eq("id", planId).eq("user_id", userId).single();
 
   if (error) {
     if (error.code === "PGRST116") {
@@ -274,12 +268,7 @@ export const updatePlan = async (
     planId,
   });
 
-  const { data, error } = await supabase
-    .from("plans")
-    .update(command)
-    .eq("id", planId)
-    .select()
-    .single();
+  const { data, error } = await supabase.from("plans").update(command).eq("id", planId).select().single();
 
   if (error) {
     if (error.code === "PGRST116") {
@@ -295,10 +284,7 @@ export const updatePlan = async (
       errorMessage: error.message,
     });
 
-    throw new DatabaseError(
-      "Failed to update plan. Please try again later.",
-      new Error(error.message)
-    );
+    throw new DatabaseError("Failed to update plan. Please try again later.", new Error(error.message));
   }
 
   logger.info("Plan updated successfully", {
@@ -324,11 +310,7 @@ export const updatePlan = async (
  * @throws {NotFoundError} If the plan is not found or doesn't belong to the user
  * @throws {DatabaseError} If the database operation fails
  */
-export const deletePlan = async (
-  supabase: SupabaseClient,
-  planId: string,
-  userId: string
-): Promise<void> => {
+export const deletePlan = async (supabase: SupabaseClient, planId: string, userId: string): Promise<void> => {
   logger.debug("Deleting plan", {
     planId,
     userId,
@@ -337,11 +319,7 @@ export const deletePlan = async (
   // First, verify the plan exists and belongs to the user
   await getPlanById(supabase, planId, userId);
 
-  const { error } = await supabase
-    .from("plans")
-    .delete()
-    .eq("id", planId)
-    .eq("user_id", userId);
+  const { error } = await supabase.from("plans").delete().eq("id", planId).eq("user_id", userId);
 
   if (error) {
     logger.error("Failed to delete plan from database", {
@@ -408,10 +386,8 @@ export const addActivityToPlanDay = async (
 
   // Create the new activity with a unique ID
   // Map category to type for database validation
-  const type = command.category === 'food' ? 'meal' : 
-               command.category === 'transport' ? 'transport' : 
-               'activity';
-  
+  const type = command.category === "food" ? "meal" : command.category === "transport" ? "transport" : "activity";
+
   const newActivity: TimelineItem = {
     id: uuidv4(),
     type: type,
@@ -436,7 +412,7 @@ export const addActivityToPlanDay = async (
     if (!a.time && !b.time) return 0;
     if (!a.time) return 1; // Items without time go to the end
     if (!b.time) return -1;
-    
+
     // Convert time to 24-hour format for proper comparison
     const timeA = convertTo24Hour(a.time);
     const timeB = convertTo24Hour(b.time);
@@ -450,7 +426,7 @@ export const addActivityToPlanDay = async (
   };
 
   const updatedPlan = await updatePlan(supabase, planId, {
-    generated_content: updatedContent as any,
+    generated_content: updatedContent as unknown as UpdatePlanCommand["generated_content"],
   });
 
   logger.info("Activity added to plan day successfully", {
@@ -536,9 +512,7 @@ export const updateActivityInPlanDay = async (
 
   // Update type if category changed
   if (command.category !== undefined) {
-    updates.type = command.category === 'food' ? 'meal' : 
-                   command.category === 'transport' ? 'transport' : 
-                   'activity';
+    updates.type = command.category === "food" ? "meal" : command.category === "transport" ? "transport" : "activity";
   }
 
   updatedDays[dayIndex].items[itemIndex] = {
@@ -552,7 +526,7 @@ export const updateActivityInPlanDay = async (
       if (!a.time && !b.time) return 0;
       if (!a.time) return 1; // Items without time go to the end
       if (!b.time) return -1;
-      
+
       // Convert time to 24-hour format for proper comparison
       const timeA = convertTo24Hour(a.time);
       const timeB = convertTo24Hour(b.time);
@@ -567,7 +541,7 @@ export const updateActivityInPlanDay = async (
   };
 
   const updatedPlan = await updatePlan(supabase, planId, {
-    generated_content: updatedContent as any,
+    generated_content: updatedContent as unknown as UpdatePlanCommand["generated_content"],
   });
 
   logger.info("Activity updated in plan day successfully", {
@@ -648,7 +622,7 @@ export const deleteActivityFromPlanDay = async (
   };
 
   const updatedPlan = await updatePlan(supabase, planId, {
-    generated_content: updatedContent as any,
+    generated_content: updatedContent as unknown as UpdatePlanCommand["generated_content"],
   });
 
   logger.info("Activity deleted from plan day successfully", {

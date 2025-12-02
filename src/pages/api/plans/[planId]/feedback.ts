@@ -41,7 +41,7 @@ export const GET: APIRoute = async ({ params, locals }) => {
       });
       return successResponse(null, 200);
     }
-    
+
     return handleApiError(error, {
       endpoint: "GET /api/plans/[planId]/feedback",
       userId: DEFAULT_USER_ID,
@@ -97,7 +97,7 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
     try {
       await getFeedback(supabase, planId, user.id);
       isUpdate = true;
-    } catch (error) {
+    } catch {
       // Feedback doesn't exist yet, will be created
     }
 
@@ -114,4 +114,3 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
 };
 
 export const prerender = false;
-
