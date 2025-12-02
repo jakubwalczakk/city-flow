@@ -13,6 +13,12 @@ export default defineConfig({
   server: { port: 3000 },
   vite: {
     plugins: [tailwindcss()],
+    test: {
+      globals: true,
+      environment: 'jsdom',
+      setupFiles: './test/setup.ts',
+      css: true,
+    }
   },
   adapter: node({
     mode: "standalone",

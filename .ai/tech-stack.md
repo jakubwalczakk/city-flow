@@ -17,3 +17,9 @@ AI - Komunikacja z modelami przez usługę Openrouter.ai:
 
 CI/CD i Hosting:
 - Vercel lub Netlify, które oferują proste wdrożenie aplikacji Astro z wbudowanym CI/CD.
+
+Testowanie:
+- Vitest - Test runner
+- React Testing Library - Testowanie komponentów React
+- Playwright - Testy End-to-End (E2E)
+- Supertest - Testy API

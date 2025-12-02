@@ -36,6 +36,13 @@ CityFlow is an AI-powered web application (MVP) designed to simplify the process
 
 - **Service**: [Openrouter.ai](https://openrouter.ai/) for access to a wide range of AI models
 
+### Testing
+
+-   **Test Runner**: [Vitest](https://vitest.dev/)
+-   **Component Testing**: [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/)
+-   **E2E Testing**: [Playwright](https://playwright.dev/)
+-   **API Testing**: [Supertest](https://github.com/ladjs/supertest)
+
 ### Hosting & CI/CD
 
 - **Platform**: Vercel/Netlify
