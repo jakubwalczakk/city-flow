@@ -104,12 +104,21 @@ CityFlow is an AI-powered web application (MVP) designed to simplify the process
 
 ## Available Scripts
 
+### Development
 -   `npm run dev`: Starts the development server.
 -   `npm run build`: Builds the application for production.
 -   `npm run preview`: Serves the production build locally for preview.
+
+### Code Quality
 -   `npm run lint`: Lints the code using ESLint.
 -   `npm run lint:fix`: Lints the code and automatically fixes issues.
 -   `npm run format`: Formats the code using Prettier.
+
+### Testing
+-   `npm run test:unit`: Runs unit tests with Vitest.
+-   `npm run test:unit:ui`: Runs unit tests with Vitest UI.
+-   `npm run test:e2e`: Runs end-to-end tests with Playwright.
+-   `npm run test:e2e:ui`: Runs end-to-end tests with Playwright UI.
 
 ## Project Scope
 
