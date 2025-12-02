@@ -43,9 +43,7 @@ export function useNewPlanForm({
   const [isLoading, setIsLoading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [planId, setPlanId] = useState<string | null>(
-    editingPlan ? editingPlan.id : null
-  );
+  const [planId, setPlanId] = useState<string | null>(editingPlan ? editingPlan.id : null);
 
   useEffect(() => {
     if (editingPlan) {
@@ -69,9 +67,7 @@ export function useNewPlanForm({
             fixedPoints: [], // These will be fetched next
           });
         } catch (err) {
-          setError(
-            err instanceof Error ? err.message : "Could not load plan details"
-          );
+          setError(err instanceof Error ? err.message : "Could not load plan details");
         } finally {
           setIsLoading(false);
         }
@@ -93,9 +89,7 @@ export function useNewPlanForm({
           }));
           setFormData((prev) => ({ ...prev, fixedPoints: fixedPointCommands }));
         } catch (err) {
-          setError(
-            err instanceof Error ? err.message : "Could not load draft details"
-          );
+          setError(err instanceof Error ? err.message : "Could not load draft details");
         }
       };
 
@@ -108,9 +102,7 @@ export function useNewPlanForm({
     }
   }, [editingPlan]);
 
-  const updateBasicInfo = (
-    data: Partial<NewPlanViewModel["basicInfo"]>
-  ) => {
+  const updateBasicInfo = (data: Partial<NewPlanViewModel["basicInfo"]>) => {
     setFormData((prev) => ({
       ...prev,
       basicInfo: { ...prev.basicInfo, ...data },
@@ -196,7 +188,7 @@ export function useNewPlanForm({
       const existingPointsResponse = await fetch(`/api/plans/${currentPlanId}/fixed-points`);
       if (existingPointsResponse.ok) {
         const existingPoints = await existingPointsResponse.json();
-        
+
         // Delete all existing fixed points
         const deletePromises = existingPoints.map((point: any) =>
           fetch(`/api/plans/${currentPlanId}/fixed-points/${point.id}`, {
@@ -247,9 +239,7 @@ export function useNewPlanForm({
         onFinished();
       }
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "An unexpected error occurred"
-      );
+      setError(err instanceof Error ? err.message : "An unexpected error occurred");
     } finally {
       setIsLoading(false);
     }
@@ -275,7 +265,7 @@ export function useNewPlanForm({
       if (!currentPlanId) {
         currentPlanId = await saveStep1();
       }
-      
+
       // Save fixed points if any exist
       if (currentPlanId && formData.fixedPoints.length > 0) {
         await saveStep2(currentPlanId);
@@ -311,9 +301,7 @@ export function useNewPlanForm({
       }
     } catch (err) {
       setIsGenerating(false);
-      setError(
-        err instanceof Error ? err.message : "An unexpected error occurred"
-      );
+      setError(err instanceof Error ? err.message : "An unexpected error occurred");
     } finally {
       setIsLoading(false);
     }
@@ -335,4 +323,3 @@ export function useNewPlanForm({
     saveDraft,
   };
 }
-
