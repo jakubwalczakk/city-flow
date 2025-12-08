@@ -1,8 +1,8 @@
 import { z } from 'zod';
 import { OpenRouterService } from './openrouter.service';
-import { AppError, ExternalServiceError, ForbiddenError, ConflictError } from '@/lib/errors/app-error';
+import { AppError, ExternalServiceError, ForbiddenError, ConflictError, NotFoundError } from '@/lib/errors/app-error';
 import { logger } from '@/lib/utils/logger';
-import type { PlanDetailsDto, FixedPointDto, UpdatePlanCommand } from '@/types';
+import type { PlanDetailsDto, FixedPointDto, UpdatePlanCommand, ProfileDto } from '@/types';
 import { PlanService } from './plan.service';
 import { FixedPointService } from './fixed-point.service';
 import { ProfileService } from './profile.service';
@@ -106,8 +106,12 @@ export class PlanGenerationService {
     logger.debug('Starting plan generation workflow', { planId, userId });
 
     // 1. User Credit Check
-    const hasCredits = await this.profileService.hasGenerationsRemaining(userId);
-    if (!hasCredits) {
+    const profile = await this.profileService.findProfileByUserId(userId);
+    if (!profile) {
+      throw new NotFoundError('Profile not found.');
+    }
+
+    if (profile.generations_remaining <= 0) {
       throw new ForbiddenError('You have no plan generations remaining.');
     }
 
@@ -126,7 +130,7 @@ export class PlanGenerationService {
     const fixedPoints = await this.fixedPointService.getFixedPointsByPlanId(planId);
 
     // 4. Generate Content
-    const generatedContent = await this.generatePlanContent(plan, fixedPoints, language);
+    const generatedContent = await this.generatePlanContent(plan, fixedPoints, profile, language);
 
     // 5. Update Database (Decrement Credits & Save Plan)
     // Note: Ideally this would be a transaction.
@@ -165,18 +169,20 @@ export class PlanGenerationService {
    *
    * @param plan - The draft plan details
    * @param fixedPoints - Any fixed points/events to include in the plan
+   * @param profile - The user profile containing preferences and pace
    * @param language - The language for the generated content (default: Polish)
    * @returns The generated plan content formatted for the database
    */
   public async generatePlanContent(
     plan: PlanDetailsDto,
     fixedPoints: FixedPointDto[],
+    profile: ProfileDto,
     language = 'Polish'
   ): Promise<UpdatePlanCommand['generated_content']> {
     logger.debug('Generating plan content', { planId: plan.id, destination: plan.destination });
 
     // 1. Construct the Prompts
-    const systemPrompt = this.buildSystemPrompt(plan, fixedPoints, language);
+    const systemPrompt = this.buildSystemPrompt(plan, fixedPoints, profile, language);
     const userPrompt = `
 Please generate the travel plan now based on the provided details. Ensure the output is a valid JSON object matching the required structure.
 `;
@@ -205,7 +211,12 @@ Please generate the travel plan now based on the provided details. Ensure the ou
   /**
    * Builds the system prompt for the AI.
    */
-  private buildSystemPrompt(plan: PlanDetailsDto, fixedPoints: FixedPointDto[], language: string): string {
+  private buildSystemPrompt(
+    plan: PlanDetailsDto,
+    fixedPoints: FixedPointDto[],
+    profile: ProfileDto,
+    language: string
+  ): string {
     const fixedPointsText =
       fixedPoints && fixedPoints.length > 0
         ? fixedPoints
@@ -215,6 +226,9 @@ Please generate the travel plan now based on the provided details. Ensure the ou
             )
             .join('\n')
         : 'No fixed points scheduled.';
+
+    const pace = profile.travel_pace || 'moderate';
+    const preferences = profile.preferences?.length ? profile.preferences.join(', ') : 'No specific preferences';
 
     return `
 You are an expert travel planner AI. Your task is to generate a detailed, structured travel itinerary based on the user's plan details.
@@ -230,6 +244,11 @@ The response MUST be a single JSON object and nothing else. Do not include any i
 - Use the ISO 4217 three-letter currency code (e.g., "EUR" for Eurozone countries, "USD" for USA, "GBP" for UK, "JPY" for Japan, "PLN" for Poland, "CZK" for Czech Republic, etc.).
 - All price estimates should be in the LOCAL currency of the destination, provided as numeric strings WITHOUT currency symbols.
 - For free activities, use "0" as the price.
+
+**USER PREFERENCES (HIGHEST PRIORITY):**
+The user has specified the following travel style and interests. You MUST prioritize these over general tourist attractions:
+- **Travel Pace:** ${pace} (adjust the density of activities accordingly).
+- **Interests:** ${preferences} (focus on these categories when selecting activities).
 
 **Response Structure:**
 
