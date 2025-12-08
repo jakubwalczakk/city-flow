@@ -1,10 +1,10 @@
 import type { APIRoute } from 'astro';
 import { createPlanSchema, listPlansQuerySchema } from '@/lib/schemas/plan.schema';
 import { PlanService } from '@/lib/services/plan.service';
+import { AuthService } from '@/lib/services/auth.service';
 import { ValidationError } from '@/lib/errors/app-error';
 import { handleApiError, successResponse } from '@/lib/utils/error-handler';
 import { logger } from '@/lib/utils/logger';
-import { ForbiddenError } from '@/lib/errors/app-error';
 
 export const prerender = false;
 
@@ -17,23 +17,9 @@ export const prerender = false;
  */
 export const GET: APIRoute = async ({ url, locals }) => {
   try {
-    const { supabase } = locals;
+    const authService = new AuthService(locals);
+    const userId = await authService.getUserId();
 
-    // In middleware we trust - if supabase is present, session might be too,
-    // but explicit auth check is safer or relies on supabase.auth.getUser()
-    // However, existing code used createSupabaseServerInstance manually.
-    // Assuming middleware puts supabase in locals correctly.
-
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      logger.warn('Unauthenticated request to list plans');
-      throw new ForbiddenError('You must be logged in to view plans.');
-    }
-    const userId = user.id;
     logger.debug('Received request to list plans', { userId });
 
     const queryParams = {
@@ -52,7 +38,7 @@ export const GET: APIRoute = async ({ url, locals }) => {
       throw new ValidationError('Invalid query parameters', validation.error.flatten());
     }
 
-    const planService = new PlanService(supabase);
+    const planService = new PlanService(locals);
     const result = await planService.getPlans(userId, {
       ...validation.data,
       status: validation.data.statuses,
@@ -75,19 +61,10 @@ export const GET: APIRoute = async ({ url, locals }) => {
  * Returns the created plan with status 201 on success.
  */
 export const POST: APIRoute = async ({ request, locals }) => {
-  const { supabase } = locals;
-
   try {
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
+    const authService = new AuthService(locals);
+    const userId = await authService.getUserId();
 
-    if (authError || !user) {
-      logger.warn('Unauthenticated request to create plan');
-      throw new ForbiddenError('You must be logged in to create a plan.');
-    }
-    const userId = user.id;
     logger.debug('Received request to create plan', { userId });
 
     let body: unknown;
@@ -108,7 +85,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
       throw new ValidationError('Validation failed', validation.error.flatten());
     }
 
-    const planService = new PlanService(supabase);
+    const planService = new PlanService(locals);
     const plan = await planService.createPlan(validation.data, userId);
 
     return successResponse(plan, 201);

@@ -1,8 +1,8 @@
 import type { APIRoute } from 'astro';
 import { z } from 'zod';
 import { PlanService } from '@/lib/services/plan.service';
+import { AuthService } from '@/lib/services/auth.service';
 import { handleApiError } from '@/lib/utils/error-handler';
-import { DEFAULT_USER_ID } from '@/db/supabase.client';
 import type { UpdateActivityCommand } from '@/types';
 
 export const prerender = false;
@@ -33,6 +33,9 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
       });
     }
 
+    const authService = new AuthService(locals);
+    const userId = await authService.getUserId();
+
     // Parse and validate request body
     const body = await request.json();
     const validationResult = updateActivitySchema.safeParse(body);
@@ -49,19 +52,9 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
 
     const command: UpdateActivityCommand = validationResult.data;
 
-    // Get Supabase client from locals
-    const { supabase } = locals;
-
-    if (!supabase) {
-      return new Response(JSON.stringify({ error: 'Database connection not available.' }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-
     // Update the activity
-    const planService = new PlanService(supabase);
-    const updatedPlan = await planService.updateActivityInPlanDay(planId, date, itemId, command, DEFAULT_USER_ID);
+    const planService = new PlanService(locals);
+    const updatedPlan = await planService.updateActivityInPlanDay(planId, date, itemId, command, userId);
 
     return new Response(JSON.stringify(updatedPlan), {
       status: 200,
@@ -87,19 +80,12 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
       });
     }
 
-    // Get Supabase client from locals
-    const { supabase } = locals;
-
-    if (!supabase) {
-      return new Response(JSON.stringify({ error: 'Database connection not available.' }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
+    const authService = new AuthService(locals);
+    const userId = await authService.getUserId();
 
     // Delete the activity
-    const planService = new PlanService(supabase);
-    const updatedPlan = await planService.deleteActivityFromPlanDay(planId, date, itemId, DEFAULT_USER_ID);
+    const planService = new PlanService(locals);
+    const updatedPlan = await planService.deleteActivityFromPlanDay(planId, date, itemId, userId);
 
     return new Response(JSON.stringify(updatedPlan), {
       status: 200,

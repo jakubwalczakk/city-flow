@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
-import { DEFAULT_USER_ID } from '@/db/supabase.client';
 import { submitFeedbackSchema } from '@/lib/schemas/feedback.schema';
 import { FeedbackService } from '@/lib/services/feedback.service';
+import { AuthService } from '@/lib/services/auth.service';
 import { ValidationError, NotFoundError } from '@/lib/errors/app-error';
 import { handleApiError, successResponse } from '@/lib/utils/error-handler';
 import { logger } from '@/lib/utils/logger';
@@ -15,8 +15,8 @@ import { logger } from '@/lib/utils/logger';
  */
 export const GET: APIRoute = async ({ params, locals }) => {
   try {
-    const { supabase } = locals;
-    const user = { id: DEFAULT_USER_ID };
+    const authService = new AuthService(locals);
+    const userId = await authService.getUserId();
     const planId = params.planId;
 
     if (!planId) {
@@ -24,12 +24,12 @@ export const GET: APIRoute = async ({ params, locals }) => {
     }
 
     logger.debug('Received request to get feedback', {
-      userId: user.id,
+      userId,
       planId,
     });
 
-    const feedbackService = new FeedbackService(supabase);
-    const feedback = await feedbackService.getFeedback(planId, user.id);
+    const feedbackService = new FeedbackService(locals);
+    const feedback = await feedbackService.getFeedback(planId, userId);
 
     return successResponse(feedback, 200);
   } catch (error) {
@@ -37,7 +37,7 @@ export const GET: APIRoute = async ({ params, locals }) => {
     // This is a normal state for newly generated plans
     if (error instanceof NotFoundError) {
       logger.debug('No feedback found for plan, returning null', {
-        userId: DEFAULT_USER_ID,
+        userId: 'authenticated_user',
         planId: params.planId,
       });
       return successResponse(null, 200);
@@ -45,7 +45,7 @@ export const GET: APIRoute = async ({ params, locals }) => {
 
     return handleApiError(error, {
       endpoint: 'GET /api/plans/[planId]/feedback',
-      userId: DEFAULT_USER_ID,
+      userId: 'unauthenticated',
     });
   }
 };
@@ -59,8 +59,8 @@ export const GET: APIRoute = async ({ params, locals }) => {
  */
 export const POST: APIRoute = async ({ params, request, locals }) => {
   try {
-    const { supabase } = locals;
-    const user = { id: DEFAULT_USER_ID };
+    const authService = new AuthService(locals);
+    const userId = await authService.getUserId();
     const planId = params.planId;
 
     if (!planId) {
@@ -68,7 +68,7 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
     }
 
     logger.debug('Received request to submit feedback', {
-      userId: user.id,
+      userId,
       planId,
     });
 
@@ -94,23 +94,23 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
     }
 
     // Check if feedback already exists to determine response code
-    const feedbackService = new FeedbackService(supabase);
+    const feedbackService = new FeedbackService(locals);
     let isUpdate = false;
     try {
-      await feedbackService.getFeedback(planId, user.id);
+      await feedbackService.getFeedback(planId, userId);
       isUpdate = true;
     } catch {
       // Feedback doesn't exist yet, will be created
     }
 
     // Submit the feedback
-    const feedback = await feedbackService.submitFeedback(planId, user.id, validation.data);
+    const feedback = await feedbackService.submitFeedback(planId, userId, validation.data);
 
     return successResponse(feedback, isUpdate ? 200 : 201);
   } catch (error) {
     return handleApiError(error, {
       endpoint: 'POST /api/plans/[planId]/feedback',
-      userId: DEFAULT_USER_ID,
+      userId: 'unauthenticated',
     });
   }
 };

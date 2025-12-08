@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
-import { DEFAULT_USER_ID } from '@/db/supabase.client';
 import { createFixedPointSchema } from '@/lib/schemas/fixed-point.schema';
 import { FixedPointService } from '@/lib/services/fixed-point.service';
+import { AuthService } from '@/lib/services/auth.service';
 import { ValidationError } from '@/lib/errors/app-error';
 import { handleApiError, successResponse } from '@/lib/utils/error-handler';
 import { logger } from '@/lib/utils/logger';
@@ -14,8 +14,8 @@ import { logger } from '@/lib/utils/logger';
  */
 export const GET: APIRoute = async ({ params, locals }) => {
   try {
-    const { supabase } = locals;
-    const user = { id: DEFAULT_USER_ID };
+    const authService = new AuthService(locals);
+    const userId = await authService.getUserId();
     const { planId } = params;
 
     if (!planId) {
@@ -23,18 +23,18 @@ export const GET: APIRoute = async ({ params, locals }) => {
     }
 
     logger.debug('Received request to list fixed points', {
-      userId: user.id,
+      userId,
       planId,
     });
 
-    const fixedPointService = new FixedPointService(supabase);
+    const fixedPointService = new FixedPointService(locals);
     const fixedPoints = await fixedPointService.getFixedPointsByPlanId(planId);
 
     return successResponse(fixedPoints, 200);
   } catch (error) {
     return handleApiError(error, {
       endpoint: 'GET /api/plans/{planId}/fixed-points',
-      userId: DEFAULT_USER_ID,
+      userId: 'unauthenticated',
     });
   }
 };
@@ -48,8 +48,8 @@ export const GET: APIRoute = async ({ params, locals }) => {
  */
 export const POST: APIRoute = async ({ params, request, locals }) => {
   try {
-    const { supabase } = locals;
-    const user = { id: DEFAULT_USER_ID };
+    const authService = new AuthService(locals);
+    const userId = await authService.getUserId();
     const { planId } = params;
 
     if (!planId) {
@@ -57,7 +57,7 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
     }
 
     logger.debug('Received request to create fixed point', {
-      userId: user.id,
+      userId,
       planId,
     });
 
@@ -83,21 +83,21 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
     }
 
     // Create the fixed point
-    const fixedPointService = new FixedPointService(supabase);
+    const fixedPointService = new FixedPointService(locals);
     const fixedPoint = await fixedPointService.createFixedPoint(
       planId,
       {
         ...validation.data,
         event_duration: validation.data.event_duration ?? null,
       },
-      user.id
+      userId
     );
 
     return successResponse(fixedPoint, 201);
   } catch (error) {
     return handleApiError(error, {
       endpoint: 'POST /api/plans/{planId}/fixed-points',
-      userId: DEFAULT_USER_ID,
+      userId: 'unauthenticated',
     });
   }
 };

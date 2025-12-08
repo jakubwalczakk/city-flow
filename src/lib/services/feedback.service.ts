@@ -7,7 +7,15 @@ import { logger } from '@/lib/utils/logger';
  * Service for managing user feedback on plans.
  */
 export class FeedbackService {
-  constructor(private readonly supabase: SupabaseClient) {}
+  private readonly supabase: SupabaseClient;
+
+  constructor(clientOrLocals: SupabaseClient | App.Locals) {
+    if ('supabase' in clientOrLocals) {
+      this.supabase = clientOrLocals.supabase;
+    } else {
+      this.supabase = clientOrLocals;
+    }
+  }
 
   /**
    * Submits or updates feedback for a plan (upsert operation).

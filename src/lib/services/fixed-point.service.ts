@@ -8,7 +8,15 @@ import { v4 as uuidv4 } from 'uuid';
  * Service for managing fixed points (e.g., flights, hotel bookings) in travel plans.
  */
 export class FixedPointService {
-  constructor(private readonly supabase: SupabaseClient) {}
+  private readonly supabase: SupabaseClient;
+
+  constructor(clientOrLocals: SupabaseClient | App.Locals) {
+    if ('supabase' in clientOrLocals) {
+      this.supabase = clientOrLocals.supabase;
+    } else {
+      this.supabase = clientOrLocals;
+    }
+  }
 
   /**
    * Creates a new fixed point for a plan.

@@ -8,7 +8,15 @@ import { logger } from '@/lib/utils/logger';
  * Handles database interactions for the profiles table.
  */
 export class ProfileService {
-  constructor(private readonly supabase: SupabaseClient) {}
+  private readonly supabase: SupabaseClient;
+
+  constructor(clientOrLocals: SupabaseClient | App.Locals) {
+    if ('supabase' in clientOrLocals) {
+      this.supabase = clientOrLocals.supabase;
+    } else {
+      this.supabase = clientOrLocals;
+    }
+  }
 
   /**
    * Retrieves a user's profile by their user ID.

@@ -66,22 +66,26 @@ export type AIGeneratedContent = z.infer<typeof aiGeneratedContentSchema>;
  * Encapsulates the prompt logic and interaction with OpenRouter for plan generation.
  */
 export class PlanGenerationService {
+  private readonly supabase: SupabaseClient;
   private readonly openRouterService: OpenRouterService;
   private readonly planService: PlanService;
   private readonly fixedPointService: FixedPointService;
   private readonly profileService: ProfileService;
 
-  constructor(
-    private readonly supabase: SupabaseClient,
-    apiKey: string
-  ) {
+  constructor(clientOrLocals: SupabaseClient | App.Locals, apiKey: string) {
+    if ('supabase' in clientOrLocals) {
+      this.supabase = clientOrLocals.supabase;
+    } else {
+      this.supabase = clientOrLocals;
+    }
+
     if (!apiKey) {
       throw new Error('OpenRouter API key is required for PlanGenerationService.');
     }
     this.openRouterService = new OpenRouterService({ apiKey });
-    this.planService = new PlanService(supabase);
-    this.fixedPointService = new FixedPointService(supabase);
-    this.profileService = new ProfileService(supabase);
+    this.planService = new PlanService(this.supabase);
+    this.fixedPointService = new FixedPointService(this.supabase);
+    this.profileService = new ProfileService(this.supabase);
   }
 
   /**

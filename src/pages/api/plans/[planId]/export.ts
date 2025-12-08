@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
-import { DEFAULT_USER_ID } from '@/db/supabase.client';
 import { PlanService } from '@/lib/services/plan.service';
+import { AuthService } from '@/lib/services/auth.service';
 import { generatePlanPdf } from '@/lib/services/pdf.service';
 import { ValidationError, ConflictError } from '@/lib/errors/app-error';
 import { handleApiError } from '@/lib/utils/error-handler';
@@ -20,8 +20,8 @@ import { logger } from '@/lib/utils/logger';
  */
 export const GET: APIRoute = async ({ params, url, locals }) => {
   try {
-    const { supabase } = locals;
-    const user = { id: DEFAULT_USER_ID };
+    const authService = new AuthService(locals);
+    const userId = await authService.getUserId();
     const planId = params.planId;
 
     // Validate plan ID
@@ -41,19 +41,19 @@ export const GET: APIRoute = async ({ params, url, locals }) => {
     }
 
     logger.debug('Received request to export plan', {
-      userId: user.id,
+      userId,
       planId,
       format,
     });
 
     // Fetch the plan
-    const planService = new PlanService(supabase);
-    const plan = await planService.getPlanById(planId, user.id);
+    const planService = new PlanService(locals);
+    const plan = await planService.getPlanById(planId, userId);
 
     // Validate plan status
     if (plan.status !== 'generated') {
       logger.warn('Attempt to export non-generated plan', {
-        userId: user.id,
+        userId,
         planId,
         status: plan.status,
       });
@@ -74,7 +74,7 @@ export const GET: APIRoute = async ({ params, url, locals }) => {
     const filename = `${sanitizedName}-plan.pdf`;
 
     logger.info('Plan exported successfully', {
-      userId: user.id,
+      userId,
       planId,
       filename,
       sizeBytes: pdfBuffer.length,
@@ -93,7 +93,7 @@ export const GET: APIRoute = async ({ params, url, locals }) => {
   } catch (error) {
     return handleApiError(error, {
       endpoint: 'GET /api/plans/[planId]/export',
-      userId: DEFAULT_USER_ID,
+      userId: 'unauthenticated',
     });
   }
 };

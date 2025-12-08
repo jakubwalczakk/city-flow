@@ -60,7 +60,15 @@ export type GetPlansParams = {
  * Service for managing travel plans.
  */
 export class PlanService {
-  constructor(private readonly supabase: SupabaseClient) {}
+  private readonly supabase: SupabaseClient;
+
+  constructor(clientOrLocals: SupabaseClient | App.Locals) {
+    if ('supabase' in clientOrLocals) {
+      this.supabase = clientOrLocals.supabase;
+    } else {
+      this.supabase = clientOrLocals;
+    }
+  }
 
   /**
    * Creates a new travel plan in the database.

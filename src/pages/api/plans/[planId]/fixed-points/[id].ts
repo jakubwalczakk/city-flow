@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
-import { DEFAULT_USER_ID } from '@/db/supabase.client';
 import { updateFixedPointSchema } from '@/lib/schemas/fixed-point.schema';
 import { FixedPointService } from '@/lib/services/fixed-point.service';
+import { AuthService } from '@/lib/services/auth.service';
 import { ValidationError } from '@/lib/errors/app-error';
 import { handleApiError, successResponse } from '@/lib/utils/error-handler';
 import { logger } from '@/lib/utils/logger';
@@ -15,8 +15,8 @@ import { logger } from '@/lib/utils/logger';
  */
 export const PATCH: APIRoute = async ({ params, request, locals }) => {
   try {
-    const { supabase } = locals;
-    const user = { id: DEFAULT_USER_ID };
+    const authService = new AuthService(locals);
+    const userId = await authService.getUserId();
     const { planId, id } = params;
 
     if (!planId || !id) {
@@ -24,7 +24,7 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
     }
 
     logger.debug('Received request to update fixed point', {
-      userId: user.id,
+      userId,
       planId,
       fixedPointId: id,
     });
@@ -51,14 +51,14 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
     }
 
     // Update the fixed point
-    const fixedPointService = new FixedPointService(supabase);
+    const fixedPointService = new FixedPointService(locals);
     const fixedPoint = await fixedPointService.updateFixedPoint(planId, id, validation.data);
 
     return successResponse(fixedPoint, 200);
   } catch (error) {
     return handleApiError(error, {
       endpoint: 'PATCH /api/plans/{planId}/fixed-points/{id}',
-      userId: DEFAULT_USER_ID,
+      userId: 'unauthenticated',
     });
   }
 };
@@ -71,8 +71,8 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
  */
 export const DELETE: APIRoute = async ({ params, locals }) => {
   try {
-    const { supabase } = locals;
-    const user = { id: DEFAULT_USER_ID };
+    const authService = new AuthService(locals);
+    const userId = await authService.getUserId();
     const { planId, id } = params;
 
     if (!planId || !id) {
@@ -80,20 +80,20 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
     }
 
     logger.debug('Received request to delete fixed point', {
-      userId: user.id,
+      userId,
       planId,
       fixedPointId: id,
     });
 
     // Delete the fixed point
-    const fixedPointService = new FixedPointService(supabase);
+    const fixedPointService = new FixedPointService(locals);
     await fixedPointService.deleteFixedPoint(planId, id);
 
     return new Response(null, { status: 204 });
   } catch (error) {
     return handleApiError(error, {
       endpoint: 'DELETE /api/plans/{planId}/fixed-points/{id}',
-      userId: DEFAULT_USER_ID,
+      userId: 'unauthenticated',
     });
   }
 };

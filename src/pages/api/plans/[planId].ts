@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
-import { DEFAULT_USER_ID } from '@/db/supabase.client';
 import { updatePlanSchema } from '@/lib/schemas/plan.schema';
 import { PlanService } from '@/lib/services/plan.service';
+import { AuthService } from '@/lib/services/auth.service';
 import { ValidationError } from '@/lib/errors/app-error';
 import { handleApiError, successResponse } from '@/lib/utils/error-handler';
 import { logger } from '@/lib/utils/logger';
@@ -15,8 +15,8 @@ import { logger } from '@/lib/utils/logger';
  */
 export const GET: APIRoute = async ({ params, locals }) => {
   try {
-    const { supabase } = locals;
-    const user = { id: DEFAULT_USER_ID };
+    const authService = new AuthService(locals);
+    const userId = await authService.getUserId();
     const planId = params.planId;
 
     if (!planId) {
@@ -24,18 +24,18 @@ export const GET: APIRoute = async ({ params, locals }) => {
     }
 
     logger.debug('Received request to get plan details', {
-      userId: user.id,
+      userId,
       planId,
     });
 
-    const planService = new PlanService(supabase);
-    const plan = await planService.getPlanById(planId, user.id);
+    const planService = new PlanService(locals);
+    const plan = await planService.getPlanById(planId, userId);
 
     return successResponse(plan, 200);
   } catch (error) {
     return handleApiError(error, {
       endpoint: 'GET /api/plans/[planId]',
-      userId: DEFAULT_USER_ID,
+      userId: 'unauthenticated',
     });
   }
 };
@@ -50,8 +50,8 @@ export const GET: APIRoute = async ({ params, locals }) => {
  */
 export const PATCH: APIRoute = async ({ params, request, locals }) => {
   try {
-    const { supabase } = locals;
-    const user = { id: DEFAULT_USER_ID };
+    const authService = new AuthService(locals);
+    const userId = await authService.getUserId();
     const planId = params.planId;
 
     if (!planId) {
@@ -59,7 +59,7 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
     }
 
     logger.debug('Received request to update plan', {
-      userId: user.id,
+      userId,
       planId,
     });
 
@@ -85,14 +85,16 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
     }
 
     // Update the plan
-    const planService = new PlanService(supabase);
+    const planService = new PlanService(locals);
+    // Note: updatePlan in service should ideally check ownership or rely on RLS.
+    // Since we use the authenticated client, RLS should apply.
     const plan = await planService.updatePlan(planId, validation.data);
 
     return successResponse(plan, 200);
   } catch (error) {
     return handleApiError(error, {
       endpoint: 'PATCH /api/plans/[planId]',
-      userId: DEFAULT_USER_ID,
+      userId: 'unauthenticated',
     });
   }
 };
@@ -106,8 +108,8 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
  */
 export const DELETE: APIRoute = async ({ params, locals }) => {
   try {
-    const { supabase } = locals;
-    const user = { id: DEFAULT_USER_ID };
+    const authService = new AuthService(locals);
+    const userId = await authService.getUserId();
     const planId = params.planId;
 
     if (!planId) {
@@ -115,18 +117,18 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
     }
 
     logger.debug('Received request to delete plan', {
-      userId: user.id,
+      userId,
       planId,
     });
 
-    const planService = new PlanService(supabase);
-    await planService.deletePlan(planId, user.id);
+    const planService = new PlanService(locals);
+    await planService.deletePlan(planId, userId);
 
     return new Response(null, { status: 204 });
   } catch (error) {
     return handleApiError(error, {
       endpoint: 'DELETE /api/plans/[planId]',
-      userId: DEFAULT_USER_ID,
+      userId: 'unauthenticated',
     });
   }
 };
