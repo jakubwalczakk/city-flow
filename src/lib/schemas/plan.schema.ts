@@ -115,6 +115,7 @@ export const updatePlanSchema = z
     start_date: z.string().datetime({ message: 'Start date must be a valid datetime.' }).optional(),
     end_date: z.string().datetime({ message: 'End date must be a valid datetime.' }).optional(),
     notes: z.string().optional().nullable(),
+    status: z.enum(['draft', 'generated', 'archived']).optional(),
   })
   .refine(
     (data) => {

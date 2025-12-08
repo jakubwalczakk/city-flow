@@ -24,18 +24,21 @@ type PlanHeaderProps = {
   plan: PlanDetailsDto;
   onUpdate: (newName: string) => Promise<void>;
   onDelete: () => Promise<void>;
+  onArchive: () => Promise<void>;
 };
 
 /**
  * Header component for the plan details view.
  * Displays the plan name (editable), dates, and action menu.
  */
-export default function PlanHeader({ plan, onUpdate, onDelete }: PlanHeaderProps) {
+export default function PlanHeader({ plan, onUpdate, onDelete, onArchive }: PlanHeaderProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState(plan.name);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isArchiving, setIsArchiving] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showArchiveDialog, setShowArchiveDialog] = useState(false);
 
   const handleSave = async () => {
     if (!editedName.trim()) {
@@ -68,6 +71,18 @@ export default function PlanHeader({ plan, onUpdate, onDelete }: PlanHeaderProps
     } catch {
       setIsDeleting(false);
       setShowDeleteDialog(false);
+    }
+  };
+
+  const handleArchive = async () => {
+    setIsArchiving(true);
+    try {
+      await onArchive();
+      setShowArchiveDialog(false);
+    } catch {
+      // Error handling could be improved here
+    } finally {
+      setIsArchiving(false);
     }
   };
 
@@ -199,6 +214,19 @@ export default function PlanHeader({ plan, onUpdate, onDelete }: PlanHeaderProps
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align='end'>
+              {plan.status !== 'archived' && (
+                <DropdownMenuItem onClick={() => setShowArchiveDialog(true)}>
+                  <svg className='mr-2 h-4 w-4' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+                    <path
+                      strokeLinecap='round'
+                      strokeLinejoin='round'
+                      strokeWidth={2}
+                      d='M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4'
+                    />
+                  </svg>
+                  Przenieś do historii
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem
                 className='text-destructive focus:text-destructive'
                 onClick={() => setShowDeleteDialog(true)}
@@ -217,6 +245,24 @@ export default function PlanHeader({ plan, onUpdate, onDelete }: PlanHeaderProps
           </DropdownMenu>
         </div>
       </div>
+
+      <AlertDialog open={showArchiveDialog} onOpenChange={setShowArchiveDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Przenieść do historii?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Plan zostanie przeniesiony do zakładki &quot;Historia&quot; i stanie się tylko do odczytu. Będziesz mógł
+              go nadal przeglądać, ale nie będziesz mógł wprowadzać zmian.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isArchiving}>Anuluj</AlertDialogCancel>
+            <AlertDialogAction onClick={handleArchive} disabled={isArchiving}>
+              {isArchiving ? 'Przenoszenie...' : 'Przenieś'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>

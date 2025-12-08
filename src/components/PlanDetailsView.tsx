@@ -22,8 +22,17 @@ type ActivityFormState = {
  * Fetches plan data and renders the appropriate view based on the plan's status.
  */
 export default function PlanDetailsView({ planId }: PlanDetailsViewProps) {
-  const { plan, isLoading, error, updatePlanName, deletePlan, addActivity, updateActivity, deleteActivity } =
-    usePlanDetails(planId);
+  const {
+    plan,
+    isLoading,
+    error,
+    updatePlanName,
+    deletePlan,
+    archivePlan,
+    addActivity,
+    updateActivity,
+    deleteActivity,
+  } = usePlanDetails(planId);
 
   const [activityFormState, setActivityFormState] = useState<ActivityFormState>({
     isOpen: false,
@@ -159,7 +168,7 @@ export default function PlanDetailsView({ planId }: PlanDetailsViewProps) {
         </a>
       </div>
 
-      <PlanHeader plan={plan} onUpdate={updatePlanName} onDelete={deletePlan} />
+      <PlanHeader plan={plan} onUpdate={updatePlanName} onDelete={deletePlan} onArchive={archivePlan} />
 
       {plan.status === 'draft' && <DraftPlanView plan={plan} />}
       {plan.status === 'generated' && (
@@ -180,9 +189,26 @@ export default function PlanDetailsView({ planId }: PlanDetailsViewProps) {
         </>
       )}
       {plan.status === 'archived' && (
-        <div className='rounded-lg border border-muted bg-muted/20 p-6 text-center'>
-          <p className='text-muted-foreground'>Ten plan został zarchiwizowany.</p>
-        </div>
+        <>
+          <div className='bg-muted/50 border border-muted rounded-lg p-4 mb-6 flex items-center gap-3 text-muted-foreground'>
+            <svg
+              xmlns='http://www.w3.org/2000/svg'
+              viewBox='0 0 24 24'
+              fill='none'
+              stroke='currentColor'
+              strokeWidth='2'
+              strokeLinecap='round'
+              strokeLinejoin='round'
+              className='h-5 w-5'
+            >
+              <rect width='20' height='5' x='2' y='3' rx='1' />
+              <path d='M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8' />
+              <path d='M10 12h4' />
+            </svg>
+            <p className='text-sm font-medium'>To jest plan archiwalny. Edycja jest zablokowana.</p>
+          </div>
+          <GeneratedPlanView plan={plan} />
+        </>
       )}
     </div>
   );

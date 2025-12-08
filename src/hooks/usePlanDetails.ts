@@ -15,6 +15,7 @@ export type UsePlanDetailsResult = {
   isLoading: boolean;
   error: string | null;
   updatePlanName: (newName: string) => Promise<void>;
+  archivePlan: () => Promise<void>;
   deletePlan: () => Promise<void>;
   addActivity: (date: string, activity: Partial<TimelineItem>) => Promise<void>;
   updateActivity: (date: string, itemId: string, activity: Partial<TimelineItem>) => Promise<void>;
@@ -87,6 +88,31 @@ export const usePlanDetails = (planId: string): UsePlanDetailsResult => {
     },
     [planId]
   );
+
+  /**
+   * Archives the plan.
+   *
+   * @throws Error if the operation fails
+   */
+  const archivePlan = useCallback(async (): Promise<void> => {
+    const command: UpdatePlanCommand = { status: 'archived' };
+
+    const response = await fetch(`/api/plans/${planId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(command),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || 'Failed to archive plan');
+    }
+
+    const updatedPlan: PlanDetailsDto = await response.json();
+    setPlan(updatedPlan);
+  }, [planId]);
 
   /**
    * Deletes the plan.
@@ -217,6 +243,7 @@ export const usePlanDetails = (planId: string): UsePlanDetailsResult => {
     isLoading,
     error,
     updatePlanName,
+    archivePlan,
     deletePlan,
     addActivity,
     updateActivity,
