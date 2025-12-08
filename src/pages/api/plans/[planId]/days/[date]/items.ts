@@ -1,9 +1,9 @@
 import type { APIRoute } from "astro";
 import { z } from "zod";
-import { addActivityToPlanDay } from "@/lib/services/plan.service";
+import type { AddActivityCommand } from "@/types";
+import { PlanService } from "@/lib/services/plan.service";
 import { handleApiError } from "@/lib/utils/error-handler";
 import { DEFAULT_USER_ID } from "@/db/supabase.client";
-import type { AddActivityCommand } from "@/types";
 
 export const prerender = false;
 
@@ -50,7 +50,7 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
     const command: AddActivityCommand = validationResult.data;
 
     // Get Supabase client from locals (set by middleware)
-    const supabase = locals.supabase;
+    const { supabase } = locals;
 
     if (!supabase) {
       return new Response(JSON.stringify({ error: "Database connection not available." }), {
@@ -60,7 +60,8 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
     }
 
     // Add the activity to the plan
-    const updatedPlan = await addActivityToPlanDay(supabase, planId, date, command, DEFAULT_USER_ID);
+    const planService = new PlanService(supabase);
+    const updatedPlan = await planService.addActivityToPlanDay(planId, date, command, DEFAULT_USER_ID);
 
     return new Response(JSON.stringify(updatedPlan), {
       status: 201,

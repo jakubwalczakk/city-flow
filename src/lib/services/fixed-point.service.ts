@@ -1,262 +1,168 @@
-import type { CreateFixedPointCommand, UpdateFixedPointCommand, FixedPointDto } from "@/types";
 import type { SupabaseClient } from "@/db/supabase.client";
+import type { FixedPointDto, CreateFixedPointCommand, UpdateFixedPointCommand } from "@/types";
 import { DatabaseError, NotFoundError } from "@/lib/errors/app-error";
 import { logger } from "@/lib/utils/logger";
+import { v4 as uuidv4 } from "uuid";
 
 /**
- * Creates a new fixed point for a plan.
- *
- * @param supabase - The Supabase client instance
- * @param planId - The ID of the plan to add the fixed point to
- * @param command - The fixed point creation data
- * @param userId - The ID of the user creating the fixed point
- * @returns The newly created fixed point
- * @throws {NotFoundError} If the plan doesn't exist or doesn't belong to the user
- * @throws {DatabaseError} If the database operation fails
+ * Service for managing fixed points (e.g., flights, hotel bookings) in travel plans.
  */
-export const createFixedPoint = async (
-  supabase: SupabaseClient,
-  planId: string,
-  command: CreateFixedPointCommand,
-  userId: string
-): Promise<FixedPointDto> => {
-  logger.debug("Creating fixed point", { planId, userId });
+export class FixedPointService {
+  constructor(private readonly supabase: SupabaseClient) {}
 
-  // First verify the plan exists and belongs to the user
-  const { data: plan, error: planError } = await supabase
-    .from("plans")
-    .select("id")
-    .eq("id", planId)
-    .eq("user_id", userId)
-    .single();
-
-  if (planError || !plan) {
-    logger.warn("Plan not found or unauthorized", {
+  /**
+   * Creates a new fixed point for a plan.
+   *
+   * @param planId - The ID of the plan
+   * @param command - The fixed point creation data
+   * @param userId - The ID of the user creating the fixed point (for verification)
+   * @returns The newly created fixed point
+   * @throws {DatabaseError} If the database operation fails
+   */
+  public async createFixedPoint(
+    planId: string,
+    command: CreateFixedPointCommand,
+    userId: string
+  ): Promise<FixedPointDto> {
+    logger.debug("Creating new fixed point", {
       planId,
+      location: command.location,
       userId,
-      error: planError?.message,
     });
-    throw new NotFoundError("Plan not found or you don't have access to it");
-  }
 
-  // Create the fixed point
-  const { data, error } = await supabase
-    .from("fixed_points")
-    .insert({ ...command, plan_id: planId })
-    .select()
-    .single();
+    const { data, error } = await this.supabase
+      .from("fixed_points")
+      .insert({
+        id: uuidv4(),
+        plan_id: planId,
+        location: command.location,
+        event_at: command.event_at,
+        event_duration: command.event_duration ?? 0, // Default to 0 if null
+        description: command.description,
+      })
+      .select()
+      .single();
 
-  if (error) {
-    logger.error("Failed to create fixed point", {
+    if (error) {
+      logger.error("Failed to create fixed point in database", {
+        planId,
+        errorCode: error.code,
+        errorMessage: error.message,
+      });
+
+      throw new DatabaseError("Failed to create a fixed point. Please try again later.", new Error(error.message));
+    }
+
+    logger.info("Fixed point created successfully", {
+      fixedPointId: data.id,
       planId,
-      userId,
-      errorCode: error.code,
-      errorMessage: error.message,
     });
-    throw new DatabaseError("Failed to create fixed point. Please try again later.", new Error(error.message));
+
+    return data as FixedPointDto;
   }
 
-  logger.info("Fixed point created successfully", {
-    fixedPointId: data.id,
-    planId,
-    userId,
-  });
+  /**
+   * Retrieves all fixed points for a specific plan.
+   *
+   * @param planId - The ID of the plan
+   * @returns A list of fixed points
+   * @throws {DatabaseError} If the database operation fails
+   */
+  public async getFixedPointsByPlanId(planId: string): Promise<FixedPointDto[]> {
+    logger.debug("Fetching fixed points for plan", { planId });
 
-  return data;
-};
+    const { data, error } = await this.supabase
+      .from("fixed_points")
+      .select("*")
+      .eq("plan_id", planId)
+      .order("event_at", { ascending: true });
 
-/**
- * Retrieves all fixed points for a plan.
- *
- * @param supabase - The Supabase client instance
- * @param planId - The ID of the plan
- * @param userId - The ID of the user requesting the fixed points
- * @returns Array of fixed points for the plan
- * @throws {NotFoundError} If the plan doesn't exist or doesn't belong to the user
- * @throws {DatabaseError} If the database operation fails
- */
-export const getFixedPoints = async (
-  supabase: SupabaseClient,
-  planId: string,
-  userId: string
-): Promise<FixedPointDto[]> => {
-  logger.debug("Fetching fixed points", { planId, userId });
+    if (error) {
+      logger.error("Failed to fetch fixed points from database", {
+        planId,
+        errorCode: error.code,
+        errorMessage: error.message,
+      });
 
-  // First verify the plan exists and belongs to the user
-  const { data: plan, error: planError } = await supabase
-    .from("plans")
-    .select("id")
-    .eq("id", planId)
-    .eq("user_id", userId)
-    .single();
+      throw new DatabaseError("Failed to retrieve fixed points. Please try again later.", new Error(error.message));
+    }
 
-  if (planError || !plan) {
-    logger.warn("Plan not found or unauthorized", {
-      planId,
-      userId,
-      error: planError?.message,
-    });
-    throw new NotFoundError("Plan not found or you don't have access to it");
+    return (data || []) as FixedPointDto[];
   }
 
-  // Get fixed points
-  const { data, error } = await supabase
-    .from("fixed_points")
-    .select("*")
-    .eq("plan_id", planId)
-    .order("event_at", { ascending: true });
+  /**
+   * Updates an existing fixed point.
+   *
+   * @param planId - The ID of the plan (for verification)
+   * @param fixedPointId - The ID of the fixed point to update
+   * @param command - The update data
+   * @returns The updated fixed point
+   * @throws {NotFoundError} If the fixed point is not found
+   * @throws {DatabaseError} If the database operation fails
+   */
+  public async updateFixedPoint(
+    planId: string,
+    fixedPointId: string,
+    command: UpdateFixedPointCommand
+  ): Promise<FixedPointDto> {
+    logger.debug("Updating fixed point", { fixedPointId, planId });
 
-  if (error) {
-    logger.error("Failed to fetch fixed points", {
-      planId,
-      userId,
-      errorCode: error.code,
-      errorMessage: error.message,
-    });
-    throw new DatabaseError("Failed to retrieve fixed points. Please try again later.", new Error(error.message));
+    const updates: any = {};
+    if (command.location !== undefined) updates.location = command.location;
+    if (command.event_at !== undefined) updates.event_at = command.event_at;
+    if (command.event_duration !== undefined) updates.event_duration = command.event_duration ?? 0;
+    if (command.description !== undefined) updates.description = command.description;
+    updates.updated_at = new Date().toISOString();
+
+    const { data, error } = await this.supabase
+      .from("fixed_points")
+      .update(updates)
+      .eq("id", fixedPointId)
+      .eq("plan_id", planId) // Security check to ensure it belongs to the plan
+      .select()
+      .single();
+
+    if (error) {
+      if (error.code === "PGRST116") {
+        throw new NotFoundError("Fixed point not found.");
+      }
+
+      logger.error("Failed to update fixed point", {
+        fixedPointId,
+        errorCode: error.code,
+        errorMessage: error.message,
+      });
+
+      throw new DatabaseError("Failed to update fixed point.", new Error(error.message));
+    }
+
+    return data as FixedPointDto;
   }
 
-  logger.info("Fixed points fetched successfully", {
-    planId,
-    userId,
-    count: data?.length ?? 0,
-  });
+  /**
+   * Deletes a fixed point.
+   *
+   * @param planId - The ID of the plan (for verification)
+   * @param fixedPointId - The ID of the fixed point to delete
+   * @throws {DatabaseError} If the database operation fails
+   */
+  public async deleteFixedPoint(planId: string, fixedPointId: string): Promise<void> {
+    logger.debug("Deleting fixed point", { fixedPointId, planId });
 
-  return data ?? [];
-};
+    const { error } = await this.supabase
+      .from("fixed_points")
+      .delete()
+      .eq("id", fixedPointId)
+      .eq("plan_id", planId);
 
-/**
- * Updates a fixed point.
- *
- * @param supabase - The Supabase client instance
- * @param planId - The ID of the plan
- * @param fixedPointId - The ID of the fixed point to update
- * @param command - The update data
- * @param userId - The ID of the user updating the fixed point
- * @returns The updated fixed point
- * @throws {NotFoundError} If the plan or fixed point doesn't exist or doesn't belong to the user
- * @throws {DatabaseError} If the database operation fails
- */
-export const updateFixedPoint = async (
-  supabase: SupabaseClient,
-  planId: string,
-  fixedPointId: string,
-  command: UpdateFixedPointCommand,
-  userId: string
-): Promise<FixedPointDto> => {
-  logger.debug("Updating fixed point", { planId, fixedPointId, userId });
+    if (error) {
+      logger.error("Failed to delete fixed point", {
+        fixedPointId,
+        errorCode: error.code,
+        errorMessage: error.message,
+      });
 
-  // First verify the plan exists and belongs to the user
-  const { data: plan, error: planError } = await supabase
-    .from("plans")
-    .select("id")
-    .eq("id", planId)
-    .eq("user_id", userId)
-    .single();
-
-  if (planError || !plan) {
-    logger.warn("Plan not found or unauthorized", {
-      planId,
-      userId,
-      error: planError?.message,
-    });
-    throw new NotFoundError("Plan not found or you don't have access to it");
+      throw new DatabaseError("Failed to delete fixed point.", new Error(error.message));
+    }
   }
-
-  // Handle null event_duration before updating
-  const { event_duration, ...restOfCommand } = command;
-  const updateData: Omit<UpdateFixedPointCommand, "event_duration"> & {
-    event_duration?: number;
-  } = { ...restOfCommand };
-  if (event_duration !== null && event_duration !== undefined) {
-    updateData.event_duration = event_duration;
-  }
-
-  // Update the fixed point
-  const { data, error } = await supabase
-    .from("fixed_points")
-    .update(updateData)
-    .eq("id", fixedPointId)
-    .eq("plan_id", planId)
-    .select()
-    .single();
-
-  if (error) {
-    logger.error("Failed to update fixed point", {
-      planId,
-      fixedPointId,
-      userId,
-      errorCode: error.code,
-      errorMessage: error.message,
-    });
-    throw new DatabaseError("Failed to update fixed point. Please try again later.", new Error(error.message));
-  }
-
-  if (!data) {
-    throw new NotFoundError("Fixed point not found");
-  }
-
-  logger.info("Fixed point updated successfully", {
-    fixedPointId,
-    planId,
-    userId,
-  });
-
-  return data;
-};
-
-/**
- * Deletes a fixed point.
- *
- * @param supabase - The Supabase client instance
- * @param planId - The ID of the plan
- * @param fixedPointId - The ID of the fixed point to delete
- * @param userId - The ID of the user deleting the fixed point
- * @throws {NotFoundError} If the plan or fixed point doesn't exist or doesn't belong to the user
- * @throws {DatabaseError} If the database operation fails
- */
-export const deleteFixedPoint = async (
-  supabase: SupabaseClient,
-  planId: string,
-  fixedPointId: string,
-  userId: string
-): Promise<void> => {
-  logger.debug("Deleting fixed point", { planId, fixedPointId, userId });
-
-  // First verify the plan exists and belongs to the user
-  const { data: plan, error: planError } = await supabase
-    .from("plans")
-    .select("id")
-    .eq("id", planId)
-    .eq("user_id", userId)
-    .single();
-
-  if (planError || !plan) {
-    logger.warn("Plan not found or unauthorized", {
-      planId,
-      userId,
-      error: planError?.message,
-    });
-    throw new NotFoundError("Plan not found or you don't have access to it");
-  }
-
-  // Delete the fixed point
-  const { error } = await supabase.from("fixed_points").delete().eq("id", fixedPointId).eq("plan_id", planId);
-
-  if (error) {
-    logger.error("Failed to delete fixed point", {
-      planId,
-      fixedPointId,
-      userId,
-      errorCode: error.code,
-      errorMessage: error.message,
-    });
-    throw new DatabaseError("Failed to delete fixed point. Please try again later.", new Error(error.message));
-  }
-
-  logger.info("Fixed point deleted successfully", {
-    fixedPointId,
-    planId,
-    userId,
-  });
-};
+}

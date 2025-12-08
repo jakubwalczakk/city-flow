@@ -1,7 +1,7 @@
 import type { APIRoute } from "astro";
 import { DEFAULT_USER_ID } from "@/db/supabase.client";
 import { updatePlanSchema } from "@/lib/schemas/plan.schema";
-import { getPlanById, updatePlan, deletePlan } from "@/lib/services/plan.service";
+import { PlanService } from "@/lib/services/plan.service";
 import { ValidationError } from "@/lib/errors/app-error";
 import { handleApiError, successResponse } from "@/lib/utils/error-handler";
 import { logger } from "@/lib/utils/logger";
@@ -15,7 +15,7 @@ import { logger } from "@/lib/utils/logger";
  */
 export const GET: APIRoute = async ({ params, locals }) => {
   try {
-    const supabase = locals.supabase;
+    const { supabase } = locals;
     const user = { id: DEFAULT_USER_ID };
     const planId = params.planId;
 
@@ -28,7 +28,8 @@ export const GET: APIRoute = async ({ params, locals }) => {
       planId,
     });
 
-    const plan = await getPlanById(supabase, planId, user.id);
+    const planService = new PlanService(supabase);
+    const plan = await planService.getPlanById(planId, user.id);
 
     return successResponse(plan, 200);
   } catch (error) {
@@ -49,7 +50,7 @@ export const GET: APIRoute = async ({ params, locals }) => {
  */
 export const PATCH: APIRoute = async ({ params, request, locals }) => {
   try {
-    const supabase = locals.supabase;
+    const { supabase } = locals;
     const user = { id: DEFAULT_USER_ID };
     const planId = params.planId;
 
@@ -84,7 +85,8 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
     }
 
     // Update the plan
-    const plan = await updatePlan(supabase, planId, validation.data);
+    const planService = new PlanService(supabase);
+    const plan = await planService.updatePlan(planId, validation.data);
 
     return successResponse(plan, 200);
   } catch (error) {
@@ -104,7 +106,7 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
  */
 export const DELETE: APIRoute = async ({ params, locals }) => {
   try {
-    const supabase = locals.supabase;
+    const { supabase } = locals;
     const user = { id: DEFAULT_USER_ID };
     const planId = params.planId;
 
@@ -117,7 +119,8 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
       planId,
     });
 
-    await deletePlan(supabase, planId, user.id);
+    const planService = new PlanService(supabase);
+    await planService.deletePlan(planId, user.id);
 
     return new Response(null, { status: 204 });
   } catch (error) {
@@ -127,5 +130,3 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
     });
   }
 };
-
-export const prerender = false;

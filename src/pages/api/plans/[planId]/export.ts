@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
 import { DEFAULT_USER_ID } from "@/db/supabase.client";
-import { getPlanById } from "@/lib/services/plan.service";
+import { PlanService } from "@/lib/services/plan.service";
 import { generatePlanPdf } from "@/lib/services/pdf.service";
 import { ValidationError, ConflictError } from "@/lib/errors/app-error";
 import { handleApiError } from "@/lib/utils/error-handler";
@@ -20,7 +20,7 @@ import { logger } from "@/lib/utils/logger";
  */
 export const GET: APIRoute = async ({ params, url, locals }) => {
   try {
-    const supabase = locals.supabase;
+    const { supabase } = locals;
     const user = { id: DEFAULT_USER_ID };
     const planId = params.planId;
 
@@ -47,7 +47,8 @@ export const GET: APIRoute = async ({ params, url, locals }) => {
     });
 
     // Fetch the plan
-    const plan = await getPlanById(supabase, planId, user.id);
+    const planService = new PlanService(supabase);
+    const plan = await planService.getPlanById(planId, user.id);
 
     // Validate plan status
     if (plan.status !== "generated") {

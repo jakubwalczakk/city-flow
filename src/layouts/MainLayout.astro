@@ -2,6 +2,7 @@
 import "../styles/global.css";
 import ToasterWrapper from "@/components/ToasterWrapper";
 import { UserMenu } from "@/components/layout/UserMenu";
+import { OnboardingModal } from "@/components/auth/OnboardingModal";
 
 interface Props {
   title?: string;
@@ -66,6 +67,7 @@ const isAuthenticated = !!user;
       <slot />
     </main>
 
+    {isAuthenticated && <OnboardingModal client:idle />}
     <ToasterWrapper client:only="react" />
   </body>
 </html>

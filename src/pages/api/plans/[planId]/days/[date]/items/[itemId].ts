@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
 import { z } from "zod";
-import { updateActivityInPlanDay, deleteActivityFromPlanDay } from "@/lib/services/plan.service";
+import { PlanService } from "@/lib/services/plan.service";
 import { handleApiError } from "@/lib/utils/error-handler";
 import { DEFAULT_USER_ID } from "@/db/supabase.client";
 import type { UpdateActivityCommand } from "@/types";
@@ -10,7 +10,7 @@ export const prerender = false;
 // Validation schema for updating an activity
 const updateActivitySchema = z.object({
   time: z.string().optional(),
-  title: z.string().min(1).optional(),
+  title: z.string().optional(),
   description: z.string().optional(),
   location: z.string().optional(),
   duration: z.number().positive().optional(),
@@ -27,12 +27,10 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
     const { planId, date, itemId } = params;
 
     if (!planId || !date || !itemId) {
-      return new Response(
-        JSON.stringify({
-          error: "Plan ID, date, and item ID are required.",
-        }),
-        { status: 400, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: "Plan ID, date, and item ID are required." }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     // Parse and validate request body
@@ -51,8 +49,8 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
 
     const command: UpdateActivityCommand = validationResult.data;
 
-    // Get Supabase client from locals (set by middleware)
-    const supabase = locals.supabase;
+    // Get Supabase client from locals
+    const { supabase } = locals;
 
     if (!supabase) {
       return new Response(JSON.stringify({ error: "Database connection not available." }), {
@@ -61,8 +59,9 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
       });
     }
 
-    // Update the activity in the plan
-    const updatedPlan = await updateActivityInPlanDay(supabase, planId, date, itemId, command, DEFAULT_USER_ID);
+    // Update the activity
+    const planService = new PlanService(supabase);
+    const updatedPlan = await planService.updateActivityInPlanDay(planId, date, itemId, command, DEFAULT_USER_ID);
 
     return new Response(JSON.stringify(updatedPlan), {
       status: 200,
@@ -82,16 +81,14 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
     const { planId, date, itemId } = params;
 
     if (!planId || !date || !itemId) {
-      return new Response(
-        JSON.stringify({
-          error: "Plan ID, date, and item ID are required.",
-        }),
-        { status: 400, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: "Plan ID, date, and item ID are required." }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
-    // Get Supabase client from locals (set by middleware)
-    const supabase = locals.supabase;
+    // Get Supabase client from locals
+    const { supabase } = locals;
 
     if (!supabase) {
       return new Response(JSON.stringify({ error: "Database connection not available." }), {
@@ -100,8 +97,9 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
       });
     }
 
-    // Delete the activity from the plan
-    const updatedPlan = await deleteActivityFromPlanDay(supabase, planId, date, itemId, DEFAULT_USER_ID);
+    // Delete the activity
+    const planService = new PlanService(supabase);
+    const updatedPlan = await planService.deleteActivityFromPlanDay(planId, date, itemId, DEFAULT_USER_ID);
 
     return new Response(JSON.stringify(updatedPlan), {
       status: 200,

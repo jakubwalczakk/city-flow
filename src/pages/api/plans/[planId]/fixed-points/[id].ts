@@ -1,7 +1,7 @@
 import type { APIRoute } from "astro";
 import { DEFAULT_USER_ID } from "@/db/supabase.client";
 import { updateFixedPointSchema } from "@/lib/schemas/fixed-point.schema";
-import { updateFixedPoint, deleteFixedPoint } from "@/lib/services/fixed-point.service";
+import { FixedPointService } from "@/lib/services/fixed-point.service";
 import { ValidationError } from "@/lib/errors/app-error";
 import { handleApiError, successResponse } from "@/lib/utils/error-handler";
 import { logger } from "@/lib/utils/logger";
@@ -15,7 +15,7 @@ import { logger } from "@/lib/utils/logger";
  */
 export const PATCH: APIRoute = async ({ params, request, locals }) => {
   try {
-    const supabase = locals.supabase;
+    const { supabase } = locals;
     const user = { id: DEFAULT_USER_ID };
     const { planId, id } = params;
 
@@ -51,7 +51,8 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
     }
 
     // Update the fixed point
-    const fixedPoint = await updateFixedPoint(supabase, planId, id, validation.data, user.id);
+    const fixedPointService = new FixedPointService(supabase);
+    const fixedPoint = await fixedPointService.updateFixedPoint(planId, id, validation.data);
 
     return successResponse(fixedPoint, 200);
   } catch (error) {
@@ -70,7 +71,7 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
  */
 export const DELETE: APIRoute = async ({ params, locals }) => {
   try {
-    const supabase = locals.supabase;
+    const { supabase } = locals;
     const user = { id: DEFAULT_USER_ID };
     const { planId, id } = params;
 
@@ -85,7 +86,8 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
     });
 
     // Delete the fixed point
-    await deleteFixedPoint(supabase, planId, id, user.id);
+    const fixedPointService = new FixedPointService(supabase);
+    await fixedPointService.deleteFixedPoint(planId, id);
 
     return new Response(null, { status: 204 });
   } catch (error) {

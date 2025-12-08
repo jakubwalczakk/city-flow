@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { findProfileByUserId, updateProfile } from "@/lib/services/profile.service";
+import { ProfileService } from "@/lib/services/profile.service";
 import { handleApiError, successResponse } from "@/lib/utils/error-handler";
 import { logger } from "@/lib/utils/logger";
 import { NotFoundError, ValidationError } from "@/lib/errors/app-error";
@@ -20,14 +20,15 @@ export const prerender = false;
 export const GET: APIRoute = async (context) => {
   try {
     const { locals } = context;
-    const supabase = locals.supabase;
+    const { supabase } = locals;
 
     // Authenticate the user
     const user = await getAuthenticatedUser(context);
     logger.debug("Received request to get user profile", { userId: user.id });
 
     // Fetch the profile
-    const profile = await findProfileByUserId(supabase, user.id);
+    const profileService = new ProfileService(supabase);
+    const profile = await profileService.findProfileByUserId(user.id);
 
     if (!profile) {
       logger.debug("Profile not found", { userId: user.id });
@@ -88,7 +89,7 @@ export const GET: APIRoute = async (context) => {
 export const PATCH: APIRoute = async (context) => {
   try {
     const { request, locals } = context;
-    const supabase = locals.supabase;
+    const { supabase } = locals;
 
     // Authenticate the user
     const user = await getAuthenticatedUser(context);
@@ -110,7 +111,8 @@ export const PATCH: APIRoute = async (context) => {
     }
 
     // Update the profile
-    const updatedProfile = await updateProfile(supabase, user.id, validatedData);
+    const profileService = new ProfileService(supabase);
+    const updatedProfile = await profileService.updateProfile(user.id, validatedData);
 
     return successResponse(updatedProfile, 200);
   } catch (error) {

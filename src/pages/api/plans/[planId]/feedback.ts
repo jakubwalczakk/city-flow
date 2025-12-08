@@ -1,7 +1,7 @@
 import type { APIRoute } from "astro";
 import { DEFAULT_USER_ID } from "@/db/supabase.client";
 import { submitFeedbackSchema } from "@/lib/schemas/feedback.schema";
-import { submitFeedback, getFeedback } from "@/lib/services/feedback.service";
+import { FeedbackService } from "@/lib/services/feedback.service";
 import { ValidationError, NotFoundError } from "@/lib/errors/app-error";
 import { handleApiError, successResponse } from "@/lib/utils/error-handler";
 import { logger } from "@/lib/utils/logger";
@@ -15,7 +15,7 @@ import { logger } from "@/lib/utils/logger";
  */
 export const GET: APIRoute = async ({ params, locals }) => {
   try {
-    const supabase = locals.supabase;
+    const { supabase } = locals;
     const user = { id: DEFAULT_USER_ID };
     const planId = params.planId;
 
@@ -28,7 +28,8 @@ export const GET: APIRoute = async ({ params, locals }) => {
       planId,
     });
 
-    const feedback = await getFeedback(supabase, planId, user.id);
+    const feedbackService = new FeedbackService(supabase);
+    const feedback = await feedbackService.getFeedback(planId, user.id);
 
     return successResponse(feedback, 200);
   } catch (error) {
@@ -58,7 +59,7 @@ export const GET: APIRoute = async ({ params, locals }) => {
  */
 export const POST: APIRoute = async ({ params, request, locals }) => {
   try {
-    const supabase = locals.supabase;
+    const { supabase } = locals;
     const user = { id: DEFAULT_USER_ID };
     const planId = params.planId;
 
@@ -93,16 +94,17 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
     }
 
     // Check if feedback already exists to determine response code
+    const feedbackService = new FeedbackService(supabase);
     let isUpdate = false;
     try {
-      await getFeedback(supabase, planId, user.id);
+      await feedbackService.getFeedback(planId, user.id);
       isUpdate = true;
     } catch {
       // Feedback doesn't exist yet, will be created
     }
 
     // Submit the feedback
-    const feedback = await submitFeedback(supabase, planId, user.id, validation.data);
+    const feedback = await feedbackService.submitFeedback(planId, user.id, validation.data);
 
     return successResponse(feedback, isUpdate ? 200 : 201);
   } catch (error) {
