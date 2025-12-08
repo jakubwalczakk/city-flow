@@ -32,6 +32,7 @@ export default function PlanDetailsView({ planId }: PlanDetailsViewProps) {
     addActivity,
     updateActivity,
     deleteActivity,
+    generatePlan,
   } = usePlanDetails(planId);
 
   const [activityFormState, setActivityFormState] = useState<ActivityFormState>({
@@ -170,7 +171,7 @@ export default function PlanDetailsView({ planId }: PlanDetailsViewProps) {
 
       <PlanHeader plan={plan} onUpdate={updatePlanName} onDelete={deletePlan} onArchive={archivePlan} />
 
-      {plan.status === 'draft' && <DraftPlanView plan={plan} />}
+      {plan.status === 'draft' && <DraftPlanView plan={plan} onGenerate={generatePlan} />}
       {plan.status === 'generated' && (
         <>
           <GeneratedPlanView

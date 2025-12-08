@@ -7,15 +7,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 
 type DraftPlanViewProps = {
   plan: PlanDetailsDto;
+  onGenerate: () => Promise<void>;
 };
 
 /**
  * Displays the draft plan view with an editable form.
  * This view is shown when the plan status is 'draft'.
  */
-export default function DraftPlanView({ plan }: DraftPlanViewProps) {
+export default function DraftPlanView({ plan, onGenerate }: DraftPlanViewProps) {
   const [notes, setNotes] = useState(plan.notes || '');
   const [isSaving, setIsSaving] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
   const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const handleSave = async () => {
@@ -113,16 +115,40 @@ export default function DraftPlanView({ plan }: DraftPlanViewProps) {
             </Button>
 
             <Button
-              onClick={() => {
-                // TODO: Implement plan generation
-                alert('Generowanie planu zostanie zaimplementowane w kolejnym kroku');
+              onClick={async () => {
+                if (hasChanges) {
+                  // If there are unsaved changes, ask user to save first or auto-save?
+                  // For now, let's just warn or try to save first.
+                  // Let's try to save first
+                  await handleSave();
+                }
+
+                setIsGenerating(true);
+                try {
+                  await onGenerate();
+                  // No need to set isGenerating(false) if success, because component will unmount/switch view
+                  // But just in case:
+                } catch (error) {
+                  setIsGenerating(false);
+                  alert(error instanceof Error ? error.message : 'Nie udało się wygenerować planu');
+                }
               }}
               size='lg'
+              disabled={isGenerating || isSaving}
             >
-              Wygeneruj plan
-              <svg className='ml-2 h-4 w-4' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
-                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M13 10V3L4 14h7v7l9-11h-7z' />
-              </svg>
+              {isGenerating ? (
+                <>
+                  Generowanie...
+                  <div className='ml-2 h-4 w-4 animate-spin rounded-full border-2 border-solid border-current border-r-transparent' />
+                </>
+              ) : (
+                <>
+                  Wygeneruj plan
+                  <svg className='ml-2 h-4 w-4' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+                    <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M13 10V3L4 14h7v7l9-11h-7z' />
+                  </svg>
+                </>
+              )}
             </Button>
           </div>
         </CardContent>

@@ -20,6 +20,7 @@ export type UsePlanDetailsResult = {
   addActivity: (date: string, activity: Partial<TimelineItem>) => Promise<void>;
   updateActivity: (date: string, itemId: string, activity: Partial<TimelineItem>) => Promise<void>;
   deleteActivity: (date: string, itemId: string) => Promise<void>;
+  generatePlan: () => Promise<void>;
   refetch: () => void;
 };
 
@@ -233,6 +234,28 @@ export const usePlanDetails = (planId: string): UsePlanDetailsResult => {
     [planId]
   );
 
+  /**
+   * Generates the plan using AI.
+   *
+   * @throws Error if the generation fails
+   */
+  const generatePlan = useCallback(async (): Promise<void> => {
+    // Save current notes first if needed - assuming they are saved via other calls
+    // But DraftPlanView saves notes separately.
+
+    const response = await fetch(`/api/plans/${planId}/generate`, {
+      method: 'POST',
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || 'Failed to generate plan');
+    }
+
+    const updatedPlan: PlanDetailsDto = await response.json();
+    setPlan(updatedPlan);
+  }, [planId]);
+
   // Fetch plan on mount or when planId changes
   useEffect(() => {
     fetchPlan();
@@ -248,6 +271,7 @@ export const usePlanDetails = (planId: string): UsePlanDetailsResult => {
     addActivity,
     updateActivity,
     deleteActivity,
+    generatePlan,
     refetch: fetchPlan,
   };
 };
