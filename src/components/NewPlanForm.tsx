@@ -7,7 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { PlanGenerationLoading } from '@/components/PlanGenerationLoading';
 import type { PlanListItemDto } from '@/types';
 
-const STEPS = ['Basic Info', 'Fixed Points', 'Review'];
+const STEPS = ['Podstawowe informacje', 'Stałe punkty', 'Podsumowanie'];
 
 export default function NewPlanForm({
   onFinished,
@@ -36,7 +36,7 @@ export default function NewPlanForm({
     <div className='w-full'>
       {/* Show loading animation when generating */}
       {isGenerating ? (
-        <PlanGenerationLoading planName={formData.basicInfo.name || `${formData.basicInfo.destination} trip`} />
+        <PlanGenerationLoading planName={formData.basicInfo.name || `${formData.basicInfo.destination} - wycieczka`} />
       ) : (
         <>
           <StepIndicator currentStep={currentStep} steps={STEPS} />

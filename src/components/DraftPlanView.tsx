@@ -37,14 +37,14 @@ export default function DraftPlanView({ plan }: DraftPlanViewProps) {
         throw new Error('Failed to save changes');
       }
 
-      setSaveMessage({ type: 'success', text: 'Changes saved successfully!' });
+      setSaveMessage({ type: 'success', text: 'Zmiany zostały zapisane!' });
 
       // Clear success message after 3 seconds
       setTimeout(() => setSaveMessage(null), 3000);
     } catch {
       setSaveMessage({
         type: 'error',
-        text: 'Failed to save changes. Please try again.',
+        text: 'Nie udało się zapisać zmian. Spróbuj ponownie.',
       });
     } finally {
       setIsSaving(false);
@@ -115,7 +115,7 @@ export default function DraftPlanView({ plan }: DraftPlanViewProps) {
             <Button
               onClick={() => {
                 // TODO: Implement plan generation
-                alert('Plan generation will be implemented in a future step');
+                alert('Generowanie planu zostanie zaimplementowane w kolejnym kroku');
               }}
               size='lg'
             >

@@ -3,6 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { DatePicker } from '@/components/ui/date-picker';
 import { basicInfoSchema } from '@/lib/schemas/plan.schema';
 import type { NewPlanViewModel } from '@/types';
 import { ZodError } from 'zod';
@@ -27,20 +28,42 @@ export function BasicInfoStep({
   onSave,
 }: BasicInfoStepProps) {
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isStartOpen, setIsStartOpen] = useState(false);
+  const [isEndOpen, setIsEndOpen] = useState(false);
 
-  // Convert Date to datetime-local string format (YYYY-MM-DDTHH:mm)
-  const dateToDateTimeLocal = (date: Date): string => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
+  // Convert Date to time string (HH:mm)
+  const dateToTime = (date: Date): string => {
     const hours = String(date.getHours()).padStart(2, '0');
     const minutes = String(date.getMinutes()).padStart(2, '0');
-    return `${year}-${month}-${day}T${hours}:${minutes}`;
+    return `${hours}:${minutes}`;
   };
 
-  // Convert datetime-local string to Date
-  const dateTimeLocalToDate = (dateTimeLocal: string): Date => {
-    return new Date(dateTimeLocal);
+  const handleDateSelect = (field: 'start_date' | 'end_date', date: Date | undefined) => {
+    if (!date) return;
+    const current = formData[field];
+    const newDate = new Date(date);
+    // Preserve existing time
+    newDate.setHours(current.getHours());
+    newDate.setMinutes(current.getMinutes());
+
+    updateFormData({ [field]: newDate });
+
+    if (field === 'start_date') {
+      setIsStartOpen(false);
+      // Auto-open end date picker if it's not already set or just always for better flow
+      setIsEndOpen(true);
+    } else {
+      setIsEndOpen(false);
+    }
+  };
+
+  const handleTimeChange = (field: 'start_date' | 'end_date', timeStr: string) => {
+    if (!timeStr) return;
+    const [hours, minutes] = timeStr.split(':').map(Number);
+    const newDate = new Date(formData[field]);
+    newDate.setHours(hours);
+    newDate.setMinutes(minutes);
+    updateFormData({ [field]: newDate });
   };
 
   const validateAndProceed = () => {
@@ -125,13 +148,25 @@ export function BasicInfoStep({
           <Label htmlFor='start_date'>
             Data i godzina rozpoczęcia <span className='text-destructive'>*</span>
           </Label>
-          <Input
-            id='start_date'
-            type='datetime-local'
-            value={dateToDateTimeLocal(formData.start_date)}
-            onChange={(e) => updateFormData({ start_date: dateTimeLocalToDate(e.target.value) })}
-            className={errors.start_date ? 'border-destructive' : ''}
-          />
+          <div className='flex gap-2'>
+            <div className='flex-1'>
+              <DatePicker
+                date={formData.start_date}
+                onSelect={(date) => handleDateSelect('start_date', date)}
+                open={isStartOpen}
+                onOpenChange={setIsStartOpen}
+                placeholder='Wybierz datę'
+              />
+            </div>
+            <div className='w-28'>
+              <Input
+                id='start_time'
+                type='time'
+                value={dateToTime(formData.start_date)}
+                onChange={(e) => handleTimeChange('start_date', e.target.value)}
+              />
+            </div>
+          </div>
           {errors.start_date && <p className='text-sm text-destructive'>{errors.start_date}</p>}
         </div>
 
@@ -139,14 +174,26 @@ export function BasicInfoStep({
           <Label htmlFor='end_date'>
             Data i godzina zakończenia <span className='text-destructive'>*</span>
           </Label>
-          <Input
-            id='end_date'
-            type='datetime-local'
-            value={dateToDateTimeLocal(formData.end_date)}
-            onChange={(e) => updateFormData({ end_date: dateTimeLocalToDate(e.target.value) })}
-            min={dateToDateTimeLocal(formData.start_date)}
-            className={errors.end_date ? 'border-destructive' : ''}
-          />
+          <div className='flex gap-2'>
+            <div className='flex-1'>
+              <DatePicker
+                date={formData.end_date}
+                onSelect={(date) => handleDateSelect('end_date', date)}
+                open={isEndOpen}
+                onOpenChange={setIsEndOpen}
+                minDate={formData.start_date}
+                placeholder='Wybierz datę'
+              />
+            </div>
+            <div className='w-28'>
+              <Input
+                id='end_time'
+                type='time'
+                value={dateToTime(formData.end_date)}
+                onChange={(e) => handleTimeChange('end_date', e.target.value)}
+              />
+            </div>
+          </div>
           {errors.end_date && <p className='text-sm text-destructive'>{errors.end_date}</p>}
         </div>
       </div>

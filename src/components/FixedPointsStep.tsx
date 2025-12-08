@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { DatePicker } from '@/components/ui/date-picker';
 import { fixedPointSchema } from '@/lib/schemas/plan.schema';
 import type { CreateFixedPointCommand } from '@/types';
 import { Trash2, Plus, MapPin, Clock, Pencil } from 'lucide-react';
@@ -43,6 +44,57 @@ export function FixedPointsStep({
     description: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Helpers for date/time handling
+  const getEventDate = (dateStr: string): Date | undefined => {
+    if (!dateStr) return undefined;
+    return new Date(dateStr);
+  };
+
+  const getEventTime = (dateStr: string): string => {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${hours}:${minutes}`;
+  };
+
+  const handleDateSelect = (date: Date | undefined) => {
+    if (!date) return;
+    const current = currentPoint.event_at ? new Date(currentPoint.event_at) : new Date();
+    // If new date, keep current time or default to 12:00
+    const hours = currentPoint.event_at ? current.getHours() : 12;
+    const minutes = currentPoint.event_at ? current.getMinutes() : 0;
+
+    date.setHours(hours);
+    date.setMinutes(minutes);
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const h = String(date.getHours()).padStart(2, '0');
+    const m = String(date.getMinutes()).padStart(2, '0');
+
+    setCurrentPoint({ ...currentPoint, event_at: `${year}-${month}-${day}T${h}:${m}` });
+  };
+
+  const handleTimeChange = (timeStr: string) => {
+    if (!timeStr) return;
+    const [hours, minutes] = timeStr.split(':').map(Number);
+
+    // If no date selected yet, use today
+    const date = currentPoint.event_at ? new Date(currentPoint.event_at) : new Date();
+    date.setHours(hours);
+    date.setMinutes(minutes);
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const h = String(hours).padStart(2, '0');
+    const m = String(minutes).padStart(2, '0');
+
+    setCurrentPoint({ ...currentPoint, event_at: `${year}-${month}-${day}T${h}:${m}` });
+  };
 
   const validateAndGetPoint = () => {
     const pointToValidate = {
@@ -162,13 +214,23 @@ export function FixedPointsStep({
             <Label htmlFor='event_at'>
               Data i godzina <span className='text-destructive'>*</span>
             </Label>
-            <Input
-              id='event_at'
-              type='datetime-local'
-              value={currentPoint.event_at}
-              onChange={(e) => setCurrentPoint({ ...currentPoint, event_at: e.target.value })}
-              className={errors.event_at ? 'border-destructive' : ''}
-            />
+            <div className='flex gap-2'>
+              <div className='flex-1'>
+                <DatePicker
+                  date={getEventDate(currentPoint.event_at)}
+                  onSelect={handleDateSelect}
+                  placeholder='Wybierz datę'
+                />
+              </div>
+              <div className='w-28'>
+                <Input
+                  id='event_time'
+                  type='time'
+                  value={getEventTime(currentPoint.event_at)}
+                  onChange={(e) => handleTimeChange(e.target.value)}
+                />
+              </div>
+            </div>
             {errors.event_at && <p className='text-sm text-destructive'>{errors.event_at}</p>}
           </div>
 

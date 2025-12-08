@@ -63,7 +63,7 @@ export default function PlanDetailsView({ planId }: PlanDetailsViewProps) {
     try {
       await deleteActivity(date, itemId);
     } catch (error) {
-      alert(error instanceof Error ? error.message : 'Failed to delete activity');
+      alert(error instanceof Error ? error.message : 'Nie udało się usunąć aktywności');
     }
   };
 
@@ -75,7 +75,7 @@ export default function PlanDetailsView({ planId }: PlanDetailsViewProps) {
         await updateActivity(activityFormState.date, activityFormState.item.id, activity);
       }
     } catch (error) {
-      alert(error instanceof Error ? error.message : 'Failed to save activity');
+      alert(error instanceof Error ? error.message : 'Nie udało się zapisać aktywności');
       throw error; // Re-throw to prevent form from closing
     }
   };

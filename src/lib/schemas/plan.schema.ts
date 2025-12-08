@@ -4,18 +4,18 @@ import { z } from 'zod';
  * Base schema for a plan. This is the source of truth for the plan's shape.
  */
 export const planSchema = z.object({
-  name: z.string({ required_error: 'Name is required.' }).min(1, {
-    message: 'Name cannot be empty.',
+  name: z.string({ required_error: 'Nazwa jest wymagana.' }).min(1, {
+    message: 'Nazwa nie może być pusta.',
   }),
   destination: z
-    .string({ required_error: 'Destination is required.' })
-    .min(1, { message: 'Destination cannot be empty.' }),
+    .string({ required_error: 'Miejsce docelowe jest wymagane.' })
+    .min(1, { message: 'Miejsce docelowe nie może być puste.' }),
   start_date: z
-    .string({ required_error: 'Start date is required.' })
-    .datetime({ message: 'Start date must be a valid datetime.' }),
+    .string({ required_error: 'Data rozpoczęcia jest wymagana.' })
+    .datetime({ message: 'Data rozpoczęcia musi być prawidłową datą.' }),
   end_date: z
-    .string({ required_error: 'End date is required.' })
-    .datetime({ message: 'End date must be a valid datetime.' }),
+    .string({ required_error: 'Data zakończenia jest wymagana.' })
+    .datetime({ message: 'Data zakończenia musi być prawidłową datą.' }),
   notes: z.string().optional().nullable(),
 });
 
@@ -30,7 +30,7 @@ export const createPlanSchema = planSchema.refine(
     return new Date(data.end_date) >= new Date(data.start_date);
   },
   {
-    message: 'End date must be equal to or after start date.',
+    message: 'Data zakończenia musi być późniejsza lub równa dacie rozpoczęcia.',
     path: ['end_date'],
   }
 );
@@ -66,10 +66,10 @@ export const listPlansQuerySchema = z.object({
   limit: z.coerce
     .number()
     .int()
-    .min(1, { message: 'Limit must be at least 1.' })
-    .max(100, { message: 'Limit cannot exceed 100.' })
+    .min(1, { message: 'Limit musi wynosić co najmniej 1.' })
+    .max(100, { message: 'Limit nie może przekraczać 100.' })
     .default(20),
-  offset: z.coerce.number().int().min(0, { message: 'Offset must be non-negative.' }).default(0),
+  offset: z.coerce.number().int().min(0, { message: 'Offset nie może być ujemny.' }).default(0),
 });
 
 /**
@@ -79,10 +79,10 @@ export const listPlansQuerySchema = z.object({
  */
 export const basicInfoSchema = z
   .object({
-    name: z.string().min(1, 'Plan name is required'),
-    destination: z.string().min(1, 'Destination is required'),
-    start_date: z.date({ required_error: 'Start date is required' }),
-    end_date: z.date({ required_error: 'End date is required' }),
+    name: z.string().min(1, 'Nazwa planu jest wymagana'),
+    destination: z.string().min(1, 'Miejsce docelowe jest wymagane'),
+    start_date: z.date({ required_error: 'Data rozpoczęcia jest wymagana' }),
+    end_date: z.date({ required_error: 'Data zakończenia jest wymagana' }),
     notes: z.string(),
   })
   .refine(
@@ -90,7 +90,7 @@ export const basicInfoSchema = z
       return data.end_date >= data.start_date;
     },
     {
-      message: 'End date must be after or equal to start date',
+      message: 'Data zakończenia musi być późniejsza niż data rozpoczęcia',
       path: ['end_date'],
     }
   );
@@ -99,9 +99,9 @@ export const basicInfoSchema = z
  * Schema for validating fixed point form (client-side).
  */
 export const fixedPointSchema = z.object({
-  location: z.string().min(1, 'Location is required'),
-  event_at: z.string().min(1, 'Date and time is required'),
-  event_duration: z.number().positive('Duration must be a positive number.').nullable().optional(),
+  location: z.string().min(1, 'Lokalizacja jest wymagana'),
+  event_at: z.string().min(1, 'Data i godzina są wymagane'),
+  event_duration: z.number().positive('Czas trwania musi być liczbą dodatnią.').nullable().optional(),
   description: z.string().nullable().optional(),
 });
 
@@ -111,9 +111,9 @@ export const fixedPointSchema = z.object({
  */
 export const updatePlanSchema = z
   .object({
-    name: z.string().min(1, 'Name cannot be empty.').optional(),
-    start_date: z.string().datetime({ message: 'Start date must be a valid datetime.' }).optional(),
-    end_date: z.string().datetime({ message: 'End date must be a valid datetime.' }).optional(),
+    name: z.string().min(1, 'Nazwa nie może być pusta.').optional(),
+    start_date: z.string().datetime({ message: 'Data rozpoczęcia musi być prawidłową datą.' }).optional(),
+    end_date: z.string().datetime({ message: 'Data zakończenia musi być prawidłową datą.' }).optional(),
     notes: z.string().optional().nullable(),
     status: z.enum(['draft', 'generated', 'archived']).optional(),
   })
@@ -126,7 +126,7 @@ export const updatePlanSchema = z
       return true;
     },
     {
-      message: 'End date must be equal to or after start date.',
+      message: 'Data zakończenia musi być późniejsza lub równa dacie rozpoczęcia.',
       path: ['end_date'],
     }
   );

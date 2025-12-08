@@ -124,7 +124,7 @@ export default function PlanHeader({ plan, onUpdate, onDelete, onArchive }: Plan
               <Input
                 value={editedName}
                 onChange={(e) => setEditedName(e.target.value)}
-                placeholder='Plan name'
+                placeholder='Nazwa planu'
                 className='text-2xl font-bold h-auto py-2'
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
@@ -149,7 +149,7 @@ export default function PlanHeader({ plan, onUpdate, onDelete, onArchive }: Plan
               <button
                 onClick={() => setIsEditing(true)}
                 className='opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-muted rounded'
-                aria-label='Edit plan name'
+                aria-label='Edytuj nazwę planu'
               >
                 <svg className='h-5 w-5 text-muted-foreground' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
                   <path
