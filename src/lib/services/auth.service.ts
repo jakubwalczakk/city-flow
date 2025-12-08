@@ -1,5 +1,4 @@
 import type { SupabaseClient } from '@/db/supabase.client';
-import { DEFAULT_USER_ID } from '@/db/supabase.client';
 import { ForbiddenError } from '@/lib/errors/app-error';
 import { logger } from '@/lib/utils/logger';
 
@@ -19,11 +18,6 @@ export class AuthService {
    * Throws ForbiddenError if the user is not authenticated.
    */
   public async getUser() {
-    if (import.meta.env.DEV) {
-      logger.debug('Using DEFAULT_USER_ID for authentication (development mode)');
-      return { id: DEFAULT_USER_ID, email: 'dev@example.com' };
-    }
-
     const {
       data: { user },
       error,

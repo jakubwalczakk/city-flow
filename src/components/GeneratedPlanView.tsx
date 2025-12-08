@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import EventTimeline from '@/components/EventTimeline';
 import FeedbackModule from '@/components/FeedbackModule';
-import { Plus } from 'lucide-react';
+import { Plus, Sparkles } from 'lucide-react';
 
 type GeneratedPlanViewProps = {
   plan: PlanDetailsDto;
@@ -138,10 +138,20 @@ export default function GeneratedPlanView({
       {/* Plan Summary */}
       <Card>
         <CardHeader>
-          <CardTitle>Podsumowanie planu</CardTitle>
+          <div className='flex items-center justify-between'>
+            <CardTitle>Podsumowanie planu</CardTitle>
+            <div className='flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary'>
+              <Sparkles className='h-3.5 w-3.5' />
+              <span>Wygenerowano przez AI</span>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           <p className='text-muted-foreground'>{generatedContent.summary}</p>
+          <p className='mt-4 text-xs text-muted-foreground italic border-t pt-2'>
+            * Ten plan został wygenerowany przez sztuczną inteligencję. Zawsze sprawdzaj godziny otwarcia i dostępność
+            atrakcji przed podróżą.
+          </p>
         </CardContent>
       </Card>
 

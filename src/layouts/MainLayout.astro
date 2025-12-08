@@ -63,9 +63,19 @@ const isAuthenticated = !!user;
       )
     }
 
-    <main>
+    <main class='flex-1'>
       <slot />
     </main>
+
+    <footer class='border-t py-6 bg-muted/20'>
+      <div class='container mx-auto px-4 text-center text-sm text-muted-foreground'>
+        <p>&copy; {new Date().getFullYear()} CityFlow. Wszelkie prawa zastrzeżone.</p>
+        <p class='mt-2 text-xs opacity-70'>
+          Aplikacja wykorzystuje sztuczną inteligencję do generowania planów podróży. Prosimy o weryfikację informacji,
+          takich jak godziny otwarcia czy dostępność atrakcji.
+        </p>
+      </div>
+    </footer>
 
     {isAuthenticated && <OnboardingModal client:idle />}
     <ToasterWrapper client:only='react' />
@@ -78,5 +88,7 @@ const isAuthenticated = !!user;
     margin: 0;
     width: 100%;
     min-height: 100%;
+    display: flex;
+    flex-direction: column;
   }
 </style>
