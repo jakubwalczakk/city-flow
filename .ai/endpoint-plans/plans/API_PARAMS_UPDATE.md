@@ -80,15 +80,15 @@ export const listPlansQuerySchema = z.object({
   statuses: z.preprocess(
     (val) => {
       if (!val) return undefined;
-      if (typeof val === "string" && val.includes(",")) {
-        return val.split(",").map((s) => s.trim());
+      if (typeof val === 'string' && val.includes(',')) {
+        return val.split(',').map((s) => s.trim());
       }
-      if (typeof val === "string") {
+      if (typeof val === 'string') {
         return [val];
       }
       return val;
     },
-    z.array(z.enum(["draft", "generated", "archived"])).optional()
+    z.array(z.enum(['draft', 'generated', 'archived'])).optional()
   ),
   // ... other fields
 });
@@ -98,11 +98,11 @@ export const listPlansQuerySchema = z.object({
 
 ```typescript
 const queryParams = {
-  statuses: url.searchParams.get("statuses"),
-  sort_by: url.searchParams.get("sort_by"),
-  order: url.searchParams.get("order"),
-  limit: url.searchParams.get("limit"),
-  offset: url.searchParams.get("offset"),
+  statuses: url.searchParams.get('statuses'),
+  sort_by: url.searchParams.get('sort_by'),
+  order: url.searchParams.get('order'),
+  limit: url.searchParams.get('limit'),
+  offset: url.searchParams.get('offset'),
 };
 
 // Map to service layer
@@ -118,7 +118,7 @@ const result = await getPlans(supabase, user.id, {
 // Always use 'statuses' parameter (supports single or multiple values)
 if (params.status) {
   const statusArray = Array.isArray(params.status) ? params.status : [params.status];
-  searchParams.set("statuses", statusArray.join(","));
+  searchParams.set('statuses', statusArray.join(','));
 }
 ```
 
@@ -148,11 +148,11 @@ if (params.status) {
 
 ```javascript
 // Multiple statuses
-fetch("/api/plans?statuses=draft,generated&limit=12&offset=0");
+fetch('/api/plans?statuses=draft,generated&limit=12&offset=0');
 
 // Single status (still use 'statuses')
-fetch("/api/plans?statuses=draft&limit=12&offset=0");
+fetch('/api/plans?statuses=draft&limit=12&offset=0');
 
 // No filter
-fetch("/api/plans?limit=12&offset=0");
+fetch('/api/plans?limit=12&offset=0');
 ```

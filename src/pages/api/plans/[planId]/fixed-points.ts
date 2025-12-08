@@ -1,10 +1,10 @@
-import type { APIRoute } from "astro";
-import { DEFAULT_USER_ID } from "@/db/supabase.client";
-import { createFixedPointSchema } from "@/lib/schemas/fixed-point.schema";
-import { FixedPointService } from "@/lib/services/fixed-point.service";
-import { ValidationError } from "@/lib/errors/app-error";
-import { handleApiError, successResponse } from "@/lib/utils/error-handler";
-import { logger } from "@/lib/utils/logger";
+import type { APIRoute } from 'astro';
+import { DEFAULT_USER_ID } from '@/db/supabase.client';
+import { createFixedPointSchema } from '@/lib/schemas/fixed-point.schema';
+import { FixedPointService } from '@/lib/services/fixed-point.service';
+import { ValidationError } from '@/lib/errors/app-error';
+import { handleApiError, successResponse } from '@/lib/utils/error-handler';
+import { logger } from '@/lib/utils/logger';
 
 /**
  * GET /api/plans/{planId}/fixed-points
@@ -19,10 +19,10 @@ export const GET: APIRoute = async ({ params, locals }) => {
     const { planId } = params;
 
     if (!planId) {
-      throw new ValidationError("Plan ID is required");
+      throw new ValidationError('Plan ID is required');
     }
 
-    logger.debug("Received request to list fixed points", {
+    logger.debug('Received request to list fixed points', {
       userId: user.id,
       planId,
     });
@@ -33,7 +33,7 @@ export const GET: APIRoute = async ({ params, locals }) => {
     return successResponse(fixedPoints, 200);
   } catch (error) {
     return handleApiError(error, {
-      endpoint: "GET /api/plans/{planId}/fixed-points",
+      endpoint: 'GET /api/plans/{planId}/fixed-points',
       userId: DEFAULT_USER_ID,
     });
   }
@@ -53,10 +53,10 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
     const { planId } = params;
 
     if (!planId) {
-      throw new ValidationError("Plan ID is required");
+      throw new ValidationError('Plan ID is required');
     }
 
-    logger.debug("Received request to create fixed point", {
+    logger.debug('Received request to create fixed point', {
       userId: user.id,
       planId,
     });
@@ -66,20 +66,20 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
     try {
       body = await request.json();
     } catch (parseError) {
-      logger.warn("Failed to parse request body", {
+      logger.warn('Failed to parse request body', {
         error: parseError instanceof Error ? parseError.message : String(parseError),
       });
-      throw new ValidationError("Invalid JSON in request body");
+      throw new ValidationError('Invalid JSON in request body');
     }
 
     // Validate request body
     const validation = createFixedPointSchema.safeParse(body);
 
     if (!validation.success) {
-      logger.debug("Request validation failed", {
+      logger.debug('Request validation failed', {
         errors: validation.error.flatten(),
       });
-      throw new ValidationError("Validation failed", validation.error.flatten());
+      throw new ValidationError('Validation failed', validation.error.flatten());
     }
 
     // Create the fixed point
@@ -96,7 +96,7 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
     return successResponse(fixedPoint, 201);
   } catch (error) {
     return handleApiError(error, {
-      endpoint: "POST /api/plans/{planId}/fixed-points",
+      endpoint: 'POST /api/plans/{planId}/fixed-points',
       userId: DEFAULT_USER_ID,
     });
   }

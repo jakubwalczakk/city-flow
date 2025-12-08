@@ -118,12 +118,12 @@ beforeEach(() => {
 ### 4. Opisowe Nazwy Testów
 
 ```typescript
-describe("Generation Loading State", () => {
-  it("should show loading animation when isGenerating is true", () => {
+describe('Generation Loading State', () => {
+  it('should show loading animation when isGenerating is true', () => {
     // ...
   });
 
-  it("should use destination as fallback plan name when name is empty", () => {
+  it('should use destination as fallback plan name when name is empty', () => {
     // ...
   });
 });
@@ -132,11 +132,11 @@ describe("Generation Loading State", () => {
 ### 5. Type Safety
 
 ```typescript
-import type { PlanListItemDto } from "@/types";
+import type { PlanListItemDto } from '@/types';
 
 const editingPlan: PlanListItemDto = {
-  id: "plan-123",
-  name: "Existing Plan",
+  id: 'plan-123',
+  name: 'Existing Plan',
   // ...
 };
 ```

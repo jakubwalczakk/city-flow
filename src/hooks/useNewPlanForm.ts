@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 import type {
   NewPlanViewModel,
   CreatePlanCommand,
@@ -6,7 +6,7 @@ import type {
   PlanDetailsDto,
   PlanListItemDto,
   FixedPointDto,
-} from "@/types";
+} from '@/types';
 
 // Helper function to create default start date (tomorrow at 9:00 AM)
 const getDefaultStartDate = (): Date => {
@@ -26,11 +26,11 @@ const getDefaultEndDate = (): Date => {
 
 const INITIAL_FORM_DATA: NewPlanViewModel = {
   basicInfo: {
-    name: "",
-    destination: "",
+    name: '',
+    destination: '',
     start_date: getDefaultStartDate(),
     end_date: getDefaultEndDate(),
-    notes: "",
+    notes: '',
   },
   fixedPoints: [],
 };
@@ -53,7 +53,7 @@ export function useNewPlanForm({
         try {
           const response = await fetch(`/api/plans/${editingPlan.id}`);
           if (!response.ok) {
-            throw new Error("Failed to fetch plan details for editing.");
+            throw new Error('Failed to fetch plan details for editing.');
           }
           const planDetails: PlanDetailsDto = await response.json();
           setPlanId(planDetails.id);
@@ -63,12 +63,12 @@ export function useNewPlanForm({
               destination: planDetails.destination,
               start_date: new Date(planDetails.start_date),
               end_date: new Date(planDetails.end_date),
-              notes: planDetails.notes || "",
+              notes: planDetails.notes || '',
             },
             fixedPoints: [], // These will be fetched next
           });
         } catch (err) {
-          setError(err instanceof Error ? err.message : "Could not load plan details");
+          setError(err instanceof Error ? err.message : 'Could not load plan details');
         } finally {
           setIsLoading(false);
         }
@@ -78,7 +78,7 @@ export function useNewPlanForm({
         try {
           const response = await fetch(`/api/plans/${editingPlan.id}/fixed-points`);
           if (!response.ok) {
-            throw new Error("Failed to fetch fixed points");
+            throw new Error('Failed to fetch fixed points');
           }
           const fixedPoints = (await response.json()) as FixedPointDto[];
           // Convert FixedPointDto to CreateFixedPointCommand format (without id/plan_id)
@@ -90,7 +90,7 @@ export function useNewPlanForm({
           }));
           setFormData((prev) => ({ ...prev, fixedPoints: fixedPointCommands }));
         } catch (err) {
-          setError(err instanceof Error ? err.message : "Could not load draft details");
+          setError(err instanceof Error ? err.message : 'Could not load draft details');
         }
       };
 
@@ -103,7 +103,7 @@ export function useNewPlanForm({
     }
   }, [editingPlan]);
 
-  const updateBasicInfo = (data: Partial<NewPlanViewModel["basicInfo"]>) => {
+  const updateBasicInfo = (data: Partial<NewPlanViewModel['basicInfo']>) => {
     setFormData((prev) => ({
       ...prev,
       basicInfo: { ...prev.basicInfo, ...data },
@@ -142,14 +142,14 @@ export function useNewPlanForm({
       };
 
       const response = await fetch(`/api/plans/${planId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updateCommand),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to update plan");
+        throw new Error(errorData.error || 'Failed to update plan');
       }
 
       return planId;
@@ -163,15 +163,15 @@ export function useNewPlanForm({
         notes: formData.basicInfo.notes || null,
       };
 
-      const response = await fetch("/api/plans", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch('/api/plans', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(createCommand),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to create plan");
+        throw new Error(errorData.error || 'Failed to create plan');
       }
 
       const createdPlan: PlanDetailsDto = await response.json();
@@ -193,7 +193,7 @@ export function useNewPlanForm({
         // Delete all existing fixed points
         const deletePromises = existingPoints.map((point) =>
           fetch(`/api/plans/${currentPlanId}/fixed-points/${point.id}`, {
-            method: "DELETE",
+            method: 'DELETE',
           })
         );
         await Promise.all(deletePromises);
@@ -207,17 +207,17 @@ export function useNewPlanForm({
     if (formData.fixedPoints.length > 0) {
       const fixedPointPromises = formData.fixedPoints.map((point) =>
         fetch(`/api/plans/${currentPlanId}/fixed-points`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(point),
         })
       );
 
       const results = await Promise.allSettled(fixedPointPromises);
-      const failedPoints = results.filter((r) => r.status === "rejected");
+      const failedPoints = results.filter((r) => r.status === 'rejected');
 
       if (failedPoints.length > 0) {
-        setError("Some fixed points failed to save.");
+        setError('Some fixed points failed to save.');
       }
     }
   };
@@ -238,7 +238,7 @@ export function useNewPlanForm({
         onFinished();
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An unexpected error occurred");
+      setError(err instanceof Error ? err.message : 'An unexpected error occurred');
     } finally {
       setIsLoading(false);
     }
@@ -272,7 +272,7 @@ export function useNewPlanForm({
 
       // Ensure we have a planId after saving
       if (!currentPlanId) {
-        throw new Error("Failed to save the plan. Please try again.");
+        throw new Error('Failed to save the plan. Please try again.');
       }
 
       // Switch to generating state to show the loading animation
@@ -281,7 +281,7 @@ export function useNewPlanForm({
 
       // Trigger the AI generation
       const generationResponse = await fetch(`/api/plans/${currentPlanId}/generate`, {
-        method: "POST",
+        method: 'POST',
       });
 
       if (!generationResponse.ok) {
@@ -289,7 +289,7 @@ export function useNewPlanForm({
         // Prepend a user-friendly message to the error from the AI
         const message = errorData.error
           ? `The plan could not be generated: ${errorData.error}`
-          : "An unknown error occurred during plan generation.";
+          : 'An unknown error occurred during plan generation.';
         throw new Error(message);
       }
 
@@ -300,7 +300,7 @@ export function useNewPlanForm({
       }
     } catch (err) {
       setIsGenerating(false);
-      setError(err instanceof Error ? err.message : "An unexpected error occurred");
+      setError(err instanceof Error ? err.message : 'An unexpected error occurred');
     } finally {
       setIsLoading(false);
     }

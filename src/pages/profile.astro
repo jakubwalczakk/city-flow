@@ -1,10 +1,10 @@
 ---
-import MainLayout from "@/layouts/MainLayout.astro";
-import { ProfileView } from "@/components/ProfileView";
+import MainLayout from '@/layouts/MainLayout.astro';
+import { ProfileView } from '@/components/ProfileView';
 
 export const prerender = false;
 ---
 
-<MainLayout title="Profil - CityFlow">
+<MainLayout title='Profil - CityFlow'>
   <ProfileView client:load />
 </MainLayout>

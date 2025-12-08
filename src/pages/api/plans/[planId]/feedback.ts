@@ -1,10 +1,10 @@
-import type { APIRoute } from "astro";
-import { DEFAULT_USER_ID } from "@/db/supabase.client";
-import { submitFeedbackSchema } from "@/lib/schemas/feedback.schema";
-import { FeedbackService } from "@/lib/services/feedback.service";
-import { ValidationError, NotFoundError } from "@/lib/errors/app-error";
-import { handleApiError, successResponse } from "@/lib/utils/error-handler";
-import { logger } from "@/lib/utils/logger";
+import type { APIRoute } from 'astro';
+import { DEFAULT_USER_ID } from '@/db/supabase.client';
+import { submitFeedbackSchema } from '@/lib/schemas/feedback.schema';
+import { FeedbackService } from '@/lib/services/feedback.service';
+import { ValidationError, NotFoundError } from '@/lib/errors/app-error';
+import { handleApiError, successResponse } from '@/lib/utils/error-handler';
+import { logger } from '@/lib/utils/logger';
 
 /**
  * GET /api/plans/[planId]/feedback
@@ -20,10 +20,10 @@ export const GET: APIRoute = async ({ params, locals }) => {
     const planId = params.planId;
 
     if (!planId) {
-      throw new ValidationError("Plan ID is required");
+      throw new ValidationError('Plan ID is required');
     }
 
-    logger.debug("Received request to get feedback", {
+    logger.debug('Received request to get feedback', {
       userId: user.id,
       planId,
     });
@@ -36,7 +36,7 @@ export const GET: APIRoute = async ({ params, locals }) => {
     // If feedback doesn't exist yet, return null instead of error
     // This is a normal state for newly generated plans
     if (error instanceof NotFoundError) {
-      logger.debug("No feedback found for plan, returning null", {
+      logger.debug('No feedback found for plan, returning null', {
         userId: DEFAULT_USER_ID,
         planId: params.planId,
       });
@@ -44,7 +44,7 @@ export const GET: APIRoute = async ({ params, locals }) => {
     }
 
     return handleApiError(error, {
-      endpoint: "GET /api/plans/[planId]/feedback",
+      endpoint: 'GET /api/plans/[planId]/feedback',
       userId: DEFAULT_USER_ID,
     });
   }
@@ -64,10 +64,10 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
     const planId = params.planId;
 
     if (!planId) {
-      throw new ValidationError("Plan ID is required");
+      throw new ValidationError('Plan ID is required');
     }
 
-    logger.debug("Received request to submit feedback", {
+    logger.debug('Received request to submit feedback', {
       userId: user.id,
       planId,
     });
@@ -77,20 +77,20 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
     try {
       body = await request.json();
     } catch (parseError) {
-      logger.warn("Failed to parse request body", {
+      logger.warn('Failed to parse request body', {
         error: parseError instanceof Error ? parseError.message : String(parseError),
       });
-      throw new ValidationError("Invalid JSON in request body");
+      throw new ValidationError('Invalid JSON in request body');
     }
 
     // Validate request body
     const validation = submitFeedbackSchema.safeParse(body);
 
     if (!validation.success) {
-      logger.debug("Request validation failed", {
+      logger.debug('Request validation failed', {
         errors: validation.error.flatten(),
       });
-      throw new ValidationError("Validation failed", validation.error.flatten());
+      throw new ValidationError('Validation failed', validation.error.flatten());
     }
 
     // Check if feedback already exists to determine response code
@@ -109,7 +109,7 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
     return successResponse(feedback, isUpdate ? 200 : 201);
   } catch (error) {
     return handleApiError(error, {
-      endpoint: "POST /api/plans/[planId]/feedback",
+      endpoint: 'POST /api/plans/[planId]/feedback',
       userId: DEFAULT_USER_ID,
     });
   }

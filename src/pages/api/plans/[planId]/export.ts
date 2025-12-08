@@ -1,10 +1,10 @@
-import type { APIRoute } from "astro";
-import { DEFAULT_USER_ID } from "@/db/supabase.client";
-import { PlanService } from "@/lib/services/plan.service";
-import { generatePlanPdf } from "@/lib/services/pdf.service";
-import { ValidationError, ConflictError } from "@/lib/errors/app-error";
-import { handleApiError } from "@/lib/utils/error-handler";
-import { logger } from "@/lib/utils/logger";
+import type { APIRoute } from 'astro';
+import { DEFAULT_USER_ID } from '@/db/supabase.client';
+import { PlanService } from '@/lib/services/plan.service';
+import { generatePlanPdf } from '@/lib/services/pdf.service';
+import { ValidationError, ConflictError } from '@/lib/errors/app-error';
+import { handleApiError } from '@/lib/utils/error-handler';
+import { logger } from '@/lib/utils/logger';
 
 /**
  * GET /api/plans/[planId]/export
@@ -26,21 +26,21 @@ export const GET: APIRoute = async ({ params, url, locals }) => {
 
     // Validate plan ID
     if (!planId) {
-      throw new ValidationError("Plan ID is required");
+      throw new ValidationError('Plan ID is required');
     }
 
     // Validate format query parameter
-    const format = url.searchParams.get("format");
+    const format = url.searchParams.get('format');
 
     if (!format) {
       throw new ValidationError("Query parameter 'format' is required");
     }
 
-    if (format !== "pdf") {
+    if (format !== 'pdf') {
       throw new ValidationError("Only 'pdf' format is supported");
     }
 
-    logger.debug("Received request to export plan", {
+    logger.debug('Received request to export plan', {
       userId: user.id,
       planId,
       format,
@@ -51,8 +51,8 @@ export const GET: APIRoute = async ({ params, url, locals }) => {
     const plan = await planService.getPlanById(planId, user.id);
 
     // Validate plan status
-    if (plan.status !== "generated") {
-      logger.warn("Attempt to export non-generated plan", {
+    if (plan.status !== 'generated') {
+      logger.warn('Attempt to export non-generated plan', {
         userId: user.id,
         planId,
         status: plan.status,
@@ -61,19 +61,19 @@ export const GET: APIRoute = async ({ params, url, locals }) => {
     }
 
     // Generate PDF
-    logger.debug("Generating PDF for plan", { planId });
+    logger.debug('Generating PDF for plan', { planId });
     const pdfBuffer = await generatePlanPdf(plan);
 
     // Create sanitized filename from plan name
     const sanitizedName = plan.name
-      .replace(/[^a-z0-9]/gi, "-")
-      .replace(/-+/g, "-")
+      .replace(/[^a-z0-9]/gi, '-')
+      .replace(/-+/g, '-')
       .toLowerCase()
       .substring(0, 50);
 
     const filename = `${sanitizedName}-plan.pdf`;
 
-    logger.info("Plan exported successfully", {
+    logger.info('Plan exported successfully', {
       userId: user.id,
       planId,
       filename,
@@ -85,14 +85,14 @@ export const GET: APIRoute = async ({ params, url, locals }) => {
     return new Response(new Uint8Array(pdfBuffer), {
       status: 200,
       headers: {
-        "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="${filename}"`,
-        "Content-Length": pdfBuffer.length.toString(),
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename="${filename}"`,
+        'Content-Length': pdfBuffer.length.toString(),
       },
     });
   } catch (error) {
     return handleApiError(error, {
-      endpoint: "GET /api/plans/[planId]/export",
+      endpoint: 'GET /api/plans/[planId]/export',
       userId: DEFAULT_USER_ID,
     });
   }

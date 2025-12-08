@@ -238,13 +238,13 @@ curl -X POST http://localhost:4321/api/plans \
 ## Using with JavaScript/TypeScript
 
 ```typescript
-import type { CreatePlanCommand, PlanDetailsDto } from "@/types";
+import type { CreatePlanCommand, PlanDetailsDto } from '@/types';
 
 async function createPlan(plan: CreatePlanCommand): Promise<PlanDetailsDto> {
-  const response = await fetch("/api/plans", {
-    method: "POST",
+  const response = await fetch('/api/plans', {
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify(plan),
   });
@@ -260,15 +260,15 @@ async function createPlan(plan: CreatePlanCommand): Promise<PlanDetailsDto> {
 // Usage
 try {
   const newPlan = await createPlan({
-    name: "Trip to Berlin",
-    destination: "Berlin, Germany",
-    start_date: "2026-03-05T00:00:00.000Z",
-    end_date: "2026-03-08T00:00:00.000Z",
-    notes: "See the Brandenburg Gate and eat currywurst.",
+    name: 'Trip to Berlin',
+    destination: 'Berlin, Germany',
+    start_date: '2026-03-05T00:00:00.000Z',
+    end_date: '2026-03-08T00:00:00.000Z',
+    notes: 'See the Brandenburg Gate and eat currywurst.',
   });
 
-  console.log("Plan created:", newPlan);
+  console.log('Plan created:', newPlan);
 } catch (error) {
-  console.error("Failed to create plan:", error);
+  console.error('Failed to create plan:', error);
 }
 ```

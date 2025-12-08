@@ -1,20 +1,20 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { TravelPaceSelector } from "@/components/TravelPaceSelector";
-import { PreferencesSelector } from "@/components/PreferencesSelector";
-import type { TravelPace, UpdateProfileCommand } from "@/types";
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { TravelPaceSelector } from '@/components/TravelPaceSelector';
+import { PreferencesSelector } from '@/components/PreferencesSelector';
+import type { TravelPace, UpdateProfileCommand } from '@/types';
 
-interface PreferencesFormProps {
+type PreferencesFormProps = {
   initialPreferences: string[] | null;
   initialTravelPace: TravelPace | null;
   onSave: (data: UpdateProfileCommand) => Promise<void>;
   isSaving: boolean;
-}
+};
 
-interface FormErrors {
+type FormErrors = {
   preferences?: string;
   travelPace?: string;
-}
+};
 
 /**
  * Form for editing user preferences: travel pace and tourism tags.
@@ -33,14 +33,14 @@ export function PreferencesForm({ initialPreferences, initialTravelPace, onSave,
 
     // Validate preferences count
     if (preferences.length < 2) {
-      newErrors.preferences = "Wybierz co najmniej 2 preferencje";
+      newErrors.preferences = 'Wybierz co najmniej 2 preferencje';
     } else if (preferences.length > 5) {
-      newErrors.preferences = "Możesz wybrać maksymalnie 5 preferencji";
+      newErrors.preferences = 'Możesz wybrać maksymalnie 5 preferencji';
     }
 
     // Validate travel pace
     if (!travelPace) {
-      newErrors.travelPace = "Wybierz tempo zwiedzania";
+      newErrors.travelPace = 'Wybierz tempo zwiedzania';
     }
 
     setErrors(newErrors);
@@ -79,14 +79,14 @@ export function PreferencesForm({ initialPreferences, initialTravelPace, onSave,
   const isValid = preferences.length >= 2 && preferences.length <= 5 && travelPace !== null;
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className='space-y-6'>
       <TravelPaceSelector value={travelPace} onChange={setTravelPace} />
-      {errors.travelPace && <p className="text-sm text-destructive -mt-2">{errors.travelPace}</p>}
+      {errors.travelPace && <p className='text-sm text-destructive -mt-2'>{errors.travelPace}</p>}
 
       <PreferencesSelector value={preferences} onChange={setPreferences} error={errors.preferences} />
 
-      <Button type="submit" disabled={!isValid || !hasChanges || isSaving} className="w-full sm:w-auto">
-        {isSaving ? "Zapisywanie..." : "Zapisz zmiany"}
+      <Button type='submit' disabled={!isValid || !hasChanges || isSaving} className='w-full sm:w-auto'>
+        {isSaving ? 'Zapisywanie...' : 'Zapisz zmiany'}
       </Button>
     </form>
   );

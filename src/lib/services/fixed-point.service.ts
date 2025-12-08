@@ -1,8 +1,8 @@
-import type { SupabaseClient } from "@/db/supabase.client";
-import type { FixedPointDto, CreateFixedPointCommand, UpdateFixedPointCommand } from "@/types";
-import { DatabaseError, NotFoundError } from "@/lib/errors/app-error";
-import { logger } from "@/lib/utils/logger";
-import { v4 as uuidv4 } from "uuid";
+import type { SupabaseClient } from '@/db/supabase.client';
+import type { FixedPointDto, CreateFixedPointCommand, UpdateFixedPointCommand } from '@/types';
+import { DatabaseError, NotFoundError } from '@/lib/errors/app-error';
+import { logger } from '@/lib/utils/logger';
+import { v4 as uuidv4 } from 'uuid';
 
 /**
  * Service for managing fixed points (e.g., flights, hotel bookings) in travel plans.
@@ -24,14 +24,14 @@ export class FixedPointService {
     command: CreateFixedPointCommand,
     userId: string
   ): Promise<FixedPointDto> {
-    logger.debug("Creating new fixed point", {
+    logger.debug('Creating new fixed point', {
       planId,
       location: command.location,
       userId,
     });
 
     const { data, error } = await this.supabase
-      .from("fixed_points")
+      .from('fixed_points')
       .insert({
         id: uuidv4(),
         plan_id: planId,
@@ -44,16 +44,16 @@ export class FixedPointService {
       .single();
 
     if (error) {
-      logger.error("Failed to create fixed point in database", {
+      logger.error('Failed to create fixed point in database', {
         planId,
         errorCode: error.code,
         errorMessage: error.message,
       });
 
-      throw new DatabaseError("Failed to create a fixed point. Please try again later.", new Error(error.message));
+      throw new DatabaseError('Failed to create a fixed point. Please try again later.', new Error(error.message));
     }
 
-    logger.info("Fixed point created successfully", {
+    logger.info('Fixed point created successfully', {
       fixedPointId: data.id,
       planId,
     });
@@ -69,22 +69,22 @@ export class FixedPointService {
    * @throws {DatabaseError} If the database operation fails
    */
   public async getFixedPointsByPlanId(planId: string): Promise<FixedPointDto[]> {
-    logger.debug("Fetching fixed points for plan", { planId });
+    logger.debug('Fetching fixed points for plan', { planId });
 
     const { data, error } = await this.supabase
-      .from("fixed_points")
-      .select("*")
-      .eq("plan_id", planId)
-      .order("event_at", { ascending: true });
+      .from('fixed_points')
+      .select('*')
+      .eq('plan_id', planId)
+      .order('event_at', { ascending: true });
 
     if (error) {
-      logger.error("Failed to fetch fixed points from database", {
+      logger.error('Failed to fetch fixed points from database', {
         planId,
         errorCode: error.code,
         errorMessage: error.message,
       });
 
-      throw new DatabaseError("Failed to retrieve fixed points. Please try again later.", new Error(error.message));
+      throw new DatabaseError('Failed to retrieve fixed points. Please try again later.', new Error(error.message));
     }
 
     return (data || []) as FixedPointDto[];
@@ -105,9 +105,15 @@ export class FixedPointService {
     fixedPointId: string,
     command: UpdateFixedPointCommand
   ): Promise<FixedPointDto> {
-    logger.debug("Updating fixed point", { fixedPointId, planId });
+    logger.debug('Updating fixed point', { fixedPointId, planId });
 
-    const updates: any = {};
+    const updates: {
+      location?: string;
+      event_at?: string;
+      event_duration?: number;
+      description?: string | null;
+      updated_at?: string;
+    } = {};
     if (command.location !== undefined) updates.location = command.location;
     if (command.event_at !== undefined) updates.event_at = command.event_at;
     if (command.event_duration !== undefined) updates.event_duration = command.event_duration ?? 0;
@@ -115,25 +121,25 @@ export class FixedPointService {
     updates.updated_at = new Date().toISOString();
 
     const { data, error } = await this.supabase
-      .from("fixed_points")
+      .from('fixed_points')
       .update(updates)
-      .eq("id", fixedPointId)
-      .eq("plan_id", planId) // Security check to ensure it belongs to the plan
+      .eq('id', fixedPointId)
+      .eq('plan_id', planId) // Security check to ensure it belongs to the plan
       .select()
       .single();
 
     if (error) {
-      if (error.code === "PGRST116") {
-        throw new NotFoundError("Fixed point not found.");
+      if (error.code === 'PGRST116') {
+        throw new NotFoundError('Fixed point not found.');
       }
 
-      logger.error("Failed to update fixed point", {
+      logger.error('Failed to update fixed point', {
         fixedPointId,
         errorCode: error.code,
         errorMessage: error.message,
       });
 
-      throw new DatabaseError("Failed to update fixed point.", new Error(error.message));
+      throw new DatabaseError('Failed to update fixed point.', new Error(error.message));
     }
 
     return data as FixedPointDto;
@@ -147,22 +153,18 @@ export class FixedPointService {
    * @throws {DatabaseError} If the database operation fails
    */
   public async deleteFixedPoint(planId: string, fixedPointId: string): Promise<void> {
-    logger.debug("Deleting fixed point", { fixedPointId, planId });
+    logger.debug('Deleting fixed point', { fixedPointId, planId });
 
-    const { error } = await this.supabase
-      .from("fixed_points")
-      .delete()
-      .eq("id", fixedPointId)
-      .eq("plan_id", planId);
+    const { error } = await this.supabase.from('fixed_points').delete().eq('id', fixedPointId).eq('plan_id', planId);
 
     if (error) {
-      logger.error("Failed to delete fixed point", {
+      logger.error('Failed to delete fixed point', {
         fixedPointId,
         errorCode: error.code,
         errorMessage: error.message,
       });
 
-      throw new DatabaseError("Failed to delete fixed point.", new Error(error.message));
+      throw new DatabaseError('Failed to delete fixed point.', new Error(error.message));
     }
   }
 }

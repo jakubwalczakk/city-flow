@@ -34,15 +34,15 @@ Provides utilities for handling errors in API endpoints:
 ### In Services
 
 ```typescript
-import { DatabaseError } from "@/lib/errors/app-error";
-import { logger } from "@/lib/utils/logger";
+import { DatabaseError } from '@/lib/errors/app-error';
+import { logger } from '@/lib/utils/logger';
 
 export const createResource = async (data) => {
-  const { data: result, error } = await supabase.from("table").insert(data).select().single();
+  const { data: result, error } = await supabase.from('table').insert(data).select().single();
 
   if (error) {
-    logger.error("Database operation failed", { errorCode: error.code });
-    throw new DatabaseError("Failed to create resource", new Error(error.message));
+    logger.error('Database operation failed', { errorCode: error.code });
+    throw new DatabaseError('Failed to create resource', new Error(error.message));
   }
 
   return result;
@@ -52,15 +52,15 @@ export const createResource = async (data) => {
 ### In API Endpoints
 
 ```typescript
-import { ValidationError } from "@/lib/errors/app-error";
-import { handleApiError, successResponse } from "@/lib/utils/error-handler";
+import { ValidationError } from '@/lib/errors/app-error';
+import { handleApiError, successResponse } from '@/lib/utils/error-handler';
 
 export const POST: APIRoute = async ({ request, locals }) => {
   try {
     // Validate input
     const validation = schema.safeParse(data);
     if (!validation.success) {
-      throw new ValidationError("Validation failed", validation.error.flatten());
+      throw new ValidationError('Validation failed', validation.error.flatten());
     }
 
     // Process request
@@ -71,7 +71,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
   } catch (error) {
     // Handle all errors consistently
     return handleApiError(error, {
-      endpoint: "POST /api/resource",
+      endpoint: 'POST /api/resource',
       userId: user.id,
     });
   }

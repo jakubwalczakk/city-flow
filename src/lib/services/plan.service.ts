@@ -9,11 +9,11 @@ import type {
   UpdateActivityCommand,
   GeneratedContentViewModel,
   TimelineItem,
-} from "@/types";
-import type { SupabaseClient } from "@/db/supabase.client";
-import { DatabaseError, NotFoundError } from "@/lib/errors/app-error";
-import { logger } from "@/lib/utils/logger";
-import { v4 as uuidv4 } from "uuid";
+} from '@/types';
+import type { SupabaseClient } from '@/db/supabase.client';
+import { DatabaseError, NotFoundError } from '@/lib/errors/app-error';
+import { logger } from '@/lib/utils/logger';
+import { v4 as uuidv4 } from 'uuid';
 
 /**
  * Converts a time string to 24-hour format for proper sorting.
@@ -24,7 +24,7 @@ function convertTo24Hour(timeStr: string): string {
 
   // If already in 24-hour format (no AM/PM), return as is
   if (!/am|pm/i.test(time)) {
-    return time.padStart(5, "0"); // Ensure consistent format like "09:00"
+    return time.padStart(5, '0'); // Ensure consistent format like "09:00"
   }
 
   // Parse time with AM/PM
@@ -36,25 +36,25 @@ function convertTo24Hour(timeStr: string): string {
   const period = match[3].toLowerCase();
 
   // Convert to 24-hour format
-  if (period === "pm" && hours !== 12) {
+  if (period === 'pm' && hours !== 12) {
     hours += 12;
-  } else if (period === "am" && hours === 12) {
+  } else if (period === 'am' && hours === 12) {
     hours = 0;
   }
 
-  return `${hours.toString().padStart(2, "0")}:${minutes}`;
+  return `${hours.toString().padStart(2, '0')}:${minutes}`;
 }
 
 /**
  * Parameters for listing plans.
  */
-export interface GetPlansParams {
+export type GetPlansParams = {
   status?: PlanStatus | PlanStatus[];
-  sort_by: "created_at" | "name";
-  order: "asc" | "desc";
+  sort_by: 'created_at' | 'name';
+  order: 'asc' | 'desc';
   limit: number;
   offset: number;
-}
+};
 
 /**
  * Service for managing travel plans.
@@ -71,36 +71,36 @@ export class PlanService {
    * @throws {DatabaseError} If the database operation fails
    */
   public async createPlan(command: CreatePlanCommand, userId: string): Promise<PlanDetailsDto> {
-    logger.debug("Creating new plan", {
+    logger.debug('Creating new plan', {
       userId,
       destination: command.destination,
     });
 
     const { data, error } = await this.supabase
-      .from("plans")
-      .insert({ ...command, user_id: userId, status: "draft" })
+      .from('plans')
+      .insert({ ...command, user_id: userId, status: 'draft' })
       .select()
       .single();
 
     if (error) {
-      logger.error("Failed to create plan in database", {
+      logger.error('Failed to create plan in database', {
         userId,
         errorCode: error.code,
         errorMessage: error.message,
       });
 
-      throw new DatabaseError("Failed to create a plan. Please try again later.", new Error(error.message));
+      throw new DatabaseError('Failed to create a plan. Please try again later.', new Error(error.message));
     }
 
     if (!data.start_date || !data.end_date) {
-      logger.error("Plan created without start_date or end_date", {
+      logger.error('Plan created without start_date or end_date', {
         planId: data.id,
         userId,
       });
-      throw new DatabaseError("Failed to create a plan with complete data.");
+      throw new DatabaseError('Failed to create a plan with complete data.');
     }
 
-    logger.info("Plan created successfully", {
+    logger.info('Plan created successfully', {
       planId: data.id,
       userId,
     });
@@ -117,28 +117,28 @@ export class PlanService {
    * @throws {DatabaseError} If the database operation fails
    */
   public async getPlans(userId: string, params: GetPlansParams): Promise<PaginatedPlansDto> {
-    logger.debug("Fetching plans list", {
+    logger.debug('Fetching plans list', {
       userId,
       params,
     });
 
     // Build the base query
     let query = this.supabase
-      .from("plans")
-      .select("id, name, destination, start_date, end_date, status, created_at", { count: "exact" })
-      .eq("user_id", userId);
+      .from('plans')
+      .select('id, name, destination, start_date, end_date, status, created_at', { count: 'exact' })
+      .eq('user_id', userId);
 
     // Apply status filter if provided
     if (params.status) {
       if (Array.isArray(params.status)) {
-        query = query.in("status", params.status);
+        query = query.in('status', params.status);
       } else {
-        query = query.eq("status", params.status);
+        query = query.eq('status', params.status);
       }
     }
 
     // Apply sorting
-    query = query.order(params.sort_by, { ascending: params.order === "asc" });
+    query = query.order(params.sort_by, { ascending: params.order === 'asc' });
 
     // Apply pagination
     const from = params.offset;
@@ -149,16 +149,16 @@ export class PlanService {
     const { data, error, count } = await query;
 
     if (error) {
-      logger.error("Failed to fetch plans from database", {
+      logger.error('Failed to fetch plans from database', {
         userId,
         errorCode: error.code,
         errorMessage: error.message,
       });
 
-      throw new DatabaseError("Failed to retrieve plans. Please try again later.", new Error(error.message));
+      throw new DatabaseError('Failed to retrieve plans. Please try again later.', new Error(error.message));
     }
 
-    logger.info("Plans fetched successfully", {
+    logger.info('Plans fetched successfully', {
       userId,
       count: data?.length ?? 0,
       total: count ?? 0,
@@ -166,11 +166,11 @@ export class PlanService {
 
     const validatedData = (data ?? []).map((plan) => {
       if (!plan.start_date || !plan.end_date) {
-        logger.error("A plan in the list is missing start_date or end_date", {
+        logger.error('A plan in the list is missing start_date or end_date', {
           planId: plan.id,
           userId,
         });
-        throw new DatabaseError("Inconsistent plan data received.");
+        throw new DatabaseError('Inconsistent plan data received.');
       }
       return plan as PlanListItemDto;
     });
@@ -195,48 +195,48 @@ export class PlanService {
    * @throws {DatabaseError} If the database operation fails
    */
   public async getPlanById(planId: string, userId: string): Promise<PlanDetailsDto> {
-    logger.debug("Fetching plan by ID", {
+    logger.debug('Fetching plan by ID', {
       planId,
       userId,
     });
 
     const { data, error } = await this.supabase
-      .from("plans")
-      .select("*")
-      .eq("id", planId)
-      .eq("user_id", userId)
+      .from('plans')
+      .select('*')
+      .eq('id', planId)
+      .eq('user_id', userId)
       .single();
 
     if (error) {
-      if (error.code === "PGRST116") {
-        logger.warn("Plan not found", {
+      if (error.code === 'PGRST116') {
+        logger.warn('Plan not found', {
           planId,
           userId,
         });
-        throw new NotFoundError("Plan not found.");
+        throw new NotFoundError('Plan not found.');
       }
 
-      logger.error("Failed to fetch plan from database", {
+      logger.error('Failed to fetch plan from database', {
         planId,
         userId,
         errorCode: error.code,
         errorMessage: error.message,
       });
 
-      throw new DatabaseError("Failed to retrieve plan. Please try again later.", new Error(error.message));
+      throw new DatabaseError('Failed to retrieve plan. Please try again later.', new Error(error.message));
     }
 
-    logger.info("Plan fetched successfully", {
+    logger.info('Plan fetched successfully', {
       planId,
       userId,
     });
 
     if (!data.start_date || !data.end_date) {
-      logger.error("Plan from database is missing start_date or end_date", {
+      logger.error('Plan from database is missing start_date or end_date', {
         planId: data.id,
         userId,
       });
-      throw new DatabaseError("Incomplete plan data received from the database.");
+      throw new DatabaseError('Incomplete plan data received from the database.');
     }
 
     return data as PlanDetailsDto;
@@ -252,43 +252,38 @@ export class PlanService {
    * @throws {DatabaseError} If the database operation fails
    */
   public async updatePlan(planId: string, command: UpdatePlanCommand): Promise<PlanDetailsDto> {
-    logger.debug("Updating plan", {
+    logger.debug('Updating plan', {
       planId,
     });
 
-    const { data, error } = await this.supabase
-      .from("plans")
-      .update(command)
-      .eq("id", planId)
-      .select()
-      .single();
+    const { data, error } = await this.supabase.from('plans').update(command).eq('id', planId).select().single();
 
     if (error) {
-      if (error.code === "PGRST116") {
-        logger.warn("Plan not found during update", {
+      if (error.code === 'PGRST116') {
+        logger.warn('Plan not found during update', {
           planId,
         });
-        throw new NotFoundError("Plan not found.");
+        throw new NotFoundError('Plan not found.');
       }
 
-      logger.error("Failed to update plan in database", {
+      logger.error('Failed to update plan in database', {
         planId,
         errorCode: error.code,
         errorMessage: error.message,
       });
 
-      throw new DatabaseError("Failed to update plan. Please try again later.", new Error(error.message));
+      throw new DatabaseError('Failed to update plan. Please try again later.', new Error(error.message));
     }
 
-    logger.info("Plan updated successfully", {
+    logger.info('Plan updated successfully', {
       planId,
     });
 
     if (!data.start_date || !data.end_date) {
-      logger.error("Plan updated without start_date or end_date", {
+      logger.error('Plan updated without start_date or end_date', {
         planId: data.id,
       });
-      throw new DatabaseError("Failed to update a plan with complete data.");
+      throw new DatabaseError('Failed to update a plan with complete data.');
     }
 
     return data as PlanDetailsDto;
@@ -303,7 +298,7 @@ export class PlanService {
    * @throws {DatabaseError} If the database operation fails
    */
   public async deletePlan(planId: string, userId: string): Promise<void> {
-    logger.debug("Deleting plan", {
+    logger.debug('Deleting plan', {
       planId,
       userId,
     });
@@ -311,24 +306,20 @@ export class PlanService {
     // First, verify the plan exists and belongs to the user
     await this.getPlanById(planId, userId);
 
-    const { error } = await this.supabase
-      .from("plans")
-      .delete()
-      .eq("id", planId)
-      .eq("user_id", userId);
+    const { error } = await this.supabase.from('plans').delete().eq('id', planId).eq('user_id', userId);
 
     if (error) {
-      logger.error("Failed to delete plan from database", {
+      logger.error('Failed to delete plan from database', {
         planId,
         userId,
         errorCode: error.code,
         errorMessage: error.message,
       });
 
-      throw new DatabaseError("Failed to delete plan. Please try again later.", new Error(error.message));
+      throw new DatabaseError('Failed to delete plan. Please try again later.', new Error(error.message));
     }
 
-    logger.info("Plan deleted successfully", {
+    logger.info('Plan deleted successfully', {
       planId,
       userId,
     });
@@ -351,7 +342,7 @@ export class PlanService {
     command: AddActivityCommand,
     userId: string
   ): Promise<PlanDetailsDto> {
-    logger.debug("Adding activity to plan day", {
+    logger.debug('Adding activity to plan day', {
       planId,
       date,
       userId,
@@ -360,15 +351,15 @@ export class PlanService {
     // First, fetch the current plan
     const plan = await this.getPlanById(planId, userId);
 
-    if (plan.status !== "generated") {
-      throw new DatabaseError("Can only add activities to generated plans.");
+    if (plan.status !== 'generated') {
+      throw new DatabaseError('Can only add activities to generated plans.');
     }
 
     // Parse the generated_content
     const generatedContent = plan.generated_content as GeneratedContentViewModel | null;
 
     if (!generatedContent || !generatedContent.days) {
-      throw new DatabaseError("Plan does not have valid generated content.");
+      throw new DatabaseError('Plan does not have valid generated content.');
     }
 
     // Find the day to add the activity to
@@ -380,7 +371,7 @@ export class PlanService {
 
     // Create the new activity with a unique ID
     // Map category to type for database validation
-    const type = command.category === "food" ? "meal" : command.category === "transport" ? "transport" : "activity";
+    const type = command.category === 'food' ? 'meal' : command.category === 'transport' ? 'transport' : 'activity';
 
     const newActivity: TimelineItem = {
       id: uuidv4(),
@@ -420,10 +411,10 @@ export class PlanService {
     };
 
     const updatedPlan = await this.updatePlan(planId, {
-      generated_content: updatedContent as unknown as UpdatePlanCommand["generated_content"],
+      generated_content: updatedContent as unknown as UpdatePlanCommand['generated_content'],
     });
 
-    logger.info("Activity added to plan day successfully", {
+    logger.info('Activity added to plan day successfully', {
       planId,
       date,
       activityId: newActivity.id,
@@ -452,7 +443,7 @@ export class PlanService {
     command: UpdateActivityCommand,
     userId: string
   ): Promise<PlanDetailsDto> {
-    logger.debug("Updating activity in plan day", {
+    logger.debug('Updating activity in plan day', {
       planId,
       date,
       itemId,
@@ -462,15 +453,15 @@ export class PlanService {
     // First, fetch the current plan
     const plan = await this.getPlanById(planId, userId);
 
-    if (plan.status !== "generated") {
-      throw new DatabaseError("Can only update activities in generated plans.");
+    if (plan.status !== 'generated') {
+      throw new DatabaseError('Can only update activities in generated plans.');
     }
 
     // Parse the generated_content
     const generatedContent = plan.generated_content as GeneratedContentViewModel | null;
 
     if (!generatedContent || !generatedContent.days) {
-      throw new DatabaseError("Plan does not have valid generated content.");
+      throw new DatabaseError('Plan does not have valid generated content.');
     }
 
     // Find the day containing the activity
@@ -504,7 +495,7 @@ export class PlanService {
 
     // Update type if category changed
     if (command.category !== undefined) {
-      updates.type = command.category === "food" ? "meal" : command.category === "transport" ? "transport" : "activity";
+      updates.type = command.category === 'food' ? 'meal' : command.category === 'transport' ? 'transport' : 'activity';
     }
 
     updatedDays[dayIndex].items[itemIndex] = {
@@ -533,10 +524,10 @@ export class PlanService {
     };
 
     const updatedPlan = await this.updatePlan(planId, {
-      generated_content: updatedContent as unknown as UpdatePlanCommand["generated_content"],
+      generated_content: updatedContent as unknown as UpdatePlanCommand['generated_content'],
     });
 
-    logger.info("Activity updated in plan day successfully", {
+    logger.info('Activity updated in plan day successfully', {
       planId,
       date,
       itemId,
@@ -563,7 +554,7 @@ export class PlanService {
     itemId: string,
     userId: string
   ): Promise<PlanDetailsDto> {
-    logger.debug("Deleting activity from plan day", {
+    logger.debug('Deleting activity from plan day', {
       planId,
       date,
       itemId,
@@ -573,15 +564,15 @@ export class PlanService {
     // First, fetch the current plan
     const plan = await this.getPlanById(planId, userId);
 
-    if (plan.status !== "generated") {
-      throw new DatabaseError("Can only delete activities from generated plans.");
+    if (plan.status !== 'generated') {
+      throw new DatabaseError('Can only delete activities from generated plans.');
     }
 
     // Parse the generated_content
     const generatedContent = plan.generated_content as GeneratedContentViewModel | null;
 
     if (!generatedContent || !generatedContent.days) {
-      throw new DatabaseError("Plan does not have valid generated content.");
+      throw new DatabaseError('Plan does not have valid generated content.');
     }
 
     // Find the day containing the activity
@@ -612,10 +603,10 @@ export class PlanService {
     };
 
     const updatedPlan = await this.updatePlan(planId, {
-      generated_content: updatedContent as unknown as UpdatePlanCommand["generated_content"],
+      generated_content: updatedContent as unknown as UpdatePlanCommand['generated_content'],
     });
 
-    logger.info("Activity deleted from plan day successfully", {
+    logger.info('Activity deleted from plan day successfully', {
       planId,
       date,
       itemId,

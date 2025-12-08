@@ -1,18 +1,18 @@
 ---
-import MainLayout from "@/layouts/MainLayout.astro";
-import PlanDetailsView from "@/components/PlanDetailsView";
+import MainLayout from '@/layouts/MainLayout.astro';
+import PlanDetailsView from '@/components/PlanDetailsView';
 
 // Get the plan ID from the URL params
 const { id } = Astro.params;
 
 // Validate that we have an ID
 if (!id) {
-  return Astro.redirect("/plans");
+  return Astro.redirect('/plans');
 }
 ---
 
-<MainLayout title="Plan Details - CityFlow">
-  <div class="container mx-auto px-4 py-8 max-w-5xl">
+<MainLayout title='Plan Details - CityFlow'>
+  <div class='container mx-auto px-4 py-8 max-w-5xl'>
     <PlanDetailsView planId={id} client:load />
   </div>
 </MainLayout>

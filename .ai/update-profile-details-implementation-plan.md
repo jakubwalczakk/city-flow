@@ -30,15 +30,15 @@ Ten punkt końcowy umożliwia zautentyfikowanemu użytkownikowi aktualizację je
 - **Schemat Walidacji (Zod)**: Nowy schemat `updateProfileSchema` zostanie utworzony w `src/lib/schemas/profile.schema.ts` w celu walidacji ciała żądania.
 
   ```typescript
-  import { z } from "zod";
+  import { z } from 'zod';
 
   export const updateProfileSchema = z.object({
     preferences: z
       .array(z.string())
-      .min(2, "Must have at least 2 items.")
-      .max(5, "Must have at most 5 items.")
+      .min(2, 'Must have at least 2 items.')
+      .max(5, 'Must have at most 5 items.')
       .optional(),
-    travel_pace: z.enum(["slow", "moderate", "intensive"]).optional(),
+    travel_pace: z.enum(['slow', 'moderate', 'intensive']).optional(),
     onboarding_completed: z.boolean().optional(),
   });
   ```

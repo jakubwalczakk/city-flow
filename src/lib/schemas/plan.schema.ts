@@ -1,21 +1,21 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 /**
  * Base schema for a plan. This is the source of truth for the plan's shape.
  */
 export const planSchema = z.object({
-  name: z.string({ required_error: "Name is required." }).min(1, {
-    message: "Name cannot be empty.",
+  name: z.string({ required_error: 'Name is required.' }).min(1, {
+    message: 'Name cannot be empty.',
   }),
   destination: z
-    .string({ required_error: "Destination is required." })
-    .min(1, { message: "Destination cannot be empty." }),
+    .string({ required_error: 'Destination is required.' })
+    .min(1, { message: 'Destination cannot be empty.' }),
   start_date: z
-    .string({ required_error: "Start date is required." })
-    .datetime({ message: "Start date must be a valid datetime." }),
+    .string({ required_error: 'Start date is required.' })
+    .datetime({ message: 'Start date must be a valid datetime.' }),
   end_date: z
-    .string({ required_error: "End date is required." })
-    .datetime({ message: "End date must be a valid datetime." }),
+    .string({ required_error: 'End date is required.' })
+    .datetime({ message: 'End date must be a valid datetime.' }),
   notes: z.string().optional().nullable(),
 });
 
@@ -30,8 +30,8 @@ export const createPlanSchema = planSchema.refine(
     return new Date(data.end_date) >= new Date(data.start_date);
   },
   {
-    message: "End date must be equal to or after start date.",
-    path: ["end_date"],
+    message: 'End date must be equal to or after start date.',
+    path: ['end_date'],
   }
 );
 
@@ -48,28 +48,28 @@ export const listPlansQuerySchema = z.object({
       if (!val) return undefined;
 
       // If it's a string with commas, split it
-      if (typeof val === "string" && val.includes(",")) {
-        return val.split(",").map((s) => s.trim());
+      if (typeof val === 'string' && val.includes(',')) {
+        return val.split(',').map((s) => s.trim());
       }
 
       // Otherwise return as-is (single value as array)
-      if (typeof val === "string") {
+      if (typeof val === 'string') {
         return [val];
       }
 
       return val;
     },
-    z.array(z.enum(["draft", "generated", "archived"])).optional()
+    z.array(z.enum(['draft', 'generated', 'archived'])).optional()
   ),
-  sort_by: z.enum(["created_at", "name"]).default("created_at"),
-  order: z.enum(["asc", "desc"]).default("desc"),
+  sort_by: z.enum(['created_at', 'name']).default('created_at'),
+  order: z.enum(['asc', 'desc']).default('desc'),
   limit: z.coerce
     .number()
     .int()
-    .min(1, { message: "Limit must be at least 1." })
-    .max(100, { message: "Limit cannot exceed 100." })
+    .min(1, { message: 'Limit must be at least 1.' })
+    .max(100, { message: 'Limit cannot exceed 100.' })
     .default(20),
-  offset: z.coerce.number().int().min(0, { message: "Offset must be non-negative." }).default(0),
+  offset: z.coerce.number().int().min(0, { message: 'Offset must be non-negative.' }).default(0),
 });
 
 /**
@@ -79,10 +79,10 @@ export const listPlansQuerySchema = z.object({
  */
 export const basicInfoSchema = z
   .object({
-    name: z.string().min(1, "Plan name is required"),
-    destination: z.string().min(1, "Destination is required"),
-    start_date: z.date({ required_error: "Start date is required" }),
-    end_date: z.date({ required_error: "End date is required" }),
+    name: z.string().min(1, 'Plan name is required'),
+    destination: z.string().min(1, 'Destination is required'),
+    start_date: z.date({ required_error: 'Start date is required' }),
+    end_date: z.date({ required_error: 'End date is required' }),
     notes: z.string(),
   })
   .refine(
@@ -90,8 +90,8 @@ export const basicInfoSchema = z
       return data.end_date >= data.start_date;
     },
     {
-      message: "End date must be after or equal to start date",
-      path: ["end_date"],
+      message: 'End date must be after or equal to start date',
+      path: ['end_date'],
     }
   );
 
@@ -99,9 +99,9 @@ export const basicInfoSchema = z
  * Schema for validating fixed point form (client-side).
  */
 export const fixedPointSchema = z.object({
-  location: z.string().min(1, "Location is required"),
-  event_at: z.string().min(1, "Date and time is required"),
-  event_duration: z.number().positive("Duration must be a positive number.").nullable().optional(),
+  location: z.string().min(1, 'Location is required'),
+  event_at: z.string().min(1, 'Date and time is required'),
+  event_duration: z.number().positive('Duration must be a positive number.').nullable().optional(),
   description: z.string().nullable().optional(),
 });
 
@@ -111,9 +111,9 @@ export const fixedPointSchema = z.object({
  */
 export const updatePlanSchema = z
   .object({
-    name: z.string().min(1, "Name cannot be empty.").optional(),
-    start_date: z.string().datetime({ message: "Start date must be a valid datetime." }).optional(),
-    end_date: z.string().datetime({ message: "End date must be a valid datetime." }).optional(),
+    name: z.string().min(1, 'Name cannot be empty.').optional(),
+    start_date: z.string().datetime({ message: 'Start date must be a valid datetime.' }).optional(),
+    end_date: z.string().datetime({ message: 'End date must be a valid datetime.' }).optional(),
     notes: z.string().optional().nullable(),
   })
   .refine(
@@ -125,8 +125,8 @@ export const updatePlanSchema = z
       return true;
     },
     {
-      message: "End date must be equal to or after start date.",
-      path: ["end_date"],
+      message: 'End date must be equal to or after start date.',
+      path: ['end_date'],
     }
   );
 

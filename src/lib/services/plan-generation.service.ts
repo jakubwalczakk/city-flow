@@ -1,21 +1,21 @@
-import { z } from "zod";
-import { OpenRouterService } from "./openrouter.service";
-import { AppError, ExternalServiceError, ForbiddenError, ConflictError } from "@/lib/errors/app-error";
-import { logger } from "@/lib/utils/logger";
-import type { PlanDetailsDto, FixedPointDto, UpdatePlanCommand } from "@/types";
-import { PlanService } from "./plan.service";
-import { FixedPointService } from "./fixed-point.service";
-import { ProfileService } from "./profile.service";
-import type { SupabaseClient } from "@/db/supabase.client";
+import { z } from 'zod';
+import { OpenRouterService } from './openrouter.service';
+import { AppError, ExternalServiceError, ForbiddenError, ConflictError } from '@/lib/errors/app-error';
+import { logger } from '@/lib/utils/logger';
+import type { PlanDetailsDto, FixedPointDto, UpdatePlanCommand } from '@/types';
+import { PlanService } from './plan.service';
+import { FixedPointService } from './fixed-point.service';
+import { ProfileService } from './profile.service';
+import type { SupabaseClient } from '@/db/supabase.client';
 
 // Define the schema for the AI's structured response
 const aiTimelineEventSchema = z.object({
-  time: z.string().describe("The time of the event in 24-hour HH:mm format (e.g., 18:00, not 6:00 PM)."),
-  activity: z.string().describe("A short, descriptive title for the activity."),
+  time: z.string().describe('The time of the event in 24-hour HH:mm format (e.g., 18:00, not 6:00 PM).'),
+  activity: z.string().describe('A short, descriptive title for the activity.'),
   category: z
-    .enum(["history", "food", "sport", "nature", "culture", "transport", "accommodation", "other"])
-    .describe("The category of the activity."),
-  description: z.string().describe("A detailed description of the activity."),
+    .enum(['history', 'food', 'sport', 'nature', 'culture', 'transport', 'accommodation', 'other'])
+    .describe('The category of the activity.'),
+  description: z.string().describe('A detailed description of the activity.'),
   estimated_price: z
     .string()
     .nullable()
@@ -28,13 +28,13 @@ const aiTimelineEventSchema = z.object({
 
 const aiDayPlanSchema = z.object({
   date: z.string().describe("The date for this day's plan in YYYY-MM-DD format."),
-  activities: z.array(aiTimelineEventSchema).describe("An array of activities for the day."),
+  activities: z.array(aiTimelineEventSchema).describe('An array of activities for the day.'),
 });
 
 // Schema for a successful plan generation
 const aiSuccessResponseSchema = z.object({
-  status: z.literal("success"),
-  summary: z.string().describe("A brief, engaging summary of the entire trip, highlighting the key experiences."),
+  status: z.literal('success'),
+  summary: z.string().describe('A brief, engaging summary of the entire trip, highlighting the key experiences.'),
   currency: z
     .string()
     .length(3)
@@ -45,19 +45,19 @@ const aiSuccessResponseSchema = z.object({
       start: z.string(),
       end: z.string(),
     }),
-    days: z.array(aiDayPlanSchema).describe("An array of daily plans, one for each day of the trip."),
+    days: z.array(aiDayPlanSchema).describe('An array of daily plans, one for each day of the trip.'),
   }),
 });
 
 // Schema for when the AI detects an error in the user's request
 const aiErrorResponseSchema = z.object({
-  status: z.literal("error"),
-  error_type: z.enum(["unrealistic_plan", "invalid_location"]).describe("The type of error detected."),
-  error_message: z.string().describe("A user-friendly message explaining the error."),
+  status: z.literal('error'),
+  error_type: z.enum(['unrealistic_plan', 'invalid_location']).describe('The type of error detected.'),
+  error_message: z.string().describe('A user-friendly message explaining the error.'),
 });
 
 // Discriminated union to handle both success and error cases
-const aiGeneratedContentSchema = z.discriminatedUnion("status", [aiSuccessResponseSchema, aiErrorResponseSchema]);
+const aiGeneratedContentSchema = z.discriminatedUnion('status', [aiSuccessResponseSchema, aiErrorResponseSchema]);
 
 export type AIGeneratedContent = z.infer<typeof aiGeneratedContentSchema>;
 
@@ -76,7 +76,7 @@ export class PlanGenerationService {
     apiKey: string
   ) {
     if (!apiKey) {
-      throw new Error("OpenRouter API key is required for PlanGenerationService.");
+      throw new Error('OpenRouter API key is required for PlanGenerationService.');
     }
     this.openRouterService = new OpenRouterService({ apiKey });
     this.planService = new PlanService(supabase);
@@ -98,28 +98,24 @@ export class PlanGenerationService {
    * @param language - The language for the generated content (default: Polish)
    * @returns The updated plan details
    */
-  public async generateAndSavePlan(
-    planId: string,
-    userId: string,
-    language: string = "Polish"
-  ): Promise<PlanDetailsDto> {
-    logger.debug("Starting plan generation workflow", { planId, userId });
+  public async generateAndSavePlan(planId: string, userId: string, language = 'Polish'): Promise<PlanDetailsDto> {
+    logger.debug('Starting plan generation workflow', { planId, userId });
 
     // 1. User Credit Check
     const hasCredits = await this.profileService.hasGenerationsRemaining(userId);
     if (!hasCredits) {
-      throw new ForbiddenError("You have no plan generations remaining.");
+      throw new ForbiddenError('You have no plan generations remaining.');
     }
 
     // 2. Fetch Plan Data
     const plan = await this.planService.getPlanById(planId, userId);
-    if (plan.status !== "draft") {
-      throw new ConflictError("This plan has already been generated.");
+    if (plan.status !== 'draft') {
+      throw new ConflictError('This plan has already been generated.');
     }
 
     // Validate that required dates are present
     if (!plan.start_date || !plan.end_date) {
-      throw new AppError("Plan must have both start date and end date to generate.", 400);
+      throw new AppError('Plan must have both start date and end date to generate.', 400);
     }
 
     // 3. Fetch Fixed Points
@@ -130,17 +126,20 @@ export class PlanGenerationService {
 
     // 5. Update Database (Decrement Credits & Save Plan)
     // Note: Ideally this would be a transaction.
-    
+
     try {
       await this.profileService.decrementGenerations(userId);
     } catch (error) {
       // If decrement fails, we stop here.
-      throw new ExternalServiceError("Failed to update user credits.", error instanceof Error ? error : new Error(String(error)));
+      throw new ExternalServiceError(
+        'Failed to update user credits.',
+        error instanceof Error ? error : new Error(String(error))
+      );
     }
 
     try {
       const updatedPlan = await this.planService.updatePlan(planId, {
-        status: "generated",
+        status: 'generated',
         generated_content: generatedContent,
       });
 
@@ -149,8 +148,11 @@ export class PlanGenerationService {
     } catch (error) {
       // If plan update fails, we should ideally refund the credit (manual compensation)
       // For now, we log the critical error.
-      logger.error("CRITICAL: Credits deducted but plan update failed", { planId, userId, error });
-      throw new ExternalServiceError("Failed to save generated plan.", error instanceof Error ? error : new Error(String(error)));
+      logger.error('CRITICAL: Credits deducted but plan update failed', { planId, userId, error });
+      throw new ExternalServiceError(
+        'Failed to save generated plan.',
+        error instanceof Error ? error : new Error(String(error))
+      );
     }
   }
 
@@ -165,9 +167,9 @@ export class PlanGenerationService {
   public async generatePlanContent(
     plan: PlanDetailsDto,
     fixedPoints: FixedPointDto[],
-    language: string = "Polish"
-  ): Promise<UpdatePlanCommand["generated_content"]> {
-    logger.debug("Generating plan content", { planId: plan.id, destination: plan.destination });
+    language = 'Polish'
+  ): Promise<UpdatePlanCommand['generated_content']> {
+    logger.debug('Generating plan content', { planId: plan.id, destination: plan.destination });
 
     // 1. Construct the Prompts
     const systemPrompt = this.buildSystemPrompt(plan, fixedPoints, language);
@@ -183,8 +185,8 @@ Please generate the travel plan now based on the provided details. Ensure the ou
     });
 
     // 3. Handle AI Response
-    if (generatedContent.status === "error") {
-      logger.warn("AI returned error for plan generation", {
+    if (generatedContent.status === 'error') {
+      logger.warn('AI returned error for plan generation', {
         planId: plan.id,
         errorType: generatedContent.error_type,
         errorMessage: generatedContent.error_message,
@@ -205,10 +207,10 @@ Please generate the travel plan now based on the provided details. Ensure the ou
         ? fixedPoints
             .map(
               (fp) =>
-                `- ${new Date(fp.event_at).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short", hour12: false })}: ${fp.location} - ${fp.description || "No description"}`
+                `- ${new Date(fp.event_at).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short', hour12: false })}: ${fp.location} - ${fp.description || 'No description'}`
             )
-            .join("\n")
-        : "No fixed points scheduled.";
+            .join('\n')
+        : 'No fixed points scheduled.';
 
     return `
 You are an expert travel planner AI. Your task is to generate a detailed, structured travel itinerary based on the user's plan details.
@@ -265,9 +267,9 @@ The response MUST be a single JSON object and nothing else. Do not include any i
 
 Key requirements for the plan:
 - Destination: ${plan.destination}
-- Start Date & Time: ${new Date(plan.start_date).toLocaleString("en-US", { dateStyle: "full", timeStyle: "short", hour12: false })}
-- End Date & Time: ${new Date(plan.end_date).toLocaleString("en-US", { dateStyle: "full", timeStyle: "short", hour12: false })}
-- User Notes: ${plan.notes || "No special notes provided."}
+- Start Date & Time: ${new Date(plan.start_date).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short', hour12: false })}
+- End Date & Time: ${new Date(plan.end_date).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short', hour12: false })}
+- User Notes: ${plan.notes || 'No special notes provided.'}
 - Fixed Points: The user has scheduled the following non-negotiable events. You MUST incorporate them into the plan at the specified times.
 ${fixedPointsText}
 
@@ -278,7 +280,9 @@ Generate a plan that is logical, engaging, and takes into account travel times b
   /**
    * Transforms the AI response into the format expected by the database.
    */
-  private transformToDbFormat(generatedContent: z.infer<typeof aiSuccessResponseSchema>): UpdatePlanCommand["generated_content"] {
+  private transformToDbFormat(
+    generatedContent: z.infer<typeof aiSuccessResponseSchema>
+  ): UpdatePlanCommand['generated_content'] {
     return {
       summary: generatedContent.summary,
       currency: generatedContent.currency,
@@ -288,7 +292,7 @@ Generate a plan that is logical, engaging, and takes into account travel times b
         items: day.activities.map((activity) => {
           // Map category to type for database validation
           const type =
-            activity.category === "food" ? "meal" : activity.category === "transport" ? "transport" : "activity";
+            activity.category === 'food' ? 'meal' : activity.category === 'transport' ? 'transport' : 'activity';
 
           return {
             // Add required fields for the DB check constraint

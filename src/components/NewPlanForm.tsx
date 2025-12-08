@@ -1,13 +1,13 @@
-import { useNewPlanForm } from "@/hooks/useNewPlanForm";
-import { StepIndicator } from "@/components/StepIndicator";
-import { BasicInfoStep } from "@/components/BasicInfoStep";
-import { FixedPointsStep } from "@/components/FixedPointsStep";
-import { SummaryStep } from "@/components/SummaryStep";
-import { Card, CardContent } from "@/components/ui/card";
-import { PlanGenerationLoading } from "@/components/PlanGenerationLoading";
-import type { PlanListItemDto } from "@/types";
+import { useNewPlanForm } from '@/hooks/useNewPlanForm';
+import { StepIndicator } from '@/components/StepIndicator';
+import { BasicInfoStep } from '@/components/BasicInfoStep';
+import { FixedPointsStep } from '@/components/FixedPointsStep';
+import { SummaryStep } from '@/components/SummaryStep';
+import { Card, CardContent } from '@/components/ui/card';
+import { PlanGenerationLoading } from '@/components/PlanGenerationLoading';
+import type { PlanListItemDto } from '@/types';
 
-const STEPS = ["Basic Info", "Fixed Points", "Review"];
+const STEPS = ['Basic Info', 'Fixed Points', 'Review'];
 
 export default function NewPlanForm({
   onFinished,
@@ -33,7 +33,7 @@ export default function NewPlanForm({
   } = useNewPlanForm({ onFinished, editingPlan });
 
   return (
-    <div className="w-full">
+    <div className='w-full'>
       {/* Show loading animation when generating */}
       {isGenerating ? (
         <PlanGenerationLoading planName={formData.basicInfo.name || `${formData.basicInfo.destination} trip`} />
@@ -42,7 +42,7 @@ export default function NewPlanForm({
           <StepIndicator currentStep={currentStep} steps={STEPS} />
 
           <Card>
-            <CardContent className="pt-6">
+            <CardContent className='pt-6'>
               {currentStep === 1 && (
                 <BasicInfoStep
                   formData={formData.basicInfo}

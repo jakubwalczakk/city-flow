@@ -1,16 +1,16 @@
 /// <reference types="astro/client" />
 
 declare namespace App {
-  interface Locals {
-    supabase: ReturnType<typeof import("./db/supabase.client").createSupabaseServerInstance>;
+  type Locals = {
+    supabase: ReturnType<typeof import('./db/supabase.client').createSupabaseServerInstance>;
     user?: {
       id: string;
       email: string;
     };
-  }
+  };
 }
 
-interface ImportMetaEnv {
+type ImportMetaEnv = {
   // Server-only variables
   readonly SUPABASE_URL: string;
   readonly SUPABASE_KEY: string;
@@ -20,8 +20,8 @@ interface ImportMetaEnv {
   readonly PUBLIC_SUPABASE_URL: string;
   readonly PUBLIC_SUPABASE_KEY: string;
   // more env variables...
-}
+};
 
-interface ImportMeta {
+type ImportMeta = {
   readonly env: ImportMetaEnv;
-}
+};

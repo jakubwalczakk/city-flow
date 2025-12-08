@@ -1,10 +1,10 @@
-import type { APIRoute } from "astro";
-import { DEFAULT_USER_ID } from "@/db/supabase.client";
-import { updateFixedPointSchema } from "@/lib/schemas/fixed-point.schema";
-import { FixedPointService } from "@/lib/services/fixed-point.service";
-import { ValidationError } from "@/lib/errors/app-error";
-import { handleApiError, successResponse } from "@/lib/utils/error-handler";
-import { logger } from "@/lib/utils/logger";
+import type { APIRoute } from 'astro';
+import { DEFAULT_USER_ID } from '@/db/supabase.client';
+import { updateFixedPointSchema } from '@/lib/schemas/fixed-point.schema';
+import { FixedPointService } from '@/lib/services/fixed-point.service';
+import { ValidationError } from '@/lib/errors/app-error';
+import { handleApiError, successResponse } from '@/lib/utils/error-handler';
+import { logger } from '@/lib/utils/logger';
 
 /**
  * PATCH /api/plans/{planId}/fixed-points/{id}
@@ -20,10 +20,10 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
     const { planId, id } = params;
 
     if (!planId || !id) {
-      throw new ValidationError("Plan ID and Fixed Point ID are required");
+      throw new ValidationError('Plan ID and Fixed Point ID are required');
     }
 
-    logger.debug("Received request to update fixed point", {
+    logger.debug('Received request to update fixed point', {
       userId: user.id,
       planId,
       fixedPointId: id,
@@ -34,20 +34,20 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
     try {
       body = await request.json();
     } catch (parseError) {
-      logger.warn("Failed to parse request body", {
+      logger.warn('Failed to parse request body', {
         error: parseError instanceof Error ? parseError.message : String(parseError),
       });
-      throw new ValidationError("Invalid JSON in request body");
+      throw new ValidationError('Invalid JSON in request body');
     }
 
     // Validate request body
     const validation = updateFixedPointSchema.safeParse(body);
 
     if (!validation.success) {
-      logger.debug("Request validation failed", {
+      logger.debug('Request validation failed', {
         errors: validation.error.flatten(),
       });
-      throw new ValidationError("Validation failed", validation.error.flatten());
+      throw new ValidationError('Validation failed', validation.error.flatten());
     }
 
     // Update the fixed point
@@ -57,7 +57,7 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
     return successResponse(fixedPoint, 200);
   } catch (error) {
     return handleApiError(error, {
-      endpoint: "PATCH /api/plans/{planId}/fixed-points/{id}",
+      endpoint: 'PATCH /api/plans/{planId}/fixed-points/{id}',
       userId: DEFAULT_USER_ID,
     });
   }
@@ -76,10 +76,10 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
     const { planId, id } = params;
 
     if (!planId || !id) {
-      throw new ValidationError("Plan ID and Fixed Point ID are required");
+      throw new ValidationError('Plan ID and Fixed Point ID are required');
     }
 
-    logger.debug("Received request to delete fixed point", {
+    logger.debug('Received request to delete fixed point', {
       userId: user.id,
       planId,
       fixedPointId: id,
@@ -92,7 +92,7 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
     return new Response(null, { status: 204 });
   } catch (error) {
     return handleApiError(error, {
-      endpoint: "DELETE /api/plans/{planId}/fixed-points/{id}",
+      endpoint: 'DELETE /api/plans/{planId}/fixed-points/{id}',
       userId: DEFAULT_USER_ID,
     });
   }

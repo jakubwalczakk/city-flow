@@ -1,11 +1,11 @@
-import type { APIRoute } from "astro";
-import { ProfileService } from "@/lib/services/profile.service";
-import { handleApiError, successResponse } from "@/lib/utils/error-handler";
-import { logger } from "@/lib/utils/logger";
-import { NotFoundError, ValidationError } from "@/lib/errors/app-error";
-import { updateProfileSchema } from "@/lib/schemas/profile.schema";
-import { getAuthenticatedUser } from "@/lib/utils/auth";
-import { ZodError } from "zod";
+import type { APIRoute } from 'astro';
+import { ProfileService } from '@/lib/services/profile.service';
+import { handleApiError, successResponse } from '@/lib/utils/error-handler';
+import { logger } from '@/lib/utils/logger';
+import { NotFoundError, ValidationError } from '@/lib/errors/app-error';
+import { updateProfileSchema } from '@/lib/schemas/profile.schema';
+import { getAuthenticatedUser } from '@/lib/utils/auth';
+import { ZodError } from 'zod';
 
 export const prerender = false;
 
@@ -24,21 +24,21 @@ export const GET: APIRoute = async (context) => {
 
     // Authenticate the user
     const user = await getAuthenticatedUser(context);
-    logger.debug("Received request to get user profile", { userId: user.id });
+    logger.debug('Received request to get user profile', { userId: user.id });
 
     // Fetch the profile
     const profileService = new ProfileService(supabase);
     const profile = await profileService.findProfileByUserId(user.id);
 
     if (!profile) {
-      logger.debug("Profile not found", { userId: user.id });
-      throw new NotFoundError("Profile not found.");
+      logger.debug('Profile not found', { userId: user.id });
+      throw new NotFoundError('Profile not found.');
     }
 
     return successResponse(profile, 200);
   } catch (error) {
     return handleApiError(error, {
-      endpoint: "GET /api/profiles",
+      endpoint: 'GET /api/profiles',
     });
   }
 };
@@ -93,7 +93,7 @@ export const PATCH: APIRoute = async (context) => {
 
     // Authenticate the user
     const user = await getAuthenticatedUser(context);
-    logger.debug("Received request to update user profile", { userId: user.id });
+    logger.debug('Received request to update user profile', { userId: user.id });
 
     // Parse request body
     const body = await request.json();
@@ -104,8 +104,8 @@ export const PATCH: APIRoute = async (context) => {
       validatedData = updateProfileSchema.parse(body);
     } catch (error) {
       if (error instanceof ZodError) {
-        logger.debug("Validation failed", { userId: user.id, errors: error.errors });
-        throw new ValidationError("Validation failed.", error.errors);
+        logger.debug('Validation failed', { userId: user.id, errors: error.errors });
+        throw new ValidationError('Validation failed.', error.errors);
       }
       throw error;
     }
@@ -117,7 +117,7 @@ export const PATCH: APIRoute = async (context) => {
     return successResponse(updatedProfile, 200);
   } catch (error) {
     return handleApiError(error, {
-      endpoint: "PATCH /api/profiles",
+      endpoint: 'PATCH /api/profiles',
     });
   }
 };

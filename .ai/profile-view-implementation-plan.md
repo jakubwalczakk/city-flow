@@ -184,7 +184,7 @@ export type UpdateProfileCommand = {
 };
 
 // Enum dla tempa podróży
-export type TravelPace = "slow" | "moderate" | "intensive";
+export type TravelPace = 'slow' | 'moderate' | 'intensive';
 ```
 
 ### Nowe typy (do dodania w pliku komponentu lub w `types.ts`)
@@ -207,21 +207,21 @@ export type ProfileViewModel = {
  * Używana w komponencie PreferencesSelector.
  */
 export const AVAILABLE_PREFERENCES = [
-  "Sztuka i Muzea",
-  "Lokalne Jedzenie",
-  "Aktywny Wypoczynek",
-  "Natura i Parki",
-  "Życie Nocne",
-  "Historia i Kultura",
+  'Sztuka i Muzea',
+  'Lokalne Jedzenie',
+  'Aktywny Wypoczynek',
+  'Natura i Parki',
+  'Życie Nocne',
+  'Historia i Kultura',
 ] as const;
 
 /**
  * Stałe: Mapowanie wartości TravelPace na czytelne etykiety.
  */
 export const TRAVEL_PACE_LABELS: Record<TravelPace, string> = {
-  slow: "Wolne",
-  moderate: "Umiarkowane",
-  intensive: "Intensywne",
+  slow: 'Wolne',
+  moderate: 'Umiarkowane',
+  intensive: 'Intensywne',
 };
 ```
 
@@ -333,21 +333,21 @@ export function useProfile() {
 **Przykład wywołania**:
 
 ```typescript
-const response = await fetch("/api/profiles", {
-  method: "PATCH",
+const response = await fetch('/api/profiles', {
+  method: 'PATCH',
   headers: {
-    "Content-Type": "application/json",
+    'Content-Type': 'application/json',
     Authorization: `Bearer ${token}`,
   },
   body: JSON.stringify({
-    preferences: ["Sztuka i Muzea", "Lokalne Jedzenie", "Historia i Kultura"],
-    travel_pace: "moderate",
+    preferences: ['Sztuka i Muzea', 'Lokalne Jedzenie', 'Historia i Kultura'],
+    travel_pace: 'moderate',
   }),
 });
 
 if (!response.ok) {
   const error = await response.json();
-  throw new Error(error.error || "Failed to update profile");
+  throw new Error(error.error || 'Failed to update profile');
 }
 
 const updatedProfile: ProfileDto = await response.json();
@@ -453,10 +453,10 @@ const updatedProfile: ProfileDto = await response.json();
 ```typescript
 const validatePreferences = (preferences: string[]): string | null => {
   if (preferences.length < 2) {
-    return "Wybierz co najmniej 2 preferencje";
+    return 'Wybierz co najmniej 2 preferencje';
   }
   if (preferences.length > 5) {
-    return "Możesz wybrać maksymalnie 5 preferencji";
+    return 'Możesz wybrać maksymalnie 5 preferencji';
   }
   return null;
 };
@@ -479,7 +479,7 @@ const validatePreferences = (preferences: string[]): string | null => {
 ```typescript
 const validateTravelPace = (pace: TravelPace | null): string | null => {
   if (!pace) {
-    return "Wybierz tempo zwiedzania";
+    return 'Wybierz tempo zwiedzania';
   }
   return null;
 };
@@ -705,7 +705,7 @@ API wykonuje dodatkową walidację i może zwrócić błąd `400 Bad Request` z 
 3. Dodać middleware sprawdzający autentykację (jeśli nie jest globalny)
 4. Osadzić komponent `ProfileView` z dyrektywą `client:load`:
    ```astro
-   <Layout title="Profil">
+   <Layout title='Profil'>
      <ProfileView client:load />
    </Layout>
    ```

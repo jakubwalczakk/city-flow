@@ -13,7 +13,7 @@ Konstruktor klasy `OpenRouterService` będzie przyjmował obiekt konfiguracyjny,
 ```typescript
 // src/lib/services/openrouter.service.ts
 
-import { z } from "zod";
+import { z } from 'zod';
 
 export interface OpenRouterConfig {
   apiKey: string;
@@ -28,20 +28,20 @@ export class OpenRouterService {
 
   constructor(config: OpenRouterConfig) {
     if (!config.apiKey) {
-      throw new Error("OpenRouter API key is required.");
+      throw new Error('OpenRouter API key is required.');
     }
     this.config = {
       ...config,
-      baseUrl: config.baseUrl || "https://openrouter.ai/api/v1",
+      baseUrl: config.baseUrl || 'https://openrouter.ai/api/v1',
     };
     // Inicjalizacja klienta HTTP, np. z domyślnymi nagłówkami
     this.httpClient = {
       post: async (url: string, body: any, headers: any) => {
         const fullUrl = `${this.config.baseUrl}${url}`;
         const response = await fetch(fullUrl, {
-          method: "POST",
+          method: 'POST',
           headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
             ...headers,
           },
           body: JSON.stringify(body),
@@ -173,7 +173,7 @@ Przykład rozbudowanej obsługi błędów w metodzie publicznej:
 try {
   const requestBody = await this.buildRequestBody(options);
 
-  const apiResponse = await this.httpClient.post("/chat/completions", requestBody, {
+  const apiResponse = await this.httpClient.post('/chat/completions', requestBody, {
     Authorization: `Bearer ${this.config.apiKey}`,
   });
 
@@ -181,7 +181,7 @@ try {
 } catch (error: any) {
   // TODO: Zaimplementować mapowanie błędów na AppError
   // np. na podstawie statusu HTTP lub typu błędu
-  console.error("Error interacting with OpenRouter API:", error);
+  console.error('Error interacting with OpenRouter API:', error);
   // throw new AppError('OpenRouterServiceError', '...');
   throw error; // Tymczasowe rzucenie oryginalnego błędu
 }
@@ -224,9 +224,9 @@ Przykład użycia w endpointcie testowym:
 
 ```typescript
 // src/pages/api/test-openrouter.ts
-import type { APIRoute } from "astro";
-import { z } from "zod";
-import { OpenRouterService } from "@/lib/services/openrouter.service";
+import type { APIRoute } from 'astro';
+import { z } from 'zod';
+import { OpenRouterService } from '@/lib/services/openrouter.service';
 
 export const GET: APIRoute = async () => {
   try {
@@ -235,21 +235,21 @@ export const GET: APIRoute = async () => {
     });
 
     const travelPlanSchema = z.object({
-      destination: z.string().describe("The city of the travel plan."),
-      durationDays: z.number().describe("Total duration of the trip in days."),
-      activities: z.array(z.string()).describe("A list of recommended activities."),
+      destination: z.string().describe('The city of the travel plan.'),
+      durationDays: z.number().describe('Total duration of the trip in days.'),
+      activities: z.array(z.string()).describe('A list of recommended activities.'),
     });
 
     const result = await service.getStructuredResponse({
-      systemPrompt: "You are a travel planning assistant.",
-      userPrompt: "Create a simple travel plan for a 3-day trip to Paris.",
+      systemPrompt: 'You are a travel planning assistant.',
+      userPrompt: 'Create a simple travel plan for a 3-day trip to Paris.',
       responseSchema: travelPlanSchema,
     });
 
     return new Response(JSON.stringify(result, null, 2), { status: 200 });
   } catch (error) {
     console.error(error);
-    return new Response("An error occurred.", { status: 500 });
+    return new Response('An error occurred.', { status: 500 });
   }
 };
 ```

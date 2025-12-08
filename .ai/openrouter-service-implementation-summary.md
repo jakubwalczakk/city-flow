@@ -81,12 +81,12 @@ Utworzono `GET /api/test-openrouter` do weryfikacji:
 ### Inicjalizacja serwisu
 
 ```typescript
-import { OpenRouterService } from "@/lib/services/openrouter.service";
+import { OpenRouterService } from '@/lib/services/openrouter.service';
 
 const service = new OpenRouterService({
   apiKey: import.meta.env.OPENROUTER_API_KEY,
   // Opcjonalnie:
-  defaultModel: "anthropic/claude-3.5-sonnet",
+  defaultModel: 'anthropic/claude-3.5-sonnet',
   defaultParams: { temperature: 0.7 },
 });
 ```
@@ -94,7 +94,7 @@ const service = new OpenRouterService({
 ### Generowanie strukturalnej odpowiedzi
 
 ```typescript
-import { z } from "zod";
+import { z } from 'zod';
 
 const schema = z.object({
   destination: z.string(),
@@ -102,11 +102,11 @@ const schema = z.object({
 });
 
 const result = await service.getStructuredResponse({
-  systemPrompt: "You are a travel assistant.",
-  userPrompt: "Plan a trip to Paris.",
+  systemPrompt: 'You are a travel assistant.',
+  userPrompt: 'Plan a trip to Paris.',
   responseSchema: schema,
   // Opcjonalnie:
-  model: "anthropic/claude-3.5-sonnet",
+  model: 'anthropic/claude-3.5-sonnet',
   params: { temperature: 0.7 },
 });
 
@@ -132,7 +132,7 @@ curl http://localhost:4321/api/test-openrouter
 
 ```typescript
 // src/pages/api/plans.ts
-import { OpenRouterService } from "@/lib/services/openrouter.service";
+import { OpenRouterService } from '@/lib/services/openrouter.service';
 
 export const POST: APIRoute = async ({ locals }) => {
   const service = new OpenRouterService({

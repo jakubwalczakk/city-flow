@@ -1,14 +1,14 @@
-import { useState } from "react";
-import { Download, Loader2 } from "lucide-react";
-import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useState } from 'react';
+import { Download, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
-interface ExportPlanButtonProps {
+type ExportPlanButtonProps = {
   planId: string;
   planName: string;
   className?: string;
-}
+};
 
 /**
  * Button component for exporting a plan to PDF.
@@ -27,18 +27,18 @@ export default function ExportPlanButton({ planId, planName, className }: Export
     try {
       // Make API request to export endpoint
       const response = await fetch(`/api/plans/${planId}/export?format=pdf`, {
-        method: "GET",
+        method: 'GET',
         headers: {
-          Accept: "application/pdf",
+          Accept: 'application/pdf',
         },
       });
 
       // Handle error responses
       if (!response.ok) {
         if (response.status === 404) {
-          throw new Error("Nie znaleziono podanego planu.");
+          throw new Error('Nie znaleziono podanego planu.');
         } else if (response.status === 500) {
-          throw new Error("Wystąpił błąd po stronie serwera. Prosimy spróbować ponownie później.");
+          throw new Error('Wystąpił błąd po stronie serwera. Prosimy spróbować ponownie później.');
         } else {
           throw new Error(`Błąd eksportu: ${response.status}`);
         }
@@ -49,7 +49,7 @@ export default function ExportPlanButton({ planId, planName, className }: Export
 
       // Extract filename from Content-Disposition header or use fallback
       let filename = `${planName}.pdf`;
-      const contentDisposition = response.headers.get("Content-Disposition");
+      const contentDisposition = response.headers.get('Content-Disposition');
       if (contentDisposition) {
         const filenameMatch = contentDisposition.match(/filename="?([^"]+)"?/);
         if (filenameMatch && filenameMatch[1]) {
@@ -61,7 +61,7 @@ export default function ExportPlanButton({ planId, planName, className }: Export
       const blobUrl = URL.createObjectURL(blob);
 
       // Create a temporary anchor element and trigger download
-      const link = document.createElement("a");
+      const link = document.createElement('a');
       link.href = blobUrl;
       link.download = filename;
       document.body.appendChild(link);
@@ -72,14 +72,14 @@ export default function ExportPlanButton({ planId, planName, className }: Export
       URL.revokeObjectURL(blobUrl);
 
       // Show success message
-      toast.success("Plan został pomyślnie wyeksportowany", {
+      toast.success('Plan został pomyślnie wyeksportowany', {
         description: `Plik ${filename} został pobrany`,
       });
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Nie udało się wyeksportować planu.";
+      const errorMessage = err instanceof Error ? err.message : 'Nie udało się wyeksportować planu.';
 
       // Show error toast
-      toast.error("Błąd eksportu", {
+      toast.error('Błąd eksportu', {
         description: errorMessage,
       });
     } finally {
@@ -94,15 +94,15 @@ export default function ExportPlanButton({ planId, planName, className }: Export
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button variant="outline" size="sm" onClick={handleExport} disabled={isDisabled} className={className}>
+          <Button variant='outline' size='sm' onClick={handleExport} disabled={isDisabled} className={className}>
             {isLoading ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className='mr-2 h-4 w-4 animate-spin' />
                 Eksportowanie...
               </>
             ) : (
               <>
-                <Download className="mr-2 h-4 w-4" />
+                <Download className='mr-2 h-4 w-4' />
                 Eksportuj do PDF
               </>
             )}

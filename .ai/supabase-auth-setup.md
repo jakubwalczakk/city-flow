@@ -58,7 +58,7 @@ Redirect URL po autoryzacji Google jest już skonfigurowany w `GoogleAuthButton.
 
 ```typescript
 await supabaseClient.auth.signInWithOAuth({
-  provider: "google",
+  provider: 'google',
   options: {
     redirectTo: `${window.location.origin}/plans`,
   },

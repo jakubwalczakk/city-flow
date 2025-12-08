@@ -13,15 +13,15 @@ Ten dokument opisuje plan testowania dla `ProfileService`, który jest odpowiedz
 ```typescript
 // Setup
 const mockSupabase = createMockSupabaseClient();
-const userId = "existing-user-id";
+const userId = 'existing-user-id';
 const mockProfile = {
   id: userId,
-  preferences: ["Art & Museums", "Local Food"],
-  travel_pace: "moderate",
+  preferences: ['Art & Museums', 'Local Food'],
+  travel_pace: 'moderate',
   generations_remaining: 5,
   onboarding_completed: true,
-  created_at: "2025-11-10T10:00:00Z",
-  updated_at: "2025-11-10T10:00:00Z",
+  created_at: '2025-11-10T10:00:00Z',
+  updated_at: '2025-11-10T10:00:00Z',
 };
 
 mockSupabase.from().select().eq().single.mockResolvedValue({
@@ -34,7 +34,7 @@ const result = await ProfileService.findProfileByUserId(mockSupabase, userId);
 
 // Assert
 expect(result).toEqual(mockProfile);
-expect(mockSupabase.from).toHaveBeenCalledWith("profiles");
+expect(mockSupabase.from).toHaveBeenCalledWith('profiles');
 ```
 
 #### Test 2: Powinien zwrócić null dla nieistniejącego użytkownika
@@ -42,7 +42,7 @@ expect(mockSupabase.from).toHaveBeenCalledWith("profiles");
 ```typescript
 // Setup
 const mockSupabase = createMockSupabaseClient();
-const userId = "non-existent-user-id";
+const userId = 'non-existent-user-id';
 
 mockSupabase
   .from()
@@ -50,7 +50,7 @@ mockSupabase
   .eq()
   .single.mockResolvedValue({
     data: null,
-    error: { code: "PGRST116", message: "No rows found" },
+    error: { code: 'PGRST116', message: 'No rows found' },
   });
 
 // Execute
@@ -65,8 +65,8 @@ expect(result).toBeNull();
 ```typescript
 // Setup
 const mockSupabase = createMockSupabaseClient();
-const userId = "user-id";
-const dbError = { code: "DB_ERROR", message: "Database connection failed" };
+const userId = 'user-id';
+const dbError = { code: 'DB_ERROR', message: 'Database connection failed' };
 
 mockSupabase.from().select().eq().single.mockResolvedValue({
   data: null,
@@ -84,18 +84,18 @@ await expect(ProfileService.findProfileByUserId(mockSupabase, userId)).rejects.t
 ```typescript
 // Setup
 const mockSupabase = createMockSupabaseClient();
-const userId = "user-id";
+const userId = 'user-id';
 const updateData = {
-  preferences: ["Art & Museums", "Local Food", "Nightlife"],
-  travel_pace: "intensive" as const,
+  preferences: ['Art & Museums', 'Local Food', 'Nightlife'],
+  travel_pace: 'intensive' as const,
   onboarding_completed: true,
 };
 const mockUpdatedProfile = {
   id: userId,
   ...updateData,
   generations_remaining: 5,
-  created_at: "2025-11-10T10:00:00Z",
-  updated_at: "2025-11-10T20:00:00Z",
+  created_at: '2025-11-10T10:00:00Z',
+  updated_at: '2025-11-10T20:00:00Z',
 };
 
 mockSupabase.from().update().eq().select().single.mockResolvedValue({
@@ -108,7 +108,7 @@ const result = await ProfileService.updateProfile(mockSupabase, userId, updateDa
 
 // Assert
 expect(result).toEqual(mockUpdatedProfile);
-expect(mockSupabase.from).toHaveBeenCalledWith("profiles");
+expect(mockSupabase.from).toHaveBeenCalledWith('profiles');
 expect(mockSupabase.from().update).toHaveBeenCalledWith(
   expect.objectContaining({
     ...updateData,
@@ -122,18 +122,18 @@ expect(mockSupabase.from().update).toHaveBeenCalledWith(
 ```typescript
 // Setup
 const mockSupabase = createMockSupabaseClient();
-const userId = "user-id";
+const userId = 'user-id';
 const updateData = {
-  travel_pace: "slow" as const,
+  travel_pace: 'slow' as const,
 };
 const mockUpdatedProfile = {
   id: userId,
-  preferences: ["Art & Museums", "Local Food"],
-  travel_pace: "slow",
+  preferences: ['Art & Museums', 'Local Food'],
+  travel_pace: 'slow',
   generations_remaining: 5,
   onboarding_completed: true,
-  created_at: "2025-11-10T10:00:00Z",
-  updated_at: "2025-11-10T20:00:00Z",
+  created_at: '2025-11-10T10:00:00Z',
+  updated_at: '2025-11-10T20:00:00Z',
 };
 
 mockSupabase.from().update().eq().select().single.mockResolvedValue({
@@ -148,7 +148,7 @@ const result = await ProfileService.updateProfile(mockSupabase, userId, updateDa
 expect(result).toEqual(mockUpdatedProfile);
 expect(mockSupabase.from().update).toHaveBeenCalledWith(
   expect.objectContaining({
-    travel_pace: "slow",
+    travel_pace: 'slow',
     updated_at: expect.any(String),
   })
 );
@@ -159,16 +159,16 @@ expect(mockSupabase.from().update).toHaveBeenCalledWith(
 ```typescript
 // Setup
 const mockSupabase = createMockSupabaseClient();
-const userId = "user-id";
+const userId = 'user-id';
 const updateData = {};
 const mockUpdatedProfile = {
   id: userId,
-  preferences: ["Art & Museums", "Local Food"],
-  travel_pace: "moderate",
+  preferences: ['Art & Museums', 'Local Food'],
+  travel_pace: 'moderate',
   generations_remaining: 5,
   onboarding_completed: true,
-  created_at: "2025-11-10T10:00:00Z",
-  updated_at: "2025-11-10T20:00:00Z",
+  created_at: '2025-11-10T10:00:00Z',
+  updated_at: '2025-11-10T20:00:00Z',
 };
 
 mockSupabase.from().update().eq().select().single.mockResolvedValue({
@@ -192,9 +192,9 @@ expect(mockSupabase.from().update).toHaveBeenCalledWith({
 ```typescript
 // Setup
 const mockSupabase = createMockSupabaseClient();
-const userId = "user-id";
-const updateData = { travel_pace: "intensive" as const };
-const dbError = { code: "DB_ERROR", message: "Update failed" };
+const userId = 'user-id';
+const updateData = { travel_pace: 'intensive' as const };
+const dbError = { code: 'DB_ERROR', message: 'Update failed' };
 
 mockSupabase.from().update().eq().select().single.mockResolvedValue({
   data: null,
@@ -210,8 +210,8 @@ await expect(ProfileService.updateProfile(mockSupabase, userId, updateData)).rej
 ```typescript
 // Setup
 const mockSupabase = createMockSupabaseClient();
-const userId = "user-id";
-const updateData = { travel_pace: "slow" as const };
+const userId = 'user-id';
+const updateData = { travel_pace: 'slow' as const };
 const beforeUpdate = new Date().toISOString();
 
 // Execute
@@ -228,16 +228,16 @@ expect(new Date(updateCall.updated_at).getTime()).toBeGreaterThanOrEqual(new Dat
 ```typescript
 // Setup
 const mockSupabase = createMockSupabaseClient();
-const mockLogger = jest.spyOn(logger, "debug");
-const userId = "user-id";
-const updateData = { travel_pace: "intensive" as const };
+const mockLogger = jest.spyOn(logger, 'debug');
+const userId = 'user-id';
+const updateData = { travel_pace: 'intensive' as const };
 
 // Execute
 await ProfileService.updateProfile(mockSupabase, userId, updateData);
 
 // Assert
-expect(mockLogger).toHaveBeenCalledWith("Updating profile", { userId, data: updateData });
-expect(mockLogger).toHaveBeenCalledWith("Profile updated successfully", { userId });
+expect(mockLogger).toHaveBeenCalledWith('Updating profile', { userId, data: updateData });
+expect(mockLogger).toHaveBeenCalledWith('Profile updated successfully', { userId });
 ```
 
 ## Testy integracyjne
@@ -250,8 +250,8 @@ const testUserId = await createTestUser();
 
 // Execute
 const updateData = {
-  preferences: ["Art & Museums", "Local Food"],
-  travel_pace: "moderate" as const,
+  preferences: ['Art & Museums', 'Local Food'],
+  travel_pace: 'moderate' as const,
   onboarding_completed: true,
 };
 
@@ -282,63 +282,63 @@ await deleteTestUser(testUserId);
 ### E2E Test 1: PATCH /api/profiles - sukces z pełnymi danymi
 
 ```typescript
-const response = await fetch("/api/profiles", {
-  method: "PATCH",
+const response = await fetch('/api/profiles', {
+  method: 'PATCH',
   headers: {
-    "Content-Type": "application/json",
+    'Content-Type': 'application/json',
     Authorization: `Bearer ${validToken}`,
   },
   body: JSON.stringify({
-    preferences: ["Art & Museums", "Local Food"],
-    travel_pace: "intensive",
+    preferences: ['Art & Museums', 'Local Food'],
+    travel_pace: 'intensive',
     onboarding_completed: true,
   }),
 });
 
 expect(response.status).toBe(200);
 const data = await response.json();
-expect(data.preferences).toEqual(["Art & Museums", "Local Food"]);
-expect(data.travel_pace).toBe("intensive");
+expect(data.preferences).toEqual(['Art & Museums', 'Local Food']);
+expect(data.travel_pace).toBe('intensive');
 expect(data.onboarding_completed).toBe(true);
 ```
 
 ### E2E Test 2: PATCH /api/profiles - walidacja (za mało preferencji)
 
 ```typescript
-const response = await fetch("/api/profiles", {
-  method: "PATCH",
+const response = await fetch('/api/profiles', {
+  method: 'PATCH',
   headers: {
-    "Content-Type": "application/json",
+    'Content-Type': 'application/json',
     Authorization: `Bearer ${validToken}`,
   },
   body: JSON.stringify({
-    preferences: ["Art & Museums"], // Tylko 1 element
+    preferences: ['Art & Museums'], // Tylko 1 element
   }),
 });
 
 expect(response.status).toBe(400);
 const data = await response.json();
-expect(data.error).toBe("Validation failed.");
-expect(data.details[0].message).toContain("at least 2 items");
+expect(data.error).toBe('Validation failed.');
+expect(data.details[0].message).toContain('at least 2 items');
 ```
 
 ### E2E Test 3: PATCH /api/profiles - częściowa aktualizacja
 
 ```typescript
-const response = await fetch("/api/profiles", {
-  method: "PATCH",
+const response = await fetch('/api/profiles', {
+  method: 'PATCH',
   headers: {
-    "Content-Type": "application/json",
+    'Content-Type': 'application/json',
     Authorization: `Bearer ${validToken}`,
   },
   body: JSON.stringify({
-    travel_pace: "slow",
+    travel_pace: 'slow',
   }),
 });
 
 expect(response.status).toBe(200);
 const data = await response.json();
-expect(data.travel_pace).toBe("slow");
+expect(data.travel_pace).toBe('slow');
 // Inne pola powinny pozostać niezmienione
 ```
 
@@ -361,16 +361,16 @@ expect(data.travel_pace).toBe("slow");
 ### Plik konfiguracyjny vitest.config.ts
 
 ```typescript
-import { defineConfig } from "vitest/config";
+import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
     globals: true,
-    environment: "node",
-    setupFiles: ["./tests/setup.ts"],
+    environment: 'node',
+    setupFiles: ['./tests/setup.ts'],
     coverage: {
-      reporter: ["text", "json", "html"],
-      exclude: ["node_modules/", "tests/", "**/*.d.ts", "**/*.config.*", "**/dist/**"],
+      reporter: ['text', 'json', 'html'],
+      exclude: ['node_modules/', 'tests/', '**/*.d.ts', '**/*.config.*', '**/dist/**'],
     },
   },
 });
@@ -379,7 +379,7 @@ export default defineConfig({
 ### Setup file (tests/setup.ts)
 
 ```typescript
-import { beforeAll, afterAll, afterEach } from "vitest";
+import { beforeAll, afterAll, afterEach } from 'vitest';
 
 // Setup database connection for integration tests
 beforeAll(async () => {

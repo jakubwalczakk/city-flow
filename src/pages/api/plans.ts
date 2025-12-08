@@ -1,10 +1,10 @@
-import type { APIRoute } from "astro";
-import { createPlanSchema, listPlansQuerySchema } from "@/lib/schemas/plan.schema";
-import { PlanService } from "@/lib/services/plan.service";
-import { ValidationError } from "@/lib/errors/app-error";
-import { handleApiError, successResponse } from "@/lib/utils/error-handler";
-import { logger } from "@/lib/utils/logger";
-import { ForbiddenError } from "@/lib/errors/app-error";
+import type { APIRoute } from 'astro';
+import { createPlanSchema, listPlansQuerySchema } from '@/lib/schemas/plan.schema';
+import { PlanService } from '@/lib/services/plan.service';
+import { ValidationError } from '@/lib/errors/app-error';
+import { handleApiError, successResponse } from '@/lib/utils/error-handler';
+import { logger } from '@/lib/utils/logger';
+import { ForbiddenError } from '@/lib/errors/app-error';
 
 export const prerender = false;
 
@@ -18,38 +18,38 @@ export const prerender = false;
 export const GET: APIRoute = async ({ url, locals }) => {
   try {
     const { supabase } = locals;
-    
-    // In middleware we trust - if supabase is present, session might be too, 
+
+    // In middleware we trust - if supabase is present, session might be too,
     // but explicit auth check is safer or relies on supabase.auth.getUser()
     // However, existing code used createSupabaseServerInstance manually.
     // Assuming middleware puts supabase in locals correctly.
-    
+
     const {
       data: { user },
       error: authError,
     } = await supabase.auth.getUser();
-    
+
     if (authError || !user) {
-      logger.warn("Unauthenticated request to list plans");
-      throw new ForbiddenError("You must be logged in to view plans.");
+      logger.warn('Unauthenticated request to list plans');
+      throw new ForbiddenError('You must be logged in to view plans.');
     }
     const userId = user.id;
-    logger.debug("Received request to list plans", { userId });
-    
+    logger.debug('Received request to list plans', { userId });
+
     const queryParams = {
-      statuses: url.searchParams.get("statuses"),
-      sort_by: url.searchParams.get("sort_by"),
-      order: url.searchParams.get("order"),
-      limit: url.searchParams.get("limit"),
-      offset: url.searchParams.get("offset"),
+      statuses: url.searchParams.get('statuses'),
+      sort_by: url.searchParams.get('sort_by'),
+      order: url.searchParams.get('order'),
+      limit: url.searchParams.get('limit'),
+      offset: url.searchParams.get('offset'),
     };
-    
+
     const validation = listPlansQuerySchema.safeParse(queryParams);
     if (!validation.success) {
-      logger.debug("Query parameter validation failed", {
+      logger.debug('Query parameter validation failed', {
         errors: validation.error.flatten(),
       });
-      throw new ValidationError("Invalid query parameters", validation.error.flatten());
+      throw new ValidationError('Invalid query parameters', validation.error.flatten());
     }
 
     const planService = new PlanService(supabase);
@@ -61,8 +61,8 @@ export const GET: APIRoute = async ({ url, locals }) => {
     return successResponse(result, 200);
   } catch (error) {
     return handleApiError(error, {
-      endpoint: "GET /api/plans",
-      userId: "unauthenticated",
+      endpoint: 'GET /api/plans',
+      userId: 'unauthenticated',
     });
   }
 };
@@ -76,46 +76,46 @@ export const GET: APIRoute = async ({ url, locals }) => {
  */
 export const POST: APIRoute = async ({ request, locals }) => {
   const { supabase } = locals;
-  
+
   try {
     const {
       data: { user },
       error: authError,
     } = await supabase.auth.getUser();
-    
+
     if (authError || !user) {
-      logger.warn("Unauthenticated request to create plan");
-      throw new ForbiddenError("You must be logged in to create a plan.");
+      logger.warn('Unauthenticated request to create plan');
+      throw new ForbiddenError('You must be logged in to create a plan.');
     }
     const userId = user.id;
-    logger.debug("Received request to create plan", { userId });
-    
+    logger.debug('Received request to create plan', { userId });
+
     let body: unknown;
     try {
       body = await request.json();
     } catch (parseError) {
-      logger.warn("Failed to parse request body", {
+      logger.warn('Failed to parse request body', {
         error: parseError instanceof Error ? parseError.message : String(parseError),
       });
-      throw new ValidationError("Invalid JSON in request body");
+      throw new ValidationError('Invalid JSON in request body');
     }
-    
+
     const validation = createPlanSchema.safeParse(body);
     if (!validation.success) {
-      logger.debug("Request validation failed", {
+      logger.debug('Request validation failed', {
         errors: validation.error.flatten(),
       });
-      throw new ValidationError("Validation failed", validation.error.flatten());
+      throw new ValidationError('Validation failed', validation.error.flatten());
     }
 
     const planService = new PlanService(supabase);
     const plan = await planService.createPlan(validation.data, userId);
-    
+
     return successResponse(plan, 201);
   } catch (error) {
     return handleApiError(error, {
-      endpoint: "POST /api/plans",
-      userId: "unauthenticated",
+      endpoint: 'POST /api/plans',
+      userId: 'unauthenticated',
     });
   }
 };

@@ -72,12 +72,12 @@ Migration: `20251024120150_add_generated_content_validation.sql`
 
 ```typescript
 // Example: Zod schema in your application
-import { z } from "zod";
+import { z } from 'zod';
 
 const ItemSchema = z.object({
   id: z.string().uuid(),
   time: z.string().optional(),
-  type: z.enum(["activity", "meal", "transport"]),
+  type: z.enum(['activity', 'meal', 'transport']),
   title: z.string(),
   description: z.string().optional(),
   location: z.string().optional(),

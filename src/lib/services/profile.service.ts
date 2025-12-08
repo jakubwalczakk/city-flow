@@ -1,7 +1,7 @@
-import type { SupabaseClient } from "../../db/supabase.client";
-import type { UpdateProfileCommand } from "../../types";
-import { DatabaseError, NotFoundError } from "@/lib/errors/app-error";
-import { logger } from "@/lib/utils/logger";
+import type { SupabaseClient } from '../../db/supabase.client';
+import type { UpdateProfileCommand } from '../../types';
+import { DatabaseError, NotFoundError } from '@/lib/errors/app-error';
+import { logger } from '@/lib/utils/logger';
 
 /**
  * Service responsible for managing user profile operations.
@@ -18,15 +18,11 @@ export class ProfileService {
    * @throws Error if the database operation fails (excluding not found errors)
    */
   public async findProfileByUserId(userId: string) {
-    const { data: profile, error } = await this.supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", userId)
-      .single();
+    const { data: profile, error } = await this.supabase.from('profiles').select('*').eq('id', userId).single();
 
     if (error) {
       // PGRST116 is the Postgrest error code for "no rows found"
-      if (error.code === "PGRST116") {
+      if (error.code === 'PGRST116') {
         return null;
       }
       throw error;
@@ -46,24 +42,24 @@ export class ProfileService {
    * @throws DatabaseError if the update operation fails
    */
   public async updateProfile(userId: string, data: UpdateProfileCommand) {
-    logger.debug("Updating profile", { userId, data });
+    logger.debug('Updating profile', { userId, data });
 
     const { data: updatedProfile, error } = await this.supabase
-      .from("profiles")
+      .from('profiles')
       .update({
         ...data,
         updated_at: new Date().toISOString(),
       })
-      .eq("id", userId)
+      .eq('id', userId)
       .select()
       .single();
 
     if (error) {
-      logger.error("Failed to update profile", { userId, error: error.message }, error);
-      throw new DatabaseError("Failed to update profile.", error);
+      logger.error('Failed to update profile', { userId, error: error.message }, error);
+      throw new DatabaseError('Failed to update profile.', error);
     }
 
-    logger.debug("Profile updated successfully", { userId });
+    logger.debug('Profile updated successfully', { userId });
     return updatedProfile;
   }
 
@@ -76,7 +72,7 @@ export class ProfileService {
   public async hasGenerationsRemaining(userId: string): Promise<boolean> {
     const profile = await this.findProfileByUserId(userId);
     if (!profile) {
-      throw new NotFoundError("Profile not found");
+      throw new NotFoundError('Profile not found');
     }
     return profile.generations_remaining > 0;
   }
@@ -88,31 +84,31 @@ export class ProfileService {
    * @throws DatabaseError if the update fails or if generations would go below 0
    */
   public async decrementGenerations(userId: string): Promise<void> {
-    logger.debug("Decrementing generations", { userId });
+    logger.debug('Decrementing generations', { userId });
 
     const profile = await this.findProfileByUserId(userId);
     if (!profile) {
-      throw new NotFoundError("Profile not found");
+      throw new NotFoundError('Profile not found');
     }
 
     if (profile.generations_remaining <= 0) {
-      throw new DatabaseError("No generations remaining.");
+      throw new DatabaseError('No generations remaining.');
     }
 
     const { error } = await this.supabase
-      .from("profiles")
+      .from('profiles')
       .update({
         generations_remaining: profile.generations_remaining - 1,
         updated_at: new Date().toISOString(),
       })
-      .eq("id", userId);
+      .eq('id', userId);
 
     if (error) {
-      logger.error("Failed to decrement generations", { userId, error: error.message });
-      throw new DatabaseError("Failed to update user credits.", error);
+      logger.error('Failed to decrement generations', { userId, error: error.message });
+      throw new DatabaseError('Failed to update user credits.', error);
     }
 
-    logger.info("Generations decremented successfully", {
+    logger.info('Generations decremented successfully', {
       userId,
       remaining: profile.generations_remaining - 1,
     });

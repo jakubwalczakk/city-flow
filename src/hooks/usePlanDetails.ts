@@ -1,16 +1,16 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from 'react';
 import type {
   PlanDetailsDto,
   UpdatePlanCommand,
   AddActivityCommand,
   UpdateActivityCommand,
   TimelineItem,
-} from "@/types";
+} from '@/types';
 
 /**
  * Result type returned by the usePlanDetails hook.
  */
-export interface UsePlanDetailsResult {
+export type UsePlanDetailsResult = {
   plan: PlanDetailsDto | null;
   isLoading: boolean;
   error: string | null;
@@ -20,7 +20,7 @@ export interface UsePlanDetailsResult {
   updateActivity: (date: string, itemId: string, activity: Partial<TimelineItem>) => Promise<void>;
   deleteActivity: (date: string, itemId: string) => Promise<void>;
   refetch: () => void;
-}
+};
 
 /**
  * Custom hook for managing a single plan's details.
@@ -43,7 +43,7 @@ export const usePlanDetails = (planId: string): UsePlanDetailsResult => {
 
       if (!response.ok) {
         if (response.status === 404) {
-          throw new Error("Plan not found");
+          throw new Error('Plan not found');
         }
         throw new Error(`Failed to fetch plan: ${response.statusText}`);
       }
@@ -51,7 +51,7 @@ export const usePlanDetails = (planId: string): UsePlanDetailsResult => {
       const result: PlanDetailsDto = await response.json();
       setPlan(result);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "An unknown error occurred while fetching plan.";
+      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred while fetching plan.';
       setError(errorMessage);
       setPlan(null);
     } finally {
@@ -70,16 +70,16 @@ export const usePlanDetails = (planId: string): UsePlanDetailsResult => {
       const command: UpdatePlanCommand = { name: newName };
 
       const response = await fetch(`/api/plans/${planId}`, {
-        method: "PATCH",
+        method: 'PATCH',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(command),
       });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || "Failed to update plan name");
+        throw new Error(errorData.error || 'Failed to update plan name');
       }
 
       const updatedPlan: PlanDetailsDto = await response.json();
@@ -95,12 +95,12 @@ export const usePlanDetails = (planId: string): UsePlanDetailsResult => {
    */
   const deletePlan = useCallback(async (): Promise<void> => {
     const response = await fetch(`/api/plans/${planId}`, {
-      method: "DELETE",
+      method: 'DELETE',
     });
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || "Failed to delete plan");
+      throw new Error(errorData.error || 'Failed to delete plan');
     }
   }, [planId]);
 
@@ -116,25 +116,25 @@ export const usePlanDetails = (planId: string): UsePlanDetailsResult => {
       // Convert TimelineItem to AddActivityCommand format
       const command: AddActivityCommand = {
         time: activity.time,
-        title: activity.title || "",
+        title: activity.title || '',
         description: activity.description,
         location: activity.location,
         duration: activity.duration,
-        category: activity.category || "other",
+        category: activity.category || 'other',
         estimated_cost: activity.estimated_price,
       };
 
       const response = await fetch(`/api/plans/${planId}/days/${date}/items`, {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(command),
       });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || "Failed to add activity");
+        throw new Error(errorData.error || 'Failed to add activity');
       }
 
       const updatedPlan: PlanDetailsDto = await response.json();
@@ -165,16 +165,16 @@ export const usePlanDetails = (planId: string): UsePlanDetailsResult => {
       };
 
       const response = await fetch(`/api/plans/${planId}/days/${date}/items/${itemId}`, {
-        method: "PATCH",
+        method: 'PATCH',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(command),
       });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || "Failed to update activity");
+        throw new Error(errorData.error || 'Failed to update activity');
       }
 
       const updatedPlan: PlanDetailsDto = await response.json();
@@ -193,12 +193,12 @@ export const usePlanDetails = (planId: string): UsePlanDetailsResult => {
   const deleteActivity = useCallback(
     async (date: string, itemId: string): Promise<void> => {
       const response = await fetch(`/api/plans/${planId}/days/${date}/items/${itemId}`, {
-        method: "DELETE",
+        method: 'DELETE',
       });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || "Failed to delete activity");
+        throw new Error(errorData.error || 'Failed to delete activity');
       }
 
       const updatedPlan: PlanDetailsDto = await response.json();

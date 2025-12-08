@@ -1,15 +1,15 @@
-import type { APIContext } from "astro";
-import { UnauthorizedError } from "@/lib/errors/app-error";
-import { DEFAULT_USER_ID } from "@/db/supabase.client";
-import { logger } from "./logger";
+import type { APIContext } from 'astro';
+import { UnauthorizedError } from '@/lib/errors/app-error';
+import { DEFAULT_USER_ID } from '@/db/supabase.client';
+import { logger } from './logger';
 
 /**
  * User object returned by authentication.
  */
-export interface AuthenticatedUser {
+export type AuthenticatedUser = {
   id: string;
   email?: string;
-}
+};
 
 /**
  * Retrieves the authenticated user from the request context.
@@ -45,7 +45,7 @@ export async function getAuthenticatedUser(context: APIContext): Promise<Authent
 
   if (isDevelopment) {
     // Development mode: use default user ID
-    logger.debug("Using DEFAULT_USER_ID for authentication (development mode)");
+    logger.debug('Using DEFAULT_USER_ID for authentication (development mode)');
     return { id: DEFAULT_USER_ID };
   }
 
@@ -65,11 +65,11 @@ export async function getAuthenticatedUser(context: APIContext): Promise<Authent
  */
 async function getAuthenticatedUserFromToken(context: APIContext): Promise<AuthenticatedUser> {
   const { request, locals } = context;
-  const authHeader = request.headers.get("Authorization");
+  const authHeader = request.headers.get('Authorization');
 
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    logger.debug("Missing or invalid Authorization header");
-    throw new UnauthorizedError("Missing or invalid authorization token");
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    logger.debug('Missing or invalid Authorization header');
+    throw new UnauthorizedError('Missing or invalid authorization token');
   }
 
   const token = authHeader.substring(7); // Remove "Bearer " prefix
@@ -82,11 +82,11 @@ async function getAuthenticatedUserFromToken(context: APIContext): Promise<Authe
     } = await locals.supabase.auth.getUser(token);
 
     if (error || !user) {
-      logger.debug("Token validation failed", { error: error?.message });
-      throw new UnauthorizedError("Invalid or expired token");
+      logger.debug('Token validation failed', { error: error?.message });
+      throw new UnauthorizedError('Invalid or expired token');
     }
 
-    logger.debug("User authenticated successfully", { userId: user.id });
+    logger.debug('User authenticated successfully', { userId: user.id });
     return {
       id: user.id,
       email: user.email,
@@ -95,8 +95,8 @@ async function getAuthenticatedUserFromToken(context: APIContext): Promise<Authe
     if (error instanceof UnauthorizedError) {
       throw error;
     }
-    logger.error("Unexpected error during token validation", {}, error as Error);
-    throw new UnauthorizedError("Authentication failed");
+    logger.error('Unexpected error during token validation', {}, error as Error);
+    throw new UnauthorizedError('Authentication failed');
   }
 }
 

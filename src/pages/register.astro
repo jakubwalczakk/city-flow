@@ -1,47 +1,47 @@
 ---
-import Layout from "@/layouts/Layout.astro";
-import { AuthForm } from "@/components/auth/AuthForm";
-import { GoogleAuthButton } from "@/components/auth/GoogleAuthButton";
+import Layout from '@/layouts/Layout.astro';
+import { AuthForm } from '@/components/auth/AuthForm';
+import { GoogleAuthButton } from '@/components/auth/GoogleAuthButton';
 ---
 
-<Layout title="Zarejestruj się - CityFlow">
-  <div class="flex min-h-screen items-center justify-center px-4 py-12">
-    <div class="w-full max-w-md space-y-8">
+<Layout title='Zarejestruj się - CityFlow'>
+  <div class='flex min-h-screen items-center justify-center px-4 py-12'>
+    <div class='w-full max-w-md space-y-8'>
       {/* Header */}
-      <div class="text-center">
-        <h1 class="text-3xl font-bold tracking-tight">Utwórz konto</h1>
-        <p class="mt-2 text-sm text-muted-foreground">Rozpocznij planowanie swoich idealnych wycieczek miejskich</p>
+      <div class='text-center'>
+        <h1 class='text-3xl font-bold tracking-tight'>Utwórz konto</h1>
+        <p class='mt-2 text-sm text-muted-foreground'>Rozpocznij planowanie swoich idealnych wycieczek miejskich</p>
       </div>
 
       {/* Auth Form */}
-      <div class="space-y-6">
-        <AuthForm mode="register" client:load />
+      <div class='space-y-6'>
+        <AuthForm mode='register' client:load />
 
         {/* Divider */}
-        <div class="relative">
-          <div class="absolute inset-0 flex items-center">
-            <span class="w-full border-t"></span>
+        <div class='relative'>
+          <div class='absolute inset-0 flex items-center'>
+            <span class='w-full border-t'></span>
           </div>
-          <div class="relative flex justify-center text-xs uppercase">
-            <span class="bg-background px-2 text-muted-foreground"> Lub kontynuuj z </span>
+          <div class='relative flex justify-center text-xs uppercase'>
+            <span class='bg-background px-2 text-muted-foreground'> Lub kontynuuj z </span>
           </div>
         </div>
 
         {/* Google Auth */}
-        <GoogleAuthButton mode="register" client:load />
+        <GoogleAuthButton mode='register' client:load />
       </div>
 
       {/* Terms and Privacy */}
-      <p class="text-center text-xs text-muted-foreground">
-        Rejestrując się, akceptujesz nasze{" "}
-        <a href="/terms" class="text-primary hover:underline"> Warunki korzystania z usługi </a>
-        {" "}oraz{" "}
-        <a href="/privacy" class="text-primary hover:underline"> Politykę prywatności </a>
+      <p class='text-center text-xs text-muted-foreground'>
+        Rejestrując się, akceptujesz nasze{' '}
+        <a href='/terms' class='text-primary hover:underline'> Warunki korzystania z usługi </a>
+        {' '}oraz{' '}
+        <a href='/privacy' class='text-primary hover:underline'> Politykę prywatności </a>
       </p>
 
       {/* Back to home */}
-      <div class="text-center">
-        <a href="/" class="text-sm text-muted-foreground hover:text-primary hover:underline">
+      <div class='text-center'>
+        <a href='/' class='text-sm text-muted-foreground hover:text-primary hover:underline'>
           ← Powrót do strony głównej
         </a>
       </div>

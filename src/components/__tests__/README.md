@@ -25,9 +25,9 @@ Kompleksowy zestaw testów dla komponentu `NewPlanForm` - głównego komponentu 
 ### Naming Convention
 
 ```typescript
-describe("ComponentName", () => {
-  describe("Feature Group", () => {
-    it("should do something specific", () => {
+describe('ComponentName', () => {
+  describe('Feature Group', () => {
+    it('should do something specific', () => {
       // Arrange
       // Act
       // Assert
@@ -107,7 +107,7 @@ Plik setup importuje `@testing-library/jest-dom/vitest` dla dodatkowych matcher�
 ### Custom Hooks
 
 ```typescript
-vi.mock("@/hooks/useCustomHook", () => ({
+vi.mock('@/hooks/useCustomHook', () => ({
   useCustomHook: vi.fn(),
 }));
 ```
@@ -128,7 +128,7 @@ vi.mock('@/components/ChildComponent', () => ({
 global.fetch = vi.fn(() =>
   Promise.resolve({
     ok: true,
-    json: () => Promise.resolve({ data: "test" }),
+    json: () => Promise.resolve({ data: 'test' }),
   })
 ) as any;
 ```
@@ -146,7 +146,7 @@ expect(component.state.count).toBe(1);
 ✅ **Dobrze:**
 
 ```typescript
-expect(screen.getByText("Count: 1")).toBeInTheDocument();
+expect(screen.getByText('Count: 1')).toBeInTheDocument();
 ```
 
 ### 2. Używaj user-event zamiast fireEvent
@@ -186,7 +186,7 @@ afterEach(() => {
 
 ```typescript
 await waitFor(() => {
-  expect(screen.getByText("Loaded")).toBeInTheDocument();
+  expect(screen.getByText('Loaded')).toBeInTheDocument();
 });
 ```
 
@@ -235,7 +235,7 @@ Progi pokrycia kodu są skonfigurowane w `vitest.config.ts`:
 ### 1. Wyświetl renderowany DOM:
 
 ```typescript
-import { screen } from "@testing-library/react";
+import { screen } from '@testing-library/react';
 screen.debug();
 ```
 

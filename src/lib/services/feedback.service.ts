@@ -1,7 +1,7 @@
-import type { SubmitFeedbackCommand, FeedbackDto } from "@/types";
-import type { SupabaseClient } from "@/db/supabase.client";
-import { DatabaseError, NotFoundError } from "@/lib/errors/app-error";
-import { logger } from "@/lib/utils/logger";
+import type { SubmitFeedbackCommand, FeedbackDto } from '@/types';
+import type { SupabaseClient } from '@/db/supabase.client';
+import { DatabaseError, NotFoundError } from '@/lib/errors/app-error';
+import { logger } from '@/lib/utils/logger';
 
 /**
  * Service for managing user feedback on plans.
@@ -18,19 +18,15 @@ export class FeedbackService {
    * @returns The created or updated feedback
    * @throws {DatabaseError} If the database operation fails
    */
-  public async submitFeedback(
-    planId: string,
-    userId: string,
-    command: SubmitFeedbackCommand
-  ): Promise<FeedbackDto> {
-    logger.debug("Submitting feedback", {
+  public async submitFeedback(planId: string, userId: string, command: SubmitFeedbackCommand): Promise<FeedbackDto> {
+    logger.debug('Submitting feedback', {
       planId,
       userId,
       rating: command.rating,
     });
 
     const { data, error } = await this.supabase
-      .from("feedback")
+      .from('feedback')
       .upsert(
         {
           plan_id: planId,
@@ -39,24 +35,24 @@ export class FeedbackService {
           comment: command.comment,
         },
         {
-          onConflict: "plan_id,user_id",
+          onConflict: 'plan_id,user_id',
         }
       )
-      .select("rating, comment, updated_at")
+      .select('rating, comment, updated_at')
       .single();
 
     if (error) {
-      logger.error("Failed to submit feedback to database", {
+      logger.error('Failed to submit feedback to database', {
         planId,
         userId,
         errorCode: error.code,
         errorMessage: error.message,
       });
 
-      throw new DatabaseError("Failed to submit feedback. Please try again later.", new Error(error.message));
+      throw new DatabaseError('Failed to submit feedback. Please try again later.', new Error(error.message));
     }
 
-    logger.info("Feedback submitted successfully", {
+    logger.info('Feedback submitted successfully', {
       planId,
       userId,
     });
@@ -74,40 +70,40 @@ export class FeedbackService {
    * @throws {DatabaseError} If the database operation fails
    */
   public async getFeedback(planId: string, userId: string): Promise<FeedbackDto> {
-    logger.debug("Fetching feedback", {
+    logger.debug('Fetching feedback', {
       planId,
       userId,
     });
 
     const { data, error } = await this.supabase
-      .from("feedback")
-      .select("rating, comment, updated_at")
-      .eq("plan_id", planId)
-      .eq("user_id", userId)
+      .from('feedback')
+      .select('rating, comment, updated_at')
+      .eq('plan_id', planId)
+      .eq('user_id', userId)
       .single();
 
     if (error) {
-      if (error.code === "PGRST116") {
+      if (error.code === 'PGRST116') {
         // This is expected for newly generated plans - no feedback yet
         // Only log at debug level to avoid noise in logs
-        logger.debug("No feedback found for plan (expected for new plans)", {
+        logger.debug('No feedback found for plan (expected for new plans)', {
           planId,
           userId,
         });
-        throw new NotFoundError("No feedback submitted for this plan.");
+        throw new NotFoundError('No feedback submitted for this plan.');
       }
 
-      logger.error("Failed to fetch feedback from database", {
+      logger.error('Failed to fetch feedback from database', {
         planId,
         userId,
         errorCode: error.code,
         errorMessage: error.message,
       });
 
-      throw new DatabaseError("Failed to retrieve feedback. Please try again later.", new Error(error.message));
+      throw new DatabaseError('Failed to retrieve feedback. Please try again later.', new Error(error.message));
     }
 
-    logger.info("Feedback fetched successfully", {
+    logger.info('Feedback fetched successfully', {
       planId,
       userId,
     });

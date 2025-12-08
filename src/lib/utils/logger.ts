@@ -3,15 +3,15 @@
  * In production, this could be extended to use a more sophisticated logging service.
  */
 
-type LogLevel = "debug" | "info" | "warn" | "error";
+type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
-interface LogEntry {
+type LogEntry = {
   level: LogLevel;
   message: string;
   timestamp: string;
   context?: Record<string, unknown>;
   error?: Error;
-}
+};
 
 class Logger {
   private isDevelopment: boolean;
@@ -44,21 +44,21 @@ class Logger {
 
     /* eslint-disable no-console */
     switch (level) {
-      case "debug":
+      case 'debug':
         if (this.isDevelopment) {
           console.debug(formatted);
         }
         break;
-      case "info":
+      case 'info':
         console.info(formatted);
         break;
-      case "warn":
+      case 'warn':
         console.warn(formatted);
         if (error) {
           console.warn(error);
         }
         break;
-      case "error":
+      case 'error':
         console.error(formatted);
         if (error) {
           console.error(error);
@@ -69,19 +69,19 @@ class Logger {
   }
 
   debug(message: string, context?: Record<string, unknown>): void {
-    this.log("debug", message, context);
+    this.log('debug', message, context);
   }
 
   info(message: string, context?: Record<string, unknown>): void {
-    this.log("info", message, context);
+    this.log('info', message, context);
   }
 
   warn(message: string, context?: Record<string, unknown>, error?: Error): void {
-    this.log("warn", message, context, error);
+    this.log('warn', message, context, error);
   }
 
   error(message: string, context?: Record<string, unknown>, error?: Error): void {
-    this.log("error", message, context, error);
+    this.log('error', message, context, error);
   }
 }
 

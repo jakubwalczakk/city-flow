@@ -6,19 +6,19 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "@/components/ui/pagination";
+} from '@/components/ui/pagination';
 
 /**
  * Props for the PaginationControls component.
  */
-interface PaginationControlsProps {
+type PaginationControlsProps = {
   pagination: {
     total: number;
     limit: number;
     offset: number;
   };
   onPageChange: (newPage: number) => void;
-}
+};
 
 /**
  * Component for navigating between pages of plans.
@@ -37,8 +37,8 @@ export const PaginationControls = ({ pagination, onPageChange }: PaginationContr
   }
 
   // Generate page numbers to display
-  const getPageNumbers = (): (number | "ellipsis")[] => {
-    const pages: (number | "ellipsis")[] = [];
+  const getPageNumbers = (): (number | 'ellipsis')[] => {
+    const pages: (number | 'ellipsis')[] = [];
     const showEllipsis = totalPages > 7;
 
     if (!showEllipsis) {
@@ -51,7 +51,7 @@ export const PaginationControls = ({ pagination, onPageChange }: PaginationContr
       pages.push(1);
 
       if (currentPage > 3) {
-        pages.push("ellipsis");
+        pages.push('ellipsis');
       }
 
       // Show pages around current page
@@ -63,7 +63,7 @@ export const PaginationControls = ({ pagination, onPageChange }: PaginationContr
       }
 
       if (currentPage < totalPages - 2) {
-        pages.push("ellipsis");
+        pages.push('ellipsis');
       }
 
       // Always show last page
@@ -89,20 +89,20 @@ export const PaginationControls = ({ pagination, onPageChange }: PaginationContr
           <PaginationPrevious
             onClick={() => handlePageClick(currentPage - 1)}
             aria-disabled={currentPage === 1}
-            className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+            className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
           />
         </PaginationItem>
 
         {/* Page numbers */}
         {pageNumbers.map((page, index) => (
           <PaginationItem key={`page-${index}`}>
-            {page === "ellipsis" ? (
+            {page === 'ellipsis' ? (
               <PaginationEllipsis />
             ) : (
               <PaginationLink
                 onClick={() => handlePageClick(page)}
                 isActive={page === currentPage}
-                className="cursor-pointer"
+                className='cursor-pointer'
               >
                 {page}
               </PaginationLink>
@@ -115,7 +115,7 @@ export const PaginationControls = ({ pagination, onPageChange }: PaginationContr
           <PaginationNext
             onClick={() => handlePageClick(currentPage + 1)}
             aria-disabled={currentPage === totalPages}
-            className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+            className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
           />
         </PaginationItem>
       </PaginationContent>

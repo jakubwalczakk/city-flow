@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import type { ProfileViewModel, ProfileDto, UpdateProfileCommand } from "@/types";
+import { useState, useEffect } from 'react';
+import type { ProfileViewModel, ProfileDto, UpdateProfileCommand } from '@/types';
 
 /**
  * Custom hook for managing profile data and operations.
@@ -25,17 +25,17 @@ export function useProfile() {
     try {
       setViewModel((prev) => ({ ...prev, isLoading: true, error: null }));
 
-      const response = await fetch("/api/profiles", {
-        method: "GET",
+      const response = await fetch('/api/profiles', {
+        method: 'GET',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
-        credentials: "include",
+        credentials: 'include',
       });
 
       // Handle 401 - redirect to login
       if (response.status === 401) {
-        window.location.href = "/";
+        window.location.href = '/';
         return;
       }
 
@@ -51,7 +51,7 @@ export function useProfile() {
       }
 
       if (!response.ok) {
-        throw new Error("Nie udało się załadować profilu");
+        throw new Error('Nie udało się załadować profilu');
       }
 
       const profile: ProfileDto = await response.json();
@@ -66,7 +66,7 @@ export function useProfile() {
       setViewModel({
         isLoading: false,
         isSaving: false,
-        error: error instanceof Error ? error.message : "Wystąpił nieoczekiwany błąd",
+        error: error instanceof Error ? error.message : 'Wystąpił nieoczekiwany błąd',
         profile: null,
       });
     }
@@ -79,24 +79,24 @@ export function useProfile() {
     try {
       setViewModel((prev) => ({ ...prev, isSaving: true, error: null }));
 
-      const response = await fetch("/api/profiles", {
-        method: "PATCH",
+      const response = await fetch('/api/profiles', {
+        method: 'PATCH',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
-        credentials: "include",
+        credentials: 'include',
         body: JSON.stringify(data),
       });
 
       // Handle 401 - redirect to login
       if (response.status === 401) {
-        window.location.href = "/";
+        window.location.href = '/';
         return;
       }
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Nie udało się zapisać zmian");
+        throw new Error(errorData.error || 'Nie udało się zapisać zmian');
       }
 
       const updatedProfile: ProfileDto = await response.json();
@@ -110,7 +110,7 @@ export function useProfile() {
       setViewModel((prev) => ({
         ...prev,
         isSaving: false,
-        error: error instanceof Error ? error.message : "Wystąpił nieoczekiwany błąd",
+        error: error instanceof Error ? error.message : 'Wystąpił nieoczekiwany błąd',
       }));
       throw error; // Re-throw to allow component to handle it
     }

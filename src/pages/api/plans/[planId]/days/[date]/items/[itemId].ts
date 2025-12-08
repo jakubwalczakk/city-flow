@@ -1,9 +1,9 @@
-import type { APIRoute } from "astro";
-import { z } from "zod";
-import { PlanService } from "@/lib/services/plan.service";
-import { handleApiError } from "@/lib/utils/error-handler";
-import { DEFAULT_USER_ID } from "@/db/supabase.client";
-import type { UpdateActivityCommand } from "@/types";
+import type { APIRoute } from 'astro';
+import { z } from 'zod';
+import { PlanService } from '@/lib/services/plan.service';
+import { handleApiError } from '@/lib/utils/error-handler';
+import { DEFAULT_USER_ID } from '@/db/supabase.client';
+import type { UpdateActivityCommand } from '@/types';
 
 export const prerender = false;
 
@@ -14,7 +14,7 @@ const updateActivitySchema = z.object({
   description: z.string().optional(),
   location: z.string().optional(),
   duration: z.number().positive().optional(),
-  category: z.enum(["history", "food", "sport", "nature", "culture", "transport", "accommodation", "other"]).optional(),
+  category: z.enum(['history', 'food', 'sport', 'nature', 'culture', 'transport', 'accommodation', 'other']).optional(),
   estimated_cost: z.string().optional(),
 });
 
@@ -27,9 +27,9 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
     const { planId, date, itemId } = params;
 
     if (!planId || !date || !itemId) {
-      return new Response(JSON.stringify({ error: "Plan ID, date, and item ID are required." }), {
+      return new Response(JSON.stringify({ error: 'Plan ID, date, and item ID are required.' }), {
         status: 400,
-        headers: { "Content-Type": "application/json" },
+        headers: { 'Content-Type': 'application/json' },
       });
     }
 
@@ -40,10 +40,10 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
     if (!validationResult.success) {
       return new Response(
         JSON.stringify({
-          error: "Validation failed.",
+          error: 'Validation failed.',
           details: validationResult.error.flatten().fieldErrors,
         }),
-        { status: 400, headers: { "Content-Type": "application/json" } }
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
@@ -53,9 +53,9 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
     const { supabase } = locals;
 
     if (!supabase) {
-      return new Response(JSON.stringify({ error: "Database connection not available." }), {
+      return new Response(JSON.stringify({ error: 'Database connection not available.' }), {
         status: 500,
-        headers: { "Content-Type": "application/json" },
+        headers: { 'Content-Type': 'application/json' },
       });
     }
 
@@ -65,7 +65,7 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
 
     return new Response(JSON.stringify(updatedPlan), {
       status: 200,
-      headers: { "Content-Type": "application/json" },
+      headers: { 'Content-Type': 'application/json' },
     });
   } catch (error) {
     return handleApiError(error);
@@ -81,9 +81,9 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
     const { planId, date, itemId } = params;
 
     if (!planId || !date || !itemId) {
-      return new Response(JSON.stringify({ error: "Plan ID, date, and item ID are required." }), {
+      return new Response(JSON.stringify({ error: 'Plan ID, date, and item ID are required.' }), {
         status: 400,
-        headers: { "Content-Type": "application/json" },
+        headers: { 'Content-Type': 'application/json' },
       });
     }
 
@@ -91,9 +91,9 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
     const { supabase } = locals;
 
     if (!supabase) {
-      return new Response(JSON.stringify({ error: "Database connection not available." }), {
+      return new Response(JSON.stringify({ error: 'Database connection not available.' }), {
         status: 500,
-        headers: { "Content-Type": "application/json" },
+        headers: { 'Content-Type': 'application/json' },
       });
     }
 
@@ -103,7 +103,7 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
 
     return new Response(JSON.stringify(updatedPlan), {
       status: 200,
-      headers: { "Content-Type": "application/json" },
+      headers: { 'Content-Type': 'application/json' },
     });
   } catch (error) {
     return handleApiError(error);

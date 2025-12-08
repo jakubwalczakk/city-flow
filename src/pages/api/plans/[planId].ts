@@ -1,10 +1,10 @@
-import type { APIRoute } from "astro";
-import { DEFAULT_USER_ID } from "@/db/supabase.client";
-import { updatePlanSchema } from "@/lib/schemas/plan.schema";
-import { PlanService } from "@/lib/services/plan.service";
-import { ValidationError } from "@/lib/errors/app-error";
-import { handleApiError, successResponse } from "@/lib/utils/error-handler";
-import { logger } from "@/lib/utils/logger";
+import type { APIRoute } from 'astro';
+import { DEFAULT_USER_ID } from '@/db/supabase.client';
+import { updatePlanSchema } from '@/lib/schemas/plan.schema';
+import { PlanService } from '@/lib/services/plan.service';
+import { ValidationError } from '@/lib/errors/app-error';
+import { handleApiError, successResponse } from '@/lib/utils/error-handler';
+import { logger } from '@/lib/utils/logger';
 
 /**
  * GET /api/plans/[planId]
@@ -20,10 +20,10 @@ export const GET: APIRoute = async ({ params, locals }) => {
     const planId = params.planId;
 
     if (!planId) {
-      throw new ValidationError("Plan ID is required");
+      throw new ValidationError('Plan ID is required');
     }
 
-    logger.debug("Received request to get plan details", {
+    logger.debug('Received request to get plan details', {
       userId: user.id,
       planId,
     });
@@ -34,7 +34,7 @@ export const GET: APIRoute = async ({ params, locals }) => {
     return successResponse(plan, 200);
   } catch (error) {
     return handleApiError(error, {
-      endpoint: "GET /api/plans/[planId]",
+      endpoint: 'GET /api/plans/[planId]',
       userId: DEFAULT_USER_ID,
     });
   }
@@ -55,10 +55,10 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
     const planId = params.planId;
 
     if (!planId) {
-      throw new ValidationError("Plan ID is required");
+      throw new ValidationError('Plan ID is required');
     }
 
-    logger.debug("Received request to update plan", {
+    logger.debug('Received request to update plan', {
       userId: user.id,
       planId,
     });
@@ -68,20 +68,20 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
     try {
       body = await request.json();
     } catch (parseError) {
-      logger.warn("Failed to parse request body", {
+      logger.warn('Failed to parse request body', {
         error: parseError instanceof Error ? parseError.message : String(parseError),
       });
-      throw new ValidationError("Invalid JSON in request body");
+      throw new ValidationError('Invalid JSON in request body');
     }
 
     // Validate request body
     const validation = updatePlanSchema.safeParse(body);
 
     if (!validation.success) {
-      logger.debug("Request validation failed", {
+      logger.debug('Request validation failed', {
         errors: validation.error.flatten(),
       });
-      throw new ValidationError("Validation failed", validation.error.flatten());
+      throw new ValidationError('Validation failed', validation.error.flatten());
     }
 
     // Update the plan
@@ -91,7 +91,7 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
     return successResponse(plan, 200);
   } catch (error) {
     return handleApiError(error, {
-      endpoint: "PATCH /api/plans/[planId]",
+      endpoint: 'PATCH /api/plans/[planId]',
       userId: DEFAULT_USER_ID,
     });
   }
@@ -111,10 +111,10 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
     const planId = params.planId;
 
     if (!planId) {
-      throw new ValidationError("Plan ID is required");
+      throw new ValidationError('Plan ID is required');
     }
 
-    logger.debug("Received request to delete plan", {
+    logger.debug('Received request to delete plan', {
       userId: user.id,
       planId,
     });
@@ -125,7 +125,7 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
     return new Response(null, { status: 204 });
   } catch (error) {
     return handleApiError(error, {
-      endpoint: "DELETE /api/plans/[planId]",
+      endpoint: 'DELETE /api/plans/[planId]',
       userId: DEFAULT_USER_ID,
     });
   }

@@ -1,6 +1,6 @@
-import { defineMiddleware } from "astro:middleware";
+import { defineMiddleware } from 'astro:middleware';
 
-import { createSupabaseServerInstance } from "../db/supabase.client";
+import { createSupabaseServerInstance } from '../db/supabase.client';
 
 /**
  * Public paths that don't require authentication
@@ -8,18 +8,18 @@ import { createSupabaseServerInstance } from "../db/supabase.client";
  */
 const PUBLIC_PATHS = [
   // Public pages
-  "/",
+  '/',
   // Auth pages
-  "/login",
-  "/register",
-  "/forgot-password",
-  "/update-password",
+  '/login',
+  '/register',
+  '/forgot-password',
+  '/update-password',
   // API endpoints (will handle auth internally if needed)
-  "/api/auth/login",
-  "/api/auth/register",
-  "/api/auth/logout",
-  "/api/auth/reset-password",
-  "/api/auth/update-password",
+  '/api/auth/login',
+  '/api/auth/register',
+  '/api/auth/logout',
+  '/api/auth/reset-password',
+  '/api/auth/update-password',
 ];
 
 /**
@@ -50,11 +50,11 @@ export const onRequest = defineMiddleware(async ({ locals, cookies, url, request
     // User is authenticated - store user info in locals
     locals.user = {
       id: user.id,
-      email: user.email ?? "",
+      email: user.email ?? '',
     };
   } else {
     // User is not authenticated - redirect to login for protected routes
-    return redirect("/login");
+    return redirect('/login');
   }
 
   return next();

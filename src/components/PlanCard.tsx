@@ -1,7 +1,7 @@
-import type { PlanListItemDto, PlanStatus } from "@/types";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import type { PlanListItemDto, PlanStatus } from '@/types';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,28 +12,28 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Trash2 } from "lucide-react";
+} from '@/components/ui/alert-dialog';
+import { Trash2 } from 'lucide-react';
 
 /**
  * Props for the PlanCard component.
  */
-interface PlanCardProps {
+type PlanCardProps = {
   plan: PlanListItemDto;
   onClick: () => void;
   onDelete: (planId: string) => void;
-}
+};
 
 /**
  * Map plan status to human-readable label and badge variant.
  */
 const statusConfig: Record<
   PlanStatus,
-  { label: string; variant: "default" | "secondary" | "outline" | "destructive" }
+  { label: string; variant: 'default' | 'secondary' | 'outline' | 'destructive' }
 > = {
-  draft: { label: "Szkic", variant: "secondary" },
-  generated: { label: "Wygenerowany", variant: "default" },
-  archived: { label: "Zarchiwizowany", variant: "outline" },
+  draft: { label: 'Szkic', variant: 'secondary' },
+  generated: { label: 'Wygenerowany', variant: 'default' },
+  archived: { label: 'Zarchiwizowany', variant: 'outline' },
 };
 
 /**
@@ -41,12 +41,12 @@ const statusConfig: Record<
  */
 const formatDateTime = (dateString: string): string => {
   const date = new Date(dateString);
-  return new Intl.DateTimeFormat("pl-PL", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
+  return new Intl.DateTimeFormat('pl-PL', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
   }).format(date);
 };
 
@@ -64,12 +64,12 @@ export const PlanCard = ({ plan, onClick, onDelete }: PlanCardProps) => {
 
   return (
     <Card
-      className="group relative cursor-pointer transition-shadow hover:shadow-lg"
+      className='group relative cursor-pointer transition-shadow hover:shadow-lg'
       onClick={onClick}
-      role="link"
+      role='link'
       tabIndex={0}
       onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
+        if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
           onClick();
         }
@@ -77,17 +77,17 @@ export const PlanCard = ({ plan, onClick, onDelete }: PlanCardProps) => {
       aria-label={`View plan: ${plan.name}`}
     >
       {/* Delete button in top right corner */}
-      <div className="absolute right-2 top-2 z-10">
+      <div className='absolute right-2 top-2 z-10'>
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 opacity-0 transition-opacity group-hover:opacity-100"
+              variant='ghost'
+              size='icon'
+              className='h-8 w-8 opacity-0 transition-opacity group-hover:opacity-100'
               onClick={(e) => e.stopPropagation()}
-              aria-label="Usuń plan"
+              aria-label='Usuń plan'
             >
-              <Trash2 className="h-4 w-4 text-destructive" />
+              <Trash2 className='h-4 w-4 text-destructive' />
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent onClick={(e) => e.stopPropagation()}>
@@ -101,7 +101,7 @@ export const PlanCard = ({ plan, onClick, onDelete }: PlanCardProps) => {
               <AlertDialogCancel>Anuluj</AlertDialogCancel>
               <AlertDialogAction
                 onClick={handleDelete}
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                className='bg-destructive text-destructive-foreground hover:bg-destructive/90'
               >
                 Usuń
               </AlertDialogAction>
@@ -111,19 +111,19 @@ export const PlanCard = ({ plan, onClick, onDelete }: PlanCardProps) => {
       </div>
 
       <CardHeader>
-        <CardTitle className="line-clamp-1 pr-8">{plan.name}</CardTitle>
-        <CardDescription className="line-clamp-1">{plan.destination}</CardDescription>
+        <CardTitle className='line-clamp-1 pr-8'>{plan.name}</CardTitle>
+        <CardDescription className='line-clamp-1'>{plan.destination}</CardDescription>
       </CardHeader>
 
       <CardContent>
-        <div className="flex flex-col gap-1 text-sm text-muted-foreground">
-          <div className="flex items-center justify-between">
+        <div className='flex flex-col gap-1 text-sm text-muted-foreground'>
+          <div className='flex items-center justify-between'>
             <span>Data rozpoczęcia:</span>
-            <span className="font-medium">{formatDateTime(plan.start_date)}</span>
+            <span className='font-medium'>{formatDateTime(plan.start_date)}</span>
           </div>
-          <div className="flex items-center justify-between">
+          <div className='flex items-center justify-between'>
             <span>Data zakończenia:</span>
-            <span className="font-medium">{formatDateTime(plan.end_date)}</span>
+            <span className='font-medium'>{formatDateTime(plan.end_date)}</span>
           </div>
         </div>
       </CardContent>

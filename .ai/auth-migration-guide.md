@@ -45,8 +45,8 @@ Obecnie middleware tylko dodaje klienta Supabase do `locals`. Aby obsługiwać J
 **Obecna implementacja:**
 
 ```typescript
-import { defineMiddleware } from "astro:middleware";
-import { supabaseClient } from "../db/supabase.client";
+import { defineMiddleware } from 'astro:middleware';
+import { supabaseClient } from '../db/supabase.client';
 
 export const onRequest = defineMiddleware((context, next) => {
   context.locals.supabase = supabaseClient;
@@ -57,29 +57,29 @@ export const onRequest = defineMiddleware((context, next) => {
 **Docelowa implementacja:**
 
 ```typescript
-import { defineMiddleware } from "astro:middleware";
-import { supabaseClient } from "../db/supabase.client";
-import { logger } from "../lib/utils/logger";
+import { defineMiddleware } from 'astro:middleware';
+import { supabaseClient } from '../db/supabase.client';
+import { logger } from '../lib/utils/logger';
 
 export const onRequest = defineMiddleware(async (context, next) => {
   context.locals.supabase = supabaseClient;
 
   // Skip authentication for public routes
-  const publicRoutes = ["/login", "/register", "/"];
+  const publicRoutes = ['/login', '/register', '/'];
   if (publicRoutes.some((route) => context.url.pathname.startsWith(route))) {
     return next();
   }
 
   // Try to get the session from cookies or Authorization header
-  const authHeader = context.request.headers.get("Authorization");
+  const authHeader = context.request.headers.get('Authorization');
   let token: string | null = null;
 
-  if (authHeader?.startsWith("Bearer ")) {
+  if (authHeader?.startsWith('Bearer ')) {
     token = authHeader.substring(7);
   } else {
     // Try to get token from cookies (for SSR pages)
     const cookies = context.cookies;
-    token = cookies.get("sb-access-token")?.value || null;
+    token = cookies.get('sb-access-token')?.value || null;
   }
 
   if (token) {
@@ -91,10 +91,10 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
       if (user && !error) {
         context.locals.user = user;
-        logger.debug("User authenticated via middleware", { userId: user.id });
+        logger.debug('User authenticated via middleware', { userId: user.id });
       }
     } catch (error) {
-      logger.warn("Failed to authenticate user in middleware", { error });
+      logger.warn('Failed to authenticate user in middleware', { error });
     }
   }
 
@@ -123,7 +123,7 @@ Każdy endpoint powinien zostać zaktualizowany, aby używał `getAuthenticatedU
 **Przed:**
 
 ```typescript
-import { DEFAULT_USER_ID } from "@/db/supabase.client";
+import { DEFAULT_USER_ID } from '@/db/supabase.client';
 
 export const GET: APIRoute = async ({ locals }) => {
   const user = { id: DEFAULT_USER_ID };
@@ -134,7 +134,7 @@ export const GET: APIRoute = async ({ locals }) => {
 **Po:**
 
 ```typescript
-import { getAuthenticatedUser } from "@/lib/utils/auth";
+import { getAuthenticatedUser } from '@/lib/utils/auth';
 
 export const GET: APIRoute = async (context) => {
   const user = await getAuthenticatedUser(context);
@@ -172,9 +172,9 @@ export async function authenticatedFetch(url: string, options: RequestInit = {})
 
   const headers = new Headers(options.headers);
   if (token) {
-    headers.set("Authorization", `Bearer ${token}`);
+    headers.set('Authorization', `Bearer ${token}`);
   }
-  headers.set("Content-Type", "application/json");
+  headers.set('Content-Type', 'application/json');
 
   const response = await fetch(url, {
     ...options,
@@ -190,7 +190,7 @@ export async function authenticatedFetch(url: string, options: RequestInit = {})
       return authenticatedFetch(url, options);
     } else {
       // Redirect to login
-      window.location.href = "/login";
+      window.location.href = '/login';
     }
   }
 
@@ -202,11 +202,11 @@ export async function authenticatedFetch(url: string, options: RequestInit = {})
 
 ```typescript
 // src/components/ProfileForm.tsx
-import { authenticatedFetch } from "@/lib/utils/api-client";
+import { authenticatedFetch } from '@/lib/utils/api-client';
 
 async function updateProfile(data: UpdateProfileCommand) {
-  const response = await authenticatedFetch("/api/profiles", {
-    method: "PATCH",
+  const response = await authenticatedFetch('/api/profiles', {
+    method: 'PATCH',
     body: JSON.stringify(data),
   });
 
@@ -255,12 +255,12 @@ import OnboardingForm from '@/components/OnboardingForm';
 
 ```typescript
 // src/components/OnboardingForm.tsx
-import { authenticatedFetch } from "@/lib/utils/api-client";
+import { authenticatedFetch } from '@/lib/utils/api-client';
 
 export default function OnboardingForm() {
   const handleSubmit = async (data) => {
-    await authenticatedFetch("/api/profiles", {
-      method: "PATCH",
+    await authenticatedFetch('/api/profiles', {
+      method: 'PATCH',
       body: JSON.stringify({
         preferences: data.preferences,
         travel_pace: data.travel_pace,
@@ -269,7 +269,7 @@ export default function OnboardingForm() {
     });
 
     // Redirect to dashboard
-    window.location.href = "/dashboard";
+    window.location.href = '/dashboard';
   };
 
   // ... form implementation

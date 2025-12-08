@@ -100,7 +100,7 @@ Do implementacji widoku wykorzystane zostaną istniejące typy DTO. Dodatkowo, z
     isLoading: boolean;
     error: string | null;
     plansData: PaginatedPlansDto | null;
-    activeTab: "my-plans" | "history";
+    activeTab: 'my-plans' | 'history';
     currentPage: number;
   };
   ```

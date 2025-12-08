@@ -1,13 +1,13 @@
-import { AppError } from "@/lib/errors/app-error";
-import { logger } from "@/lib/utils/logger";
+import { AppError } from '@/lib/errors/app-error';
+import { logger } from '@/lib/utils/logger';
 
 /**
  * Standard error response structure for API endpoints.
  */
-interface ErrorResponse {
+type ErrorResponse = {
   error: string;
   details?: unknown;
-}
+};
 
 /**
  * Handles errors in API endpoints and returns appropriate HTTP responses.
@@ -29,7 +29,7 @@ export function handleApiError(error: unknown, context?: Record<string, unknown>
     };
 
     // For validation errors, include validation details
-    if (error.name === "ValidationError" && "details" in error) {
+    if (error.name === 'ValidationError' && 'details' in error) {
       errorResponse.details = error.details;
     }
 
@@ -55,16 +55,16 @@ export function handleApiError(error: unknown, context?: Record<string, unknown>
     return new Response(JSON.stringify(errorResponse), {
       status: error.statusCode,
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
     });
   }
 
   // Handle unknown errors
-  logger.error("Unexpected error occurred", context, error as Error);
+  logger.error('Unexpected error occurred', context, error as Error);
 
   const errorResponse: ErrorResponse = {
-    error: "Internal Server Error",
+    error: 'Internal Server Error',
     // In development, include error details for debugging
     ...(import.meta.env.DEV && {
       details: error instanceof Error ? error.message : String(error),
@@ -74,7 +74,7 @@ export function handleApiError(error: unknown, context?: Record<string, unknown>
   return new Response(JSON.stringify(errorResponse), {
     status: 500,
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
   });
 }
@@ -90,7 +90,7 @@ export function successResponse(data: unknown, status = 200): Response {
   return new Response(JSON.stringify(data), {
     status,
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
   });
 }

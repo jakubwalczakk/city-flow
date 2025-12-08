@@ -1,12 +1,12 @@
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { AVAILABLE_PREFERENCES, PREFERENCE_LABELS, type TravelPreference } from "@/types";
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { AVAILABLE_PREFERENCES, PREFERENCE_LABELS, type TravelPreference } from '@/types';
 
-interface PreferencesSelectorProps {
+type PreferencesSelectorProps = {
   value: string[];
   onChange: (value: string[]) => void;
   error?: string | null;
-}
+};
 
 /**
  * Component for selecting 2-5 travel preferences from a predefined list.
@@ -33,15 +33,15 @@ export function PreferencesSelector({ value, onChange, error }: PreferencesSelec
   const isMaxReached = value.length >= maxPreferences;
 
   return (
-    <div className="space-y-3">
+    <div className='space-y-3'>
       <div>
         <Label>Preferencje turystyczne</Label>
-        <p className="text-sm text-muted-foreground mt-1">
+        <p className='text-sm text-muted-foreground mt-1'>
           Wybierz od {minPreferences} do {maxPreferences} preferencji
         </p>
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <div className='flex flex-wrap gap-2'>
         {AVAILABLE_PREFERENCES.map((preference) => {
           const selected = isSelected(preference);
           const disabled = !selected && isMaxReached;
@@ -49,9 +49,9 @@ export function PreferencesSelector({ value, onChange, error }: PreferencesSelec
           return (
             <Badge
               key={preference}
-              variant={selected ? "default" : "outline"}
+              variant={selected ? 'default' : 'outline'}
               className={`cursor-pointer transition-all ${
-                disabled ? "opacity-50 cursor-not-allowed" : "hover:scale-105"
+                disabled ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'
               }`}
               onClick={() => !disabled && handleTogglePreference(preference)}
             >
@@ -61,9 +61,9 @@ export function PreferencesSelector({ value, onChange, error }: PreferencesSelec
         })}
       </div>
 
-      {error && <p className="text-sm text-destructive">{error}</p>}
+      {error && <p className='text-sm text-destructive'>{error}</p>}
 
-      <p className="text-xs text-muted-foreground">
+      <p className='text-xs text-muted-foreground'>
         Wybrano: {value.length}/{maxPreferences}
       </p>
     </div>

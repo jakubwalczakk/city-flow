@@ -1,26 +1,26 @@
-import { useState, useEffect, useCallback } from "react";
-import type { PaginatedPlansDto, PlanStatus } from "@/types";
+import { useState, useEffect, useCallback } from 'react';
+import type { PaginatedPlansDto, PlanStatus } from '@/types';
 
 /**
  * Parameters for fetching plans.
  */
-export interface UsePlansParams {
+export type UsePlansParams = {
   status?: PlanStatus | PlanStatus[];
   limit: number;
   offset: number;
-  sortBy?: "created_at" | "name";
-  order?: "asc" | "desc";
-}
+  sortBy?: 'created_at' | 'name';
+  order?: 'asc' | 'desc';
+};
 
 /**
  * Result type returned by the usePlans hook.
  */
-export interface UsePlansResult {
+export type UsePlansResult = {
   data: PaginatedPlansDto | null;
   isLoading: boolean;
   error: string | null;
   refetch: () => void;
-}
+};
 
 /**
  * Custom hook for fetching plans from the API.
@@ -45,18 +45,18 @@ export const usePlans = (params: UsePlansParams): UsePlansResult => {
       // Always use 'statuses' parameter (supports single or multiple values)
       if (params.status) {
         const statusArray = Array.isArray(params.status) ? params.status : [params.status];
-        searchParams.set("statuses", statusArray.join(","));
+        searchParams.set('statuses', statusArray.join(','));
       }
 
-      searchParams.set("limit", params.limit.toString());
-      searchParams.set("offset", params.offset.toString());
+      searchParams.set('limit', params.limit.toString());
+      searchParams.set('offset', params.offset.toString());
 
       if (params.sortBy) {
-        searchParams.set("sort_by", params.sortBy);
+        searchParams.set('sort_by', params.sortBy);
       }
 
       if (params.order) {
-        searchParams.set("order", params.order);
+        searchParams.set('order', params.order);
       }
 
       // Fetch plans from API
@@ -69,7 +69,7 @@ export const usePlans = (params: UsePlansParams): UsePlansResult => {
       const result: PaginatedPlansDto = await response.json();
       setData(result);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "An unknown error occurred while fetching plans.";
+      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred while fetching plans.';
       setError(errorMessage);
       setData(null);
     } finally {

@@ -65,7 +65,7 @@ If you need to change the default user ID:
 
 ```typescript
 // src/db/supabase.client.ts
-export const DEFAULT_USER_ID = "your-new-uuid-here";
+export const DEFAULT_USER_ID = 'your-new-uuid-here';
 ```
 
 ```sql

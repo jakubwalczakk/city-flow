@@ -1,8 +1,8 @@
-import type { AstroCookies } from "astro";
-import { createBrowserClient } from "@supabase/ssr";
-import { createServerClient, type CookieOptionsWithName } from "@supabase/ssr";
+import type { AstroCookies } from 'astro';
+import { createBrowserClient } from '@supabase/ssr';
+import { createServerClient, type CookieOptionsWithName } from '@supabase/ssr';
 
-import type { Database } from "./database.types";
+import type { Database } from './database.types';
 
 // Client-side variables (available in browser with PUBLIC_ prefix)
 const clientUrl = import.meta.env.PUBLIC_SUPABASE_URL;
@@ -26,10 +26,10 @@ export type SupabaseClient = typeof supabaseClient;
  * Ensures secure session management with proper cookie settings
  */
 export const cookieOptions: CookieOptionsWithName = {
-  path: "/",
+  path: '/',
   secure: false, // Set to false for local development (HTTP)
   httpOnly: true,
-  sameSite: "lax",
+  sameSite: 'lax',
 };
 
 /**
@@ -37,9 +37,9 @@ export const cookieOptions: CookieOptionsWithName = {
  * Required for Supabase SSR cookie handling
  */
 function parseCookieHeader(cookieHeader: string): { name: string; value: string }[] {
-  return cookieHeader.split(";").map((cookie) => {
-    const [name, ...rest] = cookie.trim().split("=");
-    return { name, value: rest.join("=") };
+  return cookieHeader.split(';').map((cookie) => {
+    const [name, ...rest] = cookie.trim().split('=');
+    return { name, value: rest.join('=') };
   });
 }
 
@@ -55,7 +55,7 @@ export const createSupabaseServerInstance = (context: { headers: Headers; cookie
     cookieOptions,
     cookies: {
       getAll() {
-        return parseCookieHeader(context.headers.get("Cookie") ?? "");
+        return parseCookieHeader(context.headers.get('Cookie') ?? '');
       },
       setAll(cookiesToSet) {
         cookiesToSet.forEach(({ name, value, options }) => context.cookies.set(name, value, options));
@@ -66,4 +66,4 @@ export const createSupabaseServerInstance = (context: { headers: Headers; cookie
   return supabase;
 };
 
-export const DEFAULT_USER_ID = "17555d06-2387-4f0b-b4f8-0887177cadc1";
+export const DEFAULT_USER_ID = '17555d06-2387-4f0b-b4f8-0887177cadc1';

@@ -42,7 +42,7 @@ import {
   FieldValues, // ❌ Błąd - importowany jako wartość
   FormProvider,
   useFormContext,
-} from "react-hook-form";
+} from 'react-hook-form';
 ```
 
 **Rozwiązanie:**
@@ -56,7 +56,7 @@ import {
   type ControllerProps, // ✅ Import jako typ
   type FieldPath, // ✅ Import jako typ
   type FieldValues, // ✅ Import jako typ
-} from "react-hook-form";
+} from 'react-hook-form';
 ```
 
 **Plik naprawiony:**
