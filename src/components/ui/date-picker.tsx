@@ -16,6 +16,7 @@ export type DatePickerProps = {
   maxDate?: Date;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  'data-testid'?: string;
 };
 
 export function DatePicker({
@@ -27,6 +28,7 @@ export function DatePicker({
   maxDate,
   open,
   onOpenChange,
+  'data-testid': dataTestId,
 }: DatePickerProps) {
   return (
     <Popover open={open} onOpenChange={onOpenChange}>
@@ -35,6 +37,7 @@ export function DatePicker({
           variant={'outline'}
           className={cn('w-full justify-start text-left font-normal', !date && 'text-muted-foreground')}
           disabled={disabled}
+          data-testid={dataTestId}
         >
           <CalendarIcon className='mr-2 h-4 w-4' />
           {date ? format(date, 'PPP', { locale: pl }) : <span>{placeholder}</span>}

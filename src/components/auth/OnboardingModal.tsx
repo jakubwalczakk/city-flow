@@ -111,10 +111,10 @@ export function OnboardingModal() {
         </div>
 
         <DialogFooter className='flex-col sm:flex-row gap-2'>
-          <Button variant='outline' onClick={handleSkip} disabled={isSubmitting}>
+          <Button variant='outline' onClick={handleSkip} disabled={isSubmitting} data-testid='onboarding-skip-btn'>
             Pomiń
           </Button>
-          <Button onClick={handleSave} disabled={isSubmitting}>
+          <Button onClick={handleSave} disabled={isSubmitting} data-testid='onboarding-save-btn'>
             {isSubmitting ? 'Zapisywanie...' : 'Zapisz i przejdź dalej'}
           </Button>
         </DialogFooter>

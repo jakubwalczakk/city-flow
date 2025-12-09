@@ -101,7 +101,7 @@ export const PlansDashboard = () => {
         <h1 className='text-3xl font-bold tracking-tight'>Moje Plany</h1>
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
           <DialogTrigger asChild>
-            <Button className='w-full sm:w-auto' onClick={() => setEditingPlan(null)}>
+            <Button className='w-full sm:w-auto' onClick={() => setEditingPlan(null)} data-testid='create-new-plan-btn'>
               + Utwórz nowy plan
             </Button>
           </DialogTrigger>

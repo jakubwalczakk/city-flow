@@ -139,7 +139,13 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input type='email' placeholder='twoj.email@example.com' disabled={isLoading} {...field} />
+                  <Input
+                    type='email'
+                    placeholder='twoj.email@example.com'
+                    disabled={isLoading}
+                    data-testid='auth-email-input'
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -159,6 +165,7 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
                       placeholder={isLogin ? 'Wprowadź hasło' : 'Minimum 8 znaków'}
                       disabled={isLoading}
                       className='pr-10'
+                      data-testid='auth-password-input'
                       {...field}
                     />
                     <Button
@@ -222,7 +229,7 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
             </div>
           )}
 
-          <Button type='submit' className='w-full' disabled={isLoading}>
+          <Button type='submit' className='w-full' disabled={isLoading} data-testid='auth-submit-btn'>
             {isLoading && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
             {isLogin ? 'Zaloguj się' : 'Zarejestruj się'}
           </Button>

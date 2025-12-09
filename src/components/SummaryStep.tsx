@@ -130,7 +130,7 @@ export function SummaryStep({ formData, goToPrevStep, onSubmit, isLoading, error
         <Button variant='outline' onClick={goToPrevStep} disabled={isLoading}>
           Wstecz
         </Button>
-        <Button onClick={onSubmit} disabled={isLoading}>
+        <Button onClick={onSubmit} disabled={isLoading} data-testid='create-plan-button'>
           {isLoading ? (
             <>
               <Loader2 className='mr-2 h-4 w-4 animate-spin' />

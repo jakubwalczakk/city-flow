@@ -7,14 +7,7 @@ Something to consider whether it's a good practice from a RESTful point of view.
 
 
 Brakujące Historyjki
-- onboarding
 - widok admina na feedbacki i listę uzytkowników wraz z ich statystykami; wygenerowany plany itd. itd.
-
-- generowanie planu na podstawie ogólnych preferencji -> modyfikacja prompta
-- wyświetlanie ostrzezenia o weryfikacji danych, bo to AI
-
-- ręczne przenoszenie planu do historii
-- automatyczne przenoszenie planu do historii
 
 - improve animations
 - przemyslenie definicji endpointów

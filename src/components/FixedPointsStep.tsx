@@ -201,6 +201,7 @@ export function FixedPointsStep({
           </Label>
           <Input
             id='location'
+            data-testid='fixed-point-location-input'
             placeholder='np. Lotnisko Chopina'
             value={currentPoint.location}
             onChange={(e) => setCurrentPoint({ ...currentPoint, location: e.target.value })}
@@ -220,6 +221,7 @@ export function FixedPointsStep({
                   date={getEventDate(currentPoint.event_at)}
                   onSelect={handleDateSelect}
                   placeholder='Wybierz datę'
+                  data-testid='fixed-point-date-picker'
                 />
               </div>
               <div className='w-28'>
@@ -271,7 +273,12 @@ export function FixedPointsStep({
         </div>
 
         <div className='flex gap-2'>
-          <Button onClick={isAdding ? handleAddPoint : handleUpdatePoint} disabled={!isFormValid()} className='flex-1'>
+          <Button
+            onClick={isAdding ? handleAddPoint : handleUpdatePoint}
+            disabled={!isFormValid()}
+            className='flex-1'
+            data-testid='save-fixed-point-btn'
+          >
             {isAdding ? 'Dodaj punkt' : 'Zapisz zmiany'}
           </Button>
           <Button variant='outline' onClick={resetForm}>
@@ -346,7 +353,7 @@ export function FixedPointsStep({
       {isAdding ? (
         renderForm()
       ) : (
-        <Button variant='outline' onClick={handleAddClick} className='w-full'>
+        <Button variant='outline' onClick={handleAddClick} className='w-full' data-testid='add-fixed-point-btn'>
           <Plus className='mr-2 h-4 w-4' />
           Dodaj stały punkt
         </Button>
@@ -368,7 +375,9 @@ export function FixedPointsStep({
           >
             {isLoading ? 'Zapisywanie...' : 'Zapisz jako szkic'}
           </Button>
-          <Button onClick={goToNextStep}>Dalej</Button>
+          <Button onClick={goToNextStep} data-testid='fixed-points-next-button'>
+            Dalej
+          </Button>
         </div>
       </div>
     </div>

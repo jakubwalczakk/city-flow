@@ -75,3 +75,5 @@ storybook-static/
 .playwright/
 .cypress/
 .vitest/
+test-results/
+playwright-report/

@@ -121,6 +121,7 @@ export function BasicInfoStep({
         </Label>
         <Input
           id='name'
+          data-testid='plan-name-input'
           placeholder='np. Weekend w Paryżu'
           value={formData.name}
           onChange={(e) => updateFormData({ name: e.target.value })}
@@ -135,6 +136,7 @@ export function BasicInfoStep({
         </Label>
         <Input
           id='destination'
+          data-testid='plan-destination-input'
           placeholder='np. Paryż, Francja'
           value={formData.destination}
           onChange={(e) => updateFormData({ destination: e.target.value })}
@@ -156,6 +158,7 @@ export function BasicInfoStep({
                 open={isStartOpen}
                 onOpenChange={setIsStartOpen}
                 placeholder='Wybierz datę'
+                data-testid='start-date-picker'
               />
             </div>
             <div className='w-28'>
@@ -183,6 +186,7 @@ export function BasicInfoStep({
                 onOpenChange={setIsEndOpen}
                 minDate={formData.start_date}
                 placeholder='Wybierz datę'
+                data-testid='end-date-picker'
               />
             </div>
             <div className='w-28'>
@@ -222,7 +226,11 @@ export function BasicInfoStep({
           <Button variant='outline' onClick={handleSave} disabled={!isFormValid() || isLoading} className='mr-2'>
             {isLoading ? 'Zapisywanie...' : 'Zapisz jako szkic'}
           </Button>
-          <Button onClick={validateAndProceed} disabled={!isFormValid() || isLoading}>
+          <Button
+            onClick={validateAndProceed}
+            disabled={!isFormValid() || isLoading}
+            data-testid='basic-info-next-button'
+          >
             Dalej
           </Button>
         </div>

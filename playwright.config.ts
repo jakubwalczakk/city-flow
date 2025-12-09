@@ -1,4 +1,8 @@
 import { defineConfig, devices } from '@playwright/test';
+import dotenv from 'dotenv';
+import path from 'path';
+
+dotenv.config({ path: path.resolve(process.cwd(), '.env.test') });
 
 /**
  * Read environment variables from file.
@@ -40,8 +44,8 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: 'npm run dev',
-    url: 'http://localhost:3000',
+    command: 'npm run dev:e2e',
+    url: 'http://localhost:3000/login',
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
   },
