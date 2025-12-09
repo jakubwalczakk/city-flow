@@ -21,35 +21,34 @@ export class LoginPage {
   }
 
   async login(email: string, password: string) {
-    // Wait for React hydration - the form should have the onSubmit handler attached
+    // Wait for form to be ready
+    await expect(this.emailInput).toBeVisible();
+    await expect(this.passwordInput).toBeVisible();
     await expect(this.submitButton).toBeVisible();
     await expect(this.submitButton).toBeEnabled();
 
-    // Wait for hydration - check that React has mounted
-    await this.page.waitForSelector('[data-testid="auth-email-input"]', { state: 'visible' });
-
-    // Additional wait for React to fully hydrate the form handlers
+    // Wait for React hydration
     await this.page.waitForTimeout(1000);
 
-    // Fill email
-    await this.emailInput.click();
+    // Clear and fill email field
+    await this.emailInput.clear();
     await this.emailInput.fill(email);
 
-    // Verify email was filled
-    await expect(this.emailInput).toHaveValue(email);
-
-    // Fill password
-    await this.passwordInput.click();
+    // Clear and fill password field
+    await this.passwordInput.clear();
     await this.passwordInput.fill(password);
 
-    // Verify password was filled
+    // Small delay to let React process the input changes
+    await this.page.waitForTimeout(200);
+
+    // Verify both fields are filled before submitting
+    await expect(this.emailInput).toHaveValue(email);
     await expect(this.passwordInput).toHaveValue(password);
 
-    // Submit form using keyboard Enter
-    await this.passwordInput.press('Enter');
+    // Click submit button
+    await this.submitButton.click();
 
-    // Wait for successful login - either redirect to /plans or success message
-    // The app shows "Logowanie pomyślne! Przekierowywanie..." and then redirects after 500ms
+    // Wait for successful login redirect
     await expect(this.page).toHaveURL(/\/plans/, { timeout: 30000 });
   }
 }

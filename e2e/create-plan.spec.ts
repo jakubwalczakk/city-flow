@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 import { LoginPage } from './page-objects/LoginPage';
 import { NewPlanPage } from './page-objects/NewPlanPage';
 
@@ -10,7 +10,12 @@ test.describe('Create New Plan', () => {
   let loginPage: LoginPage;
   let newPlanPage: NewPlanPage;
 
-  test.beforeEach(async ({ page }) => {
+  // Clean database between tests - cleans plans, fixed_points, feedback tables
+  // Preserves profiles and auth tables needed for test user
+  test.beforeEach(async ({ page, cleanDatabase }) => {
+    // Database cleanup runs automatically via fixture
+    void cleanDatabase; // Acknowledge the fixture is being used
+
     loginPage = new LoginPage(page);
     newPlanPage = new NewPlanPage(page);
 
