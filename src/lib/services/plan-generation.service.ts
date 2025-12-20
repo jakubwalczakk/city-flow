@@ -309,10 +309,18 @@ Key requirements for the plan:
 - Start Date & Time: ${new Date(plan.start_date).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short', hour12: false })}
 - End Date & Time: ${new Date(plan.end_date).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short', hour12: false })}
 - User Notes: ${plan.notes || 'No special notes provided.'}
-- Fixed Points: The user has scheduled the following non-negotiable events. You MUST incorporate them into the plan at the specified times.
+
+**CRITICAL - FIXED POINTS (IMMUTABLE SCHEDULE):**
+The user has pre-scheduled the following events. These are NON-NEGOTIABLE and MUST appear in the itinerary EXACTLY at the specified date and time. You are FORBIDDEN from:
+- Moving these events to a different day
+- Changing the time of these events
+- Omitting any of these events from the plan
+- Scheduling other activities that would conflict with these events
+
+Build the rest of the itinerary AROUND these fixed points:
 ${fixedPointsText}
 
-Generate a plan that is logical, engaging, and takes into account travel times between locations. Be creative and suggest interesting activities, restaurants, and sights.
+Generate a plan that is logical, engaging, and takes into account travel times between locations. Be creative and suggest interesting activities, restaurants, and sights. Ensure all other activities are scheduled to accommodate the fixed points above.
 `;
   }
 

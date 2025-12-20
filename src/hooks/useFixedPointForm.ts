@@ -2,12 +2,12 @@ import { useState, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { fixedPointSchema, type FixedPointFormData } from '@/lib/schemas/plan.schema';
-import type { CreateFixedPointCommand } from '@/types';
+import type { FixedPointFormItem } from '@/types';
 import { updateDateKeepTime, updateTimeKeepDate, getDateFromISO, getTimeFromISO } from '@/lib/utils/dateFormatters';
 
 type UseFixedPointFormProps = {
-  onAdd: (point: CreateFixedPointCommand) => void;
-  onUpdate: (index: number, point: CreateFixedPointCommand) => void;
+  onAdd: (point: FixedPointFormItem) => void;
+  onUpdate: (index: number, point: FixedPointFormItem) => void;
 };
 
 /**
@@ -46,7 +46,7 @@ export function useFixedPointForm({ onAdd, onUpdate }: UseFixedPointFormProps) {
   }, [resetForm]);
 
   const startEditing = useCallback(
-    (index: number, point: CreateFixedPointCommand) => {
+    (index: number, point: FixedPointFormItem) => {
       setEditingIndex(index);
       setIsAdding(false);
       form.reset({
@@ -59,8 +59,8 @@ export function useFixedPointForm({ onAdd, onUpdate }: UseFixedPointFormProps) {
 
   const handleSubmit = useCallback(
     (data: FixedPointFormData) => {
-      // Convert form data to CreateFixedPointCommand
-      const pointToSubmit: CreateFixedPointCommand = {
+      // Convert form data to FixedPointFormItem (without ID - it will be preserved by parent)
+      const pointToSubmit: FixedPointFormItem = {
         location: data.location,
         event_at: data.event_at ? new Date(data.event_at).toISOString() : '',
         event_duration: data.event_duration ?? null,

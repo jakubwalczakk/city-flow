@@ -202,6 +202,14 @@ export type UpdateFixedPointCommand = {
   description?: string | null;
 };
 
+/**
+ * Form item for fixed points - includes optional ID for existing points.
+ * Used in the form to track which points need to be created vs updated.
+ */
+export type FixedPointFormItem = CreateFixedPointCommand & {
+  id?: string;
+};
+
 // ============================================================================
 //                                   Feedback
 // ============================================================================
@@ -276,7 +284,7 @@ export type NewPlanViewModel = {
     end_date: Date;
     notes: string;
   };
-  fixedPoints: CreateFixedPointCommand[];
+  fixedPoints: FixedPointFormItem[];
 };
 
 /**

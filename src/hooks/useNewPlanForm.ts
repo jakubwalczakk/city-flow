@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import type {
   NewPlanViewModel,
   CreatePlanCommand,
-  CreateFixedPointCommand,
+  FixedPointFormItem,
   PlanDetailsDto,
   PlanListItemDto,
   FixedPointDto,
@@ -98,14 +98,15 @@ export function useNewPlanForm({
             throw new Error('Failed to fetch fixed points');
           }
           const fixedPoints = (await response.json()) as FixedPointDto[];
-          // Convert FixedPointDto to CreateFixedPointCommand format (without id/plan_id)
-          const fixedPointCommands = fixedPoints.map((fp) => ({
+          // Convert FixedPointDto to FixedPointFormItem format (preserve id for updates)
+          const fixedPointItems: FixedPointFormItem[] = fixedPoints.map((fp) => ({
+            id: fp.id, // Preserve ID for PATCH updates
             location: fp.location,
             event_at: fp.event_at,
             event_duration: fp.event_duration,
             description: fp.description,
           }));
-          setFormData((prev) => ({ ...prev, fixedPoints: fixedPointCommands }));
+          setFormData((prev) => ({ ...prev, fixedPoints: fixedPointItems }));
         } catch (err) {
           setError(err instanceof Error ? err.message : 'Could not load draft details');
         }
@@ -127,7 +128,7 @@ export function useNewPlanForm({
     }));
   };
 
-  const addFixedPoint = (point: CreateFixedPointCommand) => {
+  const addFixedPoint = (point: FixedPointFormItem) => {
     setFormData((prev) => ({
       ...prev,
       fixedPoints: [...prev.fixedPoints, point],
@@ -141,10 +142,11 @@ export function useNewPlanForm({
     }));
   };
 
-  const updateFixedPoint = (index: number, point: CreateFixedPointCommand) => {
+  const updateFixedPoint = (index: number, point: FixedPointFormItem) => {
     setFormData((prev) => ({
       ...prev,
-      fixedPoints: prev.fixedPoints.map((p, i) => (i === index ? point : p)),
+      // Preserve the ID from the existing point when updating
+      fixedPoints: prev.fixedPoints.map((p, i) => (i === index ? { ...point, id: p.id } : p)),
     }));
   };
 
@@ -200,42 +202,114 @@ export function useNewPlanForm({
   const saveStep2 = async (currentPlanId: string) => {
     if (!currentPlanId) return;
 
-    // First, delete all existing fixed points for this plan
-    // This ensures we don't create duplicates when editing an existing draft
+    // Step 1: Get existing fixed points from the database
+    let existingPointIds: string[] = [];
     try {
       const existingPointsResponse = await fetch(`/api/plans/${currentPlanId}/fixed-points`);
       if (existingPointsResponse.ok) {
         const existingPoints = (await existingPointsResponse.json()) as FixedPointDto[];
-
-        // Delete all existing fixed points
-        const deletePromises = existingPoints.map((point) =>
-          fetch(`/api/plans/${currentPlanId}/fixed-points/${point.id}`, {
-            method: 'DELETE',
-          })
-        );
-        await Promise.all(deletePromises);
+        existingPointIds = existingPoints.map((point) => point.id);
       }
     } catch {
-      // Continue anyway - we'll try to create the new ones
+      // If we can't fetch existing points, continue
     }
 
-    // Now create all fixed points from the form
-    // TODO: This should be a bulk update, not a series of individual requests
-    if (formData.fixedPoints.length > 0) {
-      const fixedPointPromises = formData.fixedPoints.map((point) =>
-        fetch(`/api/plans/${currentPlanId}/fixed-points`, {
-          method: 'POST',
+    // Step 2: Separate points into existing (PATCH) and new (POST)
+    const pointsToUpdate = formData.fixedPoints.filter((p) => p.id);
+    const pointsToCreate = formData.fixedPoints.filter((p) => !p.id);
+    const formPointIds = formData.fixedPoints.map((p) => p.id).filter(Boolean) as string[];
+    const pointsToDelete = existingPointIds.filter((id) => !formPointIds.includes(id));
+
+    const failedResults: string[] = [];
+
+    // Helper function to check response and collect errors
+    const checkResponse = async (result: PromiseSettledResult<Response>, operation: string) => {
+      if (result.status === 'rejected') {
+        failedResults.push(`${operation}: ${result.reason?.message || 'Network error'}`);
+      } else if (!result.value.ok) {
+        try {
+          const errorData = await result.value.json();
+          let errorMessage = errorData.error || `HTTP ${result.value.status}`;
+          if (errorData.details?.fieldErrors) {
+            const fieldMessages = Object.entries(errorData.details.fieldErrors)
+              .map(([field, messages]) => `${field}: ${(messages as string[]).join(', ')}`)
+              .join('; ');
+            errorMessage += ` (${fieldMessages})`;
+          }
+          console.error(`${operation} error:`, errorData);
+          failedResults.push(errorMessage);
+        } catch {
+          failedResults.push(`${operation}: HTTP ${result.value.status}`);
+        }
+      }
+    };
+
+    // Helper to normalize date to ISO 8601 format with Z suffix
+    const normalizeEventAt = (eventAt: string): string => {
+      if (!eventAt) return eventAt;
+      try {
+        return new Date(eventAt).toISOString();
+      } catch {
+        return eventAt;
+      }
+    };
+
+    // Step 3: Update existing points (PATCH)
+    if (pointsToUpdate.length > 0) {
+      const updatePromises = pointsToUpdate.map((point) =>
+        fetch(`/api/plans/${currentPlanId}/fixed-points/${point.id}`, {
+          method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(point),
+          body: JSON.stringify({
+            location: point.location,
+            event_at: normalizeEventAt(point.event_at),
+            event_duration: point.event_duration,
+            description: point.description,
+          }),
         })
       );
 
-      const results = await Promise.allSettled(fixedPointPromises);
-      const failedPoints = results.filter((r) => r.status === 'rejected');
-
-      if (failedPoints.length > 0) {
-        setError('Some fixed points failed to save.');
+      const updateResults = await Promise.allSettled(updatePromises);
+      for (const result of updateResults) {
+        await checkResponse(result, 'Update');
       }
+    }
+
+    // Step 4: Create new points (POST)
+    if (pointsToCreate.length > 0) {
+      const createPromises = pointsToCreate.map((point) =>
+        fetch(`/api/plans/${currentPlanId}/fixed-points`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            location: point.location,
+            event_at: normalizeEventAt(point.event_at),
+            event_duration: point.event_duration,
+            description: point.description,
+          }),
+        })
+      );
+
+      const createResults = await Promise.allSettled(createPromises);
+      for (const result of createResults) {
+        await checkResponse(result, 'Create');
+      }
+    }
+
+    // Step 5: Delete removed points (only after updates/creates succeed)
+    if (failedResults.length === 0 && pointsToDelete.length > 0) {
+      const deletePromises = pointsToDelete.map((pointId) =>
+        fetch(`/api/plans/${currentPlanId}/fixed-points/${pointId}`, {
+          method: 'DELETE',
+        })
+      );
+      // We don't throw on delete failure - updates/creates are already saved
+      await Promise.allSettled(deletePromises);
+    }
+
+    if (failedResults.length > 0) {
+      console.error('Failed to save fixed points:', failedResults);
+      throw new Error(`Failed to save fixed point(s): ${failedResults[0]}`);
     }
   };
 

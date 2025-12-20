@@ -1,10 +1,10 @@
 import { memo } from 'react';
 import { MapPin, Clock } from 'lucide-react';
 import { formatDateTime } from '@/lib/utils/dateFormatters';
-import type { CreateFixedPointCommand } from '@/types';
+import type { FixedPointFormItem } from '@/types';
 
 type FixedPointSummaryItemProps = {
-  point: CreateFixedPointCommand;
+  point: FixedPointFormItem;
 };
 
 /**

@@ -1,16 +1,16 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
-import type { CreateFixedPointCommand } from '@/types';
+import type { FixedPointFormItem } from '@/types';
 import { useFixedPointForm } from '@/hooks/useFixedPointForm';
 import { FixedPointForm } from '@/components/fixed-points/FixedPointForm';
 import { FixedPointsList } from '@/components/fixed-points/FixedPointsList';
 
 type FixedPointsStepProps = {
-  fixedPoints: CreateFixedPointCommand[];
-  addFixedPoint: (point: CreateFixedPointCommand) => void;
+  fixedPoints: FixedPointFormItem[];
+  addFixedPoint: (point: FixedPointFormItem) => void;
   removeFixedPoint: (index: number) => void;
-  updateFixedPoint: (index: number, point: CreateFixedPointCommand) => void;
+  updateFixedPoint: (index: number, point: FixedPointFormItem) => void;
   goToNextStep: () => void;
   goToPrevStep: () => void;
   onCancel: () => void;

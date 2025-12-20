@@ -1,11 +1,11 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { MapPin, Clock, Pencil, Trash2 } from 'lucide-react';
-import type { CreateFixedPointCommand } from '@/types';
+import type { FixedPointFormItem } from '@/types';
 import { formatDateTime } from '@/lib/utils/dateFormatters';
 
 type FixedPointsListProps = {
-  points: CreateFixedPointCommand[];
+  points: FixedPointFormItem[];
   onEdit: (index: number) => void;
   onRemove: (index: number) => void;
   editingIndex: number | null;
