@@ -6,30 +6,39 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DatePicker } from '@/components/ui/date-picker';
-import type { CreateFixedPointCommand } from '@/types';
-import { getDateForPicker, getTimeForInput, updateDateInForm, updateTimeInForm } from '@/lib/utils/formDateHelpers';
+import type { FixedPointFormData } from '@/lib/schemas/plan.schema';
 
 type FixedPointFormProps = {
-  form: UseFormReturn<CreateFixedPointCommand>;
+  form: UseFormReturn<FixedPointFormData>;
   onSubmit: () => void;
   onCancel: () => void;
   isEditing: boolean;
+  getDateForPicker: () => Date | undefined;
+  getTimeForInput: () => string;
+  handleDateSelect: (date: Date | undefined) => void;
+  handleTimeChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 };
 
 /**
  * Form component for adding/editing fixed points
  * Uses React Hook Form for validation and state management
+ * Date/time logic is extracted to useFixedPointForm hook
  */
-export function FixedPointForm({ form, onSubmit, onCancel, isEditing }: FixedPointFormProps) {
+export function FixedPointForm({
+  form,
+  onSubmit,
+  onCancel,
+  isEditing,
+  getDateForPicker,
+  getTimeForInput,
+  handleDateSelect,
+  handleTimeChange,
+}: FixedPointFormProps) {
   const {
     register,
     control,
-    watch,
-    setValue,
     formState: { errors, isValid },
   } = form;
-
-  const eventAt = watch('event_at');
 
   return (
     <Card>
@@ -49,8 +58,15 @@ export function FixedPointForm({ form, onSubmit, onCancel, isEditing }: FixedPoi
               placeholder='np. Lotnisko Chopina'
               {...register('location')}
               className={errors.location ? 'border-destructive' : ''}
+              aria-required='true'
+              aria-invalid={!!errors.location}
+              aria-describedby={errors.location ? 'location-error' : undefined}
             />
-            {errors.location && <p className='text-sm text-destructive'>{errors.location.message}</p>}
+            {errors.location && (
+              <p id='location-error' className='text-sm text-destructive'>
+                {errors.location.message}
+              </p>
+            )}
           </div>
 
           {/* Date and Time */}
@@ -64,14 +80,10 @@ export function FixedPointForm({ form, onSubmit, onCancel, isEditing }: FixedPoi
                   <Controller
                     name='event_at'
                     control={control}
-                    render={({ field }) => (
+                    render={() => (
                       <DatePicker
-                        date={getDateForPicker(field.value)}
-                        onSelect={(date) => {
-                          if (date) {
-                            setValue('event_at', updateDateInForm(field.value, date));
-                          }
-                        }}
+                        date={getDateForPicker()}
+                        onSelect={handleDateSelect}
                         placeholder='Wybierz datę'
                         data-testid='fixed-point-date-picker'
                       />
@@ -79,12 +91,7 @@ export function FixedPointForm({ form, onSubmit, onCancel, isEditing }: FixedPoi
                   />
                 </div>
                 <div className='w-28'>
-                  <Input
-                    id='event_time'
-                    type='time'
-                    value={getTimeForInput(eventAt)}
-                    onChange={(e) => setValue('event_at', updateTimeInForm(eventAt, e.target.value))}
-                  />
+                  <Input id='event_time' type='time' value={getTimeForInput()} onChange={handleTimeChange} />
                 </div>
               </div>
               {errors.event_at && <p className='text-sm text-destructive'>{errors.event_at.message}</p>}

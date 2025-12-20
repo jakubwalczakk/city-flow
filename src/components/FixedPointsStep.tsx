@@ -34,7 +34,19 @@ export function FixedPointsStep({
   error,
   onSave,
 }: FixedPointsStepProps) {
-  const { form, isAdding, editingIndex, startAdding, startEditing, resetForm, onSubmit } = useFixedPointForm({
+  const {
+    form,
+    isAdding,
+    editingIndex,
+    startAdding,
+    startEditing,
+    resetForm,
+    onSubmit,
+    getDateForPicker,
+    getTimeForInput,
+    handleDateSelect,
+    handleTimeChange,
+  } = useFixedPointForm({
     onAdd: addFixedPoint,
     onUpdate: updateFixedPoint,
   });
@@ -59,12 +71,30 @@ export function FixedPointsStep({
 
       {/* Show form when editing */}
       {editingIndex !== null && (
-        <FixedPointForm form={form} onSubmit={onSubmit} onCancel={resetForm} isEditing={true} />
+        <FixedPointForm
+          form={form}
+          onSubmit={onSubmit}
+          onCancel={resetForm}
+          isEditing={true}
+          getDateForPicker={getDateForPicker}
+          getTimeForInput={getTimeForInput}
+          handleDateSelect={handleDateSelect}
+          handleTimeChange={handleTimeChange}
+        />
       )}
 
       {/* Add new fixed point form or button */}
       {isAdding ? (
-        <FixedPointForm form={form} onSubmit={onSubmit} onCancel={resetForm} isEditing={false} />
+        <FixedPointForm
+          form={form}
+          onSubmit={onSubmit}
+          onCancel={resetForm}
+          isEditing={false}
+          getDateForPicker={getDateForPicker}
+          getTimeForInput={getTimeForInput}
+          handleDateSelect={handleDateSelect}
+          handleTimeChange={handleTimeChange}
+        />
       ) : (
         !editingIndex && (
           <Button variant='outline' onClick={startAdding} className='w-full' data-testid='add-fixed-point-btn'>

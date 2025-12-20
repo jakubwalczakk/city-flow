@@ -1,8 +1,9 @@
 import { useState, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { fixedPointSchema } from '@/lib/schemas/plan.schema';
+import { fixedPointSchema, type FixedPointFormData } from '@/lib/schemas/plan.schema';
 import type { CreateFixedPointCommand } from '@/types';
+import { updateDateKeepTime, updateTimeKeepDate, getDateFromISO, getTimeFromISO } from '@/lib/utils/dateFormatters';
 
 type UseFixedPointFormProps = {
   onAdd: (point: CreateFixedPointCommand) => void;
@@ -17,7 +18,7 @@ export function useFixedPointForm({ onAdd, onUpdate }: UseFixedPointFormProps) {
   const [isAdding, setIsAdding] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
-  const form = useForm<CreateFixedPointCommand>({
+  const form = useForm<FixedPointFormData>({
     resolver: zodResolver(fixedPointSchema),
     defaultValues: {
       location: '',
@@ -56,11 +57,13 @@ export function useFixedPointForm({ onAdd, onUpdate }: UseFixedPointFormProps) {
   );
 
   const handleSubmit = useCallback(
-    (data: CreateFixedPointCommand) => {
-      // Convert event_at to ISO string if it's not already
-      const pointToSubmit = {
-        ...data,
+    (data: FixedPointFormData) => {
+      // Convert form data to CreateFixedPointCommand
+      const pointToSubmit: CreateFixedPointCommand = {
+        location: data.location,
         event_at: data.event_at ? new Date(data.event_at).toISOString() : '',
+        event_duration: data.event_duration ?? null,
+        description: data.description ?? null,
       };
 
       if (editingIndex !== null) {
@@ -76,6 +79,45 @@ export function useFixedPointForm({ onAdd, onUpdate }: UseFixedPointFormProps) {
 
   const onSubmit = form.handleSubmit(handleSubmit);
 
+  // Date/time handlers for the form
+  const eventAt = form.watch('event_at');
+
+  /**
+   * Get the date value for the DatePicker component
+   */
+  const getDateForPicker = useCallback((): Date | undefined => {
+    return getDateFromISO(eventAt);
+  }, [eventAt]);
+
+  /**
+   * Get the time value for the time input
+   */
+  const getTimeForInput = useCallback((): string => {
+    return getTimeFromISO(eventAt);
+  }, [eventAt]);
+
+  /**
+   * Handle date selection from DatePicker
+   */
+  const handleDateSelect = useCallback(
+    (date: Date | undefined) => {
+      if (date) {
+        form.setValue('event_at', updateDateKeepTime(eventAt, date));
+      }
+    },
+    [form, eventAt]
+  );
+
+  /**
+   * Handle time change from time input
+   */
+  const handleTimeChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      form.setValue('event_at', updateTimeKeepDate(eventAt, e.target.value));
+    },
+    [form, eventAt]
+  );
+
   return {
     form,
     isAdding,
@@ -84,5 +126,10 @@ export function useFixedPointForm({ onAdd, onUpdate }: UseFixedPointFormProps) {
     startEditing,
     resetForm,
     onSubmit,
+    // Date/time helpers
+    getDateForPicker,
+    getTimeForInput,
+    handleDateSelect,
+    handleTimeChange,
   };
 }

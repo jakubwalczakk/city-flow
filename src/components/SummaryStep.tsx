@@ -5,6 +5,7 @@ import type { NewPlanViewModel } from '@/types';
 import { Calendar, MapPin, FileText, Clock, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { pl } from 'date-fns/locale';
+import { formatDateTime } from '@/lib/utils/dateFormatters';
 
 type SummaryStepProps = {
   formData: NewPlanViewModel;
@@ -16,19 +17,6 @@ type SummaryStepProps = {
 
 export function SummaryStep({ formData, goToPrevStep, onSubmit, isLoading, error }: SummaryStepProps) {
   const { basicInfo, fixedPoints } = formData;
-
-  const formatDateTime = (dateTimeString: string) => {
-    try {
-      const date = new Date(dateTimeString);
-      return date.toLocaleString('pl-PL', {
-        dateStyle: 'medium',
-        timeStyle: 'short',
-        hour12: false,
-      });
-    } catch {
-      return dateTimeString;
-    }
-  };
 
   return (
     <div className='space-y-6'>
