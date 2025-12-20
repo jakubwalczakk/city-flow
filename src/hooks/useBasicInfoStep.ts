@@ -28,7 +28,7 @@ export function useBasicInfoStep({ formData, updateFormData, goToNextStep, onSav
       end_date: formData.end_date,
       notes: formData.notes || '',
     },
-    mode: 'onBlur',
+    mode: 'onChange',
   });
 
   // Sync form values with parent state on blur

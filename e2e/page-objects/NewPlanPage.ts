@@ -83,8 +83,12 @@ export class NewPlanPage {
     await this.nameInput.fill(name);
     await this.destinationInput.fill(destination);
 
+    // Wait a moment for React Hook Form validation to complete
+    // (validation runs onChange after fields are filled)
+    await this.page.waitForTimeout(500);
+
     // The dates should have defaults set, proceed to next step
-    await expect(this.basicInfoNextButton).toBeEnabled();
+    await expect(this.basicInfoNextButton).toBeEnabled({ timeout: 3000 });
     await this.basicInfoNextButton.click();
   }
 

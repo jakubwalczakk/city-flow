@@ -168,14 +168,11 @@ export function combineDateAndTime(date: Date, timeStr: string): string {
   const combined = new Date(date);
   combined.setHours(hours);
   combined.setMinutes(minutes);
+  combined.setSeconds(0);
+  combined.setMilliseconds(0);
 
-  const year = combined.getFullYear();
-  const month = String(combined.getMonth() + 1).padStart(2, '0');
-  const day = String(combined.getDate()).padStart(2, '0');
-  const h = String(combined.getHours()).padStart(2, '0');
-  const m = String(combined.getMinutes()).padStart(2, '0');
-
-  return `${year}-${month}-${day}T${h}:${m}`;
+  // Return full ISO datetime string required by Zod schema
+  return combined.toISOString();
 }
 
 /**

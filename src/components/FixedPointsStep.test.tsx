@@ -7,9 +7,9 @@ import type { DatePickerProps } from '@/components/ui/date-picker';
 
 // Mock DatePicker to simplify testing
 vi.mock('@/components/ui/date-picker', () => ({
-  DatePicker: ({ date, onSelect }: DatePickerProps) => (
+  DatePicker: ({ date, onSelect, 'data-testid': testId }: DatePickerProps & { 'data-testid'?: string }) => (
     <input
-      data-testid='date-picker-mock'
+      data-testid={testId || 'date-picker-mock'}
       value={date ? date.toISOString().split('T')[0] : ''}
       onChange={(e) => {
         const d = e.target.value ? new Date(e.target.value) : undefined;
@@ -71,7 +71,6 @@ describe('FixedPointsStep', () => {
     // Assert
     expect(screen.getByText('Airport')).toBeInTheDocument();
     expect(screen.getByText('Hotel')).toBeInTheDocument();
-    // Removed fragile check for exact number of buttons
   });
 
   it("should show the add form when 'Dodaj stały punkt' is clicked", async () => {
@@ -82,34 +81,39 @@ describe('FixedPointsStep', () => {
     // Act
     await user.click(screen.getByRole('button', { name: /Dodaj stały punkt/ }));
 
-    // Assert
-    expect(screen.getByLabelText(/Lokalizacja/)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Dodaj punkt' })).toBeInTheDocument();
+    // Assert - Use testId since React Hook Form Controller may not work with getByLabelText
+    expect(screen.getByTestId('fixed-point-location-input')).toBeInTheDocument();
+    expect(screen.getByTestId('save-fixed-point-btn')).toBeInTheDocument();
   });
 
-  // TODO: Fix this test after refactoring to React Hook Form
-  // The test needs to be updated to work with Controller and proper form validation
-  it.skip('should call addFixedPoint when adding a new valid point', async () => {
+  it('should call addFixedPoint when adding a new valid point', async () => {
     // Arrange
     const user = userEvent.setup();
-    const { container } = render(<FixedPointsStep {...defaultProps} fixedPoints={[]} />);
+    render(<FixedPointsStep {...defaultProps} fixedPoints={[]} />);
     await user.click(screen.getByRole('button', { name: /Dodaj stały punkt/ }));
 
     // Act
-    const locationInput = screen.getByLabelText(/Lokalizacja/);
+    const locationInput = screen.getByTestId('fixed-point-location-input');
     await user.type(locationInput, 'New Location');
 
+    // Wait a bit for React Hook Form to process the input
+    await waitFor(() => {
+      expect(locationInput).toHaveValue('New Location');
+    });
+
     // Simulate picking date
-    const dateInput = screen.getByTestId('date-picker-mock');
+    const dateInput = screen.getByTestId('fixed-point-date-picker');
     fireEvent.change(dateInput, { target: { value: '2025-11-02' } });
 
-    // Simulate picking time
-    const timeInput = container.querySelector('input[type="time"]');
-    if (!timeInput) throw new Error('Time input not found');
+    // Simulate picking time - use aria-label to find the time input
+    const timeInput = screen.getByLabelText(/godzina/i);
     fireEvent.change(timeInput, { target: { value: '15:00' } });
 
+    // Wait for form to process changes
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
     // Click submit button and wait for the callback
-    const submitButton = screen.getByRole('button', { name: 'Dodaj punkt' });
+    const submitButton = screen.getByTestId('save-fixed-point-btn');
     await user.click(submitButton);
 
     // Assert with waitFor
@@ -134,15 +138,13 @@ describe('FixedPointsStep', () => {
     if (!firstEditButton) throw new Error('Edit button not found');
     await user.click(firstEditButton);
 
-    // Assert
-    expect(screen.getByLabelText(/Lokalizacja/)).toHaveValue('Airport');
+    // Assert - Use testId for location input
+    expect(screen.getByTestId('fixed-point-location-input')).toHaveValue('Airport');
     // Check mocked date picker value
-    expect(screen.getByTestId('date-picker-mock')).toHaveValue('2025-11-01');
+    expect(screen.getByTestId('fixed-point-date-picker')).toHaveValue('2025-11-01');
   });
 
-  // TODO: Fix this test after refactoring to React Hook Form
-  // The test needs to be updated to work with Controller and proper form validation
-  it.skip('should call updateFixedPoint when editing a point', async () => {
+  it('should call updateFixedPoint when editing a point', async () => {
     // Arrange
     const user = userEvent.setup();
     render(<FixedPointsStep {...defaultProps} />);
@@ -153,16 +155,24 @@ describe('FixedPointsStep', () => {
 
     // Wait for form to be populated
     await waitFor(() => {
-      expect(screen.getByLabelText(/Lokalizacja/)).toHaveValue('Airport');
+      expect(screen.getByTestId('fixed-point-location-input')).toHaveValue('Airport');
     });
 
     // Act
-    const locationInput = screen.getByLabelText(/Lokalizacja/);
+    const locationInput = screen.getByTestId('fixed-point-location-input');
     await user.clear(locationInput);
     await user.type(locationInput, 'Updated Airport');
 
+    // Wait for form to validate
+    await waitFor(() => {
+      expect(locationInput).toHaveValue('Updated Airport');
+    });
+
+    // Wait for form to process changes
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
     // Click submit and wait for callback
-    const submitButton = screen.getByRole('button', { name: 'Zapisz zmiany' });
+    const submitButton = screen.getByTestId('save-fixed-point-btn');
     await user.click(submitButton);
 
     // Assert with waitFor
@@ -206,7 +216,7 @@ describe('FixedPointsStep', () => {
     render(<FixedPointsStep {...defaultProps} />);
 
     // Act
-    await user.click(screen.getByRole('button', { name: 'Dalej' }));
+    await user.click(screen.getByTestId('fixed-points-next-button'));
 
     // Assert
     expect(mockGoToNextStep).toHaveBeenCalledTimes(1);

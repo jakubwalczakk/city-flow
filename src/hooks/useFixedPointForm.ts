@@ -20,6 +20,7 @@ export function useFixedPointForm({ onAdd, onUpdate }: UseFixedPointFormProps) {
 
   const form = useForm<FixedPointFormData>({
     resolver: zodResolver(fixedPointSchema),
+    mode: 'onChange', // Validate on change to update isValid in real-time
     defaultValues: {
       location: '',
       event_at: '',
@@ -50,7 +51,7 @@ export function useFixedPointForm({ onAdd, onUpdate }: UseFixedPointFormProps) {
       setIsAdding(false);
       form.reset({
         ...point,
-        event_at: point.event_at ? new Date(point.event_at).toISOString().slice(0, 16) : '',
+        event_at: point.event_at ? new Date(point.event_at).toISOString() : '',
       });
     },
     [form]
@@ -102,7 +103,7 @@ export function useFixedPointForm({ onAdd, onUpdate }: UseFixedPointFormProps) {
   const handleDateSelect = useCallback(
     (date: Date | undefined) => {
       if (date) {
-        form.setValue('event_at', updateDateKeepTime(eventAt, date));
+        form.setValue('event_at', updateDateKeepTime(eventAt, date), { shouldValidate: true });
       }
     },
     [form, eventAt]
@@ -113,7 +114,7 @@ export function useFixedPointForm({ onAdd, onUpdate }: UseFixedPointFormProps) {
    */
   const handleTimeChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      form.setValue('event_at', updateTimeKeepDate(eventAt, e.target.value));
+      form.setValue('event_at', updateTimeKeepDate(eventAt, e.target.value), { shouldValidate: true });
     },
     [form, eventAt]
   );
