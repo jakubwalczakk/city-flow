@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -10,75 +9,27 @@ import {
 import { Button } from '@/components/ui/button';
 import { TravelPaceSelector } from '@/components/TravelPaceSelector';
 import { PreferencesSelector } from '@/components/PreferencesSelector';
-import { useProfile } from '@/hooks/useProfile';
-import type { TravelPace } from '@/types';
-import { toast } from 'sonner';
+import { useOnboardingModal } from '@/hooks/useOnboardingModal';
 
+/**
+ * Modal for onboarding new users.
+ * Collects travel pace and preferences to personalize AI recommendations.
+ * Uses useOnboardingModal hook for state and logic management.
+ */
 export function OnboardingModal() {
-  const { profile, isLoading, updateProfile } = useProfile();
-  const [isOpen, setIsOpen] = useState(false);
-  const [pace, setPace] = useState<TravelPace | null>(null);
-  const [preferences, setPreferences] = useState<string[]>([]);
-  const [errors, setErrors] = useState<{ pace?: string; preferences?: string }>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  useEffect(() => {
-    if (!isLoading && profile && !profile.onboarding_completed) {
-      setIsOpen(true);
-    }
-  }, [isLoading, profile]);
-
-  const validate = () => {
-    const newErrors: { pace?: string; preferences?: string } = {};
-    let isValid = true;
-
-    if (!pace) {
-      newErrors.pace = 'Wybierz preferowane tempo zwiedzania.';
-      isValid = false;
-    }
-
-    if (preferences.length < 2 || preferences.length > 5) {
-      newErrors.preferences = 'Wybierz od 2 do 5 preferencji.';
-      isValid = false;
-    }
-
-    setErrors(newErrors);
-    return isValid;
-  };
-
-  const handleSave = async () => {
-    if (!validate()) return;
-    if (!pace) return;
-
-    setIsSubmitting(true);
-    try {
-      await updateProfile({
-        travel_pace: pace,
-        preferences: preferences,
-        onboarding_completed: true,
-      });
-      toast.success('Profil zaktualizowany');
-      setIsOpen(false);
-    } catch {
-      toast.error('Wystąpił błąd podczas zapisywania profilu.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleSkip = async () => {
-    setIsSubmitting(true);
-    try {
-      await updateProfile({
-        onboarding_completed: true,
-      });
-      setIsOpen(false);
-    } catch {
-      toast.error('Wystąpił błąd.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const {
+    isOpen,
+    setIsOpen,
+    pace,
+    setPace,
+    preferences,
+    setPreferences,
+    errors,
+    isSubmitting,
+    profile,
+    handleSave,
+    handleSkip,
+  } = useOnboardingModal();
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>

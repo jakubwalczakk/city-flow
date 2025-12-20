@@ -1,7 +1,7 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Pencil } from 'lucide-react';
+import { useEditableTitle } from '@/hooks/useEditableTitle';
 
 type EditableTitleProps = {
   title: string;
@@ -9,56 +9,23 @@ type EditableTitleProps = {
 };
 
 /**
- * Editable title component with inline editing mode
- * Supports keyboard shortcuts (Enter to save, Escape to cancel)
+ * Editable title component with inline editing mode.
+ * Supports keyboard shortcuts (Enter to save, Escape to cancel).
+ * Uses useEditableTitle hook for state and logic management.
  */
 export function EditableTitle({ title, onSave }: EditableTitleProps) {
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedName, setEditedName] = useState(title);
-  const [isSaving, setIsSaving] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  // Set focus when entering edit mode
-  useEffect(() => {
-    if (isEditing && inputRef.current) {
-      inputRef.current.focus();
-      // Select all text for easy replacement
-      inputRef.current.select();
-    }
-  }, [isEditing]);
-
-  const handleSave = useCallback(async () => {
-    if (!editedName.trim()) {
-      return;
-    }
-
-    setIsSaving(true);
-    try {
-      await onSave(editedName);
-      setIsEditing(false);
-    } catch {
-      // Reset to original name on error
-      setEditedName(title);
-    } finally {
-      setIsSaving(false);
-    }
-  }, [editedName, onSave, title]);
-
-  const handleCancel = useCallback(() => {
-    setEditedName(title);
-    setIsEditing(false);
-  }, [title]);
-
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      if (e.key === 'Enter') {
-        handleSave();
-      } else if (e.key === 'Escape') {
-        handleCancel();
-      }
-    },
-    [handleSave, handleCancel]
-  );
+  const {
+    isEditing,
+    editedName,
+    setEditedName,
+    isSaving,
+    inputRef,
+    startEditing,
+    handleSave,
+    handleCancel,
+    handleKeyDown,
+    canSave,
+  } = useEditableTitle({ title, onSave });
 
   if (isEditing) {
     return (
@@ -72,7 +39,7 @@ export function EditableTitle({ title, onSave }: EditableTitleProps) {
           onKeyDown={handleKeyDown}
         />
         <div className='flex gap-2'>
-          <Button onClick={handleSave} disabled={!editedName.trim() || isSaving} size='sm'>
+          <Button onClick={handleSave} disabled={!canSave} size='sm'>
             {isSaving ? 'Zapisywanie...' : 'Zapisz'}
           </Button>
           <Button onClick={handleCancel} variant='outline' size='sm' disabled={isSaving}>
@@ -87,7 +54,7 @@ export function EditableTitle({ title, onSave }: EditableTitleProps) {
     <div className='flex items-center gap-2 group'>
       <h1 className='text-3xl font-bold tracking-tight'>{title}</h1>
       <button
-        onClick={() => setIsEditing(true)}
+        onClick={startEditing}
         className='opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-muted rounded'
         aria-label='Edytuj nazwę planu'
       >

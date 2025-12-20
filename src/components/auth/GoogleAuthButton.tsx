@@ -1,8 +1,7 @@
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, AlertCircle } from 'lucide-react';
-import { supabaseClient } from '@/db/supabase.client';
+import { useGoogleAuth } from '@/hooks/useGoogleAuth';
 
 type GoogleAuthButtonProps = {
   mode?: 'login' | 'register';
@@ -10,33 +9,10 @@ type GoogleAuthButtonProps = {
 
 /**
  * Button component for Google OAuth authentication.
- * Initiates the OAuth flow with Supabase.
+ * Uses useGoogleAuth hook for OAuth flow management.
  */
 export function GoogleAuthButton({ mode = 'login' }: GoogleAuthButtonProps) {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const handleGoogleAuth = async () => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const { error } = await supabaseClient.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/plans`,
-        },
-      });
-
-      if (error) throw error;
-
-      // Note: User will be redirected to Google OAuth page
-      // After successful auth, they'll return to /plans
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Nie udało się zainicjować logowania przez Google');
-      setIsLoading(false);
-    }
-  };
+  const { handleGoogleAuth, isLoading, error } = useGoogleAuth();
 
   return (
     <div className='space-y-4'>

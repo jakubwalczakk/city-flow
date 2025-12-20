@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import type { CreateFixedPointCommand } from '@/types';
@@ -34,6 +35,8 @@ export function FixedPointsStep({
   error,
   onSave,
 }: FixedPointsStepProps) {
+  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+
   const {
     form,
     isAdding,
@@ -50,6 +53,13 @@ export function FixedPointsStep({
     onAdd: addFixedPoint,
     onUpdate: updateFixedPoint,
   });
+
+  const dateTimeHandlers = {
+    getDateForPicker,
+    getTimeForInput,
+    handleDateSelect,
+    handleTimeChange,
+  };
 
   return (
     <div className='space-y-6'>
@@ -76,10 +86,9 @@ export function FixedPointsStep({
           onSubmit={onSubmit}
           onCancel={resetForm}
           isEditing={true}
-          getDateForPicker={getDateForPicker}
-          getTimeForInput={getTimeForInput}
-          handleDateSelect={handleDateSelect}
-          handleTimeChange={handleTimeChange}
+          dateTimeHandlers={dateTimeHandlers}
+          isDatePickerOpen={isDatePickerOpen}
+          onDatePickerOpenChange={setIsDatePickerOpen}
         />
       )}
 
@@ -90,10 +99,9 @@ export function FixedPointsStep({
           onSubmit={onSubmit}
           onCancel={resetForm}
           isEditing={false}
-          getDateForPicker={getDateForPicker}
-          getTimeForInput={getTimeForInput}
-          handleDateSelect={handleDateSelect}
-          handleTimeChange={handleTimeChange}
+          dateTimeHandlers={dateTimeHandlers}
+          isDatePickerOpen={isDatePickerOpen}
+          onDatePickerOpenChange={setIsDatePickerOpen}
         />
       ) : (
         !editingIndex && (

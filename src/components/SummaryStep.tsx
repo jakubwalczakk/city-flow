@@ -1,11 +1,11 @@
+import { memo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import type { NewPlanViewModel } from '@/types';
-import { Calendar, MapPin, FileText, Clock, Loader2 } from 'lucide-react';
-import { format } from 'date-fns';
-import { pl } from 'date-fns/locale';
-import { formatDateTime } from '@/lib/utils/dateFormatters';
+import { Calendar, MapPin, FileText, Loader2 } from 'lucide-react';
+import { SummaryField, FixedPointSummaryItem } from '@/components/summary';
+import { formatDateObjectLong } from '@/lib/utils/dateFormatters';
 
 type SummaryStepProps = {
   formData: NewPlanViewModel;
@@ -15,7 +15,17 @@ type SummaryStepProps = {
   error: string | null;
 };
 
-export function SummaryStep({ formData, goToPrevStep, onSubmit, isLoading, error }: SummaryStepProps) {
+/**
+ * Summary step component for the plan creation wizard.
+ * Displays all collected information before final submission.
+ */
+export const SummaryStep = memo(function SummaryStep({
+  formData,
+  goToPrevStep,
+  onSubmit,
+  isLoading,
+  error,
+}: SummaryStepProps) {
   const { basicInfo, fixedPoints } = formData;
 
   return (
@@ -31,48 +41,29 @@ export function SummaryStep({ formData, goToPrevStep, onSubmit, isLoading, error
           <CardTitle className='text-base'>Podstawowe informacje</CardTitle>
         </CardHeader>
         <CardContent className='space-y-3'>
-          <div>
-            <p className='text-sm text-muted-foreground mb-1'>Nazwa planu</p>
-            <p className='font-medium'>{basicInfo.name}</p>
-          </div>
+          <SummaryField label='Nazwa planu'>{basicInfo.name}</SummaryField>
 
-          <div>
-            <p className='text-sm text-muted-foreground mb-1 flex items-center gap-1'>
-              <MapPin className='h-3 w-3' />
-              Miejsce docelowe
-            </p>
-            <p className='font-medium'>{basicInfo.destination}</p>
-          </div>
+          <SummaryField icon={MapPin} label='Miejsce docelowe'>
+            {basicInfo.destination}
+          </SummaryField>
 
-          <div>
-            <p className='text-sm text-muted-foreground mb-1 flex items-center gap-1'>
-              <Calendar className='h-3 w-3' />
-              Daty i godziny podróży
-            </p>
+          <SummaryField icon={Calendar} label='Daty i godziny podróży'>
             <div className='flex flex-col gap-2'>
               <div className='flex items-center gap-2'>
-                <span className='text-sm text-muted-foreground'>Początek:</span>
-                <span className='font-medium'>
-                  {format(basicInfo.start_date, 'PPP', { locale: pl })} o {format(basicInfo.start_date, 'HH:mm')}
-                </span>
+                <span className='text-sm text-muted-foreground font-normal'>Początek:</span>
+                <span>{formatDateObjectLong(basicInfo.start_date)}</span>
               </div>
               <div className='flex items-center gap-2'>
-                <span className='text-sm text-muted-foreground'>Koniec:</span>
-                <span className='font-medium'>
-                  {format(basicInfo.end_date, 'PPP', { locale: pl })} o {format(basicInfo.end_date, 'HH:mm')}
-                </span>
+                <span className='text-sm text-muted-foreground font-normal'>Koniec:</span>
+                <span>{formatDateObjectLong(basicInfo.end_date)}</span>
               </div>
             </div>
-          </div>
+          </SummaryField>
 
           {basicInfo.notes && (
-            <div>
-              <p className='text-sm text-muted-foreground mb-1 flex items-center gap-1'>
-                <FileText className='h-3 w-3' />
-                Notatki
-              </p>
-              <p className='text-sm'>{basicInfo.notes}</p>
-            </div>
+            <SummaryField icon={FileText} label='Notatki'>
+              <p className='text-sm font-normal'>{basicInfo.notes}</p>
+            </SummaryField>
           )}
         </CardContent>
       </Card>
@@ -91,19 +82,7 @@ export function SummaryStep({ formData, goToPrevStep, onSubmit, isLoading, error
           ) : (
             <div className='space-y-3'>
               {fixedPoints.map((point, index) => (
-                <div key={index} className='flex items-start gap-3 pb-3 border-b last:border-b-0 last:pb-0'>
-                  <MapPin className='h-4 w-4 mt-1 text-muted-foreground flex-shrink-0' />
-                  <div className='flex-1 min-w-0'>
-                    <p className='font-medium'>{point.location}</p>
-                    {point.description && <p className='text-sm text-muted-foreground'>{point.description}</p>}
-                    <div className='flex items-center gap-2 mt-1 text-sm text-muted-foreground'>
-                      <Clock className='h-3 w-3' />
-                      <span>{formatDateTime(point.event_at)}</span>
-                      <span>•</span>
-                      <span>{point.event_duration} min</span>
-                    </div>
-                  </div>
-                </div>
+                <FixedPointSummaryItem key={index} point={point} />
               ))}
             </div>
           )}
@@ -131,4 +110,4 @@ export function SummaryStep({ formData, goToPrevStep, onSubmit, isLoading, error
       </div>
     </div>
   );
-}
+});

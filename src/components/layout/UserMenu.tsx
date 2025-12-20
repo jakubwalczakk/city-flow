@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -10,48 +9,26 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { User, LogOut, Loader2 } from 'lucide-react';
-import { supabaseClient } from '@/db/supabase.client';
+import { useLogout, getUserInitials } from '@/hooks/useLogout';
 
 type UserMenuProps = {
   userEmail: string;
 };
 
 /**
- * User menu component for authenticated users
- * Displays user avatar, profile link, and logout button
+ * User menu component for authenticated users.
+ * Displays user avatar, profile link, and logout button.
+ * Uses useLogout hook for logout functionality.
  */
 export function UserMenu({ userEmail }: UserMenuProps) {
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
-
-  const handleLogout = async () => {
-    setIsLoggingOut(true);
-
-    try {
-      const { error } = await supabaseClient.auth.signOut();
-
-      if (error) throw error;
-
-      // Redirect to home page after logout
-      window.location.href = '/';
-    } catch {
-      setIsLoggingOut(false);
-      // Still redirect even if there's an error
-      window.location.href = '/';
-    }
-  };
-
-  // Get user initials for avatar
-  const getInitials = (email: string) => {
-    const name = email.split('@')[0];
-    return name.substring(0, 2).toUpperCase();
-  };
+  const { handleLogout, isLoggingOut } = useLogout();
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant='ghost' className='relative h-10 w-10 rounded-full'>
           <Avatar className='h-10 w-10'>
-            <AvatarFallback className='bg-primary text-primary-foreground'>{getInitials(userEmail)}</AvatarFallback>
+            <AvatarFallback className='bg-primary text-primary-foreground'>{getUserInitials(userEmail)}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>

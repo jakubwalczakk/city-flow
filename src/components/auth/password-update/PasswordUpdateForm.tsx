@@ -1,11 +1,9 @@
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, AlertCircle } from 'lucide-react';
-import { updatePasswordSchema, type UpdatePasswordFormData } from '@/lib/schemas/auth.schema';
 import { PasswordInput } from '@/components/auth/PasswordInput';
+import { usePasswordUpdateForm } from '@/hooks/usePasswordUpdateForm';
 
 type PasswordUpdateFormProps = {
   onSubmit: (password: string) => Promise<void>;
@@ -18,17 +16,7 @@ type PasswordUpdateFormProps = {
  * Handles new password and confirmation inputs.
  */
 export function PasswordUpdateForm({ onSubmit, isLoading, error }: PasswordUpdateFormProps) {
-  const form = useForm<UpdatePasswordFormData>({
-    resolver: zodResolver(updatePasswordSchema),
-    defaultValues: {
-      password: '',
-      confirmPassword: '',
-    },
-  });
-
-  const handleSubmit = form.handleSubmit(async (data) => {
-    await onSubmit(data.password);
-  });
+  const { form, handleSubmit } = usePasswordUpdateForm({ onSubmit });
 
   return (
     <div className='w-full max-w-md space-y-6'>

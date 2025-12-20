@@ -1,13 +1,10 @@
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
-import { registerSchema, type RegisterFormData } from '@/lib/schemas/auth.schema';
 import { PasswordInput } from '@/components/auth/PasswordInput';
-import { useAuth } from '@/hooks/useAuth';
+import { useRegisterForm } from '@/hooks/useRegisterForm';
 
 type RegisterFormProps = {
   onSuccess?: () => void;
@@ -15,28 +12,11 @@ type RegisterFormProps = {
 
 /**
  * Registration form component with email, password, and password confirmation fields.
- * Uses React Hook Form with Zod validation and auth service for API calls.
+ * Uses useRegisterForm hook for form state and validation.
+ * Follows clean architecture with separation of logic and presentation.
  */
 export function RegisterForm({ onSuccess }: RegisterFormProps) {
-  const { register, isLoading, error, success } = useAuth();
-
-  const form = useForm<RegisterFormData>({
-    resolver: zodResolver(registerSchema),
-    defaultValues: {
-      email: '',
-      password: '',
-      confirmPassword: '',
-    },
-  });
-
-  const onSubmit = form.handleSubmit(async (data) => {
-    try {
-      await register(data);
-      onSuccess?.();
-    } catch {
-      // Error already handled by useAuth hook
-    }
-  });
+  const { form, onSubmit, isLoading, error, success } = useRegisterForm({ onSuccess });
 
   return (
     <div className='w-full max-w-md space-y-6'>

@@ -1,13 +1,10 @@
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
-import { loginSchema, type LoginFormData } from '@/lib/schemas/auth.schema';
 import { PasswordInput } from '@/components/auth/PasswordInput';
-import { useAuth } from '@/hooks/useAuth';
+import { useLoginForm } from '@/hooks/useLoginForm';
 
 type LoginFormProps = {
   onSuccess?: () => void;
@@ -15,27 +12,11 @@ type LoginFormProps = {
 
 /**
  * Login form component with email and password fields.
- * Uses React Hook Form with Zod validation and auth service for API calls.
+ * Uses useLoginForm hook for form state and validation.
+ * Follows clean architecture with separation of logic and presentation.
  */
 export function LoginForm({ onSuccess }: LoginFormProps) {
-  const { login, isLoading, error, success } = useAuth();
-
-  const form = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: '',
-      password: '',
-    },
-  });
-
-  const onSubmit = form.handleSubmit(async (data) => {
-    try {
-      await login(data);
-      onSuccess?.();
-    } catch {
-      // Error already handled by useAuth hook
-    }
-  });
+  const { form, onSubmit, isLoading, error, success } = useLoginForm({ onSuccess });
 
   return (
     <div className='w-full max-w-md space-y-6'>

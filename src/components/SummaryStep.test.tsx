@@ -3,20 +3,13 @@ import { render, screen } from '@testing-library/react';
 import { SummaryStep } from './SummaryStep';
 import type { NewPlanViewModel } from '@/types';
 
-// Mock date-fns format to return a predictable string
-vi.mock('date-fns', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('date-fns')>();
+// Mock dateFormatters to return predictable strings
+vi.mock('@/lib/utils/dateFormatters', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/lib/utils/dateFormatters')>();
   return {
     ...actual,
-    format: (date: Date, formatString: string) => {
-      if (formatString === 'PPP') {
-        return `Formatted Date for ${date.toISOString()}`;
-      }
-      if (formatString === 'HH:mm') {
-        return `Formatted Time for ${date.toISOString()}`;
-      }
-      return date.toISOString();
-    },
+    formatDateObjectLong: (date: Date) => `Formatted: ${date.toISOString()}`,
+    formatDateTime: (isoString: string) => `Formatted: ${isoString}`,
   };
 });
 
@@ -62,8 +55,7 @@ describe('SummaryStep', () => {
     expect(screen.getByText('Future City')).toBeInTheDocument();
     expect(screen.getByText('Bring a time machine.')).toBeInTheDocument();
     // Check for mocked date formats (multiple instances for start and end dates)
-    expect(screen.getAllByText(/Formatted Date for/).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/Formatted Time for/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Formatted:/).length).toBeGreaterThan(0);
   });
 
   it('should render all fixed points correctly', () => {

@@ -1,38 +1,17 @@
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
-import { forgotPasswordSchema, type ForgotPasswordFormData } from '@/lib/schemas/auth.schema';
-import { useAuth } from '@/hooks/useAuth';
+import { useForgotPasswordForm } from '@/hooks/useForgotPasswordForm';
 
 /**
  * Forgot password form component.
- * Allows users to request a password reset email using the auth service.
+ * Allows users to request a password reset email.
+ * Uses useForgotPasswordForm hook for state and logic management.
  */
 export function ForgotPasswordForm() {
-  const [success, setSuccess] = useState(false);
-  const { resetPassword, isLoading, error } = useAuth();
-
-  const form = useForm<ForgotPasswordFormData>({
-    resolver: zodResolver(forgotPasswordSchema),
-    defaultValues: {
-      email: '',
-    },
-  });
-
-  const onSubmit = form.handleSubmit(async (data) => {
-    try {
-      await resetPassword(data.email);
-      setSuccess(true);
-      form.reset();
-    } catch {
-      // Error already handled by useAuth hook
-    }
-  });
+  const { form, onSubmit, isLoading, error, success, resetSuccess } = useForgotPasswordForm();
 
   if (success) {
     return (
@@ -50,7 +29,7 @@ export function ForgotPasswordForm() {
         <div className='text-center space-y-4'>
           <p className='text-sm text-muted-foreground'>
             Nie otrzymałeś emaila?{' '}
-            <button onClick={() => setSuccess(false)} className='text-primary hover:underline'>
+            <button onClick={resetSuccess} className='text-primary hover:underline'>
               Spróbuj ponownie
             </button>
           </p>
@@ -72,7 +51,7 @@ export function ForgotPasswordForm() {
       )}
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
+        <form onSubmit={onSubmit} className='space-y-4'>
           <FormField
             control={form.control}
             name='email'

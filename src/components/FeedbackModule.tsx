@@ -3,6 +3,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { RatingButton } from '@/components/ui/rating-button';
 import { useFeedback } from '@/hooks/useFeedback';
+import { formatUpdatedAt } from '@/lib/utils/dateFormatters';
 
 type FeedbackModuleProps = {
   planId: string;
@@ -103,15 +104,7 @@ export default function FeedbackModule({ planId }: FeedbackModuleProps) {
         {/* Last updated timestamp */}
         {feedback && (
           <p className='text-xs text-muted-foreground text-center'>
-            Ostatnia aktualizacja:{' '}
-            {new Date(feedback.updated_at).toLocaleString('pl-PL', {
-              month: 'short',
-              day: 'numeric',
-              year: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit',
-              hour12: false,
-            })}
+            Ostatnia aktualizacja: {formatUpdatedAt(feedback.updated_at)}
           </p>
         )}
       </CardContent>

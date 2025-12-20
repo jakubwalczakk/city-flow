@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import EventTimeline from '@/components/EventTimeline';
+import { formatDayWithWeekday } from '@/lib/utils/dateFormatters';
 import type { DayPlan, TimelineItem } from '@/types';
 
 type DailyItineraryProps = {
@@ -71,13 +72,7 @@ function DayAccordionItem({
     return day.items.filter((i) => i.category !== 'transport' && i.category !== 'accommodation').length;
   }, [day.items]);
 
-  const dateLabel = useMemo(() => {
-    return new Date(day.date).toLocaleDateString('pl-PL', {
-      weekday: 'long',
-      month: 'long',
-      day: 'numeric',
-    });
-  }, [day.date]);
+  const dateLabel = useMemo(() => formatDayWithWeekday(day.date), [day.date]);
 
   const activityLabel = useMemo(() => {
     if (activityCount === 1) return 'aktywność';

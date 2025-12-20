@@ -205,3 +205,79 @@ export function updateTimeKeepDate(currentISO: string, timeStr: string): string 
   const date = currentISO ? new Date(currentISO) : new Date();
   return combineDateAndTime(date, timeStr);
 }
+
+/**
+ * Formats a Date object to long date-time format in Polish
+ * @param date - Date object
+ * @returns Formatted string (e.g., "15 grudnia 2025 o 14:30")
+ */
+export function formatDateObjectLong(date: Date): string {
+  try {
+    const dateStr = date.toLocaleDateString('pl-PL', {
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric',
+    });
+    const timeStr = date.toLocaleTimeString('pl-PL', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    });
+    return `${dateStr} o ${timeStr}`;
+  } catch {
+    return date.toString();
+  }
+}
+
+/**
+ * Gets the first day of the next month formatted in Polish
+ * @returns Formatted date string (e.g., "1 stycznia 2026")
+ */
+export function getNextMonthResetDate(): string {
+  const today = new Date();
+  const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+  return nextMonth.toLocaleDateString('pl-PL', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+}
+
+/**
+ * Formats a date with weekday, month, and day in Polish
+ * @param isoString - ISO date string
+ * @returns Formatted string (e.g., "poniedziałek, 15 grudnia")
+ */
+export function formatDayWithWeekday(isoString: string): string {
+  try {
+    const date = new Date(isoString);
+    return date.toLocaleDateString('pl-PL', {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric',
+    });
+  } catch {
+    return isoString;
+  }
+}
+
+/**
+ * Formats an updated_at timestamp in short format for display
+ * @param isoString - ISO date-time string
+ * @returns Formatted string (e.g., "15 gru 2025, 14:30")
+ */
+export function formatUpdatedAt(isoString: string): string {
+  try {
+    const date = new Date(isoString);
+    return date.toLocaleString('pl-PL', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    });
+  } catch {
+    return isoString;
+  }
+}

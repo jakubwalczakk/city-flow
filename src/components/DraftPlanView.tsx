@@ -6,7 +6,7 @@ import { useDraftPlan } from '@/hooks/useDraftPlan';
 import { NotesSection } from '@/components/draft-plan/NotesSection';
 import { DatesSection } from '@/components/draft-plan/DatesSection';
 import { FixedPointsSection } from '@/components/draft-plan/FixedPointsSection';
-import { useEffect } from 'react';
+import { toast } from 'sonner';
 
 type DraftPlanViewProps = {
   plan: PlanDetailsDto;
@@ -32,23 +32,16 @@ export default function DraftPlanView({ plan, onGenerate, onEdit }: DraftPlanVie
     isGenerating,
     saveSuccess,
     saveError,
-    generateError,
   } = useDraftPlan({ plan });
-
-  // Call onGenerate callback when generation succeeds
-  useEffect(() => {
-    if (!isGenerating && !generateError) {
-      // Check if we just finished generating (component might re-render)
-      // The parent component should handle the actual navigation
-    }
-  }, [isGenerating, generateError]);
 
   const handleGenerateClick = async () => {
     try {
       await handleGenerate();
       await onGenerate();
     } catch (error) {
-      alert(error instanceof Error ? error.message : 'Nie udało się wygenerować planu');
+      toast.error('Błąd generowania', {
+        description: error instanceof Error ? error.message : 'Nie udało się wygenerować planu',
+      });
     }
   };
 

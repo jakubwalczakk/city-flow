@@ -1,4 +1,3 @@
-import { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -17,6 +16,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { MoreVertical, Archive, Trash2 } from 'lucide-react';
+import { usePlanActionsMenu } from '@/hooks/usePlanActionsMenu';
 
 type PlanActionsMenuProps = {
   planName: string;
@@ -26,38 +26,15 @@ type PlanActionsMenuProps = {
 };
 
 /**
- * Dropdown menu with plan actions (archive, delete)
- * Includes confirmation dialogs for destructive actions
+ * Dropdown menu with plan actions (archive, delete).
+ * Uses usePlanActionsMenu hook for state and handlers.
+ * Includes confirmation dialogs for destructive actions.
  */
 export function PlanActionsMenu({ planName, planStatus, onArchive, onDelete }: PlanActionsMenuProps) {
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [showArchiveDialog, setShowArchiveDialog] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [isArchiving, setIsArchiving] = useState(false);
-
-  const handleDelete = useCallback(async () => {
-    setIsDeleting(true);
-    try {
-      await onDelete();
-      // Redirect to plans list after successful deletion
-      window.location.href = '/plans';
-    } catch {
-      setIsDeleting(false);
-      setShowDeleteDialog(false);
-    }
-  }, [onDelete]);
-
-  const handleArchive = useCallback(async () => {
-    setIsArchiving(true);
-    try {
-      await onArchive();
-      setShowArchiveDialog(false);
-    } catch {
-      // Error handling could be improved here
-    } finally {
-      setIsArchiving(false);
-    }
-  }, [onArchive]);
+  const { dialogs, loading, openDialog, closeDialog, handleDelete, handleArchive } = usePlanActionsMenu({
+    onArchive,
+    onDelete,
+  });
 
   return (
     <>
@@ -70,15 +47,12 @@ export function PlanActionsMenu({ planName, planStatus, onArchive, onDelete }: P
         </DropdownMenuTrigger>
         <DropdownMenuContent align='end'>
           {planStatus !== 'archived' && (
-            <DropdownMenuItem onClick={() => setShowArchiveDialog(true)}>
+            <DropdownMenuItem onClick={() => openDialog('archive')}>
               <Archive className='mr-2 h-4 w-4' />
               Przenieś do historii
             </DropdownMenuItem>
           )}
-          <DropdownMenuItem
-            className='text-destructive focus:text-destructive'
-            onClick={() => setShowDeleteDialog(true)}
-          >
+          <DropdownMenuItem className='text-destructive focus:text-destructive' onClick={() => openDialog('delete')}>
             <Trash2 className='mr-2 h-4 w-4' />
             Usuń plan
           </DropdownMenuItem>
@@ -86,7 +60,7 @@ export function PlanActionsMenu({ planName, planStatus, onArchive, onDelete }: P
       </DropdownMenu>
 
       {/* Archive confirmation dialog */}
-      <AlertDialog open={showArchiveDialog} onOpenChange={setShowArchiveDialog}>
+      <AlertDialog open={dialogs.archive} onOpenChange={(open) => !open && closeDialog('archive')}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Przenieść do historii?</AlertDialogTitle>
@@ -96,16 +70,16 @@ export function PlanActionsMenu({ planName, planStatus, onArchive, onDelete }: P
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isArchiving}>Anuluj</AlertDialogCancel>
-            <AlertDialogAction onClick={handleArchive} disabled={isArchiving}>
-              {isArchiving ? 'Przenoszenie...' : 'Przenieś'}
+            <AlertDialogCancel disabled={loading.archive}>Anuluj</AlertDialogCancel>
+            <AlertDialogAction onClick={handleArchive} disabled={loading.archive}>
+              {loading.archive ? 'Przenoszenie...' : 'Przenieś'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
       {/* Delete confirmation dialog */}
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+      <AlertDialog open={dialogs.delete} onOpenChange={(open) => !open && closeDialog('delete')}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Czy na pewno?</AlertDialogTitle>
@@ -115,13 +89,13 @@ export function PlanActionsMenu({ planName, planStatus, onArchive, onDelete }: P
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>Anuluj</AlertDialogCancel>
+            <AlertDialogCancel disabled={loading.delete}>Anuluj</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
-              disabled={isDeleting}
+              disabled={loading.delete}
               className='bg-destructive text-destructive-foreground hover:bg-destructive/90'
             >
-              {isDeleting ? 'Usuwanie...' : 'Usuń'}
+              {loading.delete ? 'Usuwanie...' : 'Usuń'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
