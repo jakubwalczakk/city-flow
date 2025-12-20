@@ -7,15 +7,15 @@ import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { forgotPasswordSchema, type ForgotPasswordFormData } from '@/lib/schemas/auth.schema';
+import { useAuth } from '@/hooks/useAuth';
 
 /**
  * Forgot password form component.
- * Allows users to request a password reset email.
+ * Allows users to request a password reset email using the auth service.
  */
 export function ForgotPasswordForm() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const { resetPassword, isLoading, error } = useAuth();
 
   const form = useForm<ForgotPasswordFormData>({
     resolver: zodResolver(forgotPasswordSchema),
@@ -24,28 +24,15 @@ export function ForgotPasswordForm() {
     },
   });
 
-  const onSubmit = async () => {
-    setIsLoading(true);
-    setError(null);
-    setSuccess(false);
-
+  const onSubmit = form.handleSubmit(async (data) => {
     try {
-      // TODO: Implement Supabase password reset
-      // await supabase.auth.resetPasswordForEmail(data.email, {
-      //   redirectTo: `${window.location.origin}/update-password`
-      // })
-
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
+      await resetPassword(data.email);
       setSuccess(true);
       form.reset();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Nie udało się wysłać emaila resetującego hasło');
-    } finally {
-      setIsLoading(false);
+    } catch {
+      // Error already handled by useAuth hook
     }
-  };
+  });
 
   if (success) {
     return (

@@ -3,6 +3,7 @@ import '../styles/global.css';
 import ToasterWrapper from '@/components/ToasterWrapper';
 import { UserMenu } from '@/components/layout/UserMenu';
 import { OnboardingModal } from '@/components/auth/OnboardingModal';
+import { QueryProvider } from '@/components/providers/QueryProvider';
 
 type Props = {
   title?: string;
@@ -64,7 +65,9 @@ const isAuthenticated = !!user;
     }
 
     <main class='flex-1'>
-      <slot />
+      <QueryProvider client:only='react'>
+        <slot />
+      </QueryProvider>
     </main>
 
     <footer class='border-t py-6 bg-muted/20'>

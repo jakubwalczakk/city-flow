@@ -3,20 +3,21 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { updatePasswordSchema, type UpdatePasswordFormData } from '@/lib/schemas/auth.schema';
+import { PasswordInput } from '@/components/auth/PasswordInput';
+import { useAuth } from '@/hooks/useAuth';
+import { supabaseClient } from '@/db/supabase.client';
 
 /**
  * Update password form component.
  * Allows users to set a new password after clicking the reset link.
  */
 export function UpdatePasswordForm() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [isValidSession, setIsValidSession] = useState<boolean | null>(null);
+  const { updatePassword, isLoading, error } = useAuth();
 
   const form = useForm<UpdatePasswordFormData>({
     resolver: zodResolver(updatePasswordSchema),
@@ -30,18 +31,16 @@ export function UpdatePasswordForm() {
   useEffect(() => {
     const verifySession = async () => {
       try {
-        // TODO: Implement Supabase auth state listener
-        // supabase.auth.onAuthStateChange((event, session) => {
-        //   if (event === 'PASSWORD_RECOVERY') {
-        //     setIsValidSession(true);
-        //   } else {
-        //     setIsValidSession(false);
-        //   }
-        // })
+        // Check if user has a valid session (password recovery)
+        const {
+          data: { session },
+        } = await supabaseClient.auth.getSession();
 
-        // Mock session verification
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        setIsValidSession(true); // Mock valid session
+        if (session) {
+          setIsValidSession(true);
+        } else {
+          setIsValidSession(false);
+        }
       } catch {
         setIsValidSession(false);
       }
@@ -50,29 +49,25 @@ export function UpdatePasswordForm() {
     verifySession();
   }, []);
 
-  const onSubmit = async () => {
-    setIsLoading(true);
-    setError(null);
-
+  const onSubmit = form.handleSubmit(async (data) => {
     try {
-      // TODO: Implement Supabase password update
-      // await supabase.auth.updateUser({ password: data.password })
-
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
+      await updatePassword(data.password);
       setSuccess(true);
+    } catch {
+      // Error already handled by useAuth hook
+    }
+  });
 
-      // Redirect to login after 2 seconds
-      setTimeout(() => {
+  // Redirect to login after successful password update
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => {
         window.location.href = '/login';
       }, 2000);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Nie udało się zaktualizować hasła');
-    } finally {
-      setIsLoading(false);
+
+      return () => clearTimeout(timer);
     }
-  };
+  }, [success]);
 
   // Loading state while verifying session
   if (isValidSession === null) {
@@ -145,7 +140,12 @@ export function UpdatePasswordForm() {
               <FormItem>
                 <FormLabel>Nowe hasło</FormLabel>
                 <FormControl>
-                  <Input type='password' placeholder='Minimum 8 znaków' disabled={isLoading} {...field} />
+                  <PasswordInput
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder='Minimum 8 znaków'
+                    disabled={isLoading}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -159,7 +159,12 @@ export function UpdatePasswordForm() {
               <FormItem>
                 <FormLabel>Potwierdź nowe hasło</FormLabel>
                 <FormControl>
-                  <Input type='password' placeholder='Powtórz hasło' disabled={isLoading} {...field} />
+                  <PasswordInput
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder='Powtórz hasło'
+                    disabled={isLoading}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

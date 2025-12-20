@@ -46,6 +46,19 @@ export function useNewPlanForm({
   const [error, setError] = useState<string | null>(null);
   const [planId, setPlanId] = useState<string | null>(editingPlan ? editingPlan.id : null);
 
+  // Determine the starting step based on what's already filled in
+  const determineStartingStep = (plan: PlanDetailsDto): number => {
+    // Check if basic info (step 1) is complete
+    const hasBasicInfo = plan.name && plan.destination && plan.start_date && plan.end_date;
+
+    if (!hasBasicInfo) {
+      return 1; // Start from the beginning
+    }
+
+    // If basic info is complete, start from step 2 (fixed points)
+    return 2;
+  };
+
   useEffect(() => {
     if (editingPlan) {
       setIsLoading(true);
@@ -67,6 +80,10 @@ export function useNewPlanForm({
             },
             fixedPoints: [], // These will be fetched next
           });
+
+          // Set the starting step based on what's already filled
+          const startingStep = determineStartingStep(planDetails);
+          setCurrentStep(startingStep);
         } catch (err) {
           setError(err instanceof Error ? err.message : 'Could not load plan details');
         } finally {
@@ -229,10 +246,13 @@ export function useNewPlanForm({
       if (currentStep === 1) {
         await saveStep1();
       } else if (currentStep === 2) {
-        const currentPlanId = planId;
-        if (currentPlanId) {
-          await saveStep2(currentPlanId);
+        // First ensure step 1 is saved (if not already)
+        const currentPlanId = planId || (await saveStep1());
+        if (!currentPlanId) {
+          throw new Error('Failed to create plan');
         }
+        // Now save step 2
+        await saveStep2(currentPlanId);
       }
       if (onFinished) {
         onFinished();
@@ -252,6 +272,14 @@ export function useNewPlanForm({
   const prevStep = () => {
     setError(null);
     setCurrentStep((prev) => Math.max(prev - 1, 1));
+  };
+
+  const goToStep = (step: number) => {
+    setError(null);
+    // Only allow navigation to step 1 and current or previous steps
+    if (step >= 1 && step <= currentStep) {
+      setCurrentStep(step);
+    }
   };
 
   const handleSubmit = async () => {
@@ -318,6 +346,7 @@ export function useNewPlanForm({
     updateFixedPoint,
     nextStep,
     prevStep,
+    goToStep,
     handleSubmit,
     saveDraft,
   };

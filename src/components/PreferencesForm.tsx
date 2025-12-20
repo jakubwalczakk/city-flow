@@ -1,91 +1,82 @@
-import { useState } from 'react';
+import { useMemo } from 'react';
+import { useForm, Controller, useWatch } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
 import { TravelPaceSelector } from '@/components/TravelPaceSelector';
 import { PreferencesSelector } from '@/components/PreferencesSelector';
-import type { TravelPace, UpdateProfileCommand } from '@/types';
+import { preferencesSchema, type PreferencesFormData } from '@/lib/schemas/preferences.schema';
+import type { UpdateProfileCommand } from '@/types';
 
 type PreferencesFormProps = {
   initialPreferences: string[] | null;
-  initialTravelPace: TravelPace | null;
+  initialTravelPace: PreferencesFormData['travel_pace'] | null;
   onSave: (data: UpdateProfileCommand) => Promise<void>;
   isSaving: boolean;
 };
 
-type FormErrors = {
-  preferences?: string;
-  travelPace?: string;
-};
-
 /**
  * Form for editing user preferences: travel pace and tourism tags.
- * Manages local form state, validation, and submission to the API.
+ * Uses React Hook Form with Zod validation for form state management.
  */
 export function PreferencesForm({ initialPreferences, initialTravelPace, onSave, isSaving }: PreferencesFormProps) {
-  const [preferences, setPreferences] = useState<string[]>(initialPreferences || []);
-  const [travelPace, setTravelPace] = useState<TravelPace | null>(initialTravelPace);
-  const [errors, setErrors] = useState<FormErrors>({});
+  const form = useForm<PreferencesFormData>({
+    resolver: zodResolver(preferencesSchema),
+    mode: 'onChange', // Enable onChange validation for better dirty detection
+    defaultValues: {
+      preferences: initialPreferences || [],
+      travel_pace: initialTravelPace || undefined,
+    },
+  });
 
-  /**
-   * Validates the form data before submission.
-   */
-  const validateForm = (): boolean => {
-    const newErrors: FormErrors = {};
+  // Watch form values to detect changes
+  const watchedPreferences = useWatch({ control: form.control, name: 'preferences' });
+  const watchedTravelPace = useWatch({ control: form.control, name: 'travel_pace' });
 
-    // Validate preferences count
-    if (preferences.length < 2) {
-      newErrors.preferences = 'Wybierz co najmniej 2 preferencje';
-    } else if (preferences.length > 5) {
-      newErrors.preferences = 'Możesz wybrać maksymalnie 5 preferencji';
-    }
+  // Check if form has changes manually
+  const hasChanges = useMemo(() => {
+    const preferencesChanged =
+      JSON.stringify(watchedPreferences?.sort() || []) !== JSON.stringify((initialPreferences || []).sort());
+    const travelPaceChanged = watchedTravelPace !== initialTravelPace;
 
-    // Validate travel pace
-    if (!travelPace) {
-      newErrors.travelPace = 'Wybierz tempo zwiedzania';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+    return preferencesChanged || travelPaceChanged;
+  }, [watchedPreferences, watchedTravelPace, initialPreferences, initialTravelPace]);
 
   /**
    * Handles form submission.
    */
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // Clear previous errors
-    setErrors({});
-
-    // Validate form
-    if (!validateForm() || !travelPace) {
-      return;
-    }
-
+  const handleSubmit = form.handleSubmit(async (data) => {
     try {
       await onSave({
-        preferences,
-        travel_pace: travelPace,
+        preferences: data.preferences,
+        travel_pace: data.travel_pace,
       });
     } catch {
       // Error handling is done in the parent component
     }
-  };
-
-  // Check if form has changes
-  const hasChanges =
-    JSON.stringify(preferences) !== JSON.stringify(initialPreferences || []) || travelPace !== initialTravelPace;
-
-  // Check if form is valid
-  const isValid = preferences.length >= 2 && preferences.length <= 5 && travelPace !== null;
+  });
 
   return (
     <form onSubmit={handleSubmit} className='space-y-6'>
-      <TravelPaceSelector value={travelPace} onChange={setTravelPace} />
-      {errors.travelPace && <p className='text-sm text-destructive -mt-2'>{errors.travelPace}</p>}
+      <Controller
+        control={form.control}
+        name='travel_pace'
+        render={({ field, fieldState }) => (
+          <div>
+            <TravelPaceSelector value={field.value || null} onChange={field.onChange} />
+            {fieldState.error && <p className='text-sm text-destructive mt-2'>{fieldState.error.message}</p>}
+          </div>
+        )}
+      />
 
-      <PreferencesSelector value={preferences} onChange={setPreferences} error={errors.preferences} />
+      <Controller
+        control={form.control}
+        name='preferences'
+        render={({ field, fieldState }) => (
+          <PreferencesSelector value={field.value} onChange={field.onChange} error={fieldState.error?.message} />
+        )}
+      />
 
-      <Button type='submit' disabled={!isValid || !hasChanges || isSaving} className='w-full sm:w-auto'>
+      <Button type='submit' disabled={!hasChanges || !form.formState.isValid || isSaving} className='w-full sm:w-auto'>
         {isSaving ? 'Zapisywanie...' : 'Zapisz zmiany'}
       </Button>
     </form>

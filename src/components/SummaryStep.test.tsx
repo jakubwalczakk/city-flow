@@ -61,9 +61,9 @@ describe('SummaryStep', () => {
     expect(screen.getByText('Trip to the Future')).toBeInTheDocument();
     expect(screen.getByText('Future City')).toBeInTheDocument();
     expect(screen.getByText('Bring a time machine.')).toBeInTheDocument();
-    // Check for mocked date formats
-    expect(screen.getByText(/Formatted Date for/)).toBeInTheDocument();
-    expect(screen.getByText(/Formatted Time for/)).toBeInTheDocument();
+    // Check for mocked date formats (multiple instances for start and end dates)
+    expect(screen.getAllByText(/Formatted Date for/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Formatted Time for/).length).toBeGreaterThan(0);
   });
 
   it('should render all fixed points correctly', () => {

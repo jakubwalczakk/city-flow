@@ -28,6 +28,7 @@ export default function NewPlanForm({
     updateFixedPoint,
     nextStep,
     prevStep,
+    goToStep,
     handleSubmit,
     saveDraft,
   } = useNewPlanForm({ onFinished, editingPlan });
@@ -39,7 +40,7 @@ export default function NewPlanForm({
         <PlanGenerationLoading planName={formData.basicInfo.name || `${formData.basicInfo.destination} - wycieczka`} />
       ) : (
         <>
-          <StepIndicator currentStep={currentStep} steps={STEPS} />
+          <StepIndicator currentStep={currentStep} steps={STEPS} onStepClick={goToStep} />
 
           <Card>
             <CardContent className='pt-6'>

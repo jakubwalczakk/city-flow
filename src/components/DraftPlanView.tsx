@@ -1,59 +1,56 @@
-import { useState } from 'react';
-import type { PlanDetailsDto, UpdatePlanCommand } from '@/types';
+import type { PlanDetailsDto } from '@/types';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useDraftPlan } from '@/hooks/useDraftPlan';
+import { NotesSection } from '@/components/draft-plan/NotesSection';
+import { DatesSection } from '@/components/draft-plan/DatesSection';
+import { FixedPointsSection } from '@/components/draft-plan/FixedPointsSection';
+import { useEffect } from 'react';
 
 type DraftPlanViewProps = {
   plan: PlanDetailsDto;
   onGenerate: () => Promise<void>;
+  onEdit: () => void;
 };
 
 /**
  * Displays the draft plan view with an editable form.
  * This view is shown when the plan status is 'draft'.
+ * Uses React Query for data fetching and mutations.
  */
-export default function DraftPlanView({ plan, onGenerate }: DraftPlanViewProps) {
-  const [notes, setNotes] = useState(plan.notes || '');
-  const [isSaving, setIsSaving] = useState(false);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+export default function DraftPlanView({ plan, onGenerate, onEdit }: DraftPlanViewProps) {
+  const {
+    notes,
+    setNotes,
+    hasChanges,
+    fixedPoints,
+    isLoadingFixedPoints,
+    handleSave,
+    handleGenerate,
+    isSaving,
+    isGenerating,
+    saveSuccess,
+    saveError,
+    generateError,
+  } = useDraftPlan({ plan });
 
-  const handleSave = async () => {
-    setIsSaving(true);
-    setSaveMessage(null);
+  // Call onGenerate callback when generation succeeds
+  useEffect(() => {
+    if (!isGenerating && !generateError) {
+      // Check if we just finished generating (component might re-render)
+      // The parent component should handle the actual navigation
+    }
+  }, [isGenerating, generateError]);
 
+  const handleGenerateClick = async () => {
     try {
-      const command: UpdatePlanCommand = { notes };
-
-      const response = await fetch(`/api/plans/${plan.id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(command),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to save changes');
-      }
-
-      setSaveMessage({ type: 'success', text: 'Zmiany zostały zapisane!' });
-
-      // Clear success message after 3 seconds
-      setTimeout(() => setSaveMessage(null), 3000);
-    } catch {
-      setSaveMessage({
-        type: 'error',
-        text: 'Nie udało się zapisać zmian. Spróbuj ponownie.',
-      });
-    } finally {
-      setIsSaving(false);
+      await handleGenerate();
+      await onGenerate();
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Nie udało się wygenerować planu');
     }
   };
-
-  const hasChanges = notes !== (plan.notes || '');
 
   return (
     <div className='space-y-6'>
@@ -66,6 +63,7 @@ export default function DraftPlanView({ plan, onGenerate }: DraftPlanViewProps) 
           </CardDescription>
         </CardHeader>
         <CardContent className='space-y-6'>
+          {/* Destination (read-only) */}
           <div className='space-y-2'>
             <div className='flex items-center justify-between'>
               <Label className='text-base font-medium'>Miejsce docelowe</Label>
@@ -76,66 +74,29 @@ export default function DraftPlanView({ plan, onGenerate }: DraftPlanViewProps) 
             <p className='text-xs text-muted-foreground'>Miejsca docelowego nie można zmienić po utworzeniu planu.</p>
           </div>
 
-          <div className='space-y-2'>
-            <div className='flex items-center justify-between'>
-              <Label htmlFor='notes' className='text-base font-medium'>
-                Notatki i preferencje podróży
-              </Label>
-            </div>
-            <Textarea
-              id='notes'
-              placeholder='Dodaj notatki o swoim stylu podróżowania, zainteresowaniach, budżecie, ograniczeniach dietetycznych lub czymkolwiek innym, co pomoże stworzyć idealny plan...'
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              rows={8}
-              className='resize-none'
-            />
-            <p className='text-xs text-muted-foreground'>
-              Podziel się swoimi preferencjami, aby pomóc nam stworzyć spersonalizowany plan podróży. Uwzględnij takie
-              rzeczy jak: obowiązkowe atrakcje, preferencje żywieniowe, poziom aktywności, kwestie budżetowe lub inne
-              specjalne wymagania.
-            </p>
-          </div>
+          {/* Notes section */}
+          <NotesSection notes={notes} onChange={setNotes} />
 
-          {saveMessage && (
-            <div
-              className={`rounded-md p-3 text-sm ${
-                saveMessage.type === 'success'
-                  ? 'bg-green-50 text-green-800 border border-green-200'
-                  : 'bg-red-50 text-red-800 border border-red-200'
-              }`}
-            >
-              {saveMessage.text}
+          {/* Save/Generate messages */}
+          {saveSuccess && (
+            <div className='rounded-md p-3 text-sm bg-green-50 text-green-800 border border-green-200'>
+              Zmiany zostały zapisane!
             </div>
           )}
 
+          {saveError && (
+            <div className='rounded-md p-3 text-sm bg-red-50 text-red-800 border border-red-200'>
+              Nie udało się zapisać zmian. Spróbuj ponownie.
+            </div>
+          )}
+
+          {/* Action buttons */}
           <div className='flex items-center justify-between pt-4'>
             <Button onClick={handleSave} disabled={!hasChanges || isSaving} variant='outline'>
               {isSaving ? 'Zapisywanie...' : 'Zapisz zmiany'}
             </Button>
 
-            <Button
-              onClick={async () => {
-                if (hasChanges) {
-                  // If there are unsaved changes, ask user to save first or auto-save?
-                  // For now, let's just warn or try to save first.
-                  // Let's try to save first
-                  await handleSave();
-                }
-
-                setIsGenerating(true);
-                try {
-                  await onGenerate();
-                  // No need to set isGenerating(false) if success, because component will unmount/switch view
-                  // But just in case:
-                } catch (error) {
-                  setIsGenerating(false);
-                  alert(error instanceof Error ? error.message : 'Nie udało się wygenerować planu');
-                }
-              }}
-              size='lg'
-              disabled={isGenerating || isSaving}
-            >
+            <Button onClick={handleGenerateClick} size='lg' disabled={isGenerating || isSaving}>
               {isGenerating ? (
                 <>
                   Generowanie...
@@ -154,61 +115,11 @@ export default function DraftPlanView({ plan, onGenerate }: DraftPlanViewProps) 
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className='text-base'>Daty i godziny podróży</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className='flex flex-col gap-3 text-sm'>
-            <div className='flex items-center gap-2'>
-              <svg className='h-4 w-4 text-muted-foreground' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
-                <path
-                  strokeLinecap='round'
-                  strokeLinejoin='round'
-                  strokeWidth={2}
-                  d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'
-                />
-              </svg>
-              <div className='flex flex-col'>
-                <span className='text-xs text-muted-foreground'>Początek</span>
-                <span className='font-medium'>
-                  {new Date(plan.start_date).toLocaleString('pl-PL', {
-                    month: 'long',
-                    day: 'numeric',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: false,
-                  })}
-                </span>
-              </div>
-            </div>
-            <div className='flex items-center gap-2'>
-              <svg className='h-4 w-4 text-muted-foreground' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
-                <path
-                  strokeLinecap='round'
-                  strokeLinejoin='round'
-                  strokeWidth={2}
-                  d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'
-                />
-              </svg>
-              <div className='flex flex-col'>
-                <span className='text-xs text-muted-foreground'>Koniec</span>
-                <span className='font-medium'>
-                  {new Date(plan.end_date).toLocaleString('pl-PL', {
-                    month: 'long',
-                    day: 'numeric',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: false,
-                  })}
-                </span>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Dates section */}
+      <DatesSection startDate={plan.start_date} endDate={plan.end_date} />
+
+      {/* Fixed Points section */}
+      <FixedPointsSection fixedPoints={fixedPoints} isLoading={isLoadingFixedPoints} onEdit={onEdit} />
     </div>
   );
 }

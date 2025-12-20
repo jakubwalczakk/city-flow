@@ -2,6 +2,10 @@ import type { SupabaseClient } from '@/db/supabase.client';
 import { ForbiddenError } from '@/lib/errors/app-error';
 import { logger } from '@/lib/utils/logger';
 
+/**
+ * Server-side authentication service for API routes.
+ * Works with Astro locals to authenticate users on the server.
+ */
 export class AuthService {
   private readonly supabase: SupabaseClient;
 

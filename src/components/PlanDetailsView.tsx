@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { usePlanDetails } from '@/hooks/usePlanDetails';
 import PlanHeader from '@/components/PlanHeader';
-import DraftPlanView from '@/components/DraftPlanView';
 import GeneratedPlanView from '@/components/GeneratedPlanView';
 import ActivityForm from '@/components/ActivityForm';
+import NewPlanForm from '@/components/NewPlanForm';
 import type { TimelineItem } from '@/types';
 
 type PlanDetailsViewProps = {
@@ -32,7 +32,6 @@ export default function PlanDetailsView({ planId }: PlanDetailsViewProps) {
     addActivity,
     updateActivity,
     deleteActivity,
-    generatePlan,
   } = usePlanDetails(planId);
 
   const [activityFormState, setActivityFormState] = useState<ActivityFormState>({
@@ -171,7 +170,22 @@ export default function PlanDetailsView({ planId }: PlanDetailsViewProps) {
 
       <PlanHeader plan={plan} onUpdate={updatePlanName} onDelete={deletePlan} onArchive={archivePlan} />
 
-      {plan.status === 'draft' && <DraftPlanView plan={plan} onGenerate={generatePlan} />}
+      {plan.status === 'draft' && (
+        <div className='mt-6'>
+          <NewPlanForm
+            editingPlan={{
+              id: plan.id,
+              name: plan.name,
+              destination: plan.destination,
+              start_date: plan.start_date,
+              end_date: plan.end_date,
+              status: plan.status,
+              created_at: plan.created_at,
+            }}
+            onFinished={() => window.location.reload()}
+          />
+        </div>
+      )}
       {plan.status === 'generated' && (
         <>
           <GeneratedPlanView

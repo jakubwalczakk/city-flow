@@ -222,7 +222,15 @@ export class OpenRouterService {
       });
 
       if (error instanceof z.ZodError) {
-        throw new ValidationError('The response from OpenRouter does not match the expected format.', error.errors);
+        // Log detailed Zod errors for debugging
+        logger.error('Zod validation errors:', {
+          errors: error.errors,
+          formattedErrors: error.format(),
+        });
+        throw new ValidationError(
+          `The response from OpenRouter does not match the expected format: ${error.errors.map((e) => `${e.path.join('.')}: ${e.message}`).join('; ')}`,
+          error.errors
+        );
       }
 
       throw new ValidationError('Failed to parse the response from OpenRouter API.', error);

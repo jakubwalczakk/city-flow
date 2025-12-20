@@ -83,7 +83,7 @@ export const basicInfoSchema = z
     destination: z.string().min(1, 'Miejsce docelowe jest wymagane'),
     start_date: z.date({ required_error: 'Data rozpoczęcia jest wymagana' }),
     end_date: z.date({ required_error: 'Data zakończenia jest wymagana' }),
-    notes: z.string(),
+    notes: z.string().optional().nullable(),
   })
   .refine(
     (data) => {
@@ -100,7 +100,7 @@ export const basicInfoSchema = z
  */
 export const fixedPointSchema = z.object({
   location: z.string().min(1, 'Lokalizacja jest wymagana'),
-  event_at: z.string().min(1, 'Data i godzina są wymagane'),
+  event_at: z.string().datetime({ message: 'Nieprawidłowy format daty' }),
   event_duration: z.number().positive('Czas trwania musi być liczbą dodatnią.').nullable().optional(),
   description: z.string().nullable().optional(),
 });

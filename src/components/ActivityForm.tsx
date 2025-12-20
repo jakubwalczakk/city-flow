@@ -1,4 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import type { TimelineItem, TimelineItemCategory } from '@/types';
 import {
   Dialog,
@@ -10,9 +12,11 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { activitySchema, transformActivityFormData, type ActivityFormData } from '@/lib/schemas/activity.schema';
+import { convertTo24Hour } from '@/lib/utils/timeFormatters';
 
 type ActivityFormProps = {
   isOpen: boolean;
@@ -34,94 +38,67 @@ const CATEGORIES: { value: TimelineItemCategory; label: string }[] = [
 ];
 
 /**
- * Ensures time is in 24-hour format (HH:mm).
- * Converts from 12-hour format if needed.
- */
-function convertTo24Hour(time12: string): string {
-  const match = time12.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
-  if (!match) return time12; // Already in 24h format or invalid
-
-  let hours = parseInt(match[1], 10);
-  const minutes = match[2];
-  const period = match[3].toUpperCase();
-
-  if (period === 'PM' && hours !== 12) {
-    hours += 12;
-  } else if (period === 'AM' && hours === 12) {
-    hours = 0;
-  }
-
-  return `${hours.toString().padStart(2, '0')}:${minutes}`;
-}
-
-/**
  * A form component for adding or editing activities in a plan.
- * Displays in a modal dialog and handles validation.
+ * Displays in a modal dialog and handles validation with React Hook Form.
  */
 export default function ActivityForm({ isOpen, onClose, onSubmit, initialData, mode }: ActivityFormProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState({
-    time: initialData?.time || '',
-    title: initialData?.title || '',
-    description: initialData?.description || '',
-    location: initialData?.location || '',
-    estimated_price: initialData?.estimated_price || '',
-    estimated_duration: initialData?.estimated_duration || '',
-    category: (initialData?.category || 'other') as TimelineItemCategory,
+  const form = useForm<ActivityFormData>({
+    resolver: zodResolver(activitySchema),
+    defaultValues: {
+      title: '',
+      time: '',
+      category: 'other',
+      location: '',
+      description: '',
+      estimated_price: '',
+      estimated_duration: '',
+    },
   });
 
   // Reset form when dialog opens with new data
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && initialData) {
       // Ensure time is in 24-hour format for the input
-      let timeValue = initialData?.time || '';
+      let timeValue = initialData.time || '';
       if (timeValue && /AM|PM/i.test(timeValue)) {
         timeValue = convertTo24Hour(timeValue);
       }
 
-      setFormData({
+      // Parse duration from "60 min" to "60"
+      const durationValue = initialData.estimated_duration?.replace(/\D/g, '') || '';
+
+      form.reset({
+        title: initialData.title || '',
         time: timeValue,
-        title: initialData?.title || '',
-        description: initialData?.description || '',
-        location: initialData?.location || '',
-        estimated_price: initialData?.estimated_price || '',
-        estimated_duration: initialData?.estimated_duration || '',
-        category: (initialData?.category || 'other') as TimelineItemCategory,
+        category: (initialData.category as TimelineItemCategory) || 'other',
+        location: initialData.location || '',
+        description: initialData.description || '',
+        estimated_price: initialData.estimated_price || '',
+        estimated_duration: durationValue,
+      });
+    } else if (isOpen) {
+      // Reset to default values when adding new activity
+      form.reset({
+        title: '',
+        time: '',
+        category: 'other',
+        location: '',
+        description: '',
+        estimated_price: '',
+        estimated_duration: '',
       });
     }
-  }, [isOpen, initialData]);
+  }, [isOpen, initialData, form]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
+  const handleSubmit = form.handleSubmit(async (data) => {
     try {
-      // Parse duration from string (e.g., "60 min" -> 60)
-      const durationMatch = formData.estimated_duration.match(/(\d+)/);
-      const duration = durationMatch ? parseInt(durationMatch[1], 10) : undefined;
-
-      // Keep time in 24-hour format (no conversion needed)
-      const formattedTime = formData.time || undefined;
-
-      await onSubmit({
-        time: formattedTime,
-        title: formData.title,
-        description: formData.description || undefined,
-        location: formData.location || undefined,
-        estimated_price: formData.estimated_price || undefined,
-        estimated_duration: formData.estimated_duration || undefined,
-        category: formData.category,
-        // Include duration as a number for the API
-        ...(duration && { duration }),
-      });
-
+      const transformedData = transformActivityFormData(data);
+      await onSubmit(transformedData);
       onClose();
     } catch {
       // Error handling is done by the parent component
-    } finally {
-      setIsSubmitting(false);
     }
-  };
+  });
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -133,116 +110,135 @@ export default function ActivityForm({ isOpen, onClose, onSubmit, initialData, m
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className='space-y-4'>
-          <div className='space-y-2'>
-            <Label htmlFor='title'>
-              Tytuł <span className='text-destructive'>*</span>
-            </Label>
-            <Input
-              id='title'
-              value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              placeholder='np. Wizyta w lokalnej kawiarni'
-              required
+        <Form {...form}>
+          <form onSubmit={handleSubmit} className='space-y-4'>
+            <FormField
+              control={form.control}
+              name='title'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Tytuł <span className='text-destructive'>*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Input placeholder='np. Wizyta w lokalnej kawiarni' {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          <div className='grid grid-cols-2 gap-4'>
-            <div className='space-y-2'>
-              <Label htmlFor='time'>Godzina</Label>
-              <Input
-                id='time'
-                type='time'
-                value={formData.time}
-                onChange={(e) => setFormData({ ...formData, time: e.target.value })}
+            <div className='grid grid-cols-2 gap-4'>
+              <FormField
+                control={form.control}
+                name='time'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Godzina</FormLabel>
+                    <FormControl>
+                      <Input type='time' {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name='category'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Kategoria <span className='text-destructive'>*</span>
+                    </FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder='Wybierz kategorię' />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {CATEGORIES.map((cat) => (
+                          <SelectItem key={cat.value} value={cat.value}>
+                            {cat.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
             </div>
 
-            <div className='space-y-2'>
-              <Label htmlFor='category'>
-                Kategoria <span className='text-destructive'>*</span>
-              </Label>
-              <Select
-                value={formData.category}
-                onValueChange={(value: TimelineItemCategory) => setFormData({ ...formData, category: value })}
-              >
-                <SelectTrigger id='category'>
-                  <SelectValue placeholder='Wybierz kategorię' />
-                </SelectTrigger>
-                <SelectContent>
-                  {CATEGORIES.map((cat) => (
-                    <SelectItem key={cat.value} value={cat.value}>
-                      {cat.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className='space-y-2'>
-            <Label htmlFor='location'>Lokalizacja</Label>
-            <Input
-              id='location'
-              value={formData.location}
-              onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-              placeholder='np. Dzielnica Trastevere'
+            <FormField
+              control={form.control}
+              name='location'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Lokalizacja</FormLabel>
+                  <FormControl>
+                    <Input placeholder='np. Dzielnica Trastevere' {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          <div className='space-y-2'>
-            <Label htmlFor='description'>Opis</Label>
-            <Textarea
-              id='description'
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder='Dodaj szczegóły dotyczące tej aktywności...'
-              rows={3}
+            <FormField
+              control={form.control}
+              name='description'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Opis</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder='Dodaj szczegóły dotyczące tej aktywności...' rows={3} {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          <div className='grid grid-cols-2 gap-4'>
-            <div className='space-y-2'>
-              <Label htmlFor='duration'>Czas trwania (minuty)</Label>
-              <Input
-                id='duration'
-                type='number'
-                min='1'
-                value={formData.estimated_duration.replace(/\D/g, '')}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  // Only allow digits
-                  if (value === '' || /^\d+$/.test(value)) {
-                    setFormData({
-                      ...formData,
-                      estimated_duration: value ? `${value} min` : '',
-                    });
-                  }
-                }}
-                placeholder='np. 60'
+            <div className='grid grid-cols-2 gap-4'>
+              <FormField
+                control={form.control}
+                name='estimated_duration'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Czas trwania (minuty)</FormLabel>
+                    <FormControl>
+                      <Input type='number' min='1' placeholder='np. 60' {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name='estimated_price'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Szacowany koszt</FormLabel>
+                    <FormControl>
+                      <Input placeholder='np. 20-40 PLN' {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
             </div>
 
-            <div className='space-y-2'>
-              <Label htmlFor='price'>Szacowany koszt</Label>
-              <Input
-                id='price'
-                value={formData.estimated_price}
-                onChange={(e) => setFormData({ ...formData, estimated_price: e.target.value })}
-                placeholder='np. 20-40 PLN'
-              />
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button type='button' variant='outline' onClick={onClose} disabled={isSubmitting}>
-              Anuluj
-            </Button>
-            <Button type='submit' disabled={isSubmitting}>
-              {isSubmitting ? 'Zapisywanie...' : mode === 'add' ? 'Dodaj aktywność' : 'Zapisz zmiany'}
-            </Button>
-          </DialogFooter>
-        </form>
+            <DialogFooter>
+              <Button type='button' variant='outline' onClick={onClose} disabled={form.formState.isSubmitting}>
+                Anuluj
+              </Button>
+              <Button type='submit' disabled={form.formState.isSubmitting}>
+                {form.formState.isSubmitting ? 'Zapisywanie...' : mode === 'add' ? 'Dodaj aktywność' : 'Zapisz zmiany'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );

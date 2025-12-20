@@ -247,7 +247,10 @@ The response MUST be a single JSON object and nothing else. Do not include any i
 
 **USER PREFERENCES (HIGHEST PRIORITY):**
 The user has specified the following travel style and interests. You MUST prioritize these over general tourist attractions:
-- **Travel Pace:** ${pace} (adjust the density of activities accordingly).
+- **Travel Pace:** ${pace}
+  - "slow": Relaxed pace with fewer activities per day, longer breaks, more time at each location
+  - "moderate": Balanced pace with a mix of activities and free time
+  - "intensive": Fast-paced with many activities, packed schedule, shorter breaks
 - **Interests:** ${preferences} (focus on these categories when selecting activities).
 
 **Response Structure:**
