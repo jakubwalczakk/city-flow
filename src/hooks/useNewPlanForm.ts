@@ -236,7 +236,6 @@ export function useNewPlanForm({
               .join('; ');
             errorMessage += ` (${fieldMessages})`;
           }
-          console.error(`${operation} error:`, errorData);
           failedResults.push(errorMessage);
         } catch {
           failedResults.push(`${operation}: HTTP ${result.value.status}`);
@@ -308,7 +307,6 @@ export function useNewPlanForm({
     }
 
     if (failedResults.length > 0) {
-      console.error('Failed to save fixed points:', failedResults);
       throw new Error(`Failed to save fixed point(s): ${failedResults[0]}`);
     }
   };

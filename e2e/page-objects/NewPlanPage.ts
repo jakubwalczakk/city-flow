@@ -72,10 +72,8 @@ export class NewPlanPage {
     // Check if onboarding modal appeared (only for users with onboarding_completed: false)
     const isOnboardingVisible = await this.onboardingSkipButton.isVisible();
     if (isOnboardingVisible) {
-      console.log('Onboarding modal detected, clicking skip...');
       await this.onboardingSkipButton.click();
       await this.onboardingSkipButton.waitFor({ state: 'hidden', timeout: 5000 });
-      console.log('Onboarding modal closed');
     }
   }
 

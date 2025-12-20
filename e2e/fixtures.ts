@@ -86,7 +86,6 @@ export const test = base.extend<TestFixtures>({
       const { error: feedbackError } = await supabase.from('feedback').delete().eq('user_id', testUserId);
 
       if (feedbackError) {
-        console.error('Error cleaning feedback:', feedbackError.message);
         throw new Error(`Failed to clean feedback: ${feedbackError.message}`);
       }
 
@@ -97,7 +96,6 @@ export const test = base.extend<TestFixtures>({
         .eq('user_id', testUserId);
 
       if (plansQueryError) {
-        console.error('Error querying plans:', plansQueryError.message);
         throw new Error(`Failed to query plans: ${plansQueryError.message}`);
       }
 
@@ -108,7 +106,6 @@ export const test = base.extend<TestFixtures>({
         const { error: fixedPointsError } = await supabase.from('fixed_points').delete().in('plan_id', planIds);
 
         if (fixedPointsError) {
-          console.error('Error cleaning fixed_points:', fixedPointsError.message);
           throw new Error(`Failed to clean fixed_points: ${fixedPointsError.message}`);
         }
       }
@@ -117,7 +114,6 @@ export const test = base.extend<TestFixtures>({
       const { error: plansError } = await supabase.from('plans').delete().eq('user_id', testUserId);
 
       if (plansError) {
-        console.error('Error cleaning plans:', plansError.message);
         throw new Error(`Failed to clean plans: ${plansError.message}`);
       }
     };
