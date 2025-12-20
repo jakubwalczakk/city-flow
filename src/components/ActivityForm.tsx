@@ -1,7 +1,4 @@
-import { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import type { TimelineItem, TimelineItemCategory } from '@/types';
+import type { TimelineItem } from '@/types';
 import {
   Dialog,
   DialogContent,
@@ -15,8 +12,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { activitySchema, transformActivityFormData, type ActivityFormData } from '@/lib/schemas/activity.schema';
-import { convertTo24Hour } from '@/lib/utils/timeFormatters';
+import { useActivityForm } from '@/hooks/useActivityForm';
+import { ACTIVITY_CATEGORIES } from '@/lib/constants/categories';
 
 type ActivityFormProps = {
   isOpen: boolean;
@@ -26,78 +23,16 @@ type ActivityFormProps = {
   mode: 'add' | 'edit';
 };
 
-const CATEGORIES: { value: TimelineItemCategory; label: string }[] = [
-  { value: 'history', label: 'Historia' },
-  { value: 'food', label: 'Jedzenie' },
-  { value: 'sport', label: 'Sport' },
-  { value: 'nature', label: 'Natura' },
-  { value: 'culture', label: 'Kultura' },
-  { value: 'transport', label: 'Transport' },
-  { value: 'accommodation', label: 'Zakwaterowanie' },
-  { value: 'other', label: 'Inne' },
-];
-
 /**
  * A form component for adding or editing activities in a plan.
  * Displays in a modal dialog and handles validation with React Hook Form.
  */
 export default function ActivityForm({ isOpen, onClose, onSubmit, initialData, mode }: ActivityFormProps) {
-  const form = useForm<ActivityFormData>({
-    resolver: zodResolver(activitySchema),
-    defaultValues: {
-      title: '',
-      time: '',
-      category: 'other',
-      location: '',
-      description: '',
-      estimated_price: '',
-      estimated_duration: '',
-    },
-  });
-
-  // Reset form when dialog opens with new data
-  useEffect(() => {
-    if (isOpen && initialData) {
-      // Ensure time is in 24-hour format for the input
-      let timeValue = initialData.time || '';
-      if (timeValue && /AM|PM/i.test(timeValue)) {
-        timeValue = convertTo24Hour(timeValue);
-      }
-
-      // Parse duration from "60 min" to "60"
-      const durationValue = initialData.estimated_duration?.replace(/\D/g, '') || '';
-
-      form.reset({
-        title: initialData.title || '',
-        time: timeValue,
-        category: (initialData.category as TimelineItemCategory) || 'other',
-        location: initialData.location || '',
-        description: initialData.description || '',
-        estimated_price: initialData.estimated_price || '',
-        estimated_duration: durationValue,
-      });
-    } else if (isOpen) {
-      // Reset to default values when adding new activity
-      form.reset({
-        title: '',
-        time: '',
-        category: 'other',
-        location: '',
-        description: '',
-        estimated_price: '',
-        estimated_duration: '',
-      });
-    }
-  }, [isOpen, initialData, form]);
-
-  const handleSubmit = form.handleSubmit(async (data) => {
-    try {
-      const transformedData = transformActivityFormData(data);
-      await onSubmit(transformedData);
-      onClose();
-    } catch {
-      // Error handling is done by the parent component
-    }
+  const { form, submitHandler, isSubmitting } = useActivityForm({
+    isOpen,
+    initialData,
+    onSubmit,
+    onClose,
   });
 
   return (
@@ -111,7 +46,7 @@ export default function ActivityForm({ isOpen, onClose, onSubmit, initialData, m
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={handleSubmit} className='space-y-4'>
+          <form onSubmit={submitHandler} className='space-y-4'>
             <FormField
               control={form.control}
               name='title'
@@ -158,7 +93,7 @@ export default function ActivityForm({ isOpen, onClose, onSubmit, initialData, m
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {CATEGORIES.map((cat) => (
+                        {ACTIVITY_CATEGORIES.map((cat) => (
                           <SelectItem key={cat.value} value={cat.value}>
                             {cat.label}
                           </SelectItem>
@@ -230,11 +165,11 @@ export default function ActivityForm({ isOpen, onClose, onSubmit, initialData, m
             </div>
 
             <DialogFooter>
-              <Button type='button' variant='outline' onClick={onClose} disabled={form.formState.isSubmitting}>
+              <Button type='button' variant='outline' onClick={onClose} disabled={isSubmitting}>
                 Anuluj
               </Button>
-              <Button type='submit' disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting ? 'Zapisywanie...' : mode === 'add' ? 'Dodaj aktywność' : 'Zapisz zmiany'}
+              <Button type='submit' disabled={isSubmitting}>
+                {isSubmitting ? 'Zapisywanie...' : mode === 'add' ? 'Dodaj aktywność' : 'Zapisz zmiany'}
               </Button>
             </DialogFooter>
           </form>

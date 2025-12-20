@@ -1,20 +1,13 @@
-import { useState } from 'react';
 import { usePlanDetails } from '@/hooks/usePlanDetails';
+import { useActivityFormState } from '@/hooks/useActivityFormState';
 import PlanHeader from '@/components/PlanHeader';
 import GeneratedPlanView from '@/components/GeneratedPlanView';
 import ActivityForm from '@/components/ActivityForm';
 import NewPlanForm from '@/components/NewPlanForm';
-import type { TimelineItem } from '@/types';
+import { LoadingView, ErrorView, NotFoundView, BackLink, ArchivedBanner } from '@/components/ui/state-views';
 
 type PlanDetailsViewProps = {
   planId: string;
-};
-
-type ActivityFormState = {
-  isOpen: boolean;
-  mode: 'add' | 'edit';
-  date: string | null;
-  item: TimelineItem | null;
 };
 
 /**
@@ -34,138 +27,32 @@ export default function PlanDetailsView({ planId }: PlanDetailsViewProps) {
     deleteActivity,
   } = usePlanDetails(planId);
 
-  const [activityFormState, setActivityFormState] = useState<ActivityFormState>({
-    isOpen: false,
-    mode: 'add',
-    date: null,
-    item: null,
+  const { formState, openAddForm, openEditForm, closeForm, handleFormSubmit, handleDelete } = useActivityFormState({
+    onAddActivity: addActivity,
+    onUpdateActivity: updateActivity,
+    onDeleteActivity: deleteActivity,
   });
-
-  const handleAddActivity = (date: string) => {
-    setActivityFormState({
-      isOpen: true,
-      mode: 'add',
-      date,
-      item: null,
-    });
-  };
-
-  const handleEditActivity = (date: string, item: TimelineItem) => {
-    setActivityFormState({
-      isOpen: true,
-      mode: 'edit',
-      date,
-      item,
-    });
-  };
-
-  const handleDeleteActivity = async (date: string, itemId: string) => {
-    try {
-      await deleteActivity(date, itemId);
-    } catch (error) {
-      alert(error instanceof Error ? error.message : 'Nie udało się usunąć aktywności');
-    }
-  };
-
-  const handleActivityFormSubmit = async (activity: Partial<TimelineItem>) => {
-    try {
-      if (activityFormState.mode === 'add' && activityFormState.date) {
-        await addActivity(activityFormState.date, activity);
-      } else if (activityFormState.mode === 'edit' && activityFormState.date && activityFormState.item) {
-        await updateActivity(activityFormState.date, activityFormState.item.id, activity);
-      }
-    } catch (error) {
-      alert(error instanceof Error ? error.message : 'Nie udało się zapisać aktywności');
-      throw error; // Re-throw to prevent form from closing
-    }
-  };
-
-  const handleActivityFormClose = () => {
-    setActivityFormState({
-      isOpen: false,
-      mode: 'add',
-      date: null,
-      item: null,
-    });
-  };
 
   // Loading state
   if (isLoading) {
-    return (
-      <div className='flex items-center justify-center min-h-[400px]'>
-        <div className='text-center'>
-          <div className='inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]' />
-          <p className='mt-4 text-muted-foreground'>Ładowanie planu...</p>
-        </div>
-      </div>
-    );
+    return <LoadingView message='Ładowanie planu...' />;
   }
 
   // Error state
   if (error) {
-    return (
-      <div className='flex items-center justify-center min-h-[400px]'>
-        <div className='text-center max-w-md'>
-          <div className='mb-4'>
-            <svg
-              className='mx-auto h-12 w-12 text-destructive'
-              fill='none'
-              viewBox='0 0 24 24'
-              stroke='currentColor'
-              aria-hidden='true'
-            >
-              <path
-                strokeLinecap='round'
-                strokeLinejoin='round'
-                strokeWidth={2}
-                d='M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z'
-              />
-            </svg>
-          </div>
-          <h2 className='text-xl font-semibold mb-2'>Nie można załadować planu</h2>
-          <p className='text-muted-foreground mb-6'>{error}</p>
-          <a
-            href='/plans'
-            className='inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90'
-          >
-            ← Powrót do planów
-          </a>
-        </div>
-      </div>
-    );
+    return <ErrorView title='Nie można załadować planu' message={error} />;
   }
 
   // Plan not found
   if (!plan) {
-    return (
-      <div className='flex items-center justify-center min-h-[400px]'>
-        <div className='text-center max-w-md'>
-          <h2 className='text-xl font-semibold mb-2'>Plan nie został znaleziony</h2>
-          <p className='text-muted-foreground mb-6'>Szukany plan nie istnieje lub został usunięty.</p>
-          <a
-            href='/plans'
-            className='inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90'
-          >
-            ← Powrót do planów
-          </a>
-        </div>
-      </div>
-    );
+    return <NotFoundView title='Plan nie został znaleziony' message='Szukany plan nie istnieje lub został usunięty.' />;
   }
 
   return (
     <div className='space-y-6'>
       {/* Back navigation */}
       <div className='flex items-center gap-2'>
-        <a
-          href='/plans'
-          className='inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors'
-        >
-          <svg className='h-4 w-4' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
-            <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M15 19l-7-7 7-7' />
-          </svg>
-          Powrót do planów
-        </a>
+        <BackLink />
       </div>
 
       <PlanHeader plan={plan} onUpdate={updatePlanName} onDelete={deletePlan} onArchive={archivePlan} />
@@ -186,42 +73,28 @@ export default function PlanDetailsView({ planId }: PlanDetailsViewProps) {
           />
         </div>
       )}
+
       {plan.status === 'generated' && (
         <>
           <GeneratedPlanView
             plan={plan}
-            onAddActivity={handleAddActivity}
-            onEditActivity={handleEditActivity}
-            onDeleteActivity={handleDeleteActivity}
+            onAddActivity={openAddForm}
+            onEditActivity={openEditForm}
+            onDeleteActivity={handleDelete}
           />
           <ActivityForm
-            isOpen={activityFormState.isOpen}
-            onClose={handleActivityFormClose}
-            onSubmit={handleActivityFormSubmit}
-            initialData={activityFormState.item || undefined}
-            mode={activityFormState.mode}
+            isOpen={formState.isOpen}
+            onClose={closeForm}
+            onSubmit={handleFormSubmit}
+            initialData={formState.item || undefined}
+            mode={formState.mode}
           />
         </>
       )}
+
       {plan.status === 'archived' && (
         <>
-          <div className='bg-muted/50 border border-muted rounded-lg p-4 mb-6 flex items-center gap-3 text-muted-foreground'>
-            <svg
-              xmlns='http://www.w3.org/2000/svg'
-              viewBox='0 0 24 24'
-              fill='none'
-              stroke='currentColor'
-              strokeWidth='2'
-              strokeLinecap='round'
-              strokeLinejoin='round'
-              className='h-5 w-5'
-            >
-              <rect width='20' height='5' x='2' y='3' rx='1' />
-              <path d='M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8' />
-              <path d='M10 12h4' />
-            </svg>
-            <p className='text-sm font-medium'>To jest plan archiwalny. Edycja jest zablokowana.</p>
-          </div>
+          <ArchivedBanner />
           <GeneratedPlanView plan={plan} />
         </>
       )}
