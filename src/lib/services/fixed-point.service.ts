@@ -45,7 +45,7 @@ export class FixedPointService {
         plan_id: planId,
         location: command.location,
         event_at: command.event_at,
-        event_duration: command.event_duration ?? 0, // Default to 0 if null
+        event_duration: command.event_duration ?? null, // Keep as null if not provided
         description: command.description,
       })
       .select()
@@ -118,13 +118,13 @@ export class FixedPointService {
     const updates: {
       location?: string;
       event_at?: string;
-      event_duration?: number;
+      event_duration?: number | null;
       description?: string | null;
       updated_at?: string;
     } = {};
     if (command.location !== undefined) updates.location = command.location;
     if (command.event_at !== undefined) updates.event_at = command.event_at;
-    if (command.event_duration !== undefined) updates.event_duration = command.event_duration ?? 0;
+    if (command.event_duration !== undefined) updates.event_duration = command.event_duration ?? null;
     if (command.description !== undefined) updates.description = command.description;
     updates.updated_at = new Date().toISOString();
 

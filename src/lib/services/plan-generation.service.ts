@@ -251,7 +251,20 @@ The user has specified the following travel style and interests. You MUST priori
   - "slow": Relaxed pace with fewer activities per day, longer breaks, more time at each location
   - "moderate": Balanced pace with a mix of activities and free time
   - "intensive": Fast-paced with many activities, packed schedule, shorter breaks
-- **Interests:** ${preferences} (focus on these categories when selecting activities).
+- **User Interests:** ${preferences}
+
+**IMPORTANT: Activity Categories**
+You MUST use ONLY these exact category values for activities:
+- "history" - Historical sites, monuments, heritage (use for: History & Culture preferences)
+- "food" - Restaurants, cafes, food markets (use for: Local Food preferences)
+- "sport" - Sports activities, fitness (use for: Active Recreation preferences)
+- "nature" - Parks, gardens, natural attractions (use for: Nature & Parks preferences)
+- "culture" - Museums, art galleries, theaters, concerts (use for: Art & Museums preferences)
+- "transport" - Transportation between locations
+- "accommodation" - Hotels, check-in/check-out
+- "other" - Everything else including nightlife, shopping, etc.
+
+Match the user's interests (like "Art & Museums", "Nightlife") to the appropriate category from the list above.
 
 **Response Structure:**
 
@@ -271,7 +284,7 @@ The user has specified the following travel style and interests. You MUST priori
               {
                 "time": "HH:mm (24-hour format, e.g., 18:00, NOT 6:00 PM)",
                 "activity": "Activity Title",
-                "category": "history | food | sport | nature | culture | transport | accommodation | other",
+                "category": "MUST be one of: history, food, sport, nature, culture, transport, accommodation, other",
                 "description": "Detailed description of the activity.",
                 "estimated_price": "e.g., '18', '0' (for free), or null (numeric value as string, WITHOUT currency symbol)",
                 "estimated_duration": "e.g., '2 hours', '30 minutes', or null"

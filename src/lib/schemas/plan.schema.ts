@@ -101,7 +101,12 @@ export const basicInfoSchema = z
 export const fixedPointSchema = z.object({
   location: z.string().min(1, 'Lokalizacja jest wymagana'),
   event_at: z.string().datetime({ message: 'Nieprawidłowy format daty' }),
-  event_duration: z.number().positive('Czas trwania musi być liczbą dodatnią.').nullable().optional(),
+  event_duration: z
+    .number({ invalid_type_error: 'Czas trwania musi być liczbą.' })
+    .int({ message: 'Czas trwania musi być liczbą całkowitą.' })
+    .positive('Czas trwania musi być liczbą dodatnią.')
+    .nullable()
+    .optional(),
   description: z.string().nullable().optional(),
 });
 

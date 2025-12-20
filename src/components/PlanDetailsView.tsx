@@ -5,6 +5,7 @@ import GeneratedPlanView from '@/components/GeneratedPlanView';
 import ActivityForm from '@/components/ActivityForm';
 import NewPlanForm from '@/components/NewPlanForm';
 import { LoadingView, ErrorView, NotFoundView, BackLink, ArchivedBanner } from '@/components/ui/state-views';
+import { QueryProvider } from '@/components/providers/QueryProvider';
 
 type PlanDetailsViewProps = {
   planId: string;
@@ -14,7 +15,7 @@ type PlanDetailsViewProps = {
  * Main component for the plan details view.
  * Fetches plan data and renders the appropriate view based on the plan's status.
  */
-export default function PlanDetailsView({ planId }: PlanDetailsViewProps) {
+function PlanDetailsViewContent({ planId }: PlanDetailsViewProps) {
   const {
     plan,
     isLoading,
@@ -99,5 +100,16 @@ export default function PlanDetailsView({ planId }: PlanDetailsViewProps) {
         </>
       )}
     </div>
+  );
+}
+
+/**
+ * Wrapper component that provides QueryClient context to PlanDetailsView
+ */
+export default function PlanDetailsView({ planId }: PlanDetailsViewProps) {
+  return (
+    <QueryProvider>
+      <PlanDetailsViewContent planId={planId} />
+    </QueryProvider>
   );
 }

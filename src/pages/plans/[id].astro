@@ -2,6 +2,8 @@
 import MainLayout from '@/layouts/MainLayout.astro';
 import PlanDetailsView from '@/components/PlanDetailsView';
 
+export const prerender = false;
+
 // Get the plan ID from the URL params
 const { id } = Astro.params;
 

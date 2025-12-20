@@ -40,10 +40,17 @@ export const updateFixedPointSchema = z.object({
     })
     .optional(),
   event_duration: z
-    .number()
-    .int({ message: 'Event duration must be an integer.' })
-    .positive({ message: 'Event duration must be positive.' })
-    .optional()
-    .nullable(),
+    .preprocess(
+      // transform "" to null, otherwise keep value
+      (val) => (val === '' || val === 0 ? null : val),
+      z
+        .number({
+          invalid_type_error: 'Event duration must be a number.',
+        })
+        .int({ message: 'Event duration must be an integer.' })
+        .positive({ message: 'Event duration must be positive.' })
+        .nullable()
+    )
+    .optional(),
   description: z.string().optional().nullable(),
 });
