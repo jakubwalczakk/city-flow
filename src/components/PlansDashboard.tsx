@@ -1,12 +1,9 @@
-import { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { usePlans } from '@/hooks/usePlans';
-import type { PlansDashboardViewModel } from '@/types';
-import type { PlanListItemDto } from '@/types';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { usePlansDashboard } from '@/hooks/usePlansDashboard';
 import { PlanList } from '@/components/PlanList';
 import { PaginationControls } from '@/components/PaginationControls';
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import NewPlanForm from './NewPlanForm';
 
 /**
@@ -14,85 +11,24 @@ import NewPlanForm from './NewPlanForm';
  * Manages tabs (My Plans / History), pagination, and plan data fetching.
  */
 export const PlansDashboard = () => {
-  const [activeTab, setActiveTab] = useState<PlansDashboardViewModel['activeTab']>('my-plans');
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingPlan, setEditingPlan] = useState<PlanListItemDto | null>(null);
-
-  const limit = 12;
-  const offset = (currentPage - 1) * limit;
-
-  // Determine status filter based on active tab (memoized to prevent infinite re-renders)
-  const status = useMemo<('draft' | 'generated' | 'archived')[]>(
-    () => (activeTab === 'my-plans' ? ['draft', 'generated'] : ['archived']),
-    [activeTab]
-  );
-
-  // Fetch plans using custom hook
   const {
-    data,
+    activeTab,
+    isModalOpen,
+    editingPlan,
+    plans,
+    pagination,
     isLoading,
     error,
-    refetch: refetchPlans,
-  } = usePlans({
-    status,
-    limit,
-    offset,
-    sortBy: 'created_at',
-    order: 'desc',
-  });
-
-  // Handle tab change
-  const handleTabChange = (value: string) => {
-    setActiveTab(value as PlansDashboardViewModel['activeTab']);
-    setCurrentPage(1); // Reset to first page when switching tabs
-  };
-
-  // Handle page change
-  const handlePageChange = (newPage: number) => {
-    setCurrentPage(newPage);
-  };
-
-  const handleModalClose = () => {
-    setIsModalOpen(false);
-    setEditingPlan(null);
-    refetchPlans();
-  };
-
-  const handleCreatePlan = () => {
-    setEditingPlan(null);
-    setIsModalOpen(true);
-  };
-
-  const handlePlanClick = (plan: PlanListItemDto) => {
-    if (plan.status === 'draft') {
-      setEditingPlan(plan);
-      setIsModalOpen(true);
-    } else {
-      window.location.href = `/plans/${plan.id}`;
-    }
-  };
-
-  const handlePlanDelete = async (planId: string) => {
-    try {
-      const response = await fetch(`/api/plans/${planId}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to delete plan');
-      }
-
-      // Refetch plans after successful deletion
-      refetchPlans();
-    } catch {
-      // Error handling: could add a toast notification here to inform the user
-    }
-  };
-
-  const plans = data?.data ?? [];
-  const pagination = data?.pagination;
-  const showPagination = pagination && pagination.total > limit;
+    showPagination,
+    handleTabChange,
+    handlePageChange,
+    handleModalClose,
+    handleCreatePlan,
+    handlePlanClick,
+    handlePlanDelete,
+    setIsModalOpen,
+    setEditingPlan,
+  } = usePlansDashboard();
 
   return (
     <div className='container mx-auto px-4 py-8'>
@@ -118,40 +54,78 @@ export const PlansDashboard = () => {
           <TabsTrigger value='history'>Historia</TabsTrigger>
         </TabsList>
 
-        {/* My Plans Tab */}
+        {/* Plans Content - same for both tabs, data differs based on status filter */}
         <TabsContent value='my-plans'>
-          <PlanList
+          <PlansTabContent
             plans={plans}
             isLoading={isLoading}
             error={error}
+            showPagination={showPagination}
+            pagination={pagination}
             onPlanClick={handlePlanClick}
             onPlanDelete={handlePlanDelete}
             onCreatePlan={handleCreatePlan}
+            onPageChange={handlePageChange}
           />
-          {showPagination && (
-            <div className='mt-8'>
-              <PaginationControls pagination={pagination} onPageChange={handlePageChange} />
-            </div>
-          )}
         </TabsContent>
 
-        {/* History Tab */}
         <TabsContent value='history'>
-          <PlanList
+          <PlansTabContent
             plans={plans}
             isLoading={isLoading}
             error={error}
+            showPagination={showPagination}
+            pagination={pagination}
             onPlanClick={handlePlanClick}
             onPlanDelete={handlePlanDelete}
             onCreatePlan={handleCreatePlan}
+            onPageChange={handlePageChange}
           />
-          {showPagination && (
-            <div className='mt-8'>
-              <PaginationControls pagination={pagination} onPageChange={handlePageChange} />
-            </div>
-          )}
         </TabsContent>
       </Tabs>
     </div>
   );
 };
+
+// Extracted component to reduce duplication between tabs
+type PlansTabContentProps = {
+  plans: ReturnType<typeof usePlansDashboard>['plans'];
+  isLoading: boolean;
+  error: string | null;
+  showPagination: boolean | undefined;
+  pagination: ReturnType<typeof usePlansDashboard>['pagination'];
+  onPlanClick: (plan: ReturnType<typeof usePlansDashboard>['plans'][0]) => void;
+  onPlanDelete: (planId: string) => Promise<void>;
+  onCreatePlan: () => void;
+  onPageChange: (page: number) => void;
+};
+
+function PlansTabContent({
+  plans,
+  isLoading,
+  error,
+  showPagination,
+  pagination,
+  onPlanClick,
+  onPlanDelete,
+  onCreatePlan,
+  onPageChange,
+}: PlansTabContentProps) {
+  return (
+    <>
+      <PlanList
+        plans={plans}
+        isLoading={isLoading}
+        error={error}
+        onPlanClick={onPlanClick}
+        onPlanDelete={onPlanDelete}
+        onCreatePlan={onCreatePlan}
+      />
+      {showPagination && pagination && (
+        <div className='mt-8'>
+          <PaginationControls pagination={pagination} onPageChange={onPageChange} />
+        </div>
+      )}
+    </>
+  );
+}

@@ -1,8 +1,7 @@
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormField } from '@/components/ui/form';
 import { DateTimePickerField } from '@/components/ui/date-time-picker-field';
+import { FormTextField, FormTextareaField } from '@/components/ui/form-fields';
 import { useBasicInfoStep } from '@/hooks/useBasicInfoStep';
 import type { NewPlanViewModel } from '@/types';
 
@@ -49,52 +48,24 @@ export function BasicInfoStep({
   return (
     <Form {...form}>
       <form onSubmit={handleNext} className='space-y-6'>
-        <FormField
+        <FormTextField
           control={form.control}
           name='name'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>
-                Nazwa planu <span className='text-destructive'>*</span>
-              </FormLabel>
-              <FormControl>
-                <Input
-                  {...field}
-                  data-testid='plan-name-input'
-                  placeholder='np. Weekend w Paryżu'
-                  onBlur={() => {
-                    field.onBlur();
-                    syncToParent();
-                  }}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+          label='Nazwa planu'
+          placeholder='np. Weekend w Paryżu'
+          required
+          testId='plan-name-input'
+          onBlur={syncToParent}
         />
 
-        <FormField
+        <FormTextField
           control={form.control}
           name='destination'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>
-                Miejsce docelowe <span className='text-destructive'>*</span>
-              </FormLabel>
-              <FormControl>
-                <Input
-                  {...field}
-                  data-testid='plan-destination-input'
-                  placeholder='np. Paryż, Francja'
-                  onBlur={() => {
-                    field.onBlur();
-                    syncToParent();
-                  }}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+          label='Miejsce docelowe'
+          placeholder='np. Paryż, Francja'
+          required
+          testId='plan-destination-input'
+          onBlur={syncToParent}
         />
 
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
@@ -138,30 +109,13 @@ export function BasicInfoStep({
           />
         </div>
 
-        <FormField
+        <FormTextareaField
           control={form.control}
           name='notes'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Notatki</FormLabel>
-              <FormControl>
-                <Textarea
-                  {...field}
-                  value={field.value || ''}
-                  placeholder='Dodaj dodatkowe notatki lub preferencje dotyczące podróży...'
-                  rows={4}
-                  onBlur={() => {
-                    field.onBlur();
-                    syncToParent();
-                  }}
-                />
-              </FormControl>
-              <p className='text-sm text-muted-foreground'>
-                Uwzględnij wszelkie preferencje, specjalne wymagania lub pomysły dotyczące tej podróży.
-              </p>
-              <FormMessage />
-            </FormItem>
-          )}
+          label='Notatki'
+          placeholder='Dodaj dodatkowe notatki lub preferencje dotyczące podróży...'
+          description='Uwzględnij wszelkie preferencje, specjalne wymagania lub pomysły dotyczące tej podróży.'
+          onBlur={syncToParent}
         />
 
         {error && <p className='text-sm text-destructive'>{error}</p>}
