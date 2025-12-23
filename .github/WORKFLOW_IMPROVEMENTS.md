@@ -238,6 +238,24 @@ refs/remotes/origin/main
        key: playwright-${{ hashFiles('package-lock.json') }}
    ```
 
+## ⚠️ Fix: .nvmrc Not Found Error
+
+**Problem wykryty podczas uruchamiania workflow:**
+
+```
+Error: The specified node version file at: .nvmrc does not exist
+```
+
+**Przyczyna:** Plik `.nvmrc` był w `.gitignore` (linia 46)
+
+**Rozwiązanie:**
+
+- ✅ Usunięto `.nvmrc` z `.gitignore`
+- ✅ Dodano `.nvmrc` do repozytorium (`git add -f .nvmrc`)
+- ⏳ **Wymaga commit i push do GitHub**
+
+**Szczegóły:** Zobacz `.github/NVMRC_FIX.md`
+
 ## ✅ Checklist Zgodności z Regułami
 
 - [x] **Version Verification**: Używamy MAJOR versions dla wszystkich akcji
@@ -245,6 +263,7 @@ refs/remotes/origin/main
 - [x] **Setup Node**: Używamy `node-version-file: '.nvmrc'`
 - [x] **Workflow Triggers**: Workflow uruchamia się na domyślnej gałęzi (`main`)
 - [x] **Documentation**: Wszystkie dokumenty zaktualizowane
+- [x] **.nvmrc Fix**: Plik usunięty z .gitignore i dodany do repo
 
 ## 🎉 Podsumowanie
 
