@@ -110,6 +110,18 @@ CityFlow is an AI-powered web application (MVP) designed to simplify the process
 - `npm run build`: Builds the application for production.
 - `npm run preview`: Serves the production build locally for preview.
 
+### Deployment to Production
+
+> **⚠️ TODO: CRITICAL - ENABLE RLS BEFORE PRODUCTION DEPLOYMENT**
+>
+> Before deploying to production, you **MUST** enable Row Level Security (RLS) policies:
+>
+> 1. Set production RLS flag: `ALTER DATABASE postgres SET app.enable_production_rls = 'true';`
+> 2. Run migrations: `npx supabase db push --linked`
+> 3. Verify RLS is active (see `supabase/RLS_DEVELOPMENT_GUIDE.md`)
+>
+> **Without this step, your database will be exposed with unrestricted access!**
+
 ### Code Quality
 
 - `npm run lint`: Lints the code using ESLint.

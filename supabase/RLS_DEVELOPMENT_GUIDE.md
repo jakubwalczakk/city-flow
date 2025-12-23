@@ -1,5 +1,17 @@
 # RLS Development Guide
 
+> **🚨 TODO: CRITICAL - ENABLE RLS BEFORE PRODUCTION DEPLOYMENT**
+>
+> **This is currently in DEVELOPMENT MODE with permissive RLS policies!**
+>
+> Before deploying to production, you MUST:
+>
+> 1. Enable production RLS flag in database
+> 2. Apply production RLS migration (20251024120700)
+> 3. Verify all policies are active
+>
+> See "Scenario 3: Deploying to Production" below for detailed instructions.
+
 ## Overview
 
 Row Level Security (RLS) is essential for production but can be cumbersome during development. This guide explains how to toggle between development and production RLS modes.

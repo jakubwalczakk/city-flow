@@ -3,6 +3,18 @@ import { defineMiddleware } from 'astro:middleware';
 import { createSupabaseServerInstance } from '../db/supabase.client';
 
 /**
+ * TODO: CRITICAL - ENABLE RLS BEFORE PRODUCTION DEPLOYMENT
+ *
+ * This middleware handles authentication but relies on database-level RLS for data security.
+ * Before deploying to production:
+ * 1. Enable production RLS: ALTER DATABASE postgres SET app.enable_production_rls = 'true';
+ * 2. Apply migrations: npx supabase db push --linked
+ * 3. Verify policies active: see supabase/RLS_DEVELOPMENT_GUIDE.md
+ *
+ * Without RLS, authenticated users could access ALL data regardless of ownership!
+ */
+
+/**
  * Public paths that don't require authentication
  * Includes auth pages and API endpoints
  */
