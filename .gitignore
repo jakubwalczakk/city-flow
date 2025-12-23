@@ -76,3 +76,4 @@ storybook-static/
 .vitest/
 test-results/
 playwright-report/
+.actrc
