@@ -82,11 +82,8 @@ test.describe('Create New Plan', () => {
     await newPlanPage.handleOnboarding();
 
     // 2. Act - Create a new plan
-    // Click the create new plan button
-    await newPlanPage.createNewPlanButton.click();
-
-    // Wait for modal to actually open by checking for form inputs
-    await expect(newPlanPage.nameInput).toBeVisible({ timeout: 10000 });
+    // Open the New Plan modal
+    await newPlanPage.openNewPlanModal();
 
     // Fill Basic Info (Step 1)
     await newPlanPage.fillBasicInfo('Wycieczka do Paryża', 'Paryż, Francja');

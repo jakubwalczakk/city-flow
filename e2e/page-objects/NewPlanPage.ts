@@ -67,7 +67,7 @@ export class NewPlanPage {
     await expect(this.createNewPlanButton).toBeVisible({ timeout: 10000 });
 
     // Wait for React hydration to complete
-    await this.page.waitForTimeout(500);
+    await this.page.waitForTimeout(1000);
 
     // Check if onboarding modal appeared (only for users with onboarding_completed: false)
     const isOnboardingVisible = await this.onboardingSkipButton.isVisible();
@@ -75,6 +75,30 @@ export class NewPlanPage {
       await this.onboardingSkipButton.click();
       await this.onboardingSkipButton.waitFor({ state: 'hidden', timeout: 5000 });
     }
+  }
+
+  /**
+   * Opens the New Plan modal by clicking the create button.
+   * Waits for the modal to fully render before proceeding.
+   */
+  async openNewPlanModal() {
+    // Ensure the button is visible and ready to click
+    await expect(this.createNewPlanButton).toBeVisible();
+    await expect(this.createNewPlanButton).toBeEnabled();
+
+    // Click to open modal
+    await this.createNewPlanButton.click();
+
+    // Wait for Radix UI Dialog to open (with animation)
+    // The dialog content gets data-state="open" when fully open
+    const dialogContent = this.page.locator('[role="dialog"][data-state="open"]');
+    await expect(dialogContent).toBeVisible({ timeout: 5000 });
+
+    // Wait for form inputs to be visible
+    await expect(this.nameInput).toBeVisible({ timeout: 5000 });
+
+    // Additional wait for React components to fully hydrate
+    await this.page.waitForTimeout(500);
   }
 
   async fillBasicInfo(name: string, destination: string) {
