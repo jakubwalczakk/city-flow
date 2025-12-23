@@ -46,6 +46,12 @@ CityFlow is an AI-powered web application (MVP) designed to simplify the process
 ### Hosting & CI/CD
 
 - **Platform**: Vercel/Netlify
+- **CI/CD**: GitHub Actions (automated testing and build verification)
+  - Automated linting and unit tests
+  - Production build verification
+  - E2E tests with Playwright
+  - Manual and automatic triggers
+  - See `.github/workflows/README.md` for details
 
 ## Getting Started Locally
 
@@ -134,6 +140,22 @@ CityFlow is an AI-powered web application (MVP) designed to simplify the process
 - `npm run test:unit:ui`: Runs unit tests with Vitest UI.
 - `npm run test:e2e`: Runs end-to-end tests with Playwright.
 - `npm run test:e2e:ui`: Runs end-to-end tests with Playwright UI.
+
+### CI/CD
+
+The project uses GitHub Actions for continuous integration and deployment. The pipeline automatically:
+
+- ✅ Runs on every push to `master`/`main`
+- ✅ Can be triggered manually from GitHub Actions tab
+- ✅ Executes linting checks
+- ✅ Runs unit tests
+- ✅ Builds production version
+- ✅ Runs E2E tests with Playwright
+
+**Setup Instructions**:
+
+- See `.github/workflows/README.md` for complete CI/CD documentation
+- See `.github/ENV_TEST_SETUP.md` for environment variable configuration
 
 ## Project Scope
 
