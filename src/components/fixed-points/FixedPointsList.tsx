@@ -59,6 +59,8 @@ export function FixedPointsList({ points, onEdit, onRemove, editingIndex }: Fixe
                     size='icon'
                     onClick={() => onRemove(index)}
                     className='text-destructive hover:text-destructive'
+                    aria-label={`Usuń punkt: ${point.location}`}
+                    data-testid={`delete-fixed-point-${index}`}
                   >
                     <Trash2 className='h-4 w-4' />
                   </Button>

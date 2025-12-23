@@ -187,12 +187,8 @@ describe('FixedPointsStep', () => {
     render(<FixedPointsStep {...defaultProps} />);
 
     // Act
-    const deleteButtons = screen.getAllByRole('button');
-    const firstDeleteButton = deleteButtons.find((btn) =>
-      btn.querySelector('svg')?.classList.contains('lucide-trash-2')
-    );
-    if (!firstDeleteButton) throw new Error('Delete button not found');
-    await user.click(firstDeleteButton);
+    const deleteButton = screen.getByTestId('delete-fixed-point-0');
+    await user.click(deleteButton);
 
     // Assert
     expect(mockRemoveFixedPoint).toHaveBeenCalledWith(0);
