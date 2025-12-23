@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 // @ts-check
 import { defineConfig } from 'astro/config';
 
@@ -10,6 +9,7 @@ import node from '@astrojs/node';
 // https://astro.build/config
 export default defineConfig({
   output: 'server',
+  // eslint-disable-next-line no-undef
   site: process.env.PUBLIC_SITE_URL || 'http://localhost:3000',
   integrations: [react(), sitemap()],
   server: { port: 3000 },
