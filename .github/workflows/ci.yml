@@ -97,6 +97,14 @@ jobs:
             MISSING_SECRETS="${MISSING_SECRETS}- E2E_USER_ID\n"
           fi
           
+          if [ -z "${{ secrets.E2E_USERNAME }}" ]; then
+            MISSING_SECRETS="${MISSING_SECRETS}- E2E_USERNAME\n"
+          fi
+          
+          if [ -z "${{ secrets.E2E_PASSWORD }}" ]; then
+            MISSING_SECRETS="${MISSING_SECRETS}- E2E_PASSWORD\n"
+          fi
+          
           if [ -n "$MISSING_SECRETS" ]; then
             echo "❌ Error: The following required secrets are not set:"
             echo ""
@@ -113,6 +121,8 @@ jobs:
             echo "  - PUBLIC_SUPABASE_URL: Your Supabase project URL"
             echo "  - PUBLIC_SUPABASE_KEY: Your Supabase anon/public key"
             echo "  - E2E_USER_ID: Test user UUID from auth.users table"
+            echo "  - E2E_USERNAME: Test user email (e.g., e2e-test@cityflow.test)"
+            echo "  - E2E_PASSWORD: Test user password"
             echo ""
             echo "See .github/E2E_TEST_USER_SETUP.md for detailed setup instructions"
             exit 1
@@ -135,6 +145,8 @@ jobs:
           PUBLIC_SITE_URL=http://localhost:3000
           # E2E Test User - REQUIRED
           E2E_USER_ID=${{ secrets.E2E_USER_ID }}
+          E2E_USERNAME=${{ secrets.E2E_USERNAME }}
+          E2E_PASSWORD=${{ secrets.E2E_PASSWORD }}
           EOF
 
       - name: Run E2E tests
@@ -143,6 +155,8 @@ jobs:
           CI: true
           # E2E Test User - REQUIRED
           E2E_USER_ID: ${{ secrets.E2E_USER_ID }}
+          E2E_USERNAME: ${{ secrets.E2E_USERNAME }}
+          E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
           # Supabase Configuration - REQUIRED (needed by fixtures.ts)
           PUBLIC_SUPABASE_URL: ${{ secrets.PUBLIC_SUPABASE_URL }}
           PUBLIC_SUPABASE_KEY: ${{ secrets.PUBLIC_SUPABASE_KEY }}
