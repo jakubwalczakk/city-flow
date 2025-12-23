@@ -112,11 +112,21 @@ ci.yml
 #### Wymagane w CI (GitHub Secrets):
 
 ```
+# Supabase (server-side) - OPCJONALNE (fallback do PUBLIC_*)
 SUPABASE_URL              # URL instancji Supabase (server)
 SUPABASE_KEY              # Klucz anon Supabase (server)
-PUBLIC_SUPABASE_URL       # URL instancji Supabase (client)
-PUBLIC_SUPABASE_KEY       # Klucz anon Supabase (client)
-OPENROUTER_API_KEY        # Klucz API OpenRouter
+
+# Supabase (client-side) - WYMAGANE dla E2E
+PUBLIC_SUPABASE_URL       # URL instancji Supabase (client) ✅
+PUBLIC_SUPABASE_KEY       # Klucz anon Supabase (client) ✅
+
+# E2E Test User - WYMAGANE dla E2E
+E2E_USER_ID               # UUID test usera w Supabase ✅
+E2E_USERNAME              # Email test usera ✅
+E2E_PASSWORD              # Hasło test usera ✅
+
+# OpenRouter - OPCJONALNE
+OPENROUTER_API_KEY        # Klucz API OpenRouter (jeśli testy wymagają AI)
 ```
 
 #### Ustawione automatycznie:
@@ -130,16 +140,40 @@ CI=true                                 # Flaga CI dla Playwright
 
 ### 1. Konfiguracja GitHub Secrets (WYMAGANE)
 
+**Minimalne wymagane sekrety dla E2E testów:**
+
 ```bash
 # Przejdź do repozytorium na GitHub
 # Settings → Secrets and variables → Actions → New repository secret
 
-# Dodaj każdy z sekretów:
-SUPABASE_URL
-SUPABASE_KEY
-PUBLIC_SUPABASE_URL
-PUBLIC_SUPABASE_KEY
-OPENROUTER_API_KEY
+# WYMAGANE sekrety (5):
+PUBLIC_SUPABASE_URL       # URL projektu Supabase
+PUBLIC_SUPABASE_KEY       # Klucz anon z Supabase
+E2E_USER_ID               # UUID test usera
+E2E_USERNAME              # Email test usera
+E2E_PASSWORD              # Hasło test usera
+
+# OPCJONALNE sekrety:
+SUPABASE_URL              # Fallback do PUBLIC_SUPABASE_URL
+SUPABASE_KEY              # Fallback do PUBLIC_SUPABASE_KEY
+OPENROUTER_API_KEY        # Jeśli testy wymagają AI
+```
+
+**Setup test usera:**
+
+1. Utwórz test usera w Supabase (Auth → Users)
+2. Uruchom SQL aby utworzyć profil:
+
+```sql
+INSERT INTO profiles (id, preferences, travel_pace, generations_remaining, onboarding_completed)
+VALUES (
+  'YOUR_TEST_USER_UUID'::uuid,
+  ARRAY['art_museums', 'local_food', 'history_culture'],
+  'moderate',
+  5,
+  true
+)
+ON CONFLICT (id) DO UPDATE SET onboarding_completed = true;
 ```
 
 ### 2. Testowanie Workflow
@@ -214,13 +248,16 @@ Zaktualizuj step testów jednostkowych:
 
 ## 📝 Checklist Przed Pierwszym Uruchomieniem
 
-- [ ] Sprawdź, czy wszystkie testy działają lokalnie
-- [ ] Skonfiguruj GitHub Secrets w repozytorium
-- [ ] Zweryfikuj, że `.gitignore` ignoruje `.env.test`
-- [ ] Zaktualizuj dokumentację jeśli zmienią się wymagania
-- [ ] Przetestuj manualne uruchomienie workflow
-- [ ] Sprawdź czy artifacts są poprawnie uploadowane
-- [ ] Zweryfikuj działanie na różnych gałęziach (jeśli potrzeba)
+- [x] Sprawdź, czy wszystkie testy działają lokalnie
+- [x] Utwórz test usera w Supabase
+- [x] Uruchom SQL aby utworzyć profil test usera z `onboarding_completed: true`
+- [x] Skonfiguruj GitHub Secrets w repozytorium (5 wymaganych dla E2E)
+- [x] Zweryfikuj, że `.gitignore` ignoruje `.env.test`
+- [x] Przetestuj manualne uruchomienie workflow
+- [x] Sprawdź czy artifacts są poprawnie uploadowane
+- [x] Zweryfikuj działanie E2E testów na CI
+
+**Status**: ✅ Wszystko skonfigurowane i przetestowane!
 
 ## 🔍 Troubleshooting
 
@@ -236,10 +273,13 @@ Zaktualizuj step testów jednostkowych:
 
 **Rozwiązanie**:
 
-1. Sprawdź logi Playwright w artifacts
-2. Zweryfikuj zmienne środowiskowe (czy secrets są ustawione)
-3. Zwiększ timeout w `playwright.config.ts` dla CI
-4. Dodaj więcej retry w `playwright.config.ts`
+1. **"Missing E2E_USER_ID"**: Sprawdź czy dodałeś secret `E2E_USER_ID` w GitHub
+2. **"fetch failed"**: Sprawdź `PUBLIC_SUPABASE_URL` i `PUBLIC_SUPABASE_KEY` secrets
+3. **"Test timeout / stays on /login"**: Sprawdź `E2E_USERNAME` i `E2E_PASSWORD` secrets
+4. **Onboarding modal pojawia się**: Test user nie ma profilu lub `onboarding_completed: false`
+   - Uruchom SQL z sekcji "Setup test usera" powyżej
+5. Sprawdź logi Playwright w artifacts
+6. Zweryfikuj, że używasz production Supabase URL (nie localhost)
 
 ### Problem: Build kończy się out of memory
 
@@ -279,6 +319,20 @@ W razie problemów:
 
 ---
 
-**Wersja**: 1.0  
+**Wersja**: 1.1  
 **Data utworzenia**: 23 grudnia 2025  
-**Ostatnia aktualizacja**: 23 grudnia 2025
+**Ostatnia aktualizacja**: 23 grudnia 2025  
+**Status**: ✅ W pełni funkcjonalny - wszystkie testy przechodzą!
+
+### 🎉 Osiągnięcia
+
+- ✅ Linting kodu
+- ✅ Testy jednostkowe Vitest
+- ✅ Build produkcyjny
+- ✅ Testy E2E z Playwright
+- ✅ Walidacja GitHub Secrets
+- ✅ Automatyczne artifacts upload
+- ✅ Retry mechanism dla E2E
+- ✅ Concurrency control
+
+**Czas wykonania**: ~2-3 minuty (Test & Build) + ~1-2 minuty (E2E Tests) = **~3-5 minut total**

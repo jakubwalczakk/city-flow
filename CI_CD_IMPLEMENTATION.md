@@ -68,17 +68,75 @@ Aby workflow działał poprawnie, musisz skonfigurować następujące sekrety w 
 3. Dodaj każdy z poniższych sekretów:
 ```
 
-| Secret Name           | Wartość          | Gdzie znaleźć              |
-| --------------------- | ---------------- | -------------------------- |
-| `SUPABASE_URL`        | URL Supabase     | Dashboard → Settings → API |
-| `SUPABASE_KEY`        | Klucz anon       | Dashboard → Settings → API |
-| `PUBLIC_SUPABASE_URL` | URL Supabase     | Ten sam co wyżej           |
-| `PUBLIC_SUPABASE_KEY` | Klucz anon       | Ten sam co wyżej           |
-| `OPENROUTER_API_KEY`  | Klucz OpenRouter | openrouter.ai → Keys       |
+| Secret Name           | Wartość          | Gdzie znaleźć              | Wymagany          |
+| --------------------- | ---------------- | -------------------------- | ----------------- |
+| `SUPABASE_URL`        | URL Supabase     | Dashboard → Settings → API | ⚠️ Opcjonalny\*   |
+| `SUPABASE_KEY`        | Klucz anon       | Dashboard → Settings → API | ⚠️ Opcjonalny\*   |
+| `PUBLIC_SUPABASE_URL` | URL Supabase     | Dashboard → Settings → API | ✅ **WYMAGANY**   |
+| `PUBLIC_SUPABASE_KEY` | Klucz anon       | Dashboard → Settings → API | ✅ **WYMAGANY**   |
+| `OPENROUTER_API_KEY`  | Klucz OpenRouter | openrouter.ai → Keys       | ⚠️ Opcjonalny\*\* |
+| `E2E_USER_ID`         | UUID test usera  | Supabase → Auth → Users    | ✅ **WYMAGANY**   |
+| `E2E_USERNAME`        | Email test usera | Email użyty przy tworzeniu | ✅ **WYMAGANY**   |
+| `E2E_PASSWORD`        | Hasło test usera | Hasło użyte przy tworzeniu | ✅ **WYMAGANY**   |
 
-**Uwaga**: Workflow będzie działał bez sekretów (używając mock values), ale testy E2E mogą nie przejść.
+**Legenda**:
 
-### 2. Testowanie Lokalne (OPCJONALNE)
+- ✅ **WYMAGANY** - Bez tego sekretu testy E2E się nie powiodą
+- ⚠️ **Opcjonalny\*** - Fallback do `PUBLIC_SUPABASE_*` jeśli nie ustawiony
+- ⚠️ **Opcjonalny** - Tylko jeśli testy wymagają generowania planów AI
+
+**Ważne dla testów E2E**:
+
+1. Utwórz dedykowanego test usera w Supabase (Auth → Users)
+2. Uruchom SQL aby utworzyć profil z `onboarding_completed: true`
+3. Dodaj wszystkie 5 wymaganych sekretów E2E do GitHub
+
+Zobacz sekcję **"Setup Test Usera E2E"** poniżej dla szczegółów.
+
+### 2. Setup Test Usera E2E (WYMAGANE)
+
+Testy E2E wymagają dedykowanego test usera z profilem:
+
+**Krok 1: Utwórz test usera w Supabase**
+
+1. Otwórz Supabase Dashboard → Authentication → Users
+2. Kliknij "Add user" → "Create new user"
+3. Email: `e2e-test@cityflow.test` (lub inny)
+4. Password: Utwórz silne hasło
+5. ✅ Zaznacz "Auto Confirm User"
+6. Skopiuj UUID usera po utworzeniu
+
+**Krok 2: Utwórz profil test usera (SQL)**
+
+1. Przejdź do SQL Editor w Supabase
+2. Wklej i uruchom (zastąp UUID):
+
+```sql
+INSERT INTO profiles (id, preferences, travel_pace, generations_remaining, onboarding_completed)
+VALUES (
+  'YOUR_TEST_USER_UUID'::uuid,
+  ARRAY['art_museums', 'local_food', 'history_culture'],
+  'moderate',
+  5,
+  true  -- WAŻNE: musi być true!
+)
+ON CONFLICT (id) DO UPDATE SET
+  onboarding_completed = true,
+  preferences = ARRAY['art_museums', 'local_food', 'history_culture'],
+  travel_pace = 'moderate';
+```
+
+**Krok 3: Dodaj sekrety do GitHub**
+
+1. Settings → Secrets and variables → Actions
+2. Dodaj 5 sekretów E2E:
+   - `E2E_USER_ID` - UUID z kroku 1
+   - `E2E_USERNAME` - Email z kroku 1
+   - `E2E_PASSWORD` - Hasło z kroku 1
+   - `PUBLIC_SUPABASE_URL` - URL projektu Supabase
+   - `PUBLIC_SUPABASE_KEY` - Klucz anon z Supabase
+
+### 3. Testowanie Lokalne (OPCJONALNE)
 
 Przed pierwszym push, przetestuj lokalnie:
 
@@ -89,23 +147,22 @@ npm run test:unit -- --run
 npm run build
 
 # Full check (z E2E)
-supabase start
-# Utwórz .env.test (zobacz .github/ENV_TEST_SETUP.md)
+# Utwórz .env.test (zobacz poniżej)
 npm run test:e2e
 ```
 
-### 3. Pierwszy Push
+### 4. Pierwszy Push
 
 ```bash
 # Commit wszystkie zmiany
 git add .
-git commit -m "ci: add GitHub Actions workflow"
+git commit -m "ci: add GitHub Actions workflow with E2E tests"
 
 # Push do master/main
 git push origin main
 ```
 
-### 4. Sprawdź Workflow
+### 5. Sprawdź Workflow
 
 1. Przejdź do GitHub → zakładka **Actions**
 2. Zobacz workflow "CI/CD Pipeline" w akcji
@@ -113,7 +170,7 @@ git push origin main
 4. ✅ Zielony check = sukces!
 5. ❌ Czerwony X = sprawdź logi
 
-### 5. Dodaj Status Badge (OPCJONALNE)
+### 6. Dodaj Status Badge (OPCJONALNE)
 
 Dodaj do `README.md` na początku:
 
@@ -142,16 +199,32 @@ npm run lint && npm run test:unit -- --run && npm run build
 # Pełny test suite (przed merge)
 npm run lint:fix && npm run format && npm run test:unit -- --run --coverage && npm run build && npm run test:e2e
 
-# Setup .env.test
+# Setup .env.test dla E2E testów
 cat > .env.test << 'EOF'
-SUPABASE_URL=http://127.0.0.1:54321
-SUPABASE_KEY=your_anon_key
-PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
-PUBLIC_SUPABASE_KEY=your_anon_key
-OPENROUTER_API_KEY=your_key
+# Supabase (użyj PRODUCTION credentials!)
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_KEY=your_supabase_anon_key
+PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+PUBLIC_SUPABASE_KEY=your_supabase_anon_key
+
+# OpenRouter (jeśli potrzebne)
+OPENROUTER_API_KEY=your_openrouter_key
+
+# Site config
 PUBLIC_SITE_URL=http://localhost:3000
+
+# Test user (utworzony w Supabase)
+E2E_USER_ID=your_test_user_uuid
+E2E_USERNAME=e2e-test@cityflow.test
+E2E_PASSWORD=your_test_user_password
 EOF
 ```
+
+**⚠️ Ważne**:
+
+- Użyj **production** Supabase credentials (nie localhost!)
+- Test user musi mieć profil z `onboarding_completed: true`
+- Plik `.env.test` jest w `.gitignore` - nigdy go nie commituj!
 
 ## 🎯 Charakterystyka Workflow
 
@@ -227,14 +300,32 @@ README.md                         # Zaktualizowany (sekcja CI/CD)
 
 → Sprawdź uprawnienia: Settings → Actions → General → Workflow permissions
 
-### E2E testy failują
+### E2E: "Missing E2E_USER_ID environment variable"
 
-→ Sprawdź czy GitHub Secrets są ustawione
-→ Zobacz logi w artifacts (playwright-report)
+→ Sprawdź czy dodałeś `E2E_USER_ID` secret w GitHub  
+→ Upewnij się, że nazwa jest dokładnie `E2E_USER_ID` (case-sensitive)
+
+### E2E: "Failed to clean feedback: TypeError: fetch failed"
+
+→ Sprawdź czy `PUBLIC_SUPABASE_URL` i `PUBLIC_SUPABASE_KEY` są ustawione  
+→ Upewnij się, że używasz URL **production** Supabase (nie localhost)  
+→ Zweryfikuj, czy klucze są poprawne w Supabase Dashboard
+
+### E2E: "Test timeout" / "Expected /plans/, Received /login"
+
+→ Login nie działa - sprawdź `E2E_USERNAME` i `E2E_PASSWORD`  
+→ Upewnij się, że test user istnieje w Supabase  
+→ Zweryfikuj, czy email i hasło są poprawne
+
+### E2E: Tests timeout / Onboarding modal appears
+
+→ Test user nie ma profilu lub `onboarding_completed: false`  
+→ Uruchom SQL z kroku 2 (Setup Test Usera) aby utworzyć profil  
+→ Sprawdź w Supabase Table Editor czy `profiles` ma rekord dla test usera
 
 ### Build kończy się błędem
 
-→ Sprawdź zmienne środowiskowe
+→ Sprawdź zmienne środowiskowe  
 → Przetestuj lokalnie: `npm run build`
 
 ### Więcej informacji
@@ -274,14 +365,16 @@ Dodaj powiadomienia na Slack/Discord przy failed builds.
 - [x] Zaimplementowano linting
 - [x] Zaimplementowano testy jednostkowe
 - [x] Zaimplementowano build produkcyjny
-- [x] Zaimplementowano testy E2E
+- [x] Zaimplementowano testy E2E z walidacją sekretów
 - [x] Dodano upload artifacts
 - [x] Dodano obsługę GitHub Secrets
-- [x] Dodano fallback dla sekretów
+- [x] Dodano fallback dla sekretów (build)
 - [x] Zoptymalizowano cache
 - [x] Dodano concurrency control
-- [ ] Skonfigurowano GitHub Secrets (DO ZROBIENIA)
-- [ ] Przetestowano workflow (DO ZROBIENIA)
+- [x] Dodano walidację E2E secrets przed uruchomieniem testów
+- [x] Poprawiono timing issues w testach E2E
+- [x] Skonfigurowano GitHub Secrets ✅
+- [x] Przetestowano workflow - DZIAŁA! ✅
 - [ ] Dodano status badge (OPCJONALNE)
 
 ## 📞 Wsparcie
@@ -301,10 +394,20 @@ Jeśli jesteś nowy w CI/CD:
 
 ---
 
-**Status**: ✅ Implementacja zakończona  
+**Status**: ✅ Implementacja zakończona i przetestowana  
 **Data**: 23 grudnia 2025  
-**Wersja**: 1.0
+**Wersja**: 1.1  
+**Ostatnia aktualizacja**: 23 grudnia 2025
 
-**Następny krok**: Skonfiguruj GitHub Secrets i wykonaj pierwszy push!
+**Pipeline Status**: 🟢 Wszystkie testy przechodzą!
 
-🎉 **Gratulacje! Twój projekt ma teraz profesjonalny setup CI/CD!** 🎉
+### 📈 Statystyki Końcowe
+
+- ✅ Linting: Działa
+- ✅ Unit Tests: Działa
+- ✅ Production Build: Działa
+- ✅ E2E Tests: Działa (po konfiguracji test usera)
+- ✅ Secrets Validation: Działa
+- ✅ Artifacts Upload: Działa
+
+🎉 **Gratulacje! Twój projekt ma teraz w pełni funkcjonalny setup CI/CD!** 🎉
