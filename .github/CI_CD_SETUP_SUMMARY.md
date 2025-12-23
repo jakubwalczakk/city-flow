@@ -14,7 +14,7 @@ Został stworzony minimalny, ale kompleksowy pipeline CI/CD, który:
 #### ✅ Job 1: Test & Build (15 min timeout)
 
 1. Checkout kodu z repozytorium
-2. Setup Node.js 20 z npm cache dla szybszych buildów
+2. Setup Node.js (wersja z `.nvmrc`: 22.15.0) z npm cache dla szybszych buildów
 3. Instalacja zależności (`npm ci` - deterministyczna instalacja)
 4. **Linting** kodu (`npm run lint`)
 5. **Testy jednostkowe** (`npm run test:unit`)
@@ -24,7 +24,7 @@ Został stworzony minimalny, ale kompleksowy pipeline CI/CD, który:
 #### ✅ Job 2: E2E Tests (20 min timeout)
 
 1. Checkout kodu z repozytorium
-2. Setup Node.js 20 z npm cache
+2. Setup Node.js (wersja z `.nvmrc`: 22.15.0) z npm cache
 3. Instalacja zależności
 4. Instalacja przeglądarek Playwright (tylko Chromium + deps)
 5. Utworzenie pliku `.env.test` ze zmiennymi środowiskowymi

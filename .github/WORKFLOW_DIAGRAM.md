@@ -21,7 +21,7 @@
 │              ubuntu-latest | 15min timeout                  │
 ├─────────────────────────────────────────────────────────────┤
 │  1. ✅ Checkout repository                                  │
-│  2. ✅ Setup Node.js 20 + npm cache                         │
+│  2. ✅ Setup Node.js (from .nvmrc) + npm cache                         │
 │  3. ✅ Install dependencies (npm ci)                        │
 │  4. ✅ Run linter (npm run lint)                            │
 │  5. ✅ Run unit tests (npm run test:unit)                   │
@@ -43,7 +43,7 @@
 │              ubuntu-latest | 20min timeout                  │
 ├─────────────────────────────────────────────────────────────┤
 │  1. ✅ Checkout repository                                  │
-│  2. ✅ Setup Node.js 20 + npm cache                         │
+│  2. ✅ Setup Node.js (from .nvmrc) + npm cache                         │
 │  3. ✅ Install dependencies (npm ci)                        │
 │  4. ✅ Install Playwright browsers (chromium + deps)        │
 │  5. ✅ Create .env.test file                                │

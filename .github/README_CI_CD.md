@@ -23,12 +23,13 @@ Kompletna dokumentacja setupu CI/CD dla projektu CityFlow.
 
 ### Dla Zaawansowanych
 
-| Dokument                                           | Opis                              | Czas czytania |
-| -------------------------------------------------- | --------------------------------- | ------------- |
-| [README.md](./workflows/README.md)                 | Pełna dokumentacja workflow       | 20 min        |
-| [CI_CD_SETUP_SUMMARY.md](./CI_CD_SETUP_SUMMARY.md) | Kompletne podsumowanie setupu     | 15 min        |
-| [WORKFLOW_DIAGRAM.md](./WORKFLOW_DIAGRAM.md)       | Wizualizacje i diagramy           | 10 min        |
-| [BADGES.md](./BADGES.md)                           | Jak dodać status badges do README | 5 min         |
+| Dokument                                               | Opis                               | Czas czytania |
+| ------------------------------------------------------ | ---------------------------------- | ------------- |
+| [README.md](./workflows/README.md)                     | Pełna dokumentacja workflow        | 20 min        |
+| [CI_CD_SETUP_SUMMARY.md](./CI_CD_SETUP_SUMMARY.md)     | Kompletne podsumowanie setupu      | 15 min        |
+| [WORKFLOW_DIAGRAM.md](./WORKFLOW_DIAGRAM.md)           | Wizualizacje i diagramy            | 10 min        |
+| [WORKFLOW_IMPROVEMENTS.md](./WORKFLOW_IMPROVEMENTS.md) | Ulepszenia zgodne z best practices | 10 min        |
+| [BADGES.md](./BADGES.md)                               | Jak dodać status badges do README  | 5 min         |
 
 ## 🎯 Szybkie Linki
 

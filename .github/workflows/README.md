@@ -20,8 +20,8 @@ Plik: `.github/workflows/ci.yml`
 Ten job wykonuje podstawowe testy i buduje aplikację:
 
 - ✅ Checkout kodu
-- ✅ Setup Node.js 20 z cache dla npm
-- ✅ Instalacja zależności (`npm ci`)
+- ✅ Setup Node.js (wersja z `.nvmrc`) z cache dla npm
+- ✅ Instalacja zależności (`npm ci` - deterministyczna instalacja)
 - ✅ Linting kodu (`npm run lint`)
 - ✅ Testy jednostkowe (`npm run test:unit`)
 - ✅ Build produkcyjny (`npm run build`)
@@ -32,9 +32,9 @@ Ten job wykonuje podstawowe testy i buduje aplikację:
 Ten job uruchamia testy end-to-end z Playwright:
 
 - ✅ Checkout kodu
-- ✅ Setup Node.js 20 z cache dla npm
-- ✅ Instalacja zależności (`npm ci`)
-- ✅ Instalacja przeglądarek Playwright (tylko Chromium)
+- ✅ Setup Node.js (wersja z `.nvmrc`) z cache dla npm
+- ✅ Instalacja zależności (`npm ci` - deterministyczna instalacja)
+- ✅ Instalacja przeglądarek Playwright (tylko Chromium + deps)
 - ✅ Utworzenie pliku `.env.test` ze zmiennymi środowiskowymi
 - ✅ Uruchomienie testów E2E (`npm run test:e2e`)
 - ✅ Upload raportów Playwright (tylko przy błędach)

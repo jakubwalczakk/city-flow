@@ -14,6 +14,7 @@ Workflow składa się z dwóch jobów:
 
 #### Job 1: Test & Build (15 min timeout)
 
+- ✅ Setup Node.js (wersja z `.nvmrc`: 22.15.0)
 - ✅ Linting kodu (`npm run lint`)
 - ✅ Testy jednostkowe Vitest (`npm run test:unit`)
 - ✅ Build produkcyjny (`npm run build`)
@@ -21,6 +22,7 @@ Workflow składa się z dwóch jobów:
 
 #### Job 2: E2E Tests (20 min timeout)
 
+- ✅ Setup Node.js (wersja z `.nvmrc`: 22.15.0)
 - ✅ Instalacja Playwright z Chromium
 - ✅ Konfiguracja zmiennych środowiskowych
 - ✅ Testy E2E (`npm run test:e2e`)
