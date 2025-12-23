@@ -83,32 +83,57 @@ jobs:
 
       - name: Validate E2E secrets
         run: |
+          MISSING_SECRETS=""
+          
+          if [ -z "${{ secrets.PUBLIC_SUPABASE_URL }}" ]; then
+            MISSING_SECRETS="${MISSING_SECRETS}- PUBLIC_SUPABASE_URL\n"
+          fi
+          
+          if [ -z "${{ secrets.PUBLIC_SUPABASE_KEY }}" ]; then
+            MISSING_SECRETS="${MISSING_SECRETS}- PUBLIC_SUPABASE_KEY\n"
+          fi
+          
           if [ -z "${{ secrets.E2E_USER_ID }}" ]; then
-            echo "❌ Error: E2E_USER_ID secret is not set"
+            MISSING_SECRETS="${MISSING_SECRETS}- E2E_USER_ID\n"
+          fi
+          
+          if [ -n "$MISSING_SECRETS" ]; then
+            echo "❌ Error: The following required secrets are not set:"
+            echo ""
+            echo -e "$MISSING_SECRETS"
             echo ""
             echo "To fix this:"
-            echo "1. Create a dedicated test user in your Supabase project"
-            echo "2. Copy the user's UUID from the auth.users table"
-            echo "3. Add it as E2E_USER_ID secret in GitHub repository settings"
+            echo "1. Go to your Supabase project dashboard"
+            echo "2. Navigate to Settings → API"
+            echo "3. Copy your Project URL and anon/public key"
+            echo "4. Create a test user in Authentication → Users (see .github/E2E_TEST_USER_SETUP.md)"
+            echo "5. Add all secrets in GitHub: Settings → Secrets and variables → Actions"
             echo ""
-            echo "Go to: Settings → Secrets and variables → Actions → New repository secret"
+            echo "Required secrets:"
+            echo "  - PUBLIC_SUPABASE_URL: Your Supabase project URL"
+            echo "  - PUBLIC_SUPABASE_KEY: Your Supabase anon/public key"
+            echo "  - E2E_USER_ID: Test user UUID from auth.users table"
+            echo ""
+            echo "See .github/E2E_TEST_USER_SETUP.md for detailed setup instructions"
             exit 1
           fi
+          
+          echo "✅ All required E2E secrets are configured"
 
       - name: Create test environment file
         run: |
           cat > .env.test << EOF
           # Supabase Configuration (Server-side)
-          SUPABASE_URL=${{ secrets.SUPABASE_URL || 'http://127.0.0.1:54321' }}
-          SUPABASE_KEY=${{ secrets.SUPABASE_KEY || 'mock-key-for-tests' }}
-          # Supabase Configuration (Client-side)
-          PUBLIC_SUPABASE_URL=${{ secrets.PUBLIC_SUPABASE_URL || 'http://127.0.0.1:54321' }}
-          PUBLIC_SUPABASE_KEY=${{ secrets.PUBLIC_SUPABASE_KEY || 'mock-key-for-tests' }}
+          SUPABASE_URL=${{ secrets.PUBLIC_SUPABASE_URL }}
+          SUPABASE_KEY=${{ secrets.PUBLIC_SUPABASE_KEY }}
+          # Supabase Configuration (Client-side) - REQUIRED for E2E tests
+          PUBLIC_SUPABASE_URL=${{ secrets.PUBLIC_SUPABASE_URL }}
+          PUBLIC_SUPABASE_KEY=${{ secrets.PUBLIC_SUPABASE_KEY }}
           # OpenRouter API
           OPENROUTER_API_KEY=${{ secrets.OPENROUTER_API_KEY || 'mock-key-for-tests' }}
           # Site Configuration
           PUBLIC_SITE_URL=http://localhost:3000
-          # E2E Test User
+          # E2E Test User - REQUIRED
           E2E_USER_ID=${{ secrets.E2E_USER_ID }}
           EOF
 
@@ -116,11 +141,11 @@ jobs:
         run: npm run test:e2e
         env:
           CI: true
-          # E2E Test User
+          # E2E Test User - REQUIRED
           E2E_USER_ID: ${{ secrets.E2E_USER_ID }}
-          # Supabase Configuration (needed by fixtures.ts)
-          PUBLIC_SUPABASE_URL: ${{ secrets.PUBLIC_SUPABASE_URL || 'http://127.0.0.1:54321' }}
-          PUBLIC_SUPABASE_KEY: ${{ secrets.PUBLIC_SUPABASE_KEY || 'mock-key-for-tests' }}
+          # Supabase Configuration - REQUIRED (needed by fixtures.ts)
+          PUBLIC_SUPABASE_URL: ${{ secrets.PUBLIC_SUPABASE_URL }}
+          PUBLIC_SUPABASE_KEY: ${{ secrets.PUBLIC_SUPABASE_KEY }}
 
       - name: Upload Playwright report
         if: failure()
