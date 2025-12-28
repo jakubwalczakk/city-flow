@@ -15,7 +15,11 @@ const aiTimelineEventSchema = z.object({
   category: z
     .enum(['history', 'food', 'sport', 'nature', 'culture', 'transport', 'accommodation', 'other'])
     .describe('The category of the activity.'),
-  description: z.string().describe('A detailed description of the activity.'),
+  description: z
+    .string()
+    .describe(
+      'A detailed description of the activity. MUST contain at least 2 full sentences explaining what makes this place/activity special, what to expect, or insider tips.'
+    ),
   estimated_price: z
     .string()
     .nullable()
@@ -231,7 +235,7 @@ Please generate the travel plan now based on the provided details. Ensure the ou
     const preferences = profile.preferences?.length ? profile.preferences.join(', ') : 'No specific preferences';
 
     return `
-You are an expert travel planner AI. Your task is to generate a detailed, structured travel itinerary based on the user's plan details.
+You are an expert local travel planner AI with deep knowledge of hidden gems and authentic local experiences. Your task is to generate a detailed, structured travel itinerary that goes beyond typical tourist attractions.
 All text in the response, such as summaries, descriptions, and activity titles, must be in ${language}. The JSON structure and keys must remain in English as specified in the schema.
 The response MUST be a single JSON object and nothing else. Do not include any introductory text, markdown formatting, or explanations.
 
@@ -252,6 +256,46 @@ The user has specified the following travel style and interests. You MUST priori
   - "moderate": Balanced pace with a mix of activities and free time
   - "intensive": Fast-paced with many activities, packed schedule, shorter breaks
 - **User Interests:** ${preferences}
+
+**CRITICAL: HIDDEN GEMS & AUTHENTICITY REQUIREMENTS**
+This is the most important part of your role. You MUST follow these principles:
+
+1. **Prioritize Hidden Gems & Local Favorites:**
+   - Focus on lesser-known attractions, local hangouts, and authentic experiences that match user preferences
+   - Include specific neighborhood gems that locals actually visit
+   - Avoid overrated tourist traps unless they genuinely align with user interests
+   - If including a major landmark, pair it with nearby hidden spots
+
+2. **Be Highly Specific & Concrete:**
+   - ALWAYS provide exact names of places (e.g., "Café Kamienica at ul. Długa 12" not "a cozy café in the old town")
+   - Include specific street names or locations when relevant
+   - Each activity description MUST contain at least 2 full sentences
+   - First sentence: What makes this place unique and why it's worth visiting
+   - Second sentence: Specific details like dishes to try, what to see, insider tips, or best times to visit
+   - Mention specific dishes, exhibitions, or experiences at each location
+
+3. **Ensure Daily Variety:**
+   - FORBIDDEN: Repeating the same type of activity across multiple days (e.g., "walk through old town" every day)
+   - Each day should explore different neighborhoods, themes, or aspects of the destination
+   - Vary the rhythm: mix quiet exploration with vibrant experiences
+   - If the trip is multi-day, show different faces of the city
+
+4. **Match Activities to Preferences:**
+   - Deep-dive into user's interests - if they love food, include food markets, local bakeries, cooking classes, not just restaurants
+   - If they prefer nature, find urban parks, viewpoints, riverside walks, botanical gardens
+   - Connect activities thematically but avoid repetition
+
+5. **Local Insider Knowledge:**
+   - Include timing tips (e.g., "best visited in early morning to avoid crowds")
+   - Suggest local specialties or must-try items
+   - Mention seasonal events or local customs if relevant to the dates
+   - Reference neighborhoods by their local character
+
+6. **Avoid Generic Descriptions (Minimum 2 Sentences Required):**
+   - BAD: "Visit a traditional restaurant for lunch"
+   - GOOD: "Lunch at Restauracja Pod Baranami, a family-run spot that's been serving the neighborhood for three generations. Try their signature pierogi ruskie and homemade żurek soup, especially popular among locals during Sunday lunch."
+   - BAD: "Explore the old town"
+   - GOOD: "Discover the artisan district of Kazimierz, the creative heart of the city filled with independent boutiques and vintage shops. Browse the eclectic stores on ul. Józefa and take a coffee break at Singer Café, famous for its antique sewing machines used as tables and bohemian atmosphere."
 
 **IMPORTANT: Activity Categories**
 You MUST use ONLY these exact category values for activities:
@@ -285,7 +329,7 @@ Match the user's interests (like "Art & Museums", "Nightlife") to the appropriat
                 "time": "HH:mm (24-hour format, e.g., 18:00, NOT 6:00 PM)",
                 "activity": "Activity Title",
                 "category": "MUST be one of: history, food, sport, nature, culture, transport, accommodation, other",
-                "description": "Detailed description of the activity.",
+                "description": "Detailed description with AT LEAST 2 sentences: first explaining what makes it special, second with specific details or tips.",
                 "estimated_price": "e.g., '18', '0' (for free), or null (numeric value as string, WITHOUT currency symbol)",
                 "estimated_duration": "e.g., '2 hours', '30 minutes', or null"
               }
@@ -304,7 +348,7 @@ Match the user's interests (like "Art & Museums", "Nightlife") to the appropriat
     }
     \`\`\`
 
-Key requirements for the plan:
+**PLAN REQUIREMENTS:**
 - Destination: ${plan.destination}
 - Start Date & Time: ${new Date(plan.start_date).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short', hour12: false })}
 - End Date & Time: ${new Date(plan.end_date).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short', hour12: false })}
@@ -320,7 +364,20 @@ The user has pre-scheduled the following events. These are NON-NEGOTIABLE and MU
 Build the rest of the itinerary AROUND these fixed points:
 ${fixedPointsText}
 
-Generate a plan that is logical, engaging, and takes into account travel times between locations. Be creative and suggest interesting activities, restaurants, and sights. Ensure all other activities are scheduled to accommodate the fixed points above.
+**FINAL CHECKLIST - Before returning your response, verify:**
+✓ Each day explores a different area or theme - NO repetitive activities across days
+✓ Every location has a specific name (restaurant name, exact attraction, street address when relevant)
+✓ EVERY activity description contains AT LEAST 2 complete sentences with specific details
+✓ Descriptions explain WHY each place is special AND provide insider tips or specific recommendations
+✓ Activities align with user's stated preferences (${preferences})
+✓ The plan includes a mix of popular spots and hidden gems (favor hidden gems)
+✓ Travel times and realistic scheduling are considered
+✓ Fixed points are included at exact times without conflicts
+✓ All times are in 24-hour format (HH:mm)
+✓ Currency code matches the destination country
+✓ The pace matches the user's preference (${pace})
+
+Generate a plan that reveals the authentic character of ${plan.destination}, taking travelers beyond the obvious and into experiences that locals cherish.
 `;
   }
 
