@@ -6,7 +6,6 @@
   "printWidth": 120,
   "trailingComma": "es5",
   "endOfLine": "lf",
-  "insertFinalNewline": true,
   "plugins": ["prettier-plugin-astro"],
   "overrides": [
     {

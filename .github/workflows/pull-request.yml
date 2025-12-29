@@ -162,12 +162,13 @@ jobs:
       - name: Generate E2E coverage report
         if: always()
         run: |
-          if [ -d "coverage-e2e" ] && [ "$(ls -A coverage-e2e/*.json 2>/dev/null)" ]; then
+          if [ -d "coverage-e2e/.nyc_output" ] && [ "$(ls -A coverage-e2e/.nyc_output/*.json 2>/dev/null)" ]; then
             echo "📊 Processing E2E coverage data..."
             npm run test:e2e:coverage
             echo "✅ E2E coverage report generated"
           else
-            echo "⚠️  No E2E coverage data found to process"
+            echo "⚠️  No E2E coverage data found to process (.nyc_output directory not found or empty)"
+            echo "Note: E2E coverage collection may not be configured in this test run"
           fi
 
       - name: Display E2E coverage summary
@@ -179,7 +180,7 @@ jobs:
             cat coverage-e2e/coverage-summary.json | jq -r '.total | "Lines: \(.lines.pct)%\nStatements: \(.statements.pct)%\nFunctions: \(.functions.pct)%\nBranches: \(.branches.pct)%"'
             echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
           else
-            echo "⚠️  No E2E coverage summary available"
+            echo "⚠️  No E2E coverage summary available (coverage not collected in this run)"
           fi
 
       - name: Upload Playwright report
@@ -207,7 +208,7 @@ jobs:
           name: e2e-test-coverage
           path: coverage-e2e/
           retention-days: 7
-          if-no-files-found: ignore
+          if-no-files-found: warn
 
   status-comment:
     name: Post Status Comment
