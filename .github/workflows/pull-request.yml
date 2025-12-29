@@ -159,25 +159,7 @@ jobs:
           PUBLIC_SUPABASE_URL: ${{ secrets.PUBLIC_SUPABASE_URL }}
           PUBLIC_SUPABASE_KEY: ${{ secrets.PUBLIC_SUPABASE_KEY }}
 
-      - name: Debug coverage collection
-        if: always()
-        run: |
-          echo "🔍 Debugging coverage collection..."
-          echo ""
-          echo "Coverage directory structure:"
-          ls -la coverage-e2e/ 2>/dev/null || echo "coverage-e2e/ directory not found"
-          echo ""
-          if [ -d "coverage-e2e/.nyc_output" ]; then
-            echo "Coverage files (.nyc_output):"
-            ls -lah coverage-e2e/.nyc_output/ 2>/dev/null || echo "No files in .nyc_output"
-          else
-            echo ".nyc_output directory does not exist"
-          fi
-          echo ""
-          echo "Environment variables:"
-          echo "COLLECT_COVERAGE: $COLLECT_COVERAGE"
-
-      - name: Generate E2E coverage report
+      - name: Process E2E coverage
         if: always()
         run: |
           echo "🔍 Checking for E2E coverage data..."
@@ -185,42 +167,34 @@ jobs:
           # Create coverage directory if it doesn't exist
           mkdir -p coverage-e2e/.nyc_output
           
-          # Check if coverage files exist
-          if [ -d "coverage-e2e/.nyc_output" ] && [ "$(ls -A coverage-e2e/.nyc_output/*.json 2>/dev/null | wc -l)" -gt 0 ]; then
-            echo "📊 Found $(ls -A coverage-e2e/.nyc_output/*.json 2>/dev/null | wc -l) coverage file(s)"
-            echo "Processing E2E coverage data..."
+          # Count coverage files
+          COVERAGE_FILE_COUNT=$(ls -1 coverage-e2e/.nyc_output/*.json 2>/dev/null | wc -l)
+          
+          if [ "$COVERAGE_FILE_COUNT" -gt 0 ]; then
+            echo "📊 Found $COVERAGE_FILE_COUNT coverage file(s)"
+            ls -lh coverage-e2e/.nyc_output/
+            echo ""
+            echo "Generating coverage report..."
             npm run test:e2e:coverage
+            echo ""
             
+            # Display summary if generated
             if [ -f "coverage-e2e/coverage-summary.json" ]; then
-              echo "✅ E2E coverage report generated successfully"
+              echo "✅ E2E Coverage Report:"
+              echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+              cat coverage-e2e/coverage-summary.json | jq -r '.total | "Lines: \(.lines.pct)%\nStatements: \(.statements.pct)%\nFunctions: \(.functions.pct)%\nBranches: \(.branches.pct)%"'
+              echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
             else
-              echo "⚠️  Coverage report generation completed but summary file not found"
+              echo "⚠️  NYC report command completed but summary not generated"
+              echo "Check if .nycrc.json includes 'json-summary' reporter"
             fi
           else
             echo "⚠️  No E2E coverage data collected"
             echo ""
-            echo "Coverage collection requires:"
-            echo "  1. COLLECT_COVERAGE=true environment variable"
-            echo "  2. Istanbul instrumentation via vite-plugin-istanbul"
-            echo "  3. Browser window.__coverage__ object populated"
-            echo ""
-            echo "This is expected if:"
-            echo "  - Tests are mocked and don't execute real code"
-            echo "  - Istanbul plugin didn't instrument the code"
-            echo "  - Coverage fixture didn't run"
-          fi
-
-      - name: Display E2E coverage summary
-        if: always()
-        run: |
-          if [ -f "coverage-e2e/coverage-summary.json" ]; then
-            echo "📊 E2E Test Coverage Summary:"
-            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-            cat coverage-e2e/coverage-summary.json | jq -r '.total | "Lines: \(.lines.pct)%\nStatements: \(.statements.pct)%\nFunctions: \(.functions.pct)%\nBranches: \(.branches.pct)%"'
-            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          else
-            echo "⚠️  No E2E coverage summary available"
-            echo "Coverage was not collected in this test run (see above for details)"
+            echo "Note: Coverage collection is limited because:"
+            echo "  • Tests mock API endpoints (backend code doesn't execute)"
+            echo "  • Only client-side code execution is captured"
+            echo "  • This is expected for UI-focused E2E tests"
           fi
 
       - name: Upload Playwright report

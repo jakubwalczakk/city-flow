@@ -1,4 +1,5 @@
-import { Page, Locator, expect } from '@playwright/test';
+import { expect } from '@playwright/test';
+import type { Page, Locator } from '@playwright/test';
 
 export class LoginPage {
   readonly page: Page;
@@ -27,23 +28,25 @@ export class LoginPage {
     await expect(this.submitButton).toBeVisible();
     await expect(this.submitButton).toBeEnabled();
 
-    // Wait for React hydration
+    // Wait for React hydration to complete
     await this.page.waitForTimeout(1000);
 
-    // Clear and fill email field
-    await this.emailInput.clear();
-    await this.emailInput.fill(email);
+    // Fill email field - use pressSequentially for better reliability
+    await this.emailInput.click();
+    await this.emailInput.fill('');
+    await this.emailInput.pressSequentially(email, { delay: 50 });
 
-    // Clear and fill password field
-    await this.passwordInput.clear();
-    await this.passwordInput.fill(password);
+    // Fill password field
+    await this.passwordInput.click();
+    await this.passwordInput.fill('');
+    await this.passwordInput.pressSequentially(password, { delay: 50 });
 
-    // Small delay to let React process the input changes
-    await this.page.waitForTimeout(200);
+    // Wait for React Hook Form validation to complete
+    await this.page.waitForTimeout(500);
 
     // Verify both fields are filled before submitting
-    await expect(this.emailInput).toHaveValue(email);
-    await expect(this.passwordInput).toHaveValue(password);
+    await expect(this.emailInput).toHaveValue(email, { timeout: 5000 });
+    await expect(this.passwordInput).toHaveValue(password, { timeout: 5000 });
 
     // Click submit button
     await this.submitButton.click();
