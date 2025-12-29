@@ -6,7 +6,7 @@ Ten projekt wykorzystuje GitHub Actions do automatycznego testowania i budowania
 
 ## 📋 Workflow: CI/CD Pipeline
 
-Plik: `.github/workflows/ci.yml`
+Plik: `.github/workflows/pull-request.yml`
 
 ### Triggery
 
@@ -64,7 +64,7 @@ Aby workflow działał poprawnie w CI/CD, należy skonfigurować następujące s
 
 ### Jak dodać sekrety do workflow:
 
-W pliku `.github/workflows/ci.yml`, w sekcji `env` każdego stepu, dodaj:
+W pliku `.github/workflows/pull-request.yml`, w sekcji `env` każdego stepu, dodaj:
 
 ```yaml
 env:
@@ -114,7 +114,7 @@ npm run test:e2e
 3. **Status Badge**: Możesz dodać badge do README:
 
 ```markdown
-[![CI/CD Pipeline](https://github.com/YOUR_USERNAME/city-flow/actions/workflows/ci.yml/badge.svg)](https://github.com/YOUR_USERNAME/city-flow/actions/workflows/ci.yml)
+[![CI/CD Pipeline](https://github.com/YOUR_USERNAME/city-flow/actions/workflows/pull-request.yml/badge.svg)](https://github.com/YOUR_USERNAME/city-flow/actions/workflows/pull-request.yml)
 ```
 
 ## 🔧 Troubleshooting

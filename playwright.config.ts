@@ -32,6 +32,15 @@ export default defineConfig({
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
+
+    /* Collect coverage */
+    ...(process.env.COLLECT_COVERAGE && {
+      // Enable JavaScript coverage collection
+      contextOptions: {
+        // This will be used by custom fixtures to collect coverage
+        recordVideo: undefined,
+      },
+    }),
   },
 
   /* Configure projects for major browsers */

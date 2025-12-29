@@ -221,7 +221,7 @@ A: Dodaj plik `*.spec.ts` w `e2e/` lub `*.test.tsx` w `src/`
 A: Dodaj `[skip ci]` do commit message
 
 **Q: Jak zmienić timeout?**  
-A: Edytuj `timeout-minutes` w `.github/workflows/ci.yml`
+A: Edytuj `timeout-minutes` w `.github/workflows/pull-request.yml`
 
 ## 📝 Checklist
 

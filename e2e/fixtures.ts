@@ -1,11 +1,14 @@
-import { test as base } from '@playwright/test';
+import { test as base, type BrowserContext } from '@playwright/test';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '../src/db/database.types';
+import fs from 'fs';
+import path from 'path';
 
 type TestFixtures = {
   supabase: SupabaseClient<Database>;
   testUserId: string;
   cleanDatabase: () => Promise<void>;
+  context: BrowserContext; // Override context to add coverage collection
 };
 
 /**
@@ -58,6 +61,7 @@ function getTestUserId(): string {
  * - Respects foreign key constraints (feedback → fixed_points → plans)
  * - Preserves profiles and auth tables needed for test user login
  */
+/* eslint-disable react-hooks/rules-of-hooks */
 export const test = base.extend<TestFixtures>({
   // Worker-scoped Supabase client (shared across tests in same worker)
   supabase: [
@@ -78,6 +82,46 @@ export const test = base.extend<TestFixtures>({
     },
     { scope: 'worker' },
   ],
+
+  // Override context to enable coverage collection
+  context: async ({ context }, use) => {
+    if (process.env.COLLECT_COVERAGE) {
+      // Enable JS coverage
+      await context.addInitScript(() => {
+        // Mark that coverage should be collected
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (window as any).__COVERAGE_ENABLED__ = true;
+      });
+    }
+    await use(context);
+
+    // Collect coverage after tests if enabled
+    if (process.env.COLLECT_COVERAGE) {
+      const coverageDir = path.join(process.cwd(), 'coverage-e2e');
+      if (!fs.existsSync(coverageDir)) {
+        fs.mkdirSync(coverageDir, { recursive: true });
+      }
+
+      // Get all pages from context
+      const pages = context.pages();
+      for (const page of pages) {
+        try {
+          // Try to get coverage data if available
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const coverage = await page.evaluate(() => (window as any).__coverage__);
+          if (coverage) {
+            const coverageFile = path.join(
+              coverageDir,
+              `coverage-${Date.now()}-${Math.random().toString(36).substr(2, 9)}.json`
+            );
+            fs.writeFileSync(coverageFile, JSON.stringify(coverage));
+          }
+        } catch {
+          // Coverage not available, continue
+        }
+      }
+    }
+  },
 
   // Test-scoped cleanup function - deletes only test user's data
   cleanDatabase: async ({ supabase, testUserId }, use) => {
@@ -122,12 +166,12 @@ export const test = base.extend<TestFixtures>({
     await cleanup();
 
     // Provide the cleanup function to test if needed
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     await use(cleanup);
 
     // Run cleanup after test as well (ensures clean state for next test)
     await cleanup();
   },
 });
+/* eslint-enable react-hooks/rules-of-hooks */
 
 export { expect } from '@playwright/test';
