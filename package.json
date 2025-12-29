@@ -11,6 +11,7 @@
     "test:unit:ui": "vitest --ui src/",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
+    "test:e2e:coverage": "nyc report --reporter=html --reporter=text --reporter=json",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
@@ -86,11 +87,13 @@
     "globals": "^15.13.0",
     "husky": "^9.1.7",
     "jsdom": "^25.0.1",
+    "nyc": "^17.1.0",
     "prettier": "^3.4.2",
     "prettier-plugin-astro": "^0.14.1",
     "typescript": "^5.7.2",
     "typescript-eslint": "^8.18.1",
     "vite": "^6.0.7",
+    "vite-plugin-istanbul": "^6.0.2",
     "vitest": "^2.1.8"
   }
 }

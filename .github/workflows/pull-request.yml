@@ -68,6 +68,16 @@ jobs:
       - name: Run unit tests with coverage
         run: npm run test:unit -- --run --reporter=verbose --coverage
 
+      - name: Display unit test coverage summary
+        if: always()
+        run: |
+          if [ -f "coverage/coverage-summary.json" ]; then
+            echo "📊 Unit Test Coverage Summary:"
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            cat coverage/coverage-summary.json | jq -r '.total | "Lines: \(.lines.pct)%\nStatements: \(.statements.pct)%\nFunctions: \(.functions.pct)%\nBranches: \(.branches.pct)%"'
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          fi
+
       - name: Upload unit test coverage
         if: always()
         uses: actions/upload-artifact@v4
@@ -75,6 +85,7 @@ jobs:
           name: unit-test-coverage
           path: coverage/
           retention-days: 7
+          if-no-files-found: error
 
   e2e-tests:
     name: E2E Tests
@@ -148,6 +159,29 @@ jobs:
           PUBLIC_SUPABASE_URL: ${{ secrets.PUBLIC_SUPABASE_URL }}
           PUBLIC_SUPABASE_KEY: ${{ secrets.PUBLIC_SUPABASE_KEY }}
 
+      - name: Generate E2E coverage report
+        if: always()
+        run: |
+          if [ -d "coverage-e2e" ] && [ "$(ls -A coverage-e2e/*.json 2>/dev/null)" ]; then
+            echo "📊 Processing E2E coverage data..."
+            npm run test:e2e:coverage
+            echo "✅ E2E coverage report generated"
+          else
+            echo "⚠️  No E2E coverage data found to process"
+          fi
+
+      - name: Display E2E coverage summary
+        if: always()
+        run: |
+          if [ -f "coverage-e2e/coverage-summary.json" ]; then
+            echo "📊 E2E Test Coverage Summary:"
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            cat coverage-e2e/coverage-summary.json | jq -r '.total | "Lines: \(.lines.pct)%\nStatements: \(.statements.pct)%\nFunctions: \(.functions.pct)%\nBranches: \(.branches.pct)%"'
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          else
+            echo "⚠️  No E2E coverage summary available"
+          fi
+
       - name: Upload Playwright report
         if: failure()
         uses: actions/upload-artifact@v4
@@ -155,6 +189,7 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 7
+          if-no-files-found: error
 
       - name: Upload E2E test results
         if: always()
@@ -163,6 +198,7 @@ jobs:
           name: e2e-test-results
           path: test-results/
           retention-days: 7
+          if-no-files-found: error
 
       - name: Upload E2E coverage
         if: always()
