@@ -31,6 +31,10 @@ export default defineConfig({
           ]
         : []),
     ],
+    build: {
+      // Enable sourcemaps for better debugging and to suppress warnings
+      sourcemap: true,
+    },
   },
   adapter: node({
     mode: 'standalone',

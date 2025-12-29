@@ -20,6 +20,8 @@ test.describe('Create New Plan', () => {
     newPlanPage = new NewPlanPage(page);
 
     // Mock the Plans API for creation (after login)
+    // NOTE: Mocking API calls means the actual API route code won't be covered
+    // by E2E coverage. For full coverage, consider integration tests without mocks.
     await page.route('**/api/plans', async (route) => {
       if (route.request().method() === 'POST') {
         await route.fulfill({

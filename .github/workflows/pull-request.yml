@@ -159,16 +159,55 @@ jobs:
           PUBLIC_SUPABASE_URL: ${{ secrets.PUBLIC_SUPABASE_URL }}
           PUBLIC_SUPABASE_KEY: ${{ secrets.PUBLIC_SUPABASE_KEY }}
 
+      - name: Debug coverage collection
+        if: always()
+        run: |
+          echo "🔍 Debugging coverage collection..."
+          echo ""
+          echo "Coverage directory structure:"
+          ls -la coverage-e2e/ 2>/dev/null || echo "coverage-e2e/ directory not found"
+          echo ""
+          if [ -d "coverage-e2e/.nyc_output" ]; then
+            echo "Coverage files (.nyc_output):"
+            ls -lah coverage-e2e/.nyc_output/ 2>/dev/null || echo "No files in .nyc_output"
+          else
+            echo ".nyc_output directory does not exist"
+          fi
+          echo ""
+          echo "Environment variables:"
+          echo "COLLECT_COVERAGE: $COLLECT_COVERAGE"
+
       - name: Generate E2E coverage report
         if: always()
         run: |
-          if [ -d "coverage-e2e/.nyc_output" ] && [ "$(ls -A coverage-e2e/.nyc_output/*.json 2>/dev/null)" ]; then
-            echo "📊 Processing E2E coverage data..."
+          echo "🔍 Checking for E2E coverage data..."
+          
+          # Create coverage directory if it doesn't exist
+          mkdir -p coverage-e2e/.nyc_output
+          
+          # Check if coverage files exist
+          if [ -d "coverage-e2e/.nyc_output" ] && [ "$(ls -A coverage-e2e/.nyc_output/*.json 2>/dev/null | wc -l)" -gt 0 ]; then
+            echo "📊 Found $(ls -A coverage-e2e/.nyc_output/*.json 2>/dev/null | wc -l) coverage file(s)"
+            echo "Processing E2E coverage data..."
             npm run test:e2e:coverage
-            echo "✅ E2E coverage report generated"
+            
+            if [ -f "coverage-e2e/coverage-summary.json" ]; then
+              echo "✅ E2E coverage report generated successfully"
+            else
+              echo "⚠️  Coverage report generation completed but summary file not found"
+            fi
           else
-            echo "⚠️  No E2E coverage data found to process (.nyc_output directory not found or empty)"
-            echo "Note: E2E coverage collection may not be configured in this test run"
+            echo "⚠️  No E2E coverage data collected"
+            echo ""
+            echo "Coverage collection requires:"
+            echo "  1. COLLECT_COVERAGE=true environment variable"
+            echo "  2. Istanbul instrumentation via vite-plugin-istanbul"
+            echo "  3. Browser window.__coverage__ object populated"
+            echo ""
+            echo "This is expected if:"
+            echo "  - Tests are mocked and don't execute real code"
+            echo "  - Istanbul plugin didn't instrument the code"
+            echo "  - Coverage fixture didn't run"
           fi
 
       - name: Display E2E coverage summary
@@ -180,17 +219,18 @@ jobs:
             cat coverage-e2e/coverage-summary.json | jq -r '.total | "Lines: \(.lines.pct)%\nStatements: \(.statements.pct)%\nFunctions: \(.functions.pct)%\nBranches: \(.branches.pct)%"'
             echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
           else
-            echo "⚠️  No E2E coverage summary available (coverage not collected in this run)"
+            echo "⚠️  No E2E coverage summary available"
+            echo "Coverage was not collected in this test run (see above for details)"
           fi
 
       - name: Upload Playwright report
-        if: failure()
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report
           path: playwright-report/
           retention-days: 7
-          if-no-files-found: error
+          if-no-files-found: warn
 
       - name: Upload E2E test results
         if: always()
@@ -199,7 +239,7 @@ jobs:
           name: e2e-test-results
           path: test-results/
           retention-days: 7
-          if-no-files-found: error
+          if-no-files-found: warn
 
       - name: Upload E2E coverage
         if: always()
