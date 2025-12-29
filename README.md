@@ -145,7 +145,7 @@ CityFlow is an AI-powered web application (MVP) designed to simplify the process
 
 The project uses GitHub Actions for continuous integration and deployment. The pipeline automatically:
 
-- ✅ Runs on every push to `master`/`main`
+- ✅ Runs on every push to `master`
 - ✅ Can be triggered manually from GitHub Actions tab
 - ✅ Executes linting checks
 - ✅ Runs unit tests
