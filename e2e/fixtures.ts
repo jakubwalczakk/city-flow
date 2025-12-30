@@ -97,7 +97,7 @@ export const test = base.extend<TestFixtures>({
 
     // Collect coverage after tests if enabled
     if (process.env.COLLECT_COVERAGE) {
-      const coverageDir = path.join(process.cwd(), 'coverage-e2e');
+      const coverageDir = path.join(process.cwd(), 'coverage-e2e', '.nyc_output');
       if (!fs.existsSync(coverageDir)) {
         fs.mkdirSync(coverageDir, { recursive: true });
       }

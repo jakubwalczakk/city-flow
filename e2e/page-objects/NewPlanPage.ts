@@ -1,4 +1,5 @@
-import { Page, Locator, expect } from '@playwright/test';
+import { expect } from '@playwright/test';
+import type { Page, Locator } from '@playwright/test';
 
 export class NewPlanPage {
   readonly page: Page;
@@ -86,18 +87,24 @@ export class NewPlanPage {
     await expect(this.createNewPlanButton).toBeVisible();
     await expect(this.createNewPlanButton).toBeEnabled();
 
-    // Click to open modal
-    await this.createNewPlanButton.click();
+    // Wait for React to be fully hydrated
+    await this.page.waitForLoadState('networkidle');
 
-    // Wait for Radix UI Dialog to open (with animation)
-    // The dialog content gets data-state="open" when fully open
-    const dialogContent = this.page.locator('[role="dialog"][data-state="open"]');
-    await expect(dialogContent).toBeVisible({ timeout: 5000 });
+    // Click to open modal and wait for navigation/state changes to settle
+    await Promise.all([
+      this.createNewPlanButton.click(),
+      // Wait for the dialog to actually appear in DOM
+      this.page.waitForSelector('[role="dialog"]', { state: 'attached', timeout: 15000 }),
+    ]);
 
-    // Wait for form inputs to be visible
-    await expect(this.nameInput).toBeVisible({ timeout: 5000 });
+    // Wait for dialog animations to complete and content to be visible
+    await this.page.locator('[role="dialog"]').waitFor({ state: 'visible', timeout: 5000 });
 
-    // Additional wait for React components to fully hydrate
+    // Wait for the form inputs to be actually visible and interactive
+    await expect(this.nameInput).toBeVisible({ timeout: 10000 });
+    await expect(this.nameInput).toBeEnabled({ timeout: 5000 });
+
+    // Additional wait for any remaining animations to complete
     await this.page.waitForTimeout(500);
   }
 
