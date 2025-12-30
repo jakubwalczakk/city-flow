@@ -87,19 +87,25 @@ export class NewPlanPage {
     await expect(this.createNewPlanButton).toBeVisible();
     await expect(this.createNewPlanButton).toBeEnabled();
 
-    // Click to open modal
-    await this.createNewPlanButton.click();
+    // Wait for React to be fully hydrated
+    await this.page.waitForLoadState('networkidle');
 
-    // Wait for the modal dialog to appear - use multiple strategies for reliability
-    // Strategy 1: Wait for any dialog role element
-    await this.page.locator('[role="dialog"]').first().waitFor({ state: 'visible', timeout: 10000 });
+    // Click to open modal and wait for navigation/state changes to settle
+    await Promise.all([
+      this.createNewPlanButton.click(),
+      // Wait for the dialog to actually appear in DOM
+      this.page.waitForSelector('[role="dialog"]', { state: 'attached', timeout: 15000 }),
+    ]);
 
-    // Strategy 2: Wait for the form inputs to be actually visible and interactive
+    // Wait for dialog animations to complete and content to be visible
+    await this.page.locator('[role="dialog"]').waitFor({ state: 'visible', timeout: 5000 });
+
+    // Wait for the form inputs to be actually visible and interactive
     await expect(this.nameInput).toBeVisible({ timeout: 10000 });
     await expect(this.nameInput).toBeEnabled({ timeout: 5000 });
 
-    // Additional wait for React components to fully hydrate and animations to complete
-    await this.page.waitForTimeout(1000);
+    // Additional wait for any remaining animations to complete
+    await this.page.waitForTimeout(500);
   }
 
   async fillBasicInfo(name: string, destination: string) {
