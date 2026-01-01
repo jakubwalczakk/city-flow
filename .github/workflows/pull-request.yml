@@ -1,4 +1,4 @@
-name: CI/CD Pipeline
+name: Pull Request Validation
 
 on:
   # Run on pull requests
@@ -7,12 +7,6 @@ on:
       - main
       - master
     types: [opened, synchronize, reopened]
-
-  # Run on push to main/master
-  push:
-    branches:
-      - main
-      - master
 
   # Allow manual trigger
   workflow_dispatch:
