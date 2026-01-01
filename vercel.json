@@ -2,5 +2,10 @@
   "version": 2,
   "public": false,
   "buildCommand": "npm run build",
-  "framework": "astro"
+  "framework": "astro",
+  "functions": {
+    "src/pages/api/**/*.ts": {
+      "runtime": "nodejs22.x"
+    }
+  }
 }
