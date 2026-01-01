@@ -4,7 +4,7 @@ import { defineConfig } from 'astro/config';
 import react from '@astrojs/react';
 import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
-import node from '@astrojs/node';
+import vercel from '@astrojs/vercel';
 import istanbul from 'vite-plugin-istanbul';
 
 // https://astro.build/config
@@ -36,7 +36,5 @@ export default defineConfig({
       sourcemap: true,
     },
   },
-  adapter: node({
-    mode: 'standalone',
-  }),
+  adapter: vercel(),
 });

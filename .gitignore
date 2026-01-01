@@ -18,6 +18,7 @@ pnpm-lock.yaml
 dist/
 build/
 .astro/
+.vercel/
 
 # Astro and Vite cache
 .vite/
@@ -78,3 +79,5 @@ storybook-static/
 test-results/
 playwright-report/
 .actrc
+.vercel
+.env*.local

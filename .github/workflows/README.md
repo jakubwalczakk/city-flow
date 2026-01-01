@@ -2,9 +2,32 @@
 
 ## 🚀 Overview
 
-Ten projekt wykorzystuje GitHub Actions do automatycznego testowania i budowania aplikacji. Workflow uruchamia się automatycznie przy każdym push do gałęzi `master`/`main` oraz może być uruchamiany ręcznie.
+Ten projekt wykorzystuje GitHub Actions do automatycznego testowania, budowania i wdrażania aplikacji. Dostępne są dwa główne workflow:
 
-## 📋 Workflow: CI/CD Pipeline
+1. **Pull Request Pipeline** - Pełna walidacja kodu dla PR (z testami E2E)
+2. **Master Pipeline** - Deployment na Vercel po merge do master (bez testów E2E)
+
+## 📋 Workflows
+
+### 1. Pull Request Pipeline
+
+Plik: `.github/workflows/pull-request.yml`
+
+**Cel**: Walidacja kodu przed merge do master
+
+**Dokumentacja**: Zobacz ten plik dla szczegółów
+
+### 2. Master Pipeline (Production Deployment)
+
+Plik: `.github/workflows/master.yml`
+
+**Cel**: Automatyczny deployment na Vercel po merge do master
+
+**Dokumentacja**: Zobacz [README_MASTER.md](./README_MASTER.md) dla szczegółów
+
+---
+
+## 📋 Workflow: Pull Request Pipeline
 
 Plik: `.github/workflows/pull-request.yml`
 
