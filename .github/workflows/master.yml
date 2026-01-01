@@ -1,4 +1,4 @@
-name: Master CI/CD Pipeline
+name: Master CI Pipeline
 
 on:
   # Run on push to master
@@ -79,12 +79,11 @@ jobs:
           retention-days: 7
           if-no-files-found: error
 
-  build:
-    name: Build Project
+  verify-build:
+    name: Verify Build
     runs-on: ubuntu-latest
     needs: [lint, unit-tests]
     timeout-minutes: 15
-    environment: production
 
     steps:
       - name: Checkout repository
@@ -102,55 +101,14 @@ jobs:
       - name: Build project
         run: npm run build
         env:
-          # Required for build process
-          PUBLIC_SUPABASE_URL: ${{ secrets.PUBLIC_SUPABASE_URL }}
-          PUBLIC_SUPABASE_KEY: ${{ secrets.PUBLIC_SUPABASE_KEY }}
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-output
-          path: |
-            .vercel/
-            dist/
-          retention-days: 1
-          if-no-files-found: error
-
-  deploy:
-    name: Deploy to Vercel
-    runs-on: ubuntu-latest
-    needs: build
-    timeout-minutes: 10
-    environment: production
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Deploy to Vercel Production
-        uses: amondnet/vercel-action@v25
-        id: deploy
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          vercel-args: '--prod'
-          working-directory: ./
-
-      - name: Deployment Summary
-        run: |
-          echo "🚀 Deployment Successful!"
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "📦 Project: CityFlow"
-          echo "🌐 URL: ${{ steps.deploy.outputs.preview-url }}"
-          echo "🔗 Commit: ${{ github.sha }}"
-          echo "👤 Author: ${{ github.actor }}"
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          # Required for build process validation
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
 
   status-summary:
     name: Pipeline Status Summary
     runs-on: ubuntu-latest
-    needs: [lint, unit-tests, build, deploy]
+    needs: [lint, unit-tests, verify-build]
     if: always()
 
     steps:
@@ -159,18 +117,16 @@ jobs:
         run: |
           LINT_STATUS="${{ needs.lint.result }}"
           UNIT_STATUS="${{ needs.unit-tests.result }}"
-          BUILD_STATUS="${{ needs.build.result }}"
-          DEPLOY_STATUS="${{ needs.deploy.result }}"
+          BUILD_STATUS="${{ needs.verify-build.result }}"
 
           echo "lint_status=$LINT_STATUS" >> $GITHUB_OUTPUT
           echo "unit_status=$UNIT_STATUS" >> $GITHUB_OUTPUT
           echo "build_status=$BUILD_STATUS" >> $GITHUB_OUTPUT
-          echo "deploy_status=$DEPLOY_STATUS" >> $GITHUB_OUTPUT
 
-          if [ "$LINT_STATUS" == "success" ] && [ "$UNIT_STATUS" == "success" ] && [ "$BUILD_STATUS" == "success" ] && [ "$DEPLOY_STATUS" == "success" ]; then
+          if [ "$LINT_STATUS" == "success" ] && [ "$UNIT_STATUS" == "success" ] && [ "$BUILD_STATUS" == "success" ]; then
             echo "overall_status=success" >> $GITHUB_OUTPUT
             echo "status_emoji=✅" >> $GITHUB_OUTPUT
-            echo "status_message=All checks passed and deployment successful!" >> $GITHUB_OUTPUT
+            echo "status_message=All checks passed! Vercel will handle deployment." >> $GITHUB_OUTPUT
           else
             echo "overall_status=failure" >> $GITHUB_OUTPUT
             echo "status_emoji=❌" >> $GITHUB_OUTPUT
@@ -184,10 +140,9 @@ jobs:
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
           echo ""
           echo "📋 Job Results:"
-          echo "  🔍 Lint:       ${{ needs.lint.result }}"
-          echo "  🧪 Unit Tests: ${{ needs.unit-tests.result }}"
-          echo "  🔨 Build:      ${{ needs.build.result }}"
-          echo "  🚀 Deploy:     ${{ needs.deploy.result }}"
+          echo "  🔍 Lint:         ${{ needs.lint.result }}"
+          echo "  🧪 Unit Tests:   ${{ needs.unit-tests.result }}"
+          echo "  🔨 Verify Build: ${{ needs.verify-build.result }}"
           echo ""
           echo "📊 Overall Status: ${{ steps.status.outputs.status_message }}"
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

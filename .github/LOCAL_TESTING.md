@@ -67,8 +67,6 @@ supabase start
 cat > .env.test << 'EOF'
 SUPABASE_URL=http://127.0.0.1:54321
 SUPABASE_KEY=PASTE_YOUR_ANON_KEY_HERE
-PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
-PUBLIC_SUPABASE_KEY=PASTE_YOUR_ANON_KEY_HERE
 OPENROUTER_API_KEY=YOUR_OPENROUTER_KEY
 PUBLIC_SITE_URL=http://localhost:3000
 EOF
@@ -201,7 +199,7 @@ npm install
 npm run build -- --verbose
 
 # Sprawdź zmienne środowiskowe
-echo $PUBLIC_SUPABASE_URL
+echo $SUPABASE_URL
 ```
 
 ### E2E test failures:

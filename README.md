@@ -81,8 +81,8 @@ CityFlow is an AI-powered web application (MVP) designed to simplify the process
 
     ```env
     # Supabase
-    PUBLIC_SUPABASE_URL=your_supabase_url
-    PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+    SUPABASE_URL=your_supabase_url
+    SUPABASE_KEY=your_supabase_anon_key
 
     # Openrouter.ai
     OPENROUTER_API_KEY=your_openrouter_api_key

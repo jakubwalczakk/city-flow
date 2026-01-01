@@ -27,8 +27,6 @@
 │  5. ✅ Run unit tests (npm run test:unit)                   │
 │  6. ✅ Build production (npm run build)                     │
 │     ├─ PUBLIC_SITE_URL                                      │
-│     ├─ PUBLIC_SUPABASE_URL (from secrets)                   │
-│     ├─ PUBLIC_SUPABASE_KEY (from secrets)                   │
 │     ├─ SUPABASE_URL (from secrets)                          │
 │     ├─ SUPABASE_KEY (from secrets)                          │
 │     └─ OPENROUTER_API_KEY (from secrets)                    │
@@ -49,8 +47,6 @@
 │  5. ✅ Create .env.test file                                │
 │     ├─ SUPABASE_URL (from secrets)                          │
 │     ├─ SUPABASE_KEY (from secrets)                          │
-│     ├─ PUBLIC_SUPABASE_URL (from secrets)                   │
-│     ├─ PUBLIC_SUPABASE_KEY (from secrets)                   │
 │     ├─ OPENROUTER_API_KEY (from secrets)                    │
 │     └─ PUBLIC_SITE_URL=http://localhost:3000                │
 │  6. ✅ Run E2E tests (npm run test:e2e)                     │
@@ -125,8 +121,8 @@ GitHub Secrets (Repository Settings)
     │
     ├─ SUPABASE_URL ────────────┐
     ├─ SUPABASE_KEY ────────────┤
-    ├─ PUBLIC_SUPABASE_URL ─────┼──→ Injected into workflow
-    ├─ PUBLIC_SUPABASE_KEY ─────┤   as environment variables
+    ├─ SUPABASE_URL ────────────┼──→ Injected into workflow
+    ├─ SUPABASE_KEY ────────────┤   as environment variables
     └─ OPENROUTER_API_KEY ──────┘
                 │
                 ├──→ Build step (Job 1)

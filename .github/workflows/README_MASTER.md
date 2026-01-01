@@ -68,8 +68,8 @@ The pipeline runs automatically on:
 
 **Environment Variables**:
 
-- `PUBLIC_SUPABASE_URL` - Required for build process
-- `PUBLIC_SUPABASE_KEY` - Required for build process
+- `SUPABASE_URL` - Required for build process
+- `SUPABASE_KEY` - Required for build process
 
 **Artifacts**:
 
@@ -124,13 +124,13 @@ The pipeline runs automatically on:
 
 Configure these secrets in: **Repository Settings > Secrets and variables > Actions**
 
-| Secret Name           | Description                 | How to Obtain                                                                     |
-| --------------------- | --------------------------- | --------------------------------------------------------------------------------- |
-| `VERCEL_TOKEN`        | Vercel authentication token | Generate at [Vercel Account Settings > Tokens](https://vercel.com/account/tokens) |
-| `VERCEL_ORG_ID`       | Vercel organization ID      | Found in `.vercel/project.json` after `vercel link`                               |
-| `VERCEL_PROJECT_ID`   | Vercel project ID           | Found in `.vercel/project.json` after `vercel link`                               |
-| `PUBLIC_SUPABASE_URL` | Supabase project URL        | From Supabase project settings                                                    |
-| `PUBLIC_SUPABASE_KEY` | Supabase anon key           | From Supabase project settings                                                    |
+| Secret Name         | Description                 | How to Obtain                                                                     |
+| ------------------- | --------------------------- | --------------------------------------------------------------------------------- |
+| `VERCEL_TOKEN`      | Vercel authentication token | Generate at [Vercel Account Settings > Tokens](https://vercel.com/account/tokens) |
+| `VERCEL_ORG_ID`     | Vercel organization ID      | Found in `.vercel/project.json` after `vercel link`                               |
+| `VERCEL_PROJECT_ID` | Vercel project ID           | Found in `.vercel/project.json` after `vercel link`                               |
+| `SUPABASE_URL`      | Supabase project URL        | From Supabase project settings                                                    |
+| `SUPABASE_KEY`      | Supabase anon key           | From Supabase project settings                                                    |
 
 ## Vercel Setup
 

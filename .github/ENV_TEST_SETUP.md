@@ -15,13 +15,9 @@ touch .env.test
 2. **Dodaj następujące zmienne**:
 
 ```env
-# Supabase Configuration (Server-side)
+# Supabase Configuration
 SUPABASE_URL=http://127.0.0.1:54321
 SUPABASE_KEY=your_supabase_anon_key_here
-
-# Supabase Configuration (Client-side - PUBLIC_ prefix)
-PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
-PUBLIC_SUPABASE_KEY=your_supabase_anon_key_here
 
 # OpenRouter API (for AI features)
 OPENROUTER_API_KEY=your_openrouter_api_key_here
@@ -40,7 +36,7 @@ supabase start
 
 # Wyświetli:
 # - API URL: http://127.0.0.1:54321
-# - anon key: eyJhbGc... (użyj tego jako SUPABASE_KEY i PUBLIC_SUPABASE_KEY)
+# - anon key: eyJhbGc... (użyj tego jako SUPABASE_KEY)
 ```
 
 4. **Uzyskaj klucz OpenRouter**:
@@ -63,15 +59,11 @@ Aby workflow GitHub Actions działał poprawnie, skonfiguruj następujące sekre
 
 Dodaj każdy z poniższych sekretów:
 
-| Nazwa sekretu         | Opis                            | Przykład                  |
-| --------------------- | ------------------------------- | ------------------------- |
-| `SUPABASE_URL`        | URL instancji Supabase (server) | `https://xxx.supabase.co` |
-| `SUPABASE_KEY`        | Klucz anon Supabase (server)    | `eyJhbGc...`              |
-| `PUBLIC_SUPABASE_URL` | URL instancji Supabase (client) | `https://xxx.supabase.co` |
-| `PUBLIC_SUPABASE_KEY` | Klucz anon Supabase (client)    | `eyJhbGc...`              |
-| `OPENROUTER_API_KEY`  | Klucz API OpenRouter            | `sk-or-v1-...`            |
-
-**Uwaga**: Dla testów w CI, możesz użyć tych samych wartości dla `SUPABASE_URL`/`PUBLIC_SUPABASE_URL` oraz `SUPABASE_KEY`/`PUBLIC_SUPABASE_KEY`.
+| Nazwa sekretu        | Opis                   | Przykład                  |
+| -------------------- | ---------------------- | ------------------------- |
+| `SUPABASE_URL`       | URL instancji Supabase | `https://xxx.supabase.co` |
+| `SUPABASE_KEY`       | Klucz anon Supabase    | `eyJhbGc...`              |
+| `OPENROUTER_API_KEY` | Klucz API OpenRouter   | `sk-or-v1-...`            |
 
 ### Krok 3: Weryfikacja
 

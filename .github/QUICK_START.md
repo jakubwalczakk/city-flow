@@ -11,8 +11,6 @@
 ```
 SUPABASE_URL              → Twój URL Supabase
 SUPABASE_KEY              → Twój klucz anon Supabase
-PUBLIC_SUPABASE_URL       → Ten sam URL co wyżej
-PUBLIC_SUPABASE_KEY       → Ten sam klucz co wyżej
 OPENROUTER_API_KEY        → Twój klucz OpenRouter
 ```
 
@@ -47,8 +45,6 @@ git push origin main
 cat > .env.test << 'EOF'
 SUPABASE_URL=http://127.0.0.1:54321
 SUPABASE_KEY=YOUR_LOCAL_KEY
-PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
-PUBLIC_SUPABASE_KEY=YOUR_LOCAL_KEY
 OPENROUTER_API_KEY=YOUR_KEY
 PUBLIC_SITE_URL=http://localhost:3000
 EOF

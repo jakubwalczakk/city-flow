@@ -15,6 +15,8 @@ export default defineConfig({
   integrations: [react(), sitemap()],
   server: { port: 3000 },
   vite: {
+    // Allow SUPABASE_ prefix to be exposed to the client
+    envPrefix: ['PUBLIC_', 'SUPABASE_'],
     plugins: [
       tailwindcss(),
       // Add Istanbul plugin for E2E test coverage collection

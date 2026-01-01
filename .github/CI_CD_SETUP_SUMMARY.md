@@ -117,8 +117,6 @@ SUPABASE_URL              # URL instancji Supabase (server)
 SUPABASE_KEY              # Klucz anon Supabase (server)
 
 # Supabase (client-side) - WYMAGANE dla E2E
-PUBLIC_SUPABASE_URL       # URL instancji Supabase (client) ✅
-PUBLIC_SUPABASE_KEY       # Klucz anon Supabase (client) ✅
 
 # E2E Test User - WYMAGANE dla E2E
 E2E_USER_ID               # UUID test usera w Supabase ✅
@@ -147,15 +145,11 @@ CI=true                                 # Flaga CI dla Playwright
 # Settings → Secrets and variables → Actions → New repository secret
 
 # WYMAGANE sekrety (5):
-PUBLIC_SUPABASE_URL       # URL projektu Supabase
-PUBLIC_SUPABASE_KEY       # Klucz anon z Supabase
 E2E_USER_ID               # UUID test usera
 E2E_USERNAME              # Email test usera
 E2E_PASSWORD              # Hasło test usera
 
 # OPCJONALNE sekrety:
-SUPABASE_URL              # Fallback do PUBLIC_SUPABASE_URL
-SUPABASE_KEY              # Fallback do PUBLIC_SUPABASE_KEY
 OPENROUTER_API_KEY        # Jeśli testy wymagają AI
 ```
 
@@ -274,7 +268,7 @@ Zaktualizuj step testów jednostkowych:
 **Rozwiązanie**:
 
 1. **"Missing E2E_USER_ID"**: Sprawdź czy dodałeś secret `E2E_USER_ID` w GitHub
-2. **"fetch failed"**: Sprawdź `PUBLIC_SUPABASE_URL` i `PUBLIC_SUPABASE_KEY` secrets
+2. **"fetch failed"**: Sprawdź `SUPABASE_URL` i `SUPABASE_KEY` secrets
 3. **"Test timeout / stays on /login"**: Sprawdź `E2E_USERNAME` i `E2E_PASSWORD` secrets
 4. **Onboarding modal pojawia się**: Test user nie ma profilu lub `onboarding_completed: false`
    - Uruchom SQL z sekcji "Setup test usera" powyżej

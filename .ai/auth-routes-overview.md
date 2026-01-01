@@ -214,14 +214,6 @@ Jeśli `isAuthenticated === false`:
 
 ## Zmienne Środowiskowe
 
-Po implementacji backend, potrzebne będą:
-
-```env
-PUBLIC_SUPABASE_URL=https://xxx.supabase.co
-PUBLIC_SUPABASE_ANON_KEY=eyJxxx...
-SUPABASE_SERVICE_ROLE_KEY=eyJxxx...
-```
-
 ## Konfiguracja Supabase
 
 ### Google OAuth

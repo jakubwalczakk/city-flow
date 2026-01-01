@@ -79,8 +79,8 @@ Aby workflow działał poprawnie w CI/CD, należy skonfigurować następujące s
 
 ### Opcjonalne (jeśli nie są publiczne):
 
-- `PUBLIC_SUPABASE_URL`: URL instancji Supabase
-- `PUBLIC_SUPABASE_KEY`: Klucz anon Supabase (publiczny)
+- `SUPABASE_URL`: URL instancji Supabase
+- `SUPABASE_KEY`: Klucz anon Supabase (publiczny)
 - `SUPABASE_URL`: URL instancji Supabase (server-side)
 - `SUPABASE_KEY`: Klucz anon Supabase (server-side)
 - `OPENROUTER_API_KEY`: Klucz API OpenRouter
@@ -93,8 +93,8 @@ W pliku `.github/workflows/pull-request.yml`, w sekcji `env` każdego stepu, dod
 env:
   SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
   SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
-  PUBLIC_SUPABASE_URL: ${{ secrets.PUBLIC_SUPABASE_URL }}
-  PUBLIC_SUPABASE_KEY: ${{ secrets.PUBLIC_SUPABASE_KEY }}
+  SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+  SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
   OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
   PUBLIC_SITE_URL: 'http://localhost:3000'
 ```

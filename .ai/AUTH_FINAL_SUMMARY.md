@@ -110,10 +110,6 @@ Rejestracja → auth.users
 SUPABASE_URL=http://127.0.0.1:54321
 SUPABASE_KEY=eyJhbGc...
 
-# Client-side (React components)
-PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
-PUBLIC_SUPABASE_KEY=eyJhbGc...
-
 # Inne
 OPENROUTER_API_KEY=sk-or-v1-...
 ```

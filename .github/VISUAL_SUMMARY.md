@@ -160,8 +160,8 @@ Step 1: Configure Secrets
 │ Add 5 secrets:                         │
 │ ✓ SUPABASE_URL                         │
 │ ✓ SUPABASE_KEY                         │
-│ ✓ PUBLIC_SUPABASE_URL                  │
-│ ✓ PUBLIC_SUPABASE_KEY                  │
+│ ✓ SUPABASE_URL                         │
+│ ✓ SUPABASE_KEY                         │
 │ ✓ OPENROUTER_API_KEY                   │
 └────────────────────────────────────────┘
             │

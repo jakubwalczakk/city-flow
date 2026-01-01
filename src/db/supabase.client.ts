@@ -4,13 +4,9 @@ import { createServerClient, type CookieOptionsWithName } from '@supabase/ssr';
 
 import type { Database } from './database.types';
 
-// Client-side variables (available in browser with PUBLIC_ prefix)
-const clientUrl = import.meta.env.PUBLIC_SUPABASE_URL;
-const clientKey = import.meta.env.PUBLIC_SUPABASE_KEY;
-
-// Server-side variables - use PUBLIC_ if regular ones are not available
-const serverUrl = import.meta.env.SUPABASE_URL || import.meta.env.PUBLIC_SUPABASE_URL;
-const serverKey = import.meta.env.SUPABASE_KEY || import.meta.env.PUBLIC_SUPABASE_KEY;
+// Client-side variables (exposed via envPrefix: ['SUPABASE_'] in astro.config.mjs)
+const clientUrl = import.meta.env.SUPABASE_URL;
+const clientKey = import.meta.env.SUPABASE_KEY;
 
 /**
  * Client-side Supabase client for use in React components
@@ -22,48 +18,26 @@ export const supabaseClient = createBrowserClient<Database>(clientUrl, clientKey
 export type SupabaseClient = typeof supabaseClient;
 
 /**
- * Cookie options for server-side Supabase client
- * Ensures secure session management with proper cookie settings
- */
-export const cookieOptions: CookieOptionsWithName = {
-  path: '/',
-  secure: false, // Set to false for local development (HTTP)
-  httpOnly: true,
-  sameSite: 'lax',
-};
-
-/**
- * Parses cookie header string into array of name-value pairs
- * Required for Supabase SSR cookie handling
- */
-function parseCookieHeader(cookieHeader: string): { name: string; value: string }[] {
-  return cookieHeader.split(';').map((cookie) => {
-    const [name, ...rest] = cookie.trim().split('=');
-    return { name, value: rest.join('=') };
-  });
-}
-
-/**
- * Creates a server-side Supabase client with proper cookie handling
- * Use this in middleware and API endpoints for SSR authentication
+ * Creates a server-side Supabase client (for use in Astro actions/API routes/middleware)
  *
- * @param context - Object containing Astro headers and cookies
- * @returns Configured Supabase server client
+ * @param context - Context containing cookies and headers
+ * @returns Supabase client instance
  */
-export const createSupabaseServerInstance = (context: { headers: Headers; cookies: AstroCookies }) => {
-  const supabase = createServerClient<Database>(serverUrl, serverKey, {
-    cookieOptions,
+export const createSupabaseServerInstance = (context: { cookies: AstroCookies; headers?: Headers }) => {
+  const serverUrl = import.meta.env.SUPABASE_URL;
+  const serverKey = import.meta.env.SUPABASE_KEY;
+
+  return createServerClient<Database>(serverUrl, serverKey, {
     cookies: {
-      getAll() {
-        return parseCookieHeader(context.headers.get('Cookie') ?? '');
+      get(key) {
+        return context.cookies.get(key)?.value;
       },
-      setAll(cookiesToSet) {
-        cookiesToSet.forEach(({ name, value, options }) => context.cookies.set(name, value, options));
+      set(key, value, options) {
+        context.cookies.set(key, value, options as CookieOptionsWithName);
+      },
+      remove(key, options) {
+        context.cookies.delete(key, options as CookieOptionsWithName);
       },
     },
   });
-
-  return supabase;
 };
-
-export const DEFAULT_USER_ID = '17555d06-2387-4f0b-b4f8-0887177cadc1';

@@ -68,22 +68,19 @@ Aby workflow działał poprawnie, musisz skonfigurować następujące sekrety w 
 3. Dodaj każdy z poniższych sekretów:
 ```
 
-| Secret Name           | Wartość          | Gdzie znaleźć              | Wymagany          |
-| --------------------- | ---------------- | -------------------------- | ----------------- |
-| `SUPABASE_URL`        | URL Supabase     | Dashboard → Settings → API | ⚠️ Opcjonalny\*   |
-| `SUPABASE_KEY`        | Klucz anon       | Dashboard → Settings → API | ⚠️ Opcjonalny\*   |
-| `PUBLIC_SUPABASE_URL` | URL Supabase     | Dashboard → Settings → API | ✅ **WYMAGANY**   |
-| `PUBLIC_SUPABASE_KEY` | Klucz anon       | Dashboard → Settings → API | ✅ **WYMAGANY**   |
-| `OPENROUTER_API_KEY`  | Klucz OpenRouter | openrouter.ai → Keys       | ⚠️ Opcjonalny\*\* |
-| `E2E_USER_ID`         | UUID test usera  | Supabase → Auth → Users    | ✅ **WYMAGANY**   |
-| `E2E_USERNAME`        | Email test usera | Email użyty przy tworzeniu | ✅ **WYMAGANY**   |
-| `E2E_PASSWORD`        | Hasło test usera | Hasło użyte przy tworzeniu | ✅ **WYMAGANY**   |
+| Secret Name          | Wartość          | Gdzie znaleźć              | Wymagany        |
+| -------------------- | ---------------- | -------------------------- | --------------- |
+| `SUPABASE_URL`       | URL Supabase     | Dashboard → Settings → API | ✅ **WYMAGANY** |
+| `SUPABASE_KEY`       | Klucz anon       | Dashboard → Settings → API | ✅ **WYMAGANY** |
+| `OPENROUTER_API_KEY` | Klucz OpenRouter | openrouter.ai → Keys       | ⚠️ Opcjonalny\* |
+| `E2E_USER_ID`        | UUID test usera  | Supabase → Auth → Users    | ✅ **WYMAGANY** |
+| `E2E_USERNAME`       | Email test usera | Email użyty przy tworzeniu | ✅ **WYMAGANY** |
+| `E2E_PASSWORD`       | Hasło test usera | Hasło użyte przy tworzeniu | ✅ **WYMAGANY** |
 
 **Legenda**:
 
-- ✅ **WYMAGANY** - Bez tego sekretu testy E2E się nie powiodą
-- ⚠️ **Opcjonalny\*** - Fallback do `PUBLIC_SUPABASE_*` jeśli nie ustawiony
-- ⚠️ **Opcjonalny** - Tylko jeśli testy wymagają generowania planów AI
+- ✅ **WYMAGANY** - Bez tego sekretu pipeline się nie powiedzie
+- ⚠️ **Opcjonalny\*** - Tylko jeśli testy wymagają generowania planów AI
 
 **Ważne dla testów E2E**:
 
@@ -129,12 +126,12 @@ ON CONFLICT (id) DO UPDATE SET
 **Krok 3: Dodaj sekrety do GitHub**
 
 1. Settings → Secrets and variables → Actions
-2. Dodaj 5 sekretów E2E:
+2. Dodaj sekrety E2E:
    - `E2E_USER_ID` - UUID z kroku 1
    - `E2E_USERNAME` - Email z kroku 1
    - `E2E_PASSWORD` - Hasło z kroku 1
-   - `PUBLIC_SUPABASE_URL` - URL projektu Supabase
-   - `PUBLIC_SUPABASE_KEY` - Klucz anon z Supabase
+   - `SUPABASE_URL` - URL projektu Supabase
+   - `SUPABASE_KEY` - Klucz anon z Supabase
 
 ### 3. Testowanie Lokalne (OPCJONALNE)
 
@@ -204,8 +201,6 @@ cat > .env.test << 'EOF'
 # Supabase (użyj PRODUCTION credentials!)
 SUPABASE_URL=https://your-project.supabase.co
 SUPABASE_KEY=your_supabase_anon_key
-PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-PUBLIC_SUPABASE_KEY=your_supabase_anon_key
 
 # OpenRouter (jeśli potrzebne)
 OPENROUTER_API_KEY=your_openrouter_key
@@ -257,8 +252,6 @@ EOF
 
 ```yaml
 PUBLIC_SITE_URL: 'http://localhost:3000'
-PUBLIC_SUPABASE_URL: ${{ secrets.PUBLIC_SUPABASE_URL || 'http://127.0.0.1:54321' }}
-PUBLIC_SUPABASE_KEY: ${{ secrets.PUBLIC_SUPABASE_KEY || 'mock-key-for-build' }}
 SUPABASE_URL: ${{ secrets.SUPABASE_URL || 'http://127.0.0.1:54321' }}
 SUPABASE_KEY: ${{ secrets.SUPABASE_KEY || 'mock-key-for-build' }}
 OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY || 'mock-key-for-build' }}
@@ -307,7 +300,7 @@ README.md                         # Zaktualizowany (sekcja CI/CD)
 
 ### E2E: "Failed to clean feedback: TypeError: fetch failed"
 
-→ Sprawdź czy `PUBLIC_SUPABASE_URL` i `PUBLIC_SUPABASE_KEY` są ustawione  
+→ Sprawdź czy `SUPABASE_URL` i `SUPABASE_KEY` są ustawione  
 → Upewnij się, że używasz URL **production** Supabase (nie localhost)  
 → Zweryfikuj, czy klucze są poprawne w Supabase Dashboard
 

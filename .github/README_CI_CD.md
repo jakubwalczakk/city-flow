@@ -78,13 +78,11 @@ CI/CD Pipeline
 
 ## 🔐 Wymagane GitHub Secrets
 
-| Secret                | Opis                   | Gdzie znaleźć                       |
-| --------------------- | ---------------------- | ----------------------------------- |
-| `SUPABASE_URL`        | URL instancji Supabase | Supabase Dashboard → Settings → API |
-| `SUPABASE_KEY`        | Klucz anon Supabase    | Supabase Dashboard → Settings → API |
-| `PUBLIC_SUPABASE_URL` | URL (client-side)      | Ten sam co SUPABASE_URL             |
-| `PUBLIC_SUPABASE_KEY` | Klucz (client-side)    | Ten sam co SUPABASE_KEY             |
-| `OPENROUTER_API_KEY`  | Klucz API OpenRouter   | openrouter.ai → Keys                |
+| Secret               | Opis                   | Gdzie znaleźć                       |
+| -------------------- | ---------------------- | ----------------------------------- |
+| `SUPABASE_URL`       | URL instancji Supabase | Supabase Dashboard → Settings → API |
+| `SUPABASE_KEY`       | Klucz anon Supabase    | Supabase Dashboard → Settings → API |
+| `OPENROUTER_API_KEY` | Klucz API OpenRouter   | openrouter.ai → Keys                |
 
 **Jak dodać:** GitHub → Settings → Secrets and variables → Actions → New repository secret
 
@@ -100,8 +98,6 @@ supabase start
 cat > .env.test << 'EOF'
 SUPABASE_URL=http://127.0.0.1:54321
 SUPABASE_KEY=your_anon_key
-PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
-PUBLIC_SUPABASE_KEY=your_anon_key
 OPENROUTER_API_KEY=your_key
 PUBLIC_SITE_URL=http://localhost:3000
 EOF
