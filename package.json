@@ -103,7 +103,6 @@
   "overrides": {
     "glob": "^9.3.5",
     "rimraf": "^5.0.10",
-    "whatwg-encoding": "npm:@exodus/bytes@^1.1.0",
     "@babel/plugin-proposal-private-methods": "npm:@babel/plugin-transform-private-methods@^7.26.0"
   }
 }

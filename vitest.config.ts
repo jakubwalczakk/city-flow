@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 
 export default defineConfig({
+  // @ts-expect-error - Vite plugin type conflict between vitest's bundled vite and workspace vite
   plugins: [react()],
   test: {
     globals: true,
@@ -19,6 +20,11 @@ export default defineConfig({
         functions: 1,
         branches: 1,
         statements: 1,
+      },
+    },
+    server: {
+      deps: {
+        inline: [/@exodus\/bytes/, /whatwg-encoding/],
       },
     },
   },
