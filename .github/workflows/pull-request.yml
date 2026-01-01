@@ -203,7 +203,7 @@ jobs:
         run: |
           echo "📦 Checking E2E test artifacts..."
           echo ""
-          
+
           # Check Playwright HTML report (always generated)
           if [ -d "playwright-report" ] && [ "$(ls -A playwright-report)" ]; then
             echo "✅ Playwright HTML report found"
@@ -212,7 +212,7 @@ jobs:
             echo "⚠️  No Playwright report found"
             HAS_REPORT=false
           fi
-          
+
           # Check test results (traces/screenshots - only on failures)
           if [ -d "test-results" ] && [ "$(ls -A test-results)" ]; then
             echo "📸 Test results found (traces/screenshots from failed tests)"
@@ -221,7 +221,7 @@ jobs:
             echo "✅ No test failure artifacts (all tests passed)"
             HAS_RESULTS=false
           fi
-          
+
           # Determine what to upload
           if [ "$HAS_REPORT" = true ] || [ "$HAS_RESULTS" = true ]; then
             echo "has_artifacts=true" >> $GITHUB_OUTPUT
