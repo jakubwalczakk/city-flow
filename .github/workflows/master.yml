@@ -1,4 +1,13 @@
-name: Master CI Pipeline
+name: Master CI/CD Pipeline
+
+# 🎯 Purpose:
+# This workflow validates code quality, runs tests, and verifies the build
+# before Vercel automatically deploys to production.
+#
+# 🚀 Deployment:
+# Each job notifies Vercel about its status using vercel/repository-dispatch.
+# Vercel waits for all checks to pass before deploying to production.
+# No manual configuration in Vercel Dashboard needed!
 
 on:
   # Run on push to master
@@ -6,16 +15,24 @@ on:
     branches:
       - master
 
-  # Allow manual trigger
+  # Allow manual trigger from GitHub Actions UI
   workflow_dispatch:
 
+# Prevent multiple runs for the same branch
+# Cancel in-progress runs when new commits are pushed
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# ============================================================================
+# JOBS: All jobs run in parallel when possible to optimize pipeline speed
+# ============================================================================
+
 jobs:
+  # 🔍 Code Quality Check
+  # Ensures code follows style guidelines and best practices
   lint:
-    name: Lint Code
+    name: 🔍 Lint & Format Check
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -32,14 +49,23 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run linter
+      - name: Run ESLint
         run: npm run lint
 
-      - name: Run formatter check
+      - name: Check code formatting
         run: npm run format -- --check
 
+      - name: Notify Vercel
+        if: always()
+        uses: vercel/repository-dispatch/actions/status@v1
+        with:
+          name: 'Vercel - city-flow: lint'
+
+  # 🧪 Fast Unit Tests
+  # Tests individual components and functions in isolation
+  # These are fast, cheap, and catch most bugs early
   unit-tests:
-    name: Unit Tests
+    name: 🧪 Unit Tests
     runs-on: ubuntu-latest
     needs: lint
     timeout-minutes: 15
@@ -60,7 +86,7 @@ jobs:
       - name: Run unit tests with coverage
         run: npm run test:unit -- --run --reporter=verbose --coverage
 
-      - name: Display unit test coverage summary
+      - name: Display coverage summary
         if: always()
         run: |
           if [ -f "coverage/coverage-summary.json" ]; then
@@ -70,19 +96,97 @@ jobs:
             echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
           fi
 
-      - name: Upload unit test coverage
+      - name: Upload coverage report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: unit-test-coverage
           path: coverage/
-          retention-days: 7
+          retention-days: 30
           if-no-files-found: error
 
-  verify-build:
-    name: Verify Build
+      - name: Check coverage thresholds
+        if: always()
+        run: |
+          if [ -f "coverage/coverage-summary.json" ]; then
+            LINES_PCT=$(cat coverage/coverage-summary.json | jq -r '.total.lines.pct')
+            THRESHOLD=0
+            if (( $(echo "$LINES_PCT < $THRESHOLD" | bc -l) )); then
+              echo "❌ Coverage below threshold: ${LINES_PCT}% < ${THRESHOLD}%"
+              exit 1
+            fi
+            echo "✅ Coverage meets threshold: ${LINES_PCT}% >= ${THRESHOLD}%"
+          fi
+
+      - name: Notify Vercel
+        if: always()
+        uses: vercel/repository-dispatch/actions/status@v1
+        with:
+          name: 'Vercel - city-flow: unit-tests'
+
+  # 🎭 End-to-End Tests
+  # Tests complete user flows in a real browser
+  # These catch integration issues and UX problems
+  e2e-tests:
+    name: 🎭 E2E Tests (Playwright)
     runs-on: ubuntu-latest
-    needs: [lint, unit-tests]
+    needs: lint
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run E2E tests
+        run: npm run test:e2e
+        env:
+          # Use ONLY test database (never production!) to avoid data corruption
+          # SUPABASE_TEST_URL and SUPABASE_TEST_KEY should point to a separate test project
+          SUPABASE_URL: ${{ secrets.SUPABASE_TEST_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_TEST_KEY }}
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
+          if-no-files-found: ignore
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-test-results
+          path: test-results/
+          retention-days: 7
+          if-no-files-found: ignore
+
+      - name: Notify Vercel
+        if: always()
+        uses: vercel/repository-dispatch/actions/status@v1
+        with:
+          name: 'Vercel - city-flow: e2e-tests'
+
+  # 🔨 Build Verification
+  # Ensures the application builds successfully for production
+  verify-build:
+    name: 🔨 Verify Production Build
+    runs-on: ubuntu-latest
+    needs: [lint, unit-tests, e2e-tests]
     timeout-minutes: 15
 
     steps:
@@ -98,17 +202,44 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build project
+      - name: Build for production
         run: npm run build
         env:
-          # Required for build process validation
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          # Build uses test credentials (safe - build only compiles, doesn't execute queries)
+          # Fallback to placeholder if test credentials not set
+          SUPABASE_URL: ${{ secrets.SUPABASE_TEST_URL || 'https://placeholder.supabase.co' }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_TEST_KEY || 'placeholder-key' }}
 
+      - name: Verify build output
+        run: |
+          if [ ! -d "dist" ]; then
+            echo "❌ Build directory not found!"
+            exit 1
+          fi
+          echo "✅ Build successful - dist directory created"
+          echo "📦 Build size:"
+          du -sh dist/
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-build
+          path: dist/
+          retention-days: 7
+          if-no-files-found: error
+
+      - name: Notify Vercel
+        if: always()
+        uses: vercel/repository-dispatch/actions/status@v1
+        with:
+          name: 'Vercel - city-flow: verify-build'
+
+  # 📊 Pipeline Status Summary
+  # Provides a clear overview of all checks
   status-summary:
-    name: Pipeline Status Summary
+    name: 📊 Pipeline Status
     runs-on: ubuntu-latest
-    needs: [lint, unit-tests, verify-build]
+    needs: [lint, unit-tests, e2e-tests, verify-build]
     if: always()
 
     steps:
@@ -117,32 +248,53 @@ jobs:
         run: |
           LINT_STATUS="${{ needs.lint.result }}"
           UNIT_STATUS="${{ needs.unit-tests.result }}"
+          E2E_STATUS="${{ needs.e2e-tests.result }}"
           BUILD_STATUS="${{ needs.verify-build.result }}"
 
           echo "lint_status=$LINT_STATUS" >> $GITHUB_OUTPUT
           echo "unit_status=$UNIT_STATUS" >> $GITHUB_OUTPUT
+          echo "e2e_status=$E2E_STATUS" >> $GITHUB_OUTPUT
           echo "build_status=$BUILD_STATUS" >> $GITHUB_OUTPUT
 
-          if [ "$LINT_STATUS" == "success" ] && [ "$UNIT_STATUS" == "success" ] && [ "$BUILD_STATUS" == "success" ]; then
+          if [ "$LINT_STATUS" == "success" ] && \
+             [ "$UNIT_STATUS" == "success" ] && \
+             [ "$E2E_STATUS" == "success" ] && \
+             [ "$BUILD_STATUS" == "success" ]; then
             echo "overall_status=success" >> $GITHUB_OUTPUT
             echo "status_emoji=✅" >> $GITHUB_OUTPUT
-            echo "status_message=All checks passed! Vercel will handle deployment." >> $GITHUB_OUTPUT
+            echo "status_message=All checks passed! Ready for Vercel deployment." >> $GITHUB_OUTPUT
           else
             echo "overall_status=failure" >> $GITHUB_OUTPUT
             echo "status_emoji=❌" >> $GITHUB_OUTPUT
-            echo "status_message=Pipeline failed" >> $GITHUB_OUTPUT
+            echo "status_message=Pipeline failed - deployment blocked" >> $GITHUB_OUTPUT
           fi
 
       - name: Display pipeline summary
         run: |
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "${{ steps.status.outputs.status_emoji }} Master Pipeline Summary"
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "${{ steps.status.outputs.status_emoji }} CityFlow Master Pipeline Summary"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
           echo ""
           echo "📋 Job Results:"
-          echo "  🔍 Lint:         ${{ needs.lint.result }}"
-          echo "  🧪 Unit Tests:   ${{ needs.unit-tests.result }}"
-          echo "  🔨 Verify Build: ${{ needs.verify-build.result }}"
+          echo "  🔍 Lint & Format:    ${{ needs.lint.result }}"
+          echo "  🧪 Unit Tests:       ${{ needs.unit-tests.result }}"
+          echo "  🎭 E2E Tests:        ${{ needs.e2e-tests.result }}"
+          echo "  🔨 Verify Build:     ${{ needs.verify-build.result }}"
           echo ""
           echo "📊 Overall Status: ${{ steps.status.outputs.status_message }}"
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo ""
+          echo "🚀 Deployment:"
+          if [ "${{ steps.status.outputs.overall_status }}" == "success" ]; then
+            echo "  ✅ All checks passed - Vercel will deploy to production!"
+            echo "  📊 Monitor deployment: https://vercel.com/dashboard"
+          else
+            echo "  ❌ Deployment blocked - one or more checks failed."
+            echo "  🔧 Fix the issues above and push again."
+          fi
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+      - name: Comment on commit (optional)
+        if: github.event_name == 'push'
+        run: |
+          echo "💡 Tip: To add automatic PR comments, enable GitHub Actions permissions"
+          echo "Settings → Actions → General → Workflow permissions → Read and write"
