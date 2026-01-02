@@ -1,260 +1,116 @@
 name: Pull Request Validation
 
+# 🎯 Purpose:
+# Validates pull requests before they can be merged to master.
+# Runs the same checks as master.yml to ensure code quality and prevent broken deployments.
+
 on:
-  # Run on pull requests
   pull_request:
     branches:
-      - main
       - master
+      - main
     types: [opened, synchronize, reopened]
 
-  # Allow manual trigger
+  # Allow manual trigger from GitHub Actions UI
   workflow_dispatch:
 
+# Cancel previous runs when new commits are pushed
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
+# Permissions for workflow operations
+permissions:
+  contents: read       # Read repository contents
+  pull-requests: write # Write PR comments
+
 jobs:
+  # 🔍 Code Quality Check
+  # Ensures code follows style guidelines and best practices
   lint:
-    name: Lint Code
+    name: 🔍 Lint & Format Check
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: Setup Node.js and dependencies
+        uses: ./.github/actions/setup-node-dependencies
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: '.nvmrc'
-          cache: 'npm'
+      - name: Run lint and format checks
+        uses: ./.github/actions/lint-and-format
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run linter
-        run: npm run lint
-
-      - name: Run formatter check
-        run: npm run format -- --check
-
+  # 🧪 Fast Unit Tests
+  # Tests individual components and functions in isolation
+  # These are fast, cheap, and catch most bugs early
   unit-tests:
-    name: Unit Tests
+    name: 🧪 Unit Tests
     runs-on: ubuntu-latest
     needs: lint
     timeout-minutes: 15
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: Setup Node.js and dependencies
+        uses: ./.github/actions/setup-node-dependencies
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Run unit tests
+        uses: ./.github/actions/run-unit-tests
         with:
-          node-version-file: '.nvmrc'
-          cache: 'npm'
+          artifact-name: pr-${{ github.event.pull_request.number }}-unit-coverage
+          retention-days: 14
+          coverage-threshold: 0
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run unit tests with coverage
-        run: npm run test:unit -- --run --reporter=verbose --coverage
-
-      - name: Display unit test coverage summary
-        if: always()
-        run: |
-          if [ -f "coverage/coverage-summary.json" ]; then
-            echo "📊 Unit Test Coverage Summary:"
-            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-            cat coverage/coverage-summary.json | jq -r '.total | "Lines: \(.lines.pct)%\nStatements: \(.statements.pct)%\nFunctions: \(.functions.pct)%\nBranches: \(.branches.pct)%"'
-            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          fi
-
-      - name: Upload unit test coverage
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: unit-test-coverage
-          path: coverage/
-          retention-days: 7
-          if-no-files-found: error
-
+  # 🎭 End-to-End Tests
+  # Tests complete user flows in a real browser
+  # These catch integration issues and UX problems
   e2e-tests:
-    name: E2E Tests
+    name: 🎭 E2E Tests (Playwright)
     runs-on: ubuntu-latest
     needs: lint
-    timeout-minutes: 20
-    environment: integration
+    timeout-minutes: 30
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: '.nvmrc'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Install Playwright browsers
-        run: npx -y playwright install --with-deps chromium
-
-      - name: Validate E2E secrets
-        run: |
-          MISSING_SECRETS=""
-
-          if [ -z "${{ secrets.SUPABASE_TEST_URL }}" ]; then
-            MISSING_SECRETS="${MISSING_SECRETS}- SUPABASE_TEST_URL\n"
-          fi
-
-          if [ -z "${{ secrets.SUPABASE_TEST_KEY }}" ]; then
-            MISSING_SECRETS="${MISSING_SECRETS}- SUPABASE_TEST_KEY\n"
-          fi
-
-          if [ -z "${{ secrets.E2E_USER_ID }}" ]; then
-            MISSING_SECRETS="${MISSING_SECRETS}- E2E_USER_ID\n"
-          fi
-
-          if [ -z "${{ secrets.E2E_USERNAME }}" ]; then
-            MISSING_SECRETS="${MISSING_SECRETS}- E2E_USERNAME\n"
-          fi
-
-          if [ -z "${{ secrets.E2E_PASSWORD }}" ]; then
-            MISSING_SECRETS="${MISSING_SECRETS}- E2E_PASSWORD\n"
-          fi
-
-          if [ -n "$MISSING_SECRETS" ]; then
-            echo "❌ Error: The following required secrets are not set:"
-            echo ""
-            echo -e "$MISSING_SECRETS"
-            echo ""
-            echo "E2E tests require these secrets to run."
-            echo "Use ONLY test database credentials (SUPABASE_TEST_*) to avoid data corruption"
-            exit 1
-          fi
-
-          echo "✅ All required E2E secrets are configured"
+      - name: Setup Node.js and dependencies
+        uses: ./.github/actions/setup-node-dependencies
 
       - name: Run E2E tests
-        run: npm run test:e2e
-        env:
-          CI: true
-          COLLECT_COVERAGE: true
-          # E2E Test User - REQUIRED
-          E2E_USER_ID: ${{ secrets.E2E_USER_ID }}
-          E2E_USERNAME: ${{ secrets.E2E_USERNAME }}
-          E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
-          # Use ONLY test database (never production!) to avoid data corruption
-          # SUPABASE_TEST_URL and SUPABASE_TEST_KEY should point to a separate test project
-          SUPABASE_URL: ${{ secrets.SUPABASE_TEST_URL }}
-          SUPABASE_KEY: ${{ secrets.SUPABASE_TEST_KEY }}
-
-      - name: Process E2E coverage
-        if: always()
-        run: |
-          echo "🔍 Checking for E2E coverage data..."
-
-          # Create coverage directory if it doesn't exist
-          mkdir -p coverage-e2e/.nyc_output
-
-          # Count coverage files
-          COVERAGE_FILE_COUNT=$(ls -1 coverage-e2e/.nyc_output/*.json 2>/dev/null | wc -l)
-
-          if [ "$COVERAGE_FILE_COUNT" -gt 0 ]; then
-            echo "📊 Found $COVERAGE_FILE_COUNT coverage file(s)"
-            ls -lh coverage-e2e/.nyc_output/
-            echo ""
-            echo "Generating coverage report..."
-            npm run test:e2e:coverage
-            echo ""
-            
-            # Display summary if generated
-            if [ -f "coverage-e2e/coverage-summary.json" ]; then
-              echo "✅ E2E Coverage Report:"
-              echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-              cat coverage-e2e/coverage-summary.json | jq -r '.total | "Lines: \(.lines.pct)%\nStatements: \(.statements.pct)%\nFunctions: \(.functions.pct)%\nBranches: \(.branches.pct)%"'
-              echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-            else
-              echo "⚠️  NYC report command completed but summary not generated"
-              echo "Check if .nycrc.json includes 'json-summary' reporter"
-            fi
-          else
-            echo "⚠️  No E2E coverage data collected"
-            echo ""
-            echo "Note: Coverage collection is limited because:"
-            echo "  • Tests mock API endpoints (backend code doesn't execute)"
-            echo "  • Only client-side code execution is captured"
-            echo "  • This is expected for UI-focused E2E tests"
-          fi
-
-      - name: Prepare E2E artifacts
-        id: prepare-artifacts
-        if: always()
-        run: |
-          echo "📦 Checking E2E test artifacts..."
-          echo ""
-
-          # Check Playwright HTML report (always generated)
-          if [ -d "playwright-report" ] && [ "$(ls -A playwright-report)" ]; then
-            echo "✅ Playwright HTML report found"
-            HAS_REPORT=true
-          else
-            echo "⚠️  No Playwright report found"
-            HAS_REPORT=false
-          fi
-
-          # Check test results (traces/screenshots - only on failures)
-          if [ -d "test-results" ] && [ "$(ls -A test-results)" ]; then
-            echo "📸 Test results found (traces/screenshots from failed tests)"
-            HAS_RESULTS=true
-          else
-            echo "✅ No test failure artifacts (all tests passed)"
-            HAS_RESULTS=false
-          fi
-
-          # Determine what to upload
-          if [ "$HAS_REPORT" = true ] || [ "$HAS_RESULTS" = true ]; then
-            echo "has_artifacts=true" >> $GITHUB_OUTPUT
-            echo ""
-            echo "Will upload available artifacts..."
-          else
-            echo "has_artifacts=false" >> $GITHUB_OUTPUT
-            echo ""
-            echo "⚠️  No E2E artifacts to upload"
-          fi
-
-      - name: Upload E2E test artifacts
-        if: always() && steps.prepare-artifacts.outputs.has_artifacts == 'true'
-        uses: actions/upload-artifact@v4
+        uses: ./.github/actions/run-e2e-tests
         with:
-          name: e2e-test-artifacts
-          path: |
-            playwright-report/
-            test-results/
-          retention-days: 7
-          if-no-files-found: warn
+          artifact-prefix: pr-${{ github.event.pull_request.number }}
+          retention-days-report: 14
+          retention-days-results: 7
+          validate-secrets: true
+          supabase-url: ${{ secrets.SUPABASE_TEST_URL }}
+          supabase-key: ${{ secrets.SUPABASE_TEST_KEY }}
+          e2e-user-id: ${{ secrets.E2E_USER_ID }}
+          e2e-username: ${{ secrets.E2E_USERNAME }}
+          e2e-password: ${{ secrets.E2E_PASSWORD }}
 
-      - name: Upload E2E coverage
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: e2e-test-coverage
-          path: coverage-e2e/
-          retention-days: 7
-          if-no-files-found: warn
-
-  status-comment:
-    name: Post Status Comment
+  # 🔨 Build Verification
+  # Ensures the application builds successfully for production
+  verify-build:
+    name: 🔨 Verify Production Build
     runs-on: ubuntu-latest
     needs: [lint, unit-tests, e2e-tests]
+    timeout-minutes: 15
+
+    steps:
+      - name: Setup Node.js and dependencies
+        uses: ./.github/actions/setup-node-dependencies
+
+      - name: Verify production build
+        uses: ./.github/actions/verify-build
+        with:
+          supabase-url: ${{ secrets.SUPABASE_TEST_URL || 'https://placeholder.supabase.co' }}
+          supabase-key: ${{ secrets.SUPABASE_TEST_KEY || 'placeholder-key' }}
+          upload-artifact: false
+
+  # 📊 PR Status Summary with Comment
+  # Provides a clear overview and posts automated comment
+  status-comment:
+    name: 📊 PR Status & Comment
+    runs-on: ubuntu-latest
+    needs: [lint, unit-tests, e2e-tests, verify-build]
     if: always() && github.event_name == 'pull_request'
-    permissions:
-      pull-requests: write
 
     steps:
       - name: Checkout repository
@@ -266,19 +122,24 @@ jobs:
           LINT_STATUS="${{ needs.lint.result }}"
           UNIT_STATUS="${{ needs.unit-tests.result }}"
           E2E_STATUS="${{ needs.e2e-tests.result }}"
+          BUILD_STATUS="${{ needs.verify-build.result }}"
 
           echo "lint_status=$LINT_STATUS" >> $GITHUB_OUTPUT
           echo "unit_status=$UNIT_STATUS" >> $GITHUB_OUTPUT
           echo "e2e_status=$E2E_STATUS" >> $GITHUB_OUTPUT
+          echo "build_status=$BUILD_STATUS" >> $GITHUB_OUTPUT
 
-          if [ "$LINT_STATUS" == "success" ] && [ "$UNIT_STATUS" == "success" ] && [ "$E2E_STATUS" == "success" ]; then
+          if [ "$LINT_STATUS" == "success" ] && \
+             [ "$UNIT_STATUS" == "success" ] && \
+             [ "$E2E_STATUS" == "success" ] && \
+             [ "$BUILD_STATUS" == "success" ]; then
             echo "overall_status=success" >> $GITHUB_OUTPUT
             echo "status_emoji=✅" >> $GITHUB_OUTPUT
-            echo "status_message=All checks passed!" >> $GITHUB_OUTPUT
+            echo "status_message=All checks passed! PR is ready to merge." >> $GITHUB_OUTPUT
           else
             echo "overall_status=failure" >> $GITHUB_OUTPUT
             echo "status_emoji=❌" >> $GITHUB_OUTPUT
-            echo "status_message=Some checks failed" >> $GITHUB_OUTPUT
+            echo "status_message=PR validation failed - fix issues before merging" >> $GITHUB_OUTPUT
           fi
 
       - name: Post PR comment
@@ -288,6 +149,7 @@ jobs:
             const lintStatus = '${{ steps.status.outputs.lint_status }}';
             const unitStatus = '${{ steps.status.outputs.unit_status }}';
             const e2eStatus = '${{ steps.status.outputs.e2e_status }}';
+            const buildStatus = '${{ steps.status.outputs.build_status }}';
             const overallStatus = '${{ steps.status.outputs.overall_status }}';
             const statusEmoji = '${{ steps.status.outputs.status_emoji }}';
             const statusMessage = '${{ steps.status.outputs.status_message }}';
@@ -307,19 +169,20 @@ jobs:
 
             | Job | Status | Result |
             |-----|--------|--------|
-            | 🔍 Lint | ${getStatusEmoji(lintStatus)} | \`${lintStatus}\` |
+            | 🔍 Lint & Format | ${getStatusEmoji(lintStatus)} | \`${lintStatus}\` |
             | 🧪 Unit Tests | ${getStatusEmoji(unitStatus)} | \`${unitStatus}\` |
             | 🎭 E2E Tests | ${getStatusEmoji(e2eStatus)} | \`${e2eStatus}\` |
+            | 🔨 Verify Build | ${getStatusEmoji(buildStatus)} | \`${buildStatus}\` |
 
             ### Details
 
-            - **Workflow Run:** [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            - **Workflow Run:** [View Details #${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
             - **Commit:** \`${{ github.event.pull_request.head.sha }}\`
             - **Branch:** \`${{ github.head_ref }}\`
 
             ${overallStatus === 'success' 
-              ? '🎉 **Great work!** All validation checks passed successfully.' 
-              : '⚠️  **Action Required:** Please review and fix the failing checks above.'}
+              ? '🎉 **Great work!** All validation checks passed successfully. This PR is ready to merge!' 
+              : '⚠️  **Action Required:** Please review and fix the failing checks above before merging.'}
 
             ---
 

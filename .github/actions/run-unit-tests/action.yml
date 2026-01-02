@@ -1,0 +1,58 @@
+name: 'Run Unit Tests'
+description: 'Run unit tests with coverage and upload artifacts'
+
+inputs:
+  artifact-name:
+    description: 'Name for the coverage artifact'
+    required: true
+    default: 'unit-test-coverage'
+  retention-days:
+    description: 'Number of days to retain artifacts'
+    required: false
+    default: '30'
+  coverage-threshold:
+    description: 'Minimum coverage percentage required'
+    required: false
+    default: '0'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Run unit tests with coverage
+      shell: bash
+      run: npm run test:unit -- --run --reporter=verbose --coverage
+
+    - name: Display coverage summary
+      if: always()
+      shell: bash
+      run: |
+        if [ -f "coverage/coverage-summary.json" ]; then
+          echo "📊 Unit Test Coverage Summary:"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          cat coverage/coverage-summary.json | jq -r '.total | "Lines: \(.lines.pct)%\nStatements: \(.statements.pct)%\nFunctions: \(.functions.pct)%\nBranches: \(.branches.pct)%"'
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        fi
+
+    - name: Upload coverage report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: coverage/
+        retention-days: ${{ inputs.retention-days }}
+        if-no-files-found: error
+
+    - name: Check coverage thresholds
+      if: always()
+      shell: bash
+      run: |
+        if [ -f "coverage/coverage-summary.json" ]; then
+          LINES_PCT=$(cat coverage/coverage-summary.json | jq -r '.total.lines.pct')
+          THRESHOLD=${{ inputs.coverage-threshold }}
+          if (( $(echo "$LINES_PCT < $THRESHOLD" | bc -l) )); then
+            echo "❌ Coverage below threshold: ${LINES_PCT}% < ${THRESHOLD}%"
+            exit 1
+          fi
+          echo "✅ Coverage meets threshold: ${LINES_PCT}% >= ${THRESHOLD}%"
+        fi
+

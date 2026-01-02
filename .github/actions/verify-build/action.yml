@@ -1,0 +1,53 @@
+name: 'Verify Production Build'
+description: 'Build the application for production and verify output'
+
+inputs:
+  supabase-url:
+    description: 'Supabase URL for build'
+    required: true
+  supabase-key:
+    description: 'Supabase key for build'
+    required: true
+  artifact-name:
+    description: 'Name for the build artifact'
+    required: false
+    default: 'production-build'
+  retention-days:
+    description: 'Number of days to retain build artifact'
+    required: false
+    default: '7'
+  upload-artifact:
+    description: 'Whether to upload build artifact'
+    required: false
+    default: 'true'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Build for production
+      shell: bash
+      env:
+        SUPABASE_URL: ${{ inputs.supabase-url }}
+        SUPABASE_KEY: ${{ inputs.supabase-key }}
+      run: npm run build
+
+    - name: Verify build output
+      shell: bash
+      run: |
+        if [ ! -d "dist" ]; then
+          echo "❌ Build directory not found!"
+          exit 1
+        fi
+        echo "✅ Build successful - dist directory created"
+        echo "📦 Build size:"
+        du -sh dist/
+
+    - name: Upload build artifacts
+      if: inputs.upload-artifact == 'true'
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: dist/
+        retention-days: ${{ inputs.retention-days }}
+        if-no-files-found: error
+
