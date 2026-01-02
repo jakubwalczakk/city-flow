@@ -108,12 +108,12 @@ jobs:
         run: |
           MISSING_SECRETS=""
 
-          if [ -z "${{ secrets.SUPABASE_URL }}" ]; then
-            MISSING_SECRETS="${MISSING_SECRETS}- SUPABASE_URL\n"
+          if [ -z "${{ secrets.SUPABASE_TEST_URL }}" ]; then
+            MISSING_SECRETS="${MISSING_SECRETS}- SUPABASE_TEST_URL\n"
           fi
 
-          if [ -z "${{ secrets.SUPABASE_KEY }}" ]; then
-            MISSING_SECRETS="${MISSING_SECRETS}- SUPABASE_KEY\n"
+          if [ -z "${{ secrets.SUPABASE_TEST_KEY }}" ]; then
+            MISSING_SECRETS="${MISSING_SECRETS}- SUPABASE_TEST_KEY\n"
           fi
 
           if [ -z "${{ secrets.E2E_USER_ID }}" ]; then
@@ -134,7 +134,7 @@ jobs:
             echo -e "$MISSING_SECRETS"
             echo ""
             echo "E2E tests require these secrets to run."
-            echo "See .github/E2E_TEST_USER_SETUP.md for setup instructions"
+            echo "Use ONLY test database credentials (SUPABASE_TEST_*) to avoid data corruption"
             exit 1
           fi
 
@@ -149,9 +149,10 @@ jobs:
           E2E_USER_ID: ${{ secrets.E2E_USER_ID }}
           E2E_USERNAME: ${{ secrets.E2E_USERNAME }}
           E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
-          # Supabase Configuration - REQUIRED
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          # Use ONLY test database (never production!) to avoid data corruption
+          # SUPABASE_TEST_URL and SUPABASE_TEST_KEY should point to a separate test project
+          SUPABASE_URL: ${{ secrets.SUPABASE_TEST_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_TEST_KEY }}
 
       - name: Process E2E coverage
         if: always()

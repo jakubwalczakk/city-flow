@@ -148,6 +148,10 @@ jobs:
           # SUPABASE_TEST_URL and SUPABASE_TEST_KEY should point to a separate test project
           SUPABASE_URL: ${{ secrets.SUPABASE_TEST_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_TEST_KEY }}
+          # E2E test user credentials (created in test Supabase project)
+          E2E_USER_ID: ${{ secrets.E2E_USER_ID }}
+          E2E_USERNAME: ${{ secrets.E2E_USERNAME }}
+          E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
 
       - name: Upload Playwright report
         if: always()
