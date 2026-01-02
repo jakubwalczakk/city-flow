@@ -12,10 +12,10 @@
  */
 
 const REQUIRED_CHECKS = [
-  'lint',
-  'unit-tests', 
-  'e2e-tests',
-  'verify-build'
+  '🔍 Lint & Format Check',
+  '🧪 Unit Tests',
+  '🎭 E2E Tests (Playwright)',
+  '🔨 Verify Production Build'
 ];
 
 async function main() {
@@ -121,6 +121,10 @@ async function main() {
       check => requiredCheckStatuses[check] === 'pending'
     );
     
+    const allNotStarted = REQUIRED_CHECKS.every(
+      check => requiredCheckStatuses[check] === 'pending'
+    );
+    
     console.log('\n📋 Summary:');
     
     if (allPassed) {
@@ -132,6 +136,12 @@ async function main() {
       console.log('⛔ Skipping Vercel build to prevent broken deployment');
       console.log('💡 Fix the issues and push again');
       process.exit(0); // 0 = skip build
+    } else if (allNotStarted && checkRuns.length === 0) {
+      // No check runs found at all - workflow hasn't started yet
+      console.log('⏳ GitHub Actions workflow hasn\'t started yet');
+      console.log('✅ Allowing build - GitHub will trigger Vercel rebuild when checks complete');
+      console.log('💡 This is normal for new commits - workflow may take a few seconds to start');
+      process.exit(1); // 1 = build (allow first deploy)
     } else if (anyPending) {
       console.log('⏳ CI checks are still running...');
       console.log('⛔ Skipping Vercel build - will retry when checks complete');
