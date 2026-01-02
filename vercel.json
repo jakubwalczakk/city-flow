@@ -1,10 +1,8 @@
 {
   "buildCommand": "npm run build",
   "framework": "astro",
-  "ignoreCommand": "node scripts/check-ci-status.js",
   "github": {
-    "enabled": true,
-    "autoAlias": true,
-    "silent": false
+    "enabled": false,
+    "silent": true
   }
 }
