@@ -1,6 +1,10 @@
 {
-  "version": 2,
-  "public": false,
   "buildCommand": "npm run build",
-  "framework": "astro"
+  "framework": "astro",
+  "ignoreCommand": "node .vercel/check-github-status.js",
+  "github": {
+    "enabled": true,
+    "autoAlias": true,
+    "silent": false
+  }
 }

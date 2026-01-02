@@ -5,9 +5,9 @@ name: Master CI/CD Pipeline
 # before Vercel automatically deploys to production.
 #
 # 🚀 Deployment:
-# Each job notifies Vercel about its status using vercel/repository-dispatch.
-# Vercel waits for all checks to pass before deploying to production.
-# No manual configuration in Vercel Dashboard needed!
+# Vercel uses "Ignored Build Step" (.vercel/check-github-status.js) to check
+# if all GitHub Actions checks passed before starting the build.
+# This ensures broken code never reaches production.
 
 on:
   # Run on push to master
@@ -23,6 +23,10 @@ on:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
+# Permissions for workflow operations
+permissions:
+  contents: read       # Read repository contents
 
 # ============================================================================
 # JOBS: All jobs run in parallel when possible to optimize pipeline speed
@@ -54,12 +58,6 @@ jobs:
 
       - name: Check code formatting
         run: npm run format -- --check
-
-      - name: Notify Vercel
-        if: always()
-        uses: vercel/repository-dispatch/actions/status@v1
-        with:
-          name: 'Vercel - city-flow: lint'
 
   # 🧪 Fast Unit Tests
   # Tests individual components and functions in isolation
@@ -118,12 +116,6 @@ jobs:
             echo "✅ Coverage meets threshold: ${LINES_PCT}% >= ${THRESHOLD}%"
           fi
 
-      - name: Notify Vercel
-        if: always()
-        uses: vercel/repository-dispatch/actions/status@v1
-        with:
-          name: 'Vercel - city-flow: unit-tests'
-
   # 🎭 End-to-End Tests
   # Tests complete user flows in a real browser
   # These catch integration issues and UX problems
@@ -175,12 +167,6 @@ jobs:
           retention-days: 7
           if-no-files-found: ignore
 
-      - name: Notify Vercel
-        if: always()
-        uses: vercel/repository-dispatch/actions/status@v1
-        with:
-          name: 'Vercel - city-flow: e2e-tests'
-
   # 🔨 Build Verification
   # Ensures the application builds successfully for production
   verify-build:
@@ -227,12 +213,6 @@ jobs:
           path: dist/
           retention-days: 7
           if-no-files-found: error
-
-      - name: Notify Vercel
-        if: always()
-        uses: vercel/repository-dispatch/actions/status@v1
-        with:
-          name: 'Vercel - city-flow: verify-build'
 
   # 📊 Pipeline Status Summary
   # Provides a clear overview of all checks
