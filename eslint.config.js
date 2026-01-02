@@ -15,6 +15,11 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const gitignorePath = path.resolve(__dirname, '.gitignore');
 
+// Ignore build/deployment scripts
+const ignoreConfig = {
+  ignores: ['scripts/**'],
+};
+
 const baseConfig = tseslint.config({
   extends: [eslint.configs.recommended, tseslint.configs.strict, tseslint.configs.stylistic],
   rules: {
@@ -59,6 +64,7 @@ const reactConfig = tseslint.config({
 
 export default tseslint.config(
   includeIgnoreFile(gitignorePath),
+  ignoreConfig,
   baseConfig,
   jsxA11yConfig,
   reactConfig,

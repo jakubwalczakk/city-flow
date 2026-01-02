@@ -1,7 +1,7 @@
 {
   "buildCommand": "npm run build",
   "framework": "astro",
-  "ignoreCommand": "node .vercel/check-github-status.js",
+  "ignoreCommand": "node scripts/check-ci-status.js",
   "github": {
     "enabled": true,
     "autoAlias": true,

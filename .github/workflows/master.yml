@@ -5,7 +5,7 @@ name: Master CI/CD Pipeline
 # before Vercel automatically deploys to production.
 #
 # 🚀 Deployment:
-# Vercel uses "Ignored Build Step" (.vercel/check-github-status.js) to check
+# Vercel uses "Ignored Build Step" (scripts/check-ci-status.js) to check
 # if all GitHub Actions checks passed before starting the build.
 # This ensures broken code never reaches production.
 
