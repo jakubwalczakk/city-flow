@@ -1,31 +1,7 @@
-import { test, expect, cleanDatabase, createArchivedPlan } from '../fixtures';
-import { LoginPage } from '../page-objects/LoginPage';
+import { authTest as test, expect, createArchivedPlan, TEST_CONFIG } from '../fixtures';
 import { PlanDetailsPage } from '../page-objects/PlanDetailsPage';
 
-const TEST_USER_EMAIL = process.env.E2E_USERNAME || 'test@example.com';
-const TEST_USER_PASSWORD = process.env.E2E_PASSWORD || 'testpassword123';
-
 test.describe('History Read-Only Mode', () => {
-  let loginPage: LoginPage;
-  let planDetailsPage: PlanDetailsPage;
-
-  test.beforeEach(async ({ page, supabase, testUser }) => {
-    // Clean database before each test
-    await cleanDatabase(supabase, testUser.id);
-
-    // Initialize page objects
-    loginPage = new LoginPage(page);
-    planDetailsPage = new PlanDetailsPage(page);
-
-    // Login
-    await loginPage.goto();
-    await loginPage.login(TEST_USER_EMAIL, TEST_USER_PASSWORD);
-  });
-
-  test.afterEach(async ({ supabase, testUser }) => {
-    // Clean up after each test
-    await cleanDatabase(supabase, testUser.id);
-  });
 
   test('should display read-only badge on archived plan', async ({ supabase, testUser }) => {
     // Create an archived plan

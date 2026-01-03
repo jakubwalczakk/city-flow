@@ -1,34 +1,8 @@
-import { test, expect, cleanDatabase, createArchivedPlan, createMultipleArchivedPlans } from '../fixtures';
-import { LoginPage } from '../page-objects/LoginPage';
+import { authTest as test, expect, createArchivedPlan, createMultipleArchivedPlans, TEST_CONFIG } from '../fixtures';
 import { HistoryPage } from '../page-objects/HistoryPage';
 import { PlanDetailsPage } from '../page-objects/PlanDetailsPage';
 
-const TEST_USER_EMAIL = process.env.E2E_USERNAME || 'test@example.com';
-const TEST_USER_PASSWORD = process.env.E2E_PASSWORD || 'testpassword123';
-
 test.describe('View History', () => {
-  let loginPage: LoginPage;
-  let historyPage: HistoryPage;
-  let planDetailsPage: PlanDetailsPage;
-
-  test.beforeEach(async ({ page, supabase, testUser }) => {
-    // Clean database before each test
-    await cleanDatabase(supabase, testUser.id);
-
-    // Initialize page objects
-    loginPage = new LoginPage(page);
-    historyPage = new HistoryPage(page);
-    planDetailsPage = new PlanDetailsPage(page);
-
-    // Login
-    await loginPage.goto();
-    await loginPage.login(TEST_USER_EMAIL, TEST_USER_PASSWORD);
-  });
-
-  test.afterEach(async ({ supabase, testUser }) => {
-    // Clean up after each test
-    await cleanDatabase(supabase, testUser.id);
-  });
 
   test('should display empty state when no archived plans exist', async () => {
     // Navigate to history page

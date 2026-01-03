@@ -1,32 +1,9 @@
-import { test, expect, cleanDatabase, createTestPlan, createDraftPlan, verifyPlanIsArchived } from '../fixtures';
-import { LoginPage } from '../page-objects/LoginPage';
+import { authTest as test, expect, createTestPlan, createDraftPlan, verifyPlanIsArchived, TEST_CONFIG } from '../fixtures';
 import { PlanDetailsPage } from '../page-objects/PlanDetailsPage';
 import { PlansListPage } from '../page-objects/PlansListPage';
 import { HistoryPage } from '../page-objects/HistoryPage';
 
-const TEST_USER_EMAIL = process.env.E2E_USERNAME || 'test@example.com';
-const TEST_USER_PASSWORD = process.env.E2E_PASSWORD || 'testpassword123';
-
 test.describe('Move Plan to History', () => {
-  let loginPage: LoginPage;
-  let planDetailsPage: PlanDetailsPage;
-  let plansListPage: PlansListPage;
-  let historyPage: HistoryPage;
-
-  test.beforeEach(async ({ page, supabase, testUser }) => {
-    // Clean database before each test
-    await cleanDatabase(supabase, testUser.id);
-
-    // Initialize page objects
-    loginPage = new LoginPage(page);
-    planDetailsPage = new PlanDetailsPage(page);
-    plansListPage = new PlansListPage(page);
-    historyPage = new HistoryPage(page);
-
-    // Login
-    await loginPage.goto();
-    await loginPage.login(TEST_USER_EMAIL, TEST_USER_PASSWORD);
-  });
 
   test.afterEach(async ({ supabase, testUser }) => {
     // Clean up after each test

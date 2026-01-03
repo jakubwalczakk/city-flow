@@ -1,43 +1,17 @@
 import {
-  test,
+  authTest as test,
   expect,
-  cleanDatabase,
   createTestPlan,
   createDraftPlan,
   runArchivingJob,
   verifyPlanIsArchived,
   getArchivedPlanCount,
+  TEST_CONFIG,
 } from '../fixtures';
-import { LoginPage } from '../page-objects/LoginPage';
 import { PlansListPage } from '../page-objects/PlansListPage';
 import { HistoryPage } from '../page-objects/HistoryPage';
 
-const TEST_USER_EMAIL = process.env.E2E_USERNAME || 'test@example.com';
-const TEST_USER_PASSWORD = process.env.E2E_PASSWORD || 'testpassword123';
-
 test.describe('Auto-Archive Plans', () => {
-  let loginPage: LoginPage;
-  let plansListPage: PlansListPage;
-  let historyPage: HistoryPage;
-
-  test.beforeEach(async ({ page, supabase, testUser }) => {
-    // Clean database before each test
-    await cleanDatabase(supabase, testUser.id);
-
-    // Initialize page objects
-    loginPage = new LoginPage(page);
-    plansListPage = new PlansListPage(page);
-    historyPage = new HistoryPage(page);
-
-    // Login
-    await loginPage.goto();
-    await loginPage.login(TEST_USER_EMAIL, TEST_USER_PASSWORD);
-  });
-
-  test.afterEach(async ({ supabase, testUser }) => {
-    // Clean up after each test
-    await cleanDatabase(supabase, testUser.id);
-  });
 
   test('should auto-archive plan after end date passes', async ({ supabase, testUser }) => {
     // Create a generated plan with past end date
