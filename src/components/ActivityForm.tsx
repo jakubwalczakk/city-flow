@@ -54,10 +54,17 @@ export default function ActivityForm({ isOpen, onClose, onSubmit, initialData, m
               label='Tytuł'
               placeholder='np. Wizyta w lokalnej kawiarni'
               required
+              testId='activity-title-input'
             />
 
             <div className='grid grid-cols-2 gap-4'>
-              <FormTextField control={form.control} name='time' label='Godzina' type='time' />
+              <FormTextField
+                control={form.control}
+                name='time'
+                label='Godzina'
+                type='time'
+                testId='activity-time-input'
+              />
 
               <FormSelectField
                 control={form.control}
@@ -66,6 +73,7 @@ export default function ActivityForm({ isOpen, onClose, onSubmit, initialData, m
                 options={ACTIVITY_CATEGORIES}
                 placeholder='Wybierz kategorię'
                 required
+                testId='activity-category-select'
               />
             </div>
 
@@ -74,6 +82,7 @@ export default function ActivityForm({ isOpen, onClose, onSubmit, initialData, m
               name='location'
               label='Lokalizacja'
               placeholder='np. Dzielnica Trastevere'
+              testId='activity-location-input'
             />
 
             <FormTextareaField
@@ -82,6 +91,7 @@ export default function ActivityForm({ isOpen, onClose, onSubmit, initialData, m
               label='Opis'
               placeholder='Dodaj szczegóły dotyczące tej aktywności...'
               rows={3}
+              testId='activity-description-input'
             />
 
             <div className='grid grid-cols-2 gap-4'>
@@ -92,6 +102,7 @@ export default function ActivityForm({ isOpen, onClose, onSubmit, initialData, m
                 type='number'
                 min='1'
                 placeholder='np. 60'
+                testId='activity-duration-input'
               />
 
               <FormTextField
@@ -99,6 +110,7 @@ export default function ActivityForm({ isOpen, onClose, onSubmit, initialData, m
                 name='estimated_price'
                 label='Szacowany koszt'
                 placeholder='np. 20-40 PLN'
+                testId='activity-price-input'
               />
             </div>
 

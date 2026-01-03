@@ -1,5 +1,4 @@
-import { test, expect, generateTestEmail, createTestUser, cleanDatabase } from '../fixtures';
-import { setupCommonMocks } from '../test-setup';
+import { cleanTest as test, expect, generateTestEmail, createTestUser } from '../fixtures';
 import { LoginPage } from '../page-objects/LoginPage';
 
 /**
@@ -7,24 +6,10 @@ import { LoginPage } from '../page-objects/LoginPage';
  * Tests cover: successful logout and session cleanup
  */
 test.describe('User Logout', () => {
-  let loginPage: LoginPage;
-  // let profilePage: ProfilePage;
-
-  test.beforeEach(async ({ page, supabase, testUser }) => {
-    // Clean up test user data
-    await cleanDatabase(supabase, testUser.id);
-
-    // Setup common mocks
-    await setupCommonMocks(page);
-
-    // Initialize page objects
-    loginPage = new LoginPage(page);
-    // profilePage = new ProfilePage(page);
-  });
-
   test('should successfully logout from user menu', async ({ page, supabase }) => {
     const testEmail = generateTestEmail('logout-test');
     const testPassword = 'TestPassword123!';
+    const loginPage = new LoginPage(page);
 
     // Create test user
     await createTestUser(supabase, {
@@ -66,6 +51,7 @@ test.describe('User Logout', () => {
   test('should clear session after logout', async ({ page, supabase, context }) => {
     const testEmail = generateTestEmail('session-clear');
     const testPassword = 'TestPassword123!';
+    const loginPage = new LoginPage(page);
 
     // Create test user
     await createTestUser(supabase, {
@@ -104,6 +90,7 @@ test.describe('User Logout', () => {
   test('should not allow access to protected routes after logout', async ({ page, supabase }) => {
     const testEmail = generateTestEmail('protected-route');
     const testPassword = 'TestPassword123!';
+    const loginPage = new LoginPage(page);
 
     // Create test user
     await createTestUser(supabase, {
@@ -139,6 +126,7 @@ test.describe('User Logout', () => {
   test('should be able to login again after logout', async ({ page, supabase }) => {
     const testEmail = generateTestEmail('login-after-logout');
     const testPassword = 'TestPassword123!';
+    const loginPage = new LoginPage(page);
 
     // Create test user
     await createTestUser(supabase, {

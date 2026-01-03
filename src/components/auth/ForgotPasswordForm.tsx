@@ -44,11 +44,15 @@ export function ForgotPasswordForm() {
   return (
     <div className='w-full max-w-md space-y-6'>
       {error && (
-        <Alert variant='destructive'>
+        <Alert variant='destructive' data-testid='error-alert'>
           <AlertCircle className='h-4 w-4' />
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
+
+      <h1 data-testid='auth-heading' className='text-2xl font-bold text-center'>
+        Resetuj hasło
+      </h1>
 
       <Form {...form}>
         <form onSubmit={onSubmit} className='space-y-4'>
@@ -82,7 +86,7 @@ export function ForgotPasswordForm() {
       <div className='text-center space-y-2'>
         <p className='text-sm text-muted-foreground'>
           Pamiętasz hasło?{' '}
-          <a href='/login' className='text-primary hover:underline'>
+          <a href='/login' className='text-primary hover:underline' data-testid='login-link'>
             Zaloguj się
           </a>
         </p>

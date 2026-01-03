@@ -20,19 +20,21 @@ export class RegisterPage {
     this.page = page;
     // Use data-testid selectors for reliability
     this.emailInput = page.getByTestId('auth-email-input');
-    this.passwordInput = page.getByTestId('auth-password-input').first();
-    this.confirmPasswordInput = page.getByTestId('auth-password-input').last();
+    this.passwordInput = page.getByTestId('auth-password-input');
+    this.confirmPasswordInput = page.getByTestId('auth-confirm-password-input');
     this.submitButton = page.getByTestId('auth-submit-btn');
-    this.errorAlert = page.locator('[role="alert"]').filter({ hasText: /błąd|error|nieprawidłowy/i });
-    this.successAlert = page.locator('[role="alert"]').filter({ hasText: /sukces|success|pomyślnie/i });
-    this.loginLink = page.locator('a[href="/login"]');
+    this.errorAlert = page.getByTestId('error-alert');
+    this.successAlert = page.getByTestId('success-alert');
+    this.loginLink = page.getByTestId('login-link');
     this.googleAuthButton = page.getByTestId('google-auth-btn');
   }
 
   async goto() {
     await this.page.goto('/register');
     // Wait for the page to load by checking for heading
-    await expect(this.page.getByRole('heading', { name: /Utwórz konto/i })).toBeVisible();
+    const heading = this.page.getByTestId('auth-heading');
+    await expect(heading).toBeVisible();
+    await expect(heading).toHaveText('Stwórz konto');
   }
 
   async register(email: string, password: string, confirmPassword?: string) {

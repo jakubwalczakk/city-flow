@@ -1,29 +1,8 @@
-import { test, expect, cleanDatabase, createPlanWithActivities, countActivities } from '../fixtures';
-import { LoginPage } from '../page-objects/LoginPage';
+import { authTest as test, expect, createPlanWithActivities, countActivities, TEST_CONFIG } from '../fixtures';
 import { PlanTimelinePage } from '../page-objects/PlanTimelinePage';
 import { mockOpenRouterAPI } from '../test-setup';
 
-const TEST_USER_EMAIL = process.env.E2E_USERNAME || 'test@example.com';
-const TEST_USER_PASSWORD = process.env.E2E_PASSWORD || 'testpassword123';
-
 test.describe('Delete Activity', () => {
-  let loginPage: LoginPage;
-  let planTimelinePage: PlanTimelinePage;
-  let planId: string;
-
-  test.beforeEach(async ({ page, supabase, testUser }) => {
-    // Clean database before each test
-    await cleanDatabase(supabase, testUser.id);
-
-    // Mock OpenRouter API
-    await mockOpenRouterAPI(page);
-
-    // Initialize page objects
-    loginPage = new LoginPage(page);
-    planTimelinePage = new PlanTimelinePage(page);
-
-    // Create a plan with multiple activities
-    planId = await createPlanWithActivities(supabase, testUser.id, {
       name: 'Paris Trip',
       destination: 'Paris',
       startDate: '2026-06-15',

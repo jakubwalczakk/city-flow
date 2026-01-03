@@ -21,18 +21,22 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
   return (
     <div className='w-full max-w-md space-y-6'>
       {error && (
-        <Alert variant='destructive'>
+        <Alert variant='destructive' data-testid='error-alert'>
           <AlertCircle className='h-4 w-4' />
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
 
       {success && (
-        <Alert className='border-green-500 bg-green-50 text-green-900'>
+        <Alert className='border-green-500 bg-green-50 text-green-900' data-testid='success-alert'>
           <CheckCircle2 className='h-4 w-4' />
           <AlertDescription>{success}</AlertDescription>
         </Alert>
       )}
+
+      <h1 data-testid='auth-heading' className='text-2xl font-bold text-center'>
+        Stwórz konto
+      </h1>
 
       <Form {...form}>
         <form onSubmit={onSubmit} method='post' className='space-y-4'>
@@ -88,6 +92,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
                     onChange={field.onChange}
                     placeholder='Powtórz hasło'
                     disabled={isLoading}
+                    data-testid='auth-confirm-password-input'
                   />
                 </FormControl>
                 <FormMessage />
@@ -105,7 +110,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
       <div className='text-center text-sm text-muted-foreground'>
         <p>
           Masz już konto?{' '}
-          <a href='/login' className='text-primary hover:underline'>
+          <a href='/login' className='text-primary hover:underline' data-testid='login-link'>
             Zaloguj się
           </a>
         </p>

@@ -1,28 +1,9 @@
-import { test, expect, cleanDatabase, createPlanWithActivities, getActivityByTitle } from '../fixtures';
-import { LoginPage } from '../page-objects/LoginPage';
+import { authTest as test, expect, createPlanWithActivities, getActivityByTitle, TEST_CONFIG } from '../fixtures';
 import { PlanTimelinePage } from '../page-objects/PlanTimelinePage';
 import { ActivityFormModal } from '../page-objects/ActivityFormModal';
 import { mockOpenRouterAPI } from '../test-setup';
 
-const TEST_USER_EMAIL = process.env.E2E_USERNAME || 'test@example.com';
-const TEST_USER_PASSWORD = process.env.E2E_PASSWORD || 'testpassword123';
-
 test.describe('Edit Activity', () => {
-  let loginPage: LoginPage;
-  let planTimelinePage: PlanTimelinePage;
-  let activityFormModal: ActivityFormModal;
-  let planId: string;
-
-  test.beforeEach(async ({ page, supabase, testUser }) => {
-    // Clean database before each test
-    await cleanDatabase(supabase, testUser.id);
-
-    // Mock OpenRouter API
-    await mockOpenRouterAPI(page);
-
-    // Initialize page objects
-    loginPage = new LoginPage(page);
-    planTimelinePage = new PlanTimelinePage(page);
     activityFormModal = new ActivityFormModal(page);
 
     // Create a plan with activities

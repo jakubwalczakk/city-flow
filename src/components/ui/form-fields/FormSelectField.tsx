@@ -15,6 +15,7 @@ type FormSelectFieldProps<T extends FieldValues> = {
   placeholder?: string;
   required?: boolean;
   disabled?: boolean;
+  testId?: string;
 };
 
 /**
@@ -29,6 +30,7 @@ export function FormSelectField<T extends FieldValues>({
   placeholder = 'Wybierz opcję',
   required = false,
   disabled = false,
+  testId,
 }: FormSelectFieldProps<T>) {
   return (
     <FormField
@@ -42,7 +44,7 @@ export function FormSelectField<T extends FieldValues>({
           </FormLabel>
           <Select onValueChange={field.onChange} value={field.value} disabled={disabled}>
             <FormControl>
-              <SelectTrigger>
+              <SelectTrigger data-testid={testId}>
                 <SelectValue placeholder={placeholder} />
               </SelectTrigger>
             </FormControl>

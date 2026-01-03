@@ -11,6 +11,7 @@ type FormTextareaFieldProps<T extends FieldValues> = {
   disabled?: boolean;
   rows?: number;
   description?: string;
+  testId?: string;
   onBlur?: () => void;
 };
 
@@ -27,6 +28,7 @@ export function FormTextareaField<T extends FieldValues>({
   disabled = false,
   rows = 4,
   description,
+  testId,
   onBlur,
 }: FormTextareaFieldProps<T>) {
   return (
@@ -46,6 +48,7 @@ export function FormTextareaField<T extends FieldValues>({
               placeholder={placeholder}
               disabled={disabled}
               rows={rows}
+              data-testid={testId}
               onBlur={() => {
                 field.onBlur();
                 onBlur?.();

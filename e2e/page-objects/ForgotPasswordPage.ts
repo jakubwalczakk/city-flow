@@ -16,18 +16,20 @@ export class ForgotPasswordPage {
 
   constructor(page: Page) {
     this.page = page;
-    this.emailInput = page.locator('input[type="email"]');
-    this.submitButton = page.locator('button[type="submit"]').filter({ hasText: /Wyślij link/i });
-    this.successAlert = page.locator('[role="alert"]').filter({ hasText: /Email został wysłany/i });
-    this.errorAlert = page.locator('[role="alert"]').filter({ hasText: /błąd|error/i });
-    this.loginLink = page.locator('a[href="/login"]');
+    this.emailInput = page.getByTestId('forgot-password-email-input');
+    this.submitButton = page.getByTestId('forgot-password-submit-btn');
+    this.successAlert = page.getByTestId('success-alert');
+    this.errorAlert = page.getByTestId('error-alert');
+    this.loginLink = page.getByTestId('login-link');
     this.tryAgainButton = page.locator('button').filter({ hasText: /Spróbuj ponownie/i });
   }
 
   async goto() {
     await this.page.goto('/forgot-password');
     // Wait for page to load
-    await expect(this.page.getByRole('heading', { name: /Zresetuj hasło/i })).toBeVisible();
+    const heading = this.page.getByTestId('auth-heading');
+    await expect(heading).toBeVisible();
+    await expect(heading).toHaveText('Resetuj hasło');
   }
 
   async requestReset(email: string) {
