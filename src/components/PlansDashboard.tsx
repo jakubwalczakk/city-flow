@@ -34,7 +34,9 @@ export const PlansDashboard = () => {
     <div className='container mx-auto px-4 py-8'>
       {/* Header */}
       <div className='mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
-        <h1 className='text-3xl font-bold tracking-tight'>Moje Plany</h1>
+        <h1 className='text-3xl font-bold tracking-tight' data-testid='plans-dashboard-title'>
+          Moje Plany
+        </h1>
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
           <DialogTrigger asChild>
             <Button
@@ -48,7 +50,7 @@ export const PlansDashboard = () => {
               + Utwórz nowy plan
             </Button>
           </DialogTrigger>
-          <DialogContent className='sm:max-w-4xl'>
+          <DialogContent className='sm:max-w-4xl' data-testid='new-plan-modal'>
             <NewPlanForm onFinished={handleModalClose} editingPlan={editingPlan} />
           </DialogContent>
         </Dialog>

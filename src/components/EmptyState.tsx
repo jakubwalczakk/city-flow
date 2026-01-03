@@ -19,7 +19,7 @@ export const EmptyState = ({ onCreatePlan }: EmptyStateProps) => {
   };
 
   return (
-    <div className='flex flex-col items-center justify-center rounded-lg border border-dashed py-16 px-6 text-center'>
+    <div className='flex flex-col items-center justify-center rounded-lg border border-dashed py-16 px-6 text-center' data-testid='empty-state'>
       {/* Icon */}
       <div className='mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-muted'>
         <svg
@@ -40,16 +40,20 @@ export const EmptyState = ({ onCreatePlan }: EmptyStateProps) => {
       </div>
 
       {/* Heading */}
-      <h3 className='mb-2 text-lg font-semibold'>Nie masz jeszcze żadnych planów</h3>
+      <h3 className='mb-2 text-lg font-semibold' data-testid='empty-state-heading'>
+        Nie masz jeszcze żadnych planów
+      </h3>
 
       {/* Description */}
-      <p className='mb-6 max-w-sm text-sm text-muted-foreground'>
+      <p className='mb-6 max-w-sm text-sm text-muted-foreground' data-testid='empty-state-description'>
         Zacznij planować swoją przygodę! Utwórz swój pierwszy plan podróży i pozwól nam pomóc Ci w organizacji
         niezapomnianego wypadu.
       </p>
 
       {/* CTA Button */}
-      <Button onClick={handleCreatePlan}>Utwórz swój pierwszy plan</Button>
+      <Button onClick={handleCreatePlan} data-testid='create-first-plan-btn'>
+        Utwórz swój pierwszy plan
+      </Button>
     </div>
   );
 };
