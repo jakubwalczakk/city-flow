@@ -1,5 +1,4 @@
-import { test, expect, generateTestEmail, createTestUser } from '../fixtures';
-import { setupCommonMocks } from '../test-setup';
+import { cleanTest as test, expect, generateTestEmail, createTestUser } from '../fixtures';
 import { RegisterPage } from '../page-objects/RegisterPage';
 import { OnboardingModal } from '../page-objects/OnboardingModal';
 
@@ -8,24 +7,12 @@ import { OnboardingModal } from '../page-objects/OnboardingModal';
  * Tests cover: successful registration, validation errors, and edge cases
  */
 test.describe('User Registration', () => {
-  let registerPage: RegisterPage;
-  let onboardingModal: OnboardingModal;
-
-  test.beforeEach(async ({ page, supabase, testUser }) => {
-    // Clean up test user data before each test
-    await supabase.from('plans').delete().eq('user_id', testUser.id);
-
-    // Setup common mocks for API calls
-    await setupCommonMocks(page);
-
-    // Initialize page objects
-    registerPage = new RegisterPage(page);
-    onboardingModal = new OnboardingModal(page);
-  });
 
   test('should successfully register with valid email and password', async ({ page }) => {
     const testEmail = generateTestEmail('register-success');
     const testPassword = 'ValidPassword123!';
+    const registerPage = new RegisterPage(page);
+    const onboardingModal = new OnboardingModal(page);
 
     await registerPage.goto();
     await registerPage.register(testEmail, testPassword);
@@ -48,6 +35,8 @@ test.describe('User Registration', () => {
   });
 
   test('should show error for invalid email format', async ({ page }) => {
+    const registerPage = new RegisterPage(page);
+
     await registerPage.goto();
 
     await registerPage.emailInput.fill('invalid-email');
@@ -69,9 +58,10 @@ test.describe('User Registration', () => {
   });
 
   test('should show error for password too short', async ({ page }) => {
-    await registerPage.goto();
-
     const testEmail = generateTestEmail('short-password');
+    const registerPage = new RegisterPage(page);
+
+    await registerPage.goto();
 
     await registerPage.emailInput.fill(testEmail);
     await registerPage.passwordInput.fill('short');
@@ -89,9 +79,10 @@ test.describe('User Registration', () => {
   });
 
   test('should show error when passwords do not match', async ({ page }) => {
-    await registerPage.goto();
-
     const testEmail = generateTestEmail('password-mismatch');
+    const registerPage = new RegisterPage(page);
+
+    await registerPage.goto();
 
     await registerPage.emailInput.fill(testEmail);
     await registerPage.passwordInput.fill('ValidPassword123!');
@@ -112,6 +103,7 @@ test.describe('User Registration', () => {
     // Create a test user first
     const existingEmail = generateTestEmail('existing-user');
     const testPassword = 'ExistingPassword123!';
+    const registerPage = new RegisterPage(page);
 
     await createTestUser(supabase, {
       email: existingEmail,
@@ -136,6 +128,7 @@ test.describe('User Registration', () => {
   });
 
   test('should navigate to login page when clicking login link', async ({ page }) => {
+    const registerPage = new RegisterPage(page);
     await registerPage.goto();
 
     await registerPage.loginLink.click();

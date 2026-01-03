@@ -1,5 +1,4 @@
-import { test, expect, generateTestEmail, createTestUser, cleanDatabase } from '../fixtures';
-import { setupCommonMocks } from '../test-setup';
+import { cleanTest as test, expect, generateTestEmail, createTestUser } from '../fixtures';
 import { ForgotPasswordPage } from '../page-objects/ForgotPasswordPage';
 import { UpdatePasswordPage } from '../page-objects/UpdatePasswordPage';
 
@@ -8,23 +7,11 @@ import { UpdatePasswordPage } from '../page-objects/UpdatePasswordPage';
  * Tests cover: requesting password reset, updating password with token
  */
 test.describe('Password Recovery', () => {
-  let forgotPasswordPage: ForgotPasswordPage;
-  let updatePasswordPage: UpdatePasswordPage;
-  test.beforeEach(async ({ page, supabase, testUser }) => {
-    // Clean up test user data
-    await cleanDatabase(supabase, testUser.id);
-
-    // Setup common mocks
-    await setupCommonMocks(page);
-
-    // Initialize page objects
-    forgotPasswordPage = new ForgotPasswordPage(page);
-    updatePasswordPage = new UpdatePasswordPage(page);
-  });
 
   test('should display success message when requesting password reset', async ({ supabase }) => {
     const testEmail = generateTestEmail('forgot-password');
     const testPassword = 'OldPassword123!';
+    const forgotPasswordPage = new ForgotPasswordPage(page);
 
     // Create test user
     await createTestUser(supabase, {
@@ -46,6 +33,7 @@ test.describe('Password Recovery', () => {
 
   test('should show same message for non-existent email (security)', async ({ page }) => {
     const nonExistentEmail = generateTestEmail('non-existent');
+    const forgotPasswordPage = new ForgotPasswordPage(page);
 
     await forgotPasswordPage.goto();
     await forgotPasswordPage.requestReset(nonExistentEmail);
