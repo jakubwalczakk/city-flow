@@ -95,7 +95,7 @@ export async function cleanDatabase(supabase: SupabaseClient<Database>, userId: 
 export function generateTestEmail(prefix = 'test'): string {
   const timestamp = Date.now();
   const random = Math.random().toString(36).substring(2, 8);
-  return `${prefix}-${timestamp}-${random}@example.com`;
+  return `${prefix}-${timestamp}-${random}@dev.com`;
 }
 
 /**
@@ -775,6 +775,115 @@ export async function getArchivedPlanCount(supabase: SupabaseClient<Database>, u
     .select('id', { count: 'exact' })
     .eq('user_id', userId)
     .eq('status', 'archived');
+
+  return data?.length || 0;
+}
+
+// ============================================================================
+// FEEDBACK HELPERS
+// ============================================================================
+
+/**
+ * Creates feedback for a plan.
+ * @param supabase Supabase client
+ * @param userId User ID
+ * @param planId Plan ID
+ * @param rating Rating ('positive', 'negative', or null)
+ * @param comment Optional comment text
+ * @returns Created feedback record
+ */
+export async function createFeedback(
+  supabase: SupabaseClient<Database>,
+  userId: string,
+  planId: string,
+  rating: 'positive' | 'negative' | null,
+  comment?: string
+) {
+  const { data, error } = await supabase
+    .from('feedback')
+    .insert({
+      user_id: userId,
+      plan_id: planId,
+      rating,
+      comment: comment || null,
+    })
+    .select()
+    .single();
+
+  if (error) {
+    throw new Error(`Failed to create feedback: ${error.message}`);
+  }
+
+  return data;
+}
+
+/**
+ * Gets feedback for a specific plan and user.
+ * @param supabase Supabase client
+ * @param userId User ID
+ * @param planId Plan ID
+ * @returns Feedback record or null if not found
+ */
+export async function getFeedback(supabase: SupabaseClient<Database>, userId: string, planId: string) {
+  const { data } = await supabase
+    .from('feedback')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('plan_id', planId)
+    .maybeSingle();
+
+  return data;
+}
+
+/**
+ * Updates existing feedback.
+ * @param supabase Supabase client
+ * @param feedbackId Feedback ID
+ * @param updates Updates to apply
+ * @returns Updated feedback record
+ */
+export async function updateFeedback(
+  supabase: SupabaseClient<Database>,
+  feedbackId: string,
+  updates: {
+    rating?: 'positive' | 'negative' | null;
+    comment?: string;
+  }
+) {
+  const { data, error } = await supabase
+    .from('feedback')
+    .update({
+      ...updates,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', feedbackId)
+    .select()
+    .single();
+
+  if (error) {
+    throw new Error(`Failed to update feedback: ${error.message}`);
+  }
+
+  return data;
+}
+
+/**
+ * Deletes all feedback for a user (cleanup).
+ * @param supabase Supabase client
+ * @param userId User ID
+ */
+export async function cleanFeedback(supabase: SupabaseClient<Database>, userId: string): Promise<void> {
+  await supabase.from('feedback').delete().eq('user_id', userId);
+}
+
+/**
+ * Gets feedback count for a user.
+ * @param supabase Supabase client
+ * @param userId User ID
+ * @returns Number of feedback records
+ */
+export async function getFeedbackCount(supabase: SupabaseClient<Database>, userId: string): Promise<number> {
+  const { data } = await supabase.from('feedback').select('id', { count: 'exact' }).eq('user_id', userId);
 
   return data?.length || 0;
 }

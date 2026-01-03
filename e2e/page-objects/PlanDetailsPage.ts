@@ -1,5 +1,6 @@
 import { expect } from '@playwright/test';
 import type { Page, Locator, Download } from '@playwright/test';
+import { FeedbackModule } from './FeedbackModule';
 
 /**
  * Page Object for the Plan Details page (/plans/[id])
@@ -25,6 +26,7 @@ export class PlanDetailsPage {
   readonly generationsCounter: Locator;
   readonly generationWarning: Locator;
   readonly generationLoader: Locator;
+  readonly feedbackModule: FeedbackModule;
 
   constructor(page: Page) {
     this.page = page;
@@ -51,6 +53,7 @@ export class PlanDetailsPage {
     this.addActivityButton = page.getByTestId('add-activity-button');
     this.editActivityButton = page.getByTestId('edit-activity-button');
     this.deleteActivityButton = page.getByTestId('delete-activity-button');
+    this.feedbackModule = new FeedbackModule(page);
   }
 
   /**
@@ -458,5 +461,19 @@ export class PlanDetailsPage {
     } catch {
       return false;
     }
+  }
+
+  /**
+   * Scroll to feedback module
+   */
+  async scrollToFeedback(): Promise<void> {
+    await this.feedbackModule.scrollIntoView();
+  }
+
+  /**
+   * Check if feedback module is visible
+   */
+  async isFeedbackVisible(): Promise<boolean> {
+    return await this.feedbackModule.isVisible();
   }
 }
