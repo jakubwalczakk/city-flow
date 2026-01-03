@@ -14,7 +14,10 @@ export function WarningsCard({ warnings }: WarningsCardProps) {
   }
 
   return (
-    <Card className='border-amber-200 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/20'>
+    <Card
+      className='border-amber-200 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/20'
+      data-testid='generation-warning'
+    >
       <CardHeader>
         <div className='flex items-start gap-3'>
           <AlertTriangle className='h-5 w-5 text-amber-600 dark:text-amber-500 mt-0.5 flex-shrink-0' />

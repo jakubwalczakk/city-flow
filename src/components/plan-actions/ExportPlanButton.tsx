@@ -20,7 +20,14 @@ export default function ExportPlanButton({ planId, planName, className }: Export
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button variant='outline' size='sm' onClick={handleExport} disabled={isDisabled} className={className}>
+          <Button
+            variant='outline'
+            size='sm'
+            onClick={handleExport}
+            disabled={isDisabled}
+            className={className}
+            data-testid='export-pdf-button'
+          >
             {isLoading ? (
               <>
                 <Loader2 className='mr-2 h-4 w-4 animate-spin' />

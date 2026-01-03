@@ -89,7 +89,12 @@ export default function DraftPlanView({ plan, onGenerate, onEdit }: DraftPlanVie
               {isSaving ? 'Zapisywanie...' : 'Zapisz zmiany'}
             </Button>
 
-            <Button onClick={handleGenerateClick} size='lg' disabled={isGenerating || isSaving}>
+            <Button
+              onClick={handleGenerateClick}
+              size='lg'
+              disabled={isGenerating || isSaving}
+              data-testid='generate-plan-button'
+            >
               {isGenerating ? (
                 <>
                   Generowanie...
