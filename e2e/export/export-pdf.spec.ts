@@ -1,27 +1,8 @@
-import { test, expect, cleanDatabase, createTestPlan, verifyPdfDownload, verifyPdfContent } from '../fixtures';
+import { authTest as test, expect, createTestPlan, verifyPdfDownload, verifyPdfContent, TEST_CONFIG } from '../fixtures';
 import { mockOpenRouterAPI } from '../test-setup';
-import { LoginPage } from '../page-objects/LoginPage';
 import { PlanDetailsPage } from '../page-objects/PlanDetailsPage';
 
-const TEST_USER_EMAIL = process.env.E2E_USERNAME || 'test@example.com';
-const TEST_USER_PASSWORD = process.env.E2E_PASSWORD || 'testpassword123';
-
 test.describe('PDF Export', () => {
-  let loginPage: LoginPage;
-  let planDetailsPage: PlanDetailsPage;
-
-  test.beforeEach(async ({ page, supabase, testUser }) => {
-    await cleanDatabase(supabase, testUser.id);
-
-    loginPage = new LoginPage(page);
-    planDetailsPage = new PlanDetailsPage(page);
-
-    await mockOpenRouterAPI(page);
-
-    await loginPage.goto();
-    await loginPage.login(TEST_USER_EMAIL, TEST_USER_PASSWORD);
-    await page.waitForURL(/\/plans/, { timeout: 10000 });
-  });
 
   test.afterEach(async ({ supabase, testUser }) => {
     await cleanDatabase(supabase, testUser.id);
