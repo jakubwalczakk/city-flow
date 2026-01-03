@@ -1,6 +1,11 @@
-import { authTest as test, expect, createTestPlan, verifyPdfDownload, verifyPdfContent, TEST_CONFIG } from '../fixtures';
+import {
+  authTest as test,
+  expect,
+  createTestPlan,
+  verifyPdfDownload,
+  verifyPdfContent,
+} from '../fixtures';
 import { mockOpenRouterAPI } from '../test-setup';
-import { PlanDetailsPage } from '../page-objects/PlanDetailsPage';
 
 test.describe('PDF Export', () => {
 

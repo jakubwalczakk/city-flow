@@ -1,4 +1,4 @@
-import { authTest as test, expect, createPlanWithActivities, getFeedback, TEST_CONFIG } from '../fixtures';
+import { authTest as test, expect, createPlanWithActivities, getFeedback } from '../fixtures';
 import { PlanDetailsPage } from '../page-objects/PlanDetailsPage';
 
 /**

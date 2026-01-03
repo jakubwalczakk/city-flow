@@ -5,7 +5,6 @@ import {
   verifyPlanGenerated,
   setGenerationLimit,
   getGenerationCount,
-  TEST_CONFIG,
 } from '../fixtures';
 import { mockOpenRouterAPI } from '../test-setup';
 import { PlanDetailsPage } from '../page-objects/PlanDetailsPage';
