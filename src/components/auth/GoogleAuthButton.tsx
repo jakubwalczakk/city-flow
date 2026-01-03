@@ -23,7 +23,14 @@ export function GoogleAuthButton({ mode = 'login' }: GoogleAuthButtonProps) {
         </Alert>
       )}
 
-      <Button type='button' variant='outline' className='w-full' onClick={handleGoogleAuth} disabled={isLoading}>
+      <Button
+        type='button'
+        variant='outline'
+        className='w-full'
+        onClick={handleGoogleAuth}
+        disabled={isLoading}
+        data-testid='google-auth-btn'
+      >
         {isLoading ? (
           <Loader2 className='mr-2 h-4 w-4 animate-spin' />
         ) : (

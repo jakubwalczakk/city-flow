@@ -1,0 +1,116 @@
+import { expect } from '@playwright/test';
+import type { Page, Locator } from '@playwright/test';
+
+/**
+ * Page Object for the Registration page (/register).
+ * Encapsulates interactions with the registration form.
+ */
+export class RegisterPage {
+  readonly page: Page;
+  readonly emailInput: Locator;
+  readonly passwordInput: Locator;
+  readonly confirmPasswordInput: Locator;
+  readonly submitButton: Locator;
+  readonly errorAlert: Locator;
+  readonly successAlert: Locator;
+  readonly loginLink: Locator;
+  readonly googleAuthButton: Locator;
+
+  constructor(page: Page) {
+    this.page = page;
+    // Use data-testid selectors for reliability
+    this.emailInput = page.getByTestId('auth-email-input');
+    this.passwordInput = page.getByTestId('auth-password-input').first();
+    this.confirmPasswordInput = page.getByTestId('auth-password-input').last();
+    this.submitButton = page.getByTestId('auth-submit-btn');
+    this.errorAlert = page.locator('[role="alert"]').filter({ hasText: /błąd|error|nieprawidłowy/i });
+    this.successAlert = page.locator('[role="alert"]').filter({ hasText: /sukces|success|pomyślnie/i });
+    this.loginLink = page.locator('a[href="/login"]');
+    this.googleAuthButton = page.getByTestId('google-auth-btn');
+  }
+
+  async goto() {
+    await this.page.goto('/register');
+    // Wait for the page to load by checking for heading
+    await expect(this.page.getByRole('heading', { name: /Utwórz konto/i })).toBeVisible();
+  }
+
+  async register(email: string, password: string, confirmPassword?: string) {
+    // Wait for form to be ready
+    await expect(this.emailInput).toBeVisible();
+    await expect(this.passwordInput).toBeVisible();
+    await expect(this.submitButton).toBeVisible();
+
+    // Wait for React hydration
+    await this.page.waitForTimeout(1000);
+
+    // Fill email field
+    await this.emailInput.click();
+    await this.emailInput.fill('');
+    await this.emailInput.pressSequentially(email, { delay: 50 });
+
+    // Fill password field
+    await this.passwordInput.click();
+    await this.passwordInput.fill('');
+    await this.passwordInput.pressSequentially(password, { delay: 50 });
+
+    // Fill confirm password field
+    await this.confirmPasswordInput.click();
+    await this.confirmPasswordInput.fill('');
+    await this.confirmPasswordInput.pressSequentially(confirmPassword || password, { delay: 50 });
+
+    // Wait for validation
+    await this.page.waitForTimeout(500);
+
+    // Verify fields are filled
+    await expect(this.emailInput).toHaveValue(email, { timeout: 5000 });
+    await expect(this.passwordInput).toHaveValue(password, { timeout: 5000 });
+
+    // Click submit button
+    await this.submitButton.click();
+  }
+
+  async getErrorMessage(): Promise<string | null> {
+    try {
+      await this.errorAlert.waitFor({ state: 'visible', timeout: 5000 });
+      return await this.errorAlert.textContent();
+    } catch {
+      return null;
+    }
+  }
+
+  async getFieldError(field: 'email' | 'password' | 'confirmPassword'): Promise<string | null> {
+    let fieldLocator: Locator;
+
+    if (field === 'email') {
+      fieldLocator = this.emailInput;
+    } else if (field === 'password') {
+      fieldLocator = this.passwordInput;
+    } else {
+      fieldLocator = this.confirmPasswordInput;
+    }
+
+    // Get the form item containing the field
+    const formItem = fieldLocator.locator('xpath=ancestor::*[@class and contains(@class, "space-y-2")]');
+    const errorMessage = formItem.locator('p.text-destructive, p.text-sm');
+
+    try {
+      await errorMessage.waitFor({ state: 'visible', timeout: 2000 });
+      return await errorMessage.textContent();
+    } catch {
+      return null;
+    }
+  }
+
+  async isSubmitButtonEnabled(): Promise<boolean> {
+    return await this.submitButton.isEnabled();
+  }
+
+  async clickGoogleAuth() {
+    await this.googleAuthButton.click();
+  }
+
+  async waitForRedirect(expectedUrl: string | RegExp) {
+    await expect(this.page).toHaveURL(expectedUrl, { timeout: 30000 });
+  }
+}

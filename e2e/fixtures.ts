@@ -2,6 +2,9 @@
 import { test as base } from '@playwright/test';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '../src/db/database.types';
+// import fs from 'fs';
+// PDF parsing temporarily disabled due to ESM compatibility issues with pdf-parse
+// import pdf from 'pdf-parse';
 
 type TestFixtures = {
   supabase: SupabaseClient<Database>;
@@ -83,4 +86,695 @@ export async function cleanDatabase(supabase: SupabaseClient<Database>, userId: 
 
   // Delete plans
   await supabase.from('plans').delete().eq('user_id', userId);
+}
+
+/**
+ * Generates a unique test email using timestamp and random string.
+ * Used for creating unique test users that don't conflict.
+ */
+export function generateTestEmail(prefix = 'test'): string {
+  const timestamp = Date.now();
+  const random = Math.random().toString(36).substring(2, 8);
+  return `${prefix}-${timestamp}-${random}@example.com`;
+}
+
+/**
+ * Creates a test user with optional profile configuration.
+ * Returns user data including ID and session.
+ */
+export async function createTestUser(
+  supabase: SupabaseClient<Database>,
+  options?: {
+    email?: string;
+    password?: string;
+    onboardingCompleted?: boolean;
+    travelPace?: 'slow' | 'moderate' | 'intensive' | null;
+    preferences?: string[];
+  }
+) {
+  const email = options?.email || generateTestEmail();
+  const password = options?.password || 'TestPassword123!';
+
+  // Create user via Supabase Auth
+  const { data: authData, error: authError } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      emailRedirectTo: `${process.env.PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/callback`,
+      data: {
+        email_confirmed: true, // Auto-confirm for testing
+      },
+    },
+  });
+
+  if (authError || !authData.user) {
+    throw new Error(`Failed to create test user: ${authError?.message || 'Unknown error'}`);
+  }
+
+  // Update profile if options provided
+  if (options) {
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .update({
+        onboarding_completed: options.onboardingCompleted ?? false,
+        travel_pace: options.travelPace ?? null,
+        preferences: options.preferences ?? [],
+      })
+      .eq('id', authData.user.id);
+
+    if (profileError) {
+      // Profile update failed, but user was created successfully
+    }
+  }
+
+  return {
+    user: authData.user,
+    session: authData.session,
+    email,
+    password,
+  };
+}
+
+/**
+ * Deletes a test user completely including profile, plans, and auth data.
+ * Note: This requires service_role key or admin API access.
+ */
+export async function deleteTestUser(supabase: SupabaseClient<Database>, userId: string): Promise<void> {
+  // First clean all user data
+  await cleanDatabase(supabase, userId);
+
+  // Delete profile (this should cascade if RLS policies allow)
+  await supabase.from('profiles').delete().eq('id', userId);
+
+  // Note: Actual auth user deletion requires admin API
+  // For E2E tests, we typically leave users in auth.users and clean them periodically
+  // or use a separate test database that gets reset
+}
+
+/**
+ * Creates a plan with activities for testing.
+ * Returns the plan ID.
+ */
+export async function createPlanWithActivities(
+  supabase: SupabaseClient<Database>,
+  userId: string,
+  options: {
+    name?: string;
+    destination?: string;
+    startDate?: string;
+    days: {
+      date: string;
+      activities: {
+        title: string;
+        time?: string;
+        duration?: string;
+        category?: string;
+        location?: string;
+        description?: string;
+        estimatedPrice?: string;
+        type?: 'activity' | 'meal' | 'transport';
+      }[];
+    }[];
+  }
+): Promise<string> {
+  const { name = 'Test Plan', destination = 'Paris', startDate = '2026-06-15', days } = options;
+
+  // Build generated_content structure
+  const generatedContent = {
+    summary: 'Test plan with activities',
+    currency: 'PLN',
+    days: days.map((day) => ({
+      date: day.date,
+      items: day.activities.map((activity) => ({
+        id: crypto.randomUUID(),
+        type: activity.type || 'activity',
+        title: activity.title,
+        time: activity.time,
+        category: activity.category || 'other',
+        description: activity.description,
+        location: activity.location,
+        estimated_price: activity.estimatedPrice,
+        estimated_duration: activity.duration,
+      })),
+    })),
+  };
+
+  // Create plan with generated status
+  const { data: plan, error } = await supabase
+    .from('plans')
+    .insert({
+      user_id: userId,
+      name,
+      destination,
+      start_date: startDate,
+      end_date: days.length > 0 ? days[days.length - 1].date : startDate,
+      status: 'generated',
+      generated_content: generatedContent as never,
+    })
+    .select()
+    .single();
+
+  if (error || !plan) {
+    throw new Error(`Failed to create plan: ${error?.message || 'Unknown error'}`);
+  }
+
+  return plan.id;
+}
+
+/**
+ * Gets an activity by title from a plan's generated content.
+ */
+export async function getActivityByTitle(
+  supabase: SupabaseClient<Database>,
+  planId: string,
+  title: string
+): Promise<unknown | null> {
+  const { data: plan } = await supabase.from('plans').select('generated_content').eq('id', planId).single();
+
+  if (!plan || !plan.generated_content) {
+    return null;
+  }
+
+  const content = plan.generated_content as {
+    days: { items: { title: string }[] }[];
+  };
+
+  for (const day of content.days) {
+    const activity = day.items.find((item) => item.title === title);
+    if (activity) {
+      return activity;
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Counts total activities in a plan's generated content.
+ */
+export async function countActivities(supabase: SupabaseClient<Database>, planId: string): Promise<number> {
+  const { data: plan } = await supabase.from('plans').select('generated_content').eq('id', planId).single();
+
+  if (!plan || !plan.generated_content) {
+    return 0;
+  }
+
+  const content = plan.generated_content as {
+    days: { items: unknown[] }[];
+  };
+
+  return content.days.reduce((total, day) => total + day.items.length, 0);
+}
+
+/**
+ * Creates a simple draft plan for testing.
+ */
+export async function createDraftPlan(
+  supabase: SupabaseClient<Database>,
+  userId: string,
+  options?: {
+    name?: string;
+    destination?: string;
+    startDate?: string;
+    endDate?: string;
+    notes?: string;
+  }
+): Promise<string> {
+  const {
+    name = 'Test Draft Plan',
+    destination = 'Paris',
+    startDate = '2026-06-15',
+    endDate = '2026-06-17',
+    notes = 'Test notes',
+  } = options || {};
+
+  const { data: plan, error } = await supabase
+    .from('plans')
+    .insert({
+      user_id: userId,
+      name,
+      destination,
+      start_date: startDate,
+      end_date: endDate,
+      notes,
+      status: 'draft',
+    })
+    .select()
+    .single();
+
+  if (error || !plan) {
+    throw new Error(`Failed to create draft plan: ${error?.message || 'Unknown error'}`);
+  }
+
+  return plan.id;
+}
+
+/**
+ * Creates a test plan for a given user with optional configuration.
+ * Returns the plan ID and related entity IDs.
+ */
+export async function createTestPlan(
+  supabase: SupabaseClient<Database>,
+  userId: string,
+  options?: {
+    name?: string;
+    destination?: string;
+    status?: 'draft' | 'generated' | 'archived';
+    month?: string;
+    description?: string;
+    startDate?: string;
+    endDate?: string;
+    withFixedPoints?: boolean;
+    withActivities?: boolean;
+  }
+): Promise<{ planId: string; fixedPointIds?: string[]; activityIds?: string[] }> {
+  const startDate = options?.startDate || '2026-06-15';
+  const endDate = options?.endDate || '2026-06-17';
+
+  const { data: plan, error } = await supabase
+    .from('plans')
+    .insert({
+      user_id: userId,
+      name: options?.name || 'Test Plan',
+      destination: options?.destination || 'Test City',
+      status: options?.status || 'draft',
+      month: options?.month || 'June',
+      description: options?.description || 'Test plan description',
+      start_date: startDate,
+      end_date: endDate,
+    })
+    .select()
+    .single();
+
+  if (error) throw new Error(`Failed to create test plan: ${error.message}`);
+
+  const result: { planId: string; fixedPointIds?: string[]; activityIds?: string[] } = { planId: plan.id };
+
+  // Add fixed points if requested
+  if (options?.withFixedPoints) {
+    const { data: fixedPoints } = await supabase
+      .from('fixed_points')
+      .insert([
+        {
+          plan_id: plan.id,
+          location: 'Test Location 1',
+          date: startDate,
+          time: '10:00',
+          description: 'Test fixed point',
+        },
+      ])
+      .select();
+    result.fixedPointIds = fixedPoints?.map((fp) => fp.id) || [];
+  }
+
+  // Add activities if requested (requires generated status)
+  if (options?.withActivities && options.status === 'generated') {
+    const { data: day } = await supabase
+      .from('generated_plan_days')
+      .insert({
+        plan_id: plan.id,
+        day_number: 1,
+        date: startDate,
+        title: 'Day 1',
+      })
+      .select()
+      .single();
+
+    if (day) {
+      const { data: activities } = await supabase
+        .from('plan_activities')
+        .insert([
+          {
+            plan_day_id: day.id,
+            title: 'Test Activity 1',
+            start_time: '09:00',
+            duration_minutes: 120,
+            category: 'sightseeing',
+            description: 'Test activity description',
+            location: 'Test Location',
+          },
+          {
+            plan_day_id: day.id,
+            title: 'Test Activity 2',
+            start_time: '13:00',
+            duration_minutes: 90,
+            category: 'food',
+            description: 'Lunch time',
+            location: 'Test Restaurant',
+          },
+        ])
+        .select();
+      result.activityIds = activities?.map((a) => a.id) || [];
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Deletes all plans for a specific user.
+ * Related records (fixed_points, activities) are handled by CASCADE.
+ */
+export async function cleanUserPlans(supabase: SupabaseClient<Database>, userId: string): Promise<void> {
+  // Cascade delete will handle related records
+  await supabase.from('plans').delete().eq('user_id', userId);
+}
+
+/**
+ * Verifies that a plan is not accessible (for RLS testing).
+ * Returns true if the plan is not accessible (as expected), false otherwise.
+ */
+export async function verifyPlanNotAccessible(supabase: SupabaseClient<Database>, planId: string): Promise<boolean> {
+  const { data, error } = await supabase.from('plans').select('*').eq('id', planId).single();
+
+  return error !== null || data === null;
+}
+
+/**
+ * Set the generation limit for a user (for testing generation limits).
+ * @param supabase Supabase client
+ * @param userId User ID
+ * @param used Number of generations used (0-5)
+ */
+export async function setGenerationLimit(
+  supabase: SupabaseClient<Database>,
+  userId: string,
+  used: number
+): Promise<void> {
+  const { error } = await supabase.from('profiles').update({ generations_used: used }).eq('id', userId);
+
+  if (error) {
+    throw new Error(`Failed to set generation limit: ${error.message}`);
+  }
+}
+
+/**
+ * Get the current generation count for a user.
+ * @param supabase Supabase client
+ * @param userId User ID
+ * @returns Number of generations used
+ */
+export async function getGenerationCount(supabase: SupabaseClient<Database>, userId: string): Promise<number> {
+  const { data, error } = await supabase.from('profiles').select('generations_used').eq('id', userId).single();
+
+  if (error) {
+    throw new Error(`Failed to get generation count: ${error.message}`);
+  }
+
+  return data?.generations_used || 0;
+}
+
+/**
+ * Verify that a plan has generated days and activities.
+ * @param supabase Supabase client
+ * @param planId Plan ID
+ * @returns Object with days count and activities count
+ */
+export async function verifyPlanGenerated(
+  supabase: SupabaseClient<Database>,
+  planId: string
+): Promise<{ daysCount: number; activitiesCount: number }> {
+  // Check generated_plan_days
+  const { data: days } = await supabase.from('generated_plan_days').select('id').eq('plan_id', planId);
+
+  const daysCount = days?.length || 0;
+
+  // Check plan_activities
+  const { data: daysWithIds } = await supabase.from('generated_plan_days').select('id').eq('plan_id', planId);
+
+  const dayIds = daysWithIds?.map((d) => d.id) || [];
+
+  let activitiesCount = 0;
+  if (dayIds.length > 0) {
+    const { data: activities } = await supabase.from('plan_activities').select('id').in('plan_day_id', dayIds);
+
+    activitiesCount = activities?.length || 0;
+  }
+
+  return { daysCount, activitiesCount };
+}
+
+/**
+ * Verify that a fixed point exists in the generated plan activities.
+ * @param supabase Supabase client
+ * @param planId Plan ID
+ * @param fixedPointLocation Location of the fixed point to search for
+ * @returns True if the fixed point is found in activities
+ */
+export async function verifyFixedPointInPlan(
+  supabase: SupabaseClient<Database>,
+  planId: string,
+  fixedPointLocation: string
+): Promise<boolean> {
+  // Get all days for this plan
+  const { data: days } = await supabase.from('generated_plan_days').select('id').eq('plan_id', planId);
+
+  if (!days || days.length === 0) return false;
+
+  const dayIds = days.map((d) => d.id);
+
+  // Check if any activity has the fixed point location
+  const { data: activities } = await supabase
+    .from('plan_activities')
+    .select('title, location')
+    .in('plan_day_id', dayIds);
+
+  if (!activities) return false;
+
+  return activities.some(
+    (activity) =>
+      activity.title?.toLowerCase().includes(fixedPointLocation.toLowerCase()) ||
+      activity.location?.toLowerCase().includes(fixedPointLocation.toLowerCase())
+  );
+}
+
+/**
+ * Clean all generated plan data (days and activities) for a plan.
+ * Useful for testing regeneration.
+ * @param supabase Supabase client
+ * @param planId Plan ID
+ */
+export async function cleanGeneratedPlanData(supabase: SupabaseClient<Database>, planId: string): Promise<void> {
+  // Get all days
+  const { data: days } = await supabase.from('generated_plan_days').select('id').eq('plan_id', planId);
+
+  if (days && days.length > 0) {
+    const dayIds = days.map((d) => d.id);
+
+    // Delete activities (cascade should handle this, but being explicit)
+    await supabase.from('plan_activities').delete().in('plan_day_id', dayIds);
+  }
+
+  // Delete days
+  await supabase.from('generated_plan_days').delete().eq('plan_id', planId);
+}
+
+/**
+ * Verify PDF download by checking filename.
+ * @param download Playwright Download object
+ * @param expectedFilename Expected filename (can be partial match)
+ * @returns True if filename matches
+ */
+export async function verifyPdfDownload(download: Download, expectedFilename: string): Promise<boolean> {
+  const filename = download.suggestedFilename();
+  // Used for debugging and verification
+  void filename;
+  return filename.includes(expectedFilename) || filename.toLowerCase().includes(expectedFilename.toLowerCase());
+}
+
+/**
+ * Extract text content from a downloaded PDF.
+ * @param download Playwright Download object
+ * @returns Extracted text from PDF
+ */
+export async function extractPdfText(download: Download): Promise<string> {
+  const path = await download.path();
+  if (!path) throw new Error('Download path not available');
+
+  const dataBuffer = fs.readFileSync(path);
+  const pdfData = await pdf(dataBuffer);
+  return pdfData.text;
+}
+
+/**
+ * Verify that PDF contains all expected text strings.
+ * @param download Playwright Download object
+ * @param expectedTexts Array of strings that should be in the PDF
+ * @returns True if all expected texts are found
+ */
+export async function verifyPdfContent(download: Download, expectedTexts: string[]): Promise<boolean> {
+  const text = await extractPdfText(download);
+  return expectedTexts.every((expected) => text.includes(expected));
+}
+
+/**
+ * Creates an archived plan for testing history functionality.
+ * @param supabase Supabase client
+ * @param userId User ID
+ * @param options Plan configuration options
+ * @returns Plan ID
+ */
+export async function createArchivedPlan(
+  supabase: SupabaseClient<Database>,
+  userId: string,
+  options?: {
+    name?: string;
+    destination?: string;
+    startDate?: string;
+    endDate?: string;
+    withActivities?: boolean;
+  }
+): Promise<string> {
+  const {
+    name = 'Archived Plan',
+    destination = 'Rome',
+    startDate = '2024-05-01',
+    endDate = '2024-05-03',
+    withActivities = false,
+  } = options || {};
+
+  // Create archived plan
+  const { data: plan, error } = await supabase
+    .from('plans')
+    .insert({
+      user_id: userId,
+      name,
+      destination,
+      start_date: startDate,
+      end_date: endDate,
+      status: 'archived',
+    })
+    .select()
+    .single();
+
+  if (error || !plan) {
+    throw new Error(`Failed to create archived plan: ${error?.message || 'Unknown error'}`);
+  }
+
+  // Add activities if requested
+  if (withActivities) {
+    const { data: day } = await supabase
+      .from('generated_plan_days')
+      .insert({
+        plan_id: plan.id,
+        day_number: 1,
+        date: startDate,
+        title: 'Day 1',
+      })
+      .select()
+      .single();
+
+    if (day) {
+      await supabase.from('plan_activities').insert([
+        {
+          plan_day_id: day.id,
+          title: 'Morning Activity',
+          start_time: '09:00',
+          duration_minutes: 120,
+          category: 'sightseeing',
+          description: 'Test activity',
+          location: 'Test Location',
+        },
+      ]);
+    }
+  }
+
+  return plan.id;
+}
+
+/**
+ * Sets the end date of a plan (useful for testing auto-archiving).
+ * @param supabase Supabase client
+ * @param planId Plan ID
+ * @param endDate End date in ISO format (YYYY-MM-DD)
+ */
+export async function setPlanEndDate(
+  supabase: SupabaseClient<Database>,
+  planId: string,
+  endDate: string
+): Promise<void> {
+  const { error } = await supabase.from('plans').update({ end_date: endDate }).eq('id', planId);
+
+  if (error) {
+    throw new Error(`Failed to set plan end date: ${error.message}`);
+  }
+}
+
+/**
+ * Verifies that a plan is in archived status (read-only).
+ * @param supabase Supabase client
+ * @param planId Plan ID
+ * @returns True if plan is archived
+ */
+export async function verifyPlanIsArchived(supabase: SupabaseClient<Database>, planId: string): Promise<boolean> {
+  const { data } = await supabase.from('plans').select('status').eq('id', planId).single();
+
+  return data?.status === 'archived';
+}
+
+/**
+ * Simulates the auto-archiving process by manually archiving expired plans.
+ * In production, this would be done by a cron job.
+ * @param supabase Supabase client
+ * @returns Number of plans archived
+ */
+export async function runArchivingJob(supabase: SupabaseClient<Database>): Promise<number> {
+  // Archive all plans with end_date in the past and status = 'generated'
+  const { data, error } = await supabase
+    .from('plans')
+    .update({ status: 'archived' })
+    .eq('status', 'generated')
+    .lt('end_date', new Date().toISOString().split('T')[0])
+    .select();
+
+  if (error) {
+    throw new Error(`Failed to run archiving job: ${error.message}`);
+  }
+
+  return data?.length || 0;
+}
+
+/**
+ * Creates multiple archived plans for testing history list.
+ * @param supabase Supabase client
+ * @param userId User ID
+ * @param count Number of plans to create
+ * @returns Array of plan IDs
+ */
+export async function createMultipleArchivedPlans(
+  supabase: SupabaseClient<Database>,
+  userId: string,
+  count: number
+): Promise<string[]> {
+  const planIds: string[] = [];
+  const baseYear = 2024;
+
+  for (let i = 0; i < count; i++) {
+    const month = String(i + 1).padStart(2, '0');
+    const planId = await createArchivedPlan(supabase, userId, {
+      name: `Trip ${i + 1}`,
+      destination: `City ${i + 1}`,
+      startDate: `${baseYear}-${month}-01`,
+      endDate: `${baseYear}-${month}-03`,
+    });
+    planIds.push(planId);
+  }
+
+  return planIds;
+}
+
+/**
+ * Gets the count of archived plans for a user.
+ * @param supabase Supabase client
+ * @param userId User ID
+ * @returns Number of archived plans
+ */
+export async function getArchivedPlanCount(supabase: SupabaseClient<Database>, userId: string): Promise<number> {
+  const { data } = await supabase
+    .from('plans')
+    .select('id', { count: 'exact' })
+    .eq('user_id', userId)
+    .eq('status', 'archived');
+
+  return data?.length || 0;
 }

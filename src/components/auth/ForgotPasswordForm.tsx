@@ -16,7 +16,7 @@ export function ForgotPasswordForm() {
   if (success) {
     return (
       <div className='w-full max-w-md space-y-6'>
-        <Alert className='border-green-500 bg-green-50 text-green-900'>
+        <Alert className='border-green-500 bg-green-50 text-green-900' data-testid='success-message'>
           <CheckCircle2 className='h-4 w-4' />
           <AlertDescription>
             <p className='font-medium'>Email został wysłany!</p>
@@ -59,14 +59,20 @@ export function ForgotPasswordForm() {
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input type='email' placeholder='twoj.email@example.com' disabled={isLoading} {...field} />
+                  <Input
+                    type='email'
+                    placeholder='twoj.email@example.com'
+                    disabled={isLoading}
+                    data-testid='forgot-password-email-input'
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
 
-          <Button type='submit' className='w-full' disabled={isLoading}>
+          <Button type='submit' className='w-full' disabled={isLoading} data-testid='forgot-password-submit-btn'>
             {isLoading && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
             Wyślij link resetujący
           </Button>
