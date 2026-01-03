@@ -22,13 +22,13 @@ export class ActivityFormModal {
   constructor(page: Page) {
     this.page = page;
     this.modal = page.getByTestId('activity-form-modal');
-    this.titleInput = page.getByLabel('Tytuł');
-    this.locationInput = page.getByLabel('Lokalizacja');
-    this.timeInput = page.getByLabel('Godzina');
-    this.durationInput = page.getByLabel('Czas trwania (minuty)');
-    this.categorySelect = page.getByLabel('Kategoria');
-    this.descriptionTextarea = page.getByLabel('Opis');
-    this.estimatedPriceInput = page.getByLabel('Szacowany koszt');
+    this.titleInput = page.getByTestId('activity-title-input');
+    this.locationInput = page.getByTestId('activity-location-input');
+    this.timeInput = page.getByTestId('activity-time-input');
+    this.durationInput = page.getByTestId('activity-duration-input');
+    this.categorySelect = page.getByTestId('activity-category-select');
+    this.descriptionTextarea = page.getByTestId('activity-description-input');
+    this.estimatedPriceInput = page.getByTestId('activity-price-input');
     this.saveButton = page.getByTestId('save-activity');
     this.cancelButton = page.getByTestId('cancel-activity');
     this.errorMessages = page.locator('[role="alert"]');
