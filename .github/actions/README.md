@@ -107,7 +107,7 @@ Pull Request:
 
 **Lokalizacja:** `.github/actions/run-e2e-tests/action.yml`
 
-**Opis:** Instaluje przeglądarki Playwright, uruchamia testy E2E i uploaduje artefakty z raportami.
+**Opis:** Instaluje przeglądarki Playwright z cachowaniem (oszczędność ~2-4 min), uruchamia testy E2E i uploaduje artefakty z raportami.
 
 **Użycie:**
 

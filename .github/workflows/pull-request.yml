@@ -25,166 +25,43 @@ permissions:
   pull-requests: write # Write PR comments
 
 jobs:
-  # 🔍 Code Quality Check
-  # Ensures code follows style guidelines and best practices
-  lint:
-    name: 🔍 Lint & Format Check
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js and dependencies
-        uses: ./.github/actions/setup-node-dependencies
-
-      - name: Run lint and format checks
-        uses: ./.github/actions/lint-and-format
-
-  # 🧪 Fast Unit Tests
-  # Tests individual components and functions in isolation
-  # These are fast, cheap, and catch most bugs early
-  unit-tests:
-    name: 🧪 Unit Tests
-    runs-on: ubuntu-latest
-    needs: lint
-    timeout-minutes: 15
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js and dependencies
-        uses: ./.github/actions/setup-node-dependencies
-
-      - name: Run unit tests
-        uses: ./.github/actions/run-unit-tests
-        with:
-          artifact-name: pr-${{ github.event.pull_request.number }}-unit-coverage
-          retention-days: 14
-          coverage-threshold: 0
-
-  # 🎭 End-to-End Tests
-  # Tests complete user flows in a real browser
-  # These catch integration issues and UX problems
-  e2e-tests:
-    name: 🎭 E2E Tests (Playwright)
-    runs-on: ubuntu-latest
-    needs: lint
-    timeout-minutes: 30
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js and dependencies
-        uses: ./.github/actions/setup-node-dependencies
-
-      - name: Run E2E tests
-        uses: ./.github/actions/run-e2e-tests
-        with:
-          artifact-prefix: pr-${{ github.event.pull_request.number }}
-          retention-days-report: 14
-          retention-days-results: 7
-          validate-secrets: true
-          supabase-url: ${{ secrets.SUPABASE_TEST_URL }}
-          supabase-key: ${{ secrets.SUPABASE_TEST_KEY }}
-          e2e-user-id: ${{ secrets.E2E_USER_ID }}
-          e2e-username: ${{ secrets.E2E_USERNAME }}
-          e2e-password: ${{ secrets.E2E_PASSWORD }}
-
-  # 🔨 Build Verification
-  # Ensures the application builds successfully for production
-  verify-build:
-    name: 🔨 Verify Production Build
-    runs-on: ubuntu-latest
-    needs: [lint, unit-tests, e2e-tests]
-    timeout-minutes: 15
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js and dependencies
-        uses: ./.github/actions/setup-node-dependencies
-
-      - name: Verify production build
-        uses: ./.github/actions/verify-build
-        with:
-          supabase-url: ${{ secrets.SUPABASE_TEST_URL || 'https://placeholder.supabase.co' }}
-          supabase-key: ${{ secrets.SUPABASE_TEST_KEY || 'placeholder-key' }}
-          upload-artifact: false
+  # ✅ All validation checks in reusable workflow
+  # Runs lint, unit-tests, e2e-tests, and verify-build
+  # All tests run in parallel for optimal speed (~15 min faster)
+  validate:
+    name: 🔍 Run All Validation Checks
+    uses: ./.github/workflows/validate-code.yml
+    secrets: inherit
+    with:
+      artifact-prefix: pr-${{ github.event.pull_request.number }}
+      retention-days-coverage: 14
+      retention-days-e2e-report: 14
+      retention-days-e2e-results: 7
+      upload-build-artifact: false
+      validate-e2e-secrets: true
 
   # 📊 PR Status Summary with Comment
   # Provides a clear overview and posts automated comment
   status-comment:
     name: 📊 PR Status & Comment
     runs-on: ubuntu-latest
-    needs: [lint, unit-tests, e2e-tests, verify-build]
+    needs: validate
     if: always() && github.event_name == 'pull_request'
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Determine overall status
-        id: status
-        run: |
-          LINT_STATUS="${{ needs.lint.result }}"
-          UNIT_STATUS="${{ needs.unit-tests.result }}"
-          E2E_STATUS="${{ needs.e2e-tests.result }}"
-          BUILD_STATUS="${{ needs.verify-build.result }}"
-
-          echo "lint_status=$LINT_STATUS" >> $GITHUB_OUTPUT
-          echo "unit_status=$UNIT_STATUS" >> $GITHUB_OUTPUT
-          echo "e2e_status=$E2E_STATUS" >> $GITHUB_OUTPUT
-          echo "build_status=$BUILD_STATUS" >> $GITHUB_OUTPUT
-
-          if [ "$LINT_STATUS" == "success" ] && \
-             [ "$UNIT_STATUS" == "success" ] && \
-             [ "$E2E_STATUS" == "success" ] && \
-             [ "$BUILD_STATUS" == "success" ]; then
-            echo "overall_status=success" >> $GITHUB_OUTPUT
-            echo "status_emoji=✅" >> $GITHUB_OUTPUT
-            echo "status_message=All checks passed! PR is ready to merge." >> $GITHUB_OUTPUT
-          else
-            echo "overall_status=failure" >> $GITHUB_OUTPUT
-            echo "status_emoji=❌" >> $GITHUB_OUTPUT
-            echo "status_message=PR validation failed - fix issues before merging" >> $GITHUB_OUTPUT
-          fi
-
       - name: Post PR comment
         uses: actions/github-script@v7
         with:
           script: |
-            const lintStatus = '${{ steps.status.outputs.lint_status }}';
-            const unitStatus = '${{ steps.status.outputs.unit_status }}';
-            const e2eStatus = '${{ steps.status.outputs.e2e_status }}';
-            const buildStatus = '${{ steps.status.outputs.build_status }}';
-            const overallStatus = '${{ steps.status.outputs.overall_status }}';
-            const statusEmoji = '${{ steps.status.outputs.status_emoji }}';
-            const statusMessage = '${{ steps.status.outputs.status_message }}';
-
-            const getStatusEmoji = (status) => {
-              if (status === 'success') return '✅';
-              if (status === 'failure') return '❌';
-              if (status === 'cancelled') return '⚠️';
-              return '⏭️';
-            };
+            const allChecksPassed = '${{ needs.validate.outputs.all-checks-passed }}' === 'success';
+            const statusEmoji = allChecksPassed ? '✅' : '❌';
+            const statusMessage = allChecksPassed 
+              ? 'All checks passed! PR is ready to merge.'
+              : 'PR validation failed - fix issues before merging';
 
             const comment = `## ${statusEmoji} Pull Request Validation Results
 
             **Overall Status:** ${statusMessage}
-
-            ### Job Results
-
-            | Job | Status | Result |
-            |-----|--------|--------|
-            | 🔍 Lint & Format | ${getStatusEmoji(lintStatus)} | \`${lintStatus}\` |
-            | 🧪 Unit Tests | ${getStatusEmoji(unitStatus)} | \`${unitStatus}\` |
-            | 🎭 E2E Tests | ${getStatusEmoji(e2eStatus)} | \`${e2eStatus}\` |
-            | 🔨 Verify Build | ${getStatusEmoji(buildStatus)} | \`${buildStatus}\` |
 
             ### Details
 
@@ -192,7 +69,7 @@ jobs:
             - **Commit:** \`${{ github.event.pull_request.head.sha }}\`
             - **Branch:** \`${{ github.head_ref }}\`
 
-            ${overallStatus === 'success' 
+            ${allChecksPassed 
               ? '🎉 **Great work!** All validation checks passed successfully. This PR is ready to merge!' 
               : '⚠️  **Action Required:** Please review and fix the failing checks above before merging.'}
 
