@@ -11,7 +11,6 @@ import { PlanDetailsPage } from '../page-objects/PlanDetailsPage';
 import { GenerationLoadingPage } from '../page-objects/GenerationLoadingPage';
 
 test.describe('Plan Generation', () => {
-
   test('should successfully generate a plan from draft', async ({ page, supabase, testUser }) => {
     const planDetailsPage = new PlanDetailsPage(page);
     const generationLoadingPage = new GenerationLoadingPage(page);

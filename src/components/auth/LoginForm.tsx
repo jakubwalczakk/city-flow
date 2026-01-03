@@ -81,7 +81,11 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
           />
 
           <div className='flex justify-end'>
-            <a href='/forgot-password' className='text-sm text-primary hover:underline' data-testid='forgot-password-link'>
+            <a
+              href='/forgot-password'
+              className='text-sm text-primary hover:underline'
+              data-testid='forgot-password-link'
+            >
               Zapomniałeś hasła?
             </a>
           </div>

@@ -6,7 +6,6 @@ import { LoginPage } from '../page-objects/LoginPage';
  * Tests cover: successful logout and session cleanup
  */
 test.describe('User Logout', () => {
-
   test('should successfully logout from user menu', async ({ page, supabase }) => {
     const testEmail = generateTestEmail('logout-test');
     const testPassword = 'TestPassword123!';

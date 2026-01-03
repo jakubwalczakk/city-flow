@@ -12,7 +12,6 @@ import { PlansListPage } from '../page-objects/PlansListPage';
 import { HistoryPage } from '../page-objects/HistoryPage';
 
 test.describe('Auto-Archive Plans', () => {
-
   test('should auto-archive plan after end date passes', async ({ supabase, testUser }) => {
     // Create a generated plan with past end date
     const { planId } = await createTestPlan(supabase, testUser.id, {

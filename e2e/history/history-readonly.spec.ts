@@ -2,7 +2,6 @@ import { authTest as test, expect, createArchivedPlan, TEST_CONFIG } from '../fi
 import { PlanDetailsPage } from '../page-objects/PlanDetailsPage';
 
 test.describe('History Read-Only Mode', () => {
-
   test('should display read-only badge on archived plan', async ({ supabase, testUser }) => {
     // Create an archived plan
     const planId = await createArchivedPlan(supabase, testUser.id, {

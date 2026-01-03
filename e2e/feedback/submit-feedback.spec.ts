@@ -7,7 +7,6 @@ import { PlanDetailsPage } from '../page-objects/PlanDetailsPage';
  */
 
 test.describe('Feedback Comments', () => {
-
   test.afterEach(async ({ supabase, testUser }) => {
     // Clean up test data
     await cleanDatabase(supabase, testUser.id);

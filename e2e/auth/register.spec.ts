@@ -7,7 +7,6 @@ import { OnboardingModal } from '../page-objects/OnboardingModal';
  * Tests cover: successful registration, validation errors, and edge cases
  */
 test.describe('User Registration', () => {
-
   test('should successfully register with valid email and password', async ({ page }) => {
     const testEmail = generateTestEmail('register-success');
     const testPassword = 'ValidPassword123!';

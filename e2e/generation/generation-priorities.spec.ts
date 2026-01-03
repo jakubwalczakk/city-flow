@@ -1,9 +1,15 @@
-import { authTest as test, expect, createTestPlan, setGenerationLimit, verifyFixedPointInPlan, TEST_CONFIG } from '../fixtures';
+import {
+  authTest as test,
+  expect,
+  createTestPlan,
+  setGenerationLimit,
+  verifyFixedPointInPlan,
+  TEST_CONFIG,
+} from '../fixtures';
 import { mockOpenRouterAPI, mockOpenRouterWithCustomData } from '../test-setup';
 import { PlanDetailsPage } from '../page-objects/PlanDetailsPage';
 
 test.describe('Generation Priorities', () => {
-
   test('Priority 1: Fixed points should be present in generated plan', async ({ page, supabase, testUser }) => {
     // Arrange - Mock OpenRouter to return plan with fixed points
     await mockOpenRouterWithCustomData(page, [

@@ -7,7 +7,6 @@ import { UpdatePasswordPage } from '../page-objects/UpdatePasswordPage';
  * Tests cover: requesting password reset, updating password with token
  */
 test.describe('Password Recovery', () => {
-
   test('should display success message when requesting password reset', async ({ supabase }) => {
     const testEmail = generateTestEmail('forgot-password');
     const testPassword = 'OldPassword123!';

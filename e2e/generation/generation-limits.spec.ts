@@ -1,9 +1,15 @@
-import { authTest as test, expect, createTestPlan, setGenerationLimit, getGenerationCount, TEST_CONFIG } from '../fixtures';
+import {
+  authTest as test,
+  expect,
+  createTestPlan,
+  setGenerationLimit,
+  getGenerationCount,
+  TEST_CONFIG,
+} from '../fixtures';
 import { mockOpenRouterAPI } from '../test-setup';
 import { PlanDetailsPage } from '../page-objects/PlanDetailsPage';
 
 test.describe('Generation Limits', () => {
-
   test('should generate plan with available limit', async ({ supabase, testUser }) => {
     // Arrange - Set limit to 5 (0 used)
     await setGenerationLimit(supabase, testUser.id, 0);

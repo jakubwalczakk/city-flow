@@ -3,7 +3,6 @@ import { authTest as test, expect, createTestPlan, TEST_CONFIG } from '../fixtur
 import { PlansListPage } from '../page-objects/PlansListPage';
 
 test.describe('Plans List', () => {
-
   test('should display empty state when user has no plans', async ({ page, testUser }) => {
     const plansListPage = new PlansListPage(page);
     // Navigate to plans page (should already be there after login)

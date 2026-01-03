@@ -19,7 +19,10 @@ export const EmptyState = ({ onCreatePlan }: EmptyStateProps) => {
   };
 
   return (
-    <div className='flex flex-col items-center justify-center rounded-lg border border-dashed py-16 px-6 text-center' data-testid='empty-state'>
+    <div
+      className='flex flex-col items-center justify-center rounded-lg border border-dashed py-16 px-6 text-center'
+      data-testid='empty-state'
+    >
       {/* Icon */}
       <div className='mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-muted'>
         <svg

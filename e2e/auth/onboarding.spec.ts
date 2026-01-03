@@ -8,7 +8,6 @@ import { OnboardingModal } from '../page-objects/OnboardingModal';
  * Tests cover: completing onboarding, skipping onboarding, and preference selection
  */
 test.describe('User Onboarding', () => {
-
   test('should complete onboarding after registration with preferences', async ({ page }) => {
     const testEmail = generateTestEmail('onboarding-complete');
     const testPassword = 'TestPassword123!';

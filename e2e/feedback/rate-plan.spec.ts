@@ -1,10 +1,4 @@
-import {
-  authTest as test,
-  expect,
-  createPlanWithActivities,
-  createDraftPlan,
-  getFeedback,
-} from '../fixtures';
+import { authTest as test, expect, createPlanWithActivities, createDraftPlan, getFeedback } from '../fixtures';
 import { PlanDetailsPage } from '../page-objects/PlanDetailsPage';
 
 /**
@@ -13,7 +7,6 @@ import { PlanDetailsPage } from '../page-objects/PlanDetailsPage';
  */
 
 test.describe('Plan Rating - Thumbs Up/Down', () => {
-
   test.afterEach(async ({ supabase, testUser }) => {
     // Clean up test data
     await cleanDatabase(supabase, testUser.id);

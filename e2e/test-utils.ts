@@ -162,4 +162,3 @@ export async function waitForNavigation(page: Page, expectedUrl: string | RegExp
   await expect(page).toHaveURL(expectedUrl, { timeout: TIMEOUTS.LONG });
   await page.waitForLoadState('networkidle');
 }
-

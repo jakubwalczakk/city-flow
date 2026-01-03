@@ -3,7 +3,6 @@ import { HistoryPage } from '../page-objects/HistoryPage';
 import { PlanDetailsPage } from '../page-objects/PlanDetailsPage';
 
 test.describe('View History', () => {
-
   test('should display empty state when no archived plans exist', async () => {
     // Navigate to history page
     await historyPage.goto();

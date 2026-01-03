@@ -1,14 +1,7 @@
-import {
-  authTest as test,
-  expect,
-  createTestPlan,
-  verifyPdfDownload,
-  verifyPdfContent,
-} from '../fixtures';
+import { authTest as test, expect, createTestPlan, verifyPdfDownload, verifyPdfContent } from '../fixtures';
 import { mockOpenRouterAPI } from '../test-setup';
 
 test.describe('PDF Export', () => {
-
   test.afterEach(async ({ supabase, testUser }) => {
     await cleanDatabase(supabase, testUser.id);
   });

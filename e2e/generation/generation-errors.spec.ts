@@ -1,12 +1,7 @@
-import {
-  authTest as test,
-  expect,
-  createTestPlan,
-} from '../fixtures';
+import { authTest as test, expect, createTestPlan } from '../fixtures';
 import { mockGenerationError } from '../test-setup';
 
 test.describe('Generation Error Handling', () => {
-
   test('should handle API timeout error', async ({ page, supabase, testUser }) => {
     // Arrange
     const { planId } = await createTestPlan(supabase, testUser.id, {

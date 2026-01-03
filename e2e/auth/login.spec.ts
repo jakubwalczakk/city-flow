@@ -7,7 +7,6 @@ import { OnboardingModal } from '../page-objects/OnboardingModal';
  * Tests cover: successful login, invalid credentials, and redirects
  */
 test.describe('User Login', () => {
-
   test('should successfully login with correct credentials', async ({ page, supabase }) => {
     const testEmail = generateTestEmail('login-success');
     const testPassword = 'TestPassword123!';

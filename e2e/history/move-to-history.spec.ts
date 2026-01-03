@@ -1,10 +1,16 @@
-import { authTest as test, expect, createTestPlan, createDraftPlan, verifyPlanIsArchived, TEST_CONFIG } from '../fixtures';
+import {
+  authTest as test,
+  expect,
+  createTestPlan,
+  createDraftPlan,
+  verifyPlanIsArchived,
+  TEST_CONFIG,
+} from '../fixtures';
 import { PlanDetailsPage } from '../page-objects/PlanDetailsPage';
 import { PlansListPage } from '../page-objects/PlansListPage';
 import { HistoryPage } from '../page-objects/HistoryPage';
 
 test.describe('Move Plan to History', () => {
-
   test.afterEach(async ({ supabase, testUser }) => {
     // Clean up after each test
     await cleanDatabase(supabase, testUser.id);
