@@ -81,7 +81,7 @@ function DayAccordionItem({
   }, [activityCount]);
 
   return (
-    <AccordionItem value={`day-${index}`}>
+    <AccordionItem value={`day-${index}`} data-testid='plan-day'>
       <AccordionTrigger className='hover:no-underline'>
         <div className='flex items-center justify-between w-full pr-4'>
           <div className='flex items-center gap-3 text-left'>
@@ -100,7 +100,13 @@ function DayAccordionItem({
         <div className='pt-4 space-y-4'>
           {onAddActivity && (
             <div className='flex justify-end'>
-              <Button variant='outline' size='sm' onClick={() => onAddActivity(day.date)} className='gap-2'>
+              <Button
+                variant='outline'
+                size='sm'
+                onClick={() => onAddActivity(day.date)}
+                className='gap-2'
+                data-testid='add-activity-button'
+              >
                 <Plus className='h-4 w-4' />
                 Dodaj aktywność
               </Button>

@@ -14,7 +14,10 @@ export function ModificationsCard({ modifications }: ModificationsCardProps) {
   }
 
   return (
-    <Card className='border-blue-200 bg-blue-50 dark:border-blue-900 dark:bg-blue-950/20'>
+    <Card
+      className='border-blue-200 bg-blue-50 dark:border-blue-900 dark:bg-blue-950/20'
+      data-testid='generation-warning'
+    >
       <CardHeader>
         <div className='flex items-start gap-3'>
           <Info className='h-5 w-5 text-blue-600 dark:text-blue-500 mt-0.5 flex-shrink-0' />

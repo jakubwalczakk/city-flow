@@ -41,6 +41,7 @@ export function PasswordUpdateForm({ onSubmit, isLoading, error }: PasswordUpdat
                     onChange={field.onChange}
                     placeholder='Minimum 8 znaków'
                     disabled={isLoading}
+                    data-testid='update-password-input'
                   />
                 </FormControl>
                 <FormMessage />
@@ -60,6 +61,7 @@ export function PasswordUpdateForm({ onSubmit, isLoading, error }: PasswordUpdat
                     onChange={field.onChange}
                     placeholder='Powtórz hasło'
                     disabled={isLoading}
+                    data-testid='update-password-confirm-input'
                   />
                 </FormControl>
                 <FormMessage />
@@ -67,7 +69,7 @@ export function PasswordUpdateForm({ onSubmit, isLoading, error }: PasswordUpdat
             )}
           />
 
-          <Button type='submit' className='w-full' disabled={isLoading}>
+          <Button type='submit' className='w-full' disabled={isLoading} data-testid='update-password-submit-btn'>
             {isLoading && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
             Ustaw nowe hasło
           </Button>

@@ -26,7 +26,7 @@ export function UserMenu({ userEmail }: UserMenuProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant='ghost' className='relative h-10 w-10 rounded-full'>
+        <Button variant='ghost' className='relative h-10 w-10 rounded-full' data-testid='user-menu-trigger'>
           <Avatar className='h-10 w-10'>
             <AvatarFallback className='bg-primary text-primary-foreground'>{getUserInitials(userEmail)}</AvatarFallback>
           </Avatar>
@@ -36,7 +36,9 @@ export function UserMenu({ userEmail }: UserMenuProps) {
         <DropdownMenuLabel className='font-normal'>
           <div className='flex flex-col space-y-1'>
             <p className='text-sm font-medium leading-none'>Moje konto</p>
-            <p className='text-xs leading-none text-muted-foreground'>{userEmail}</p>
+            <p className='text-xs leading-none text-muted-foreground' data-testid='user-email'>
+              {userEmail}
+            </p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
@@ -51,6 +53,7 @@ export function UserMenu({ userEmail }: UserMenuProps) {
           onClick={handleLogout}
           disabled={isLoggingOut}
           className='cursor-pointer text-destructive focus:text-destructive'
+          data-testid='logout-button'
         >
           {isLoggingOut ? <Loader2 className='mr-2 h-4 w-4 animate-spin' /> : <LogOut className='mr-2 h-4 w-4' />}
           <span>Wyloguj się</span>

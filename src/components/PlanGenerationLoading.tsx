@@ -16,7 +16,7 @@ export function PlanGenerationLoading({ planName }: PlanGenerationLoadingProps) 
   const { currentScene } = useSceneRotation(SCENE_COUNT, SCENE_INTERVAL_MS);
 
   return (
-    <div className='w-full' role='status' aria-live='polite'>
+    <div className='w-full' role='status' aria-live='polite' data-testid='generation-loader'>
       <div className='space-y-2 mb-6'>
         <h2 className='text-center text-2xl font-semibold'>Tworzenie planu</h2>
       </div>

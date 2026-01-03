@@ -34,7 +34,7 @@ export default function EventTimeline({ items, currency = 'PLN', onEdit, onDelet
   }
 
   return (
-    <div className='relative space-y-6 pl-8 pb-4'>
+    <div className='relative space-y-6 pl-8 pb-4' data-testid='plan-timeline'>
       {/* Timeline vertical line */}
       <div className='absolute left-[7px] top-2 bottom-0 w-0.5 bg-border' />
 
@@ -58,10 +58,11 @@ export default function EventTimeline({ items, currency = 'PLN', onEdit, onDelet
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Anuluj</AlertDialogCancel>
+            <AlertDialogCancel data-testid='cancel-delete'>Anuluj</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDelete}
               className='bg-destructive text-destructive-foreground hover:bg-destructive/90'
+              data-testid='confirm-delete'
             >
               Usuń
             </AlertDialogAction>
