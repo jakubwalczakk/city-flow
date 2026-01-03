@@ -1,15 +1,6 @@
-import { test, expect } from '../fixtures';
+import { authTest as test, expect, createPlanWithActivities, createFeedback, getFeedback, createTestUser, deleteTestUser, TEST_CONFIG } from '../fixtures';
 import { PlanDetailsPage } from '../page-objects/PlanDetailsPage';
-import { LoginPage } from '../page-objects/LoginPage';
 import { PlansListPage } from '../page-objects/PlansListPage';
-import {
-  cleanDatabase,
-  createPlanWithActivities,
-  createFeedback,
-  getFeedback,
-  createTestUser,
-  deleteTestUser,
-} from '../fixtures';
 
 /**
  * E2E Tests for Feedback Persistence
@@ -17,7 +8,6 @@ import {
  */
 
 test.describe('Feedback Persistence', () => {
-  test.beforeEach(async ({ page, supabase, testUser }) => {
     // Clean database before each test
     await cleanDatabase(supabase, testUser.id);
 
