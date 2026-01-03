@@ -1,30 +1,8 @@
-import { test, expect, cleanDatabase, createTestPlan, setGenerationLimit, verifyFixedPointInPlan } from '../fixtures';
+import { authTest as test, expect, createTestPlan, setGenerationLimit, verifyFixedPointInPlan, TEST_CONFIG } from '../fixtures';
 import { mockOpenRouterAPI, mockOpenRouterWithCustomData } from '../test-setup';
-import { LoginPage } from '../page-objects/LoginPage';
 import { PlanDetailsPage } from '../page-objects/PlanDetailsPage';
 
-const TEST_USER_EMAIL = process.env.E2E_USERNAME || 'test@example.com';
-const TEST_USER_PASSWORD = process.env.E2E_PASSWORD || 'testpassword123';
-
 test.describe('Generation Priorities', () => {
-  let loginPage: LoginPage;
-  let planDetailsPage: PlanDetailsPage;
-
-  test.beforeEach(async ({ page, supabase, testUser }) => {
-    await cleanDatabase(supabase, testUser.id);
-    await setGenerationLimit(supabase, testUser.id, 0);
-
-    loginPage = new LoginPage(page);
-    planDetailsPage = new PlanDetailsPage(page);
-
-    await loginPage.goto();
-    await loginPage.login(TEST_USER_EMAIL, TEST_USER_PASSWORD);
-    await page.waitForURL(/\/plans/, { timeout: 10000 });
-  });
-
-  test.afterEach(async ({ supabase, testUser }) => {
-    await cleanDatabase(supabase, testUser.id);
-  });
 
   test('Priority 1: Fixed points should be present in generated plan', async ({ page, supabase, testUser }) => {
     // Arrange - Mock OpenRouter to return plan with fixed points

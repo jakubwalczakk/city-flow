@@ -1,52 +1,27 @@
 import {
-  test,
+  authTest as test,
   expect,
-  cleanDatabase,
   createTestPlan,
   verifyPlanGenerated,
   setGenerationLimit,
   getGenerationCount,
+  TEST_CONFIG,
 } from '../fixtures';
 import { mockOpenRouterAPI } from '../test-setup';
-import { LoginPage } from '../page-objects/LoginPage';
 import { PlanDetailsPage } from '../page-objects/PlanDetailsPage';
 import { GenerationLoadingPage } from '../page-objects/GenerationLoadingPage';
 
-const TEST_USER_EMAIL = process.env.E2E_USERNAME || 'test@example.com';
-const TEST_USER_PASSWORD = process.env.E2E_PASSWORD || 'testpassword123';
-
 test.describe('Plan Generation', () => {
-  let loginPage: LoginPage;
-  let planDetailsPage: PlanDetailsPage;
-  let generationLoadingPage: GenerationLoadingPage;
 
-  test.beforeEach(async ({ page, supabase, testUser }) => {
-    // Clean database before each test
-    await cleanDatabase(supabase, testUser.id);
-
-    // Set generation limit to 5 (fresh user)
-    await setGenerationLimit(supabase, testUser.id, 0);
-
-    // Initialize page objects
-    loginPage = new LoginPage(page);
-    planDetailsPage = new PlanDetailsPage(page);
-    generationLoadingPage = new GenerationLoadingPage(page);
-
+  test('should successfully generate a plan from draft', async ({ page, supabase, testUser }) => {
+    const planDetailsPage = new PlanDetailsPage(page);
+    const generationLoadingPage = new GenerationLoadingPage(page);
     // Mock OpenRouter API
     await mockOpenRouterAPI(page);
 
-    // Login
-    await loginPage.goto();
-    await loginPage.login(TEST_USER_EMAIL, TEST_USER_PASSWORD);
-    await page.waitForURL(/\/plans/, { timeout: 10000 });
-  });
+    // Set generation limit
+    await setGenerationLimit(supabase, testUser.id, 0);
 
-  test.afterEach(async ({ supabase, testUser }) => {
-    // Clean up after each test
-    await cleanDatabase(supabase, testUser.id);
-  });
-
-  test('should successfully generate a plan from draft', async ({ page, supabase, testUser }) => {
     // Arrange
     const { planId } = await createTestPlan(supabase, testUser.id, {
       name: 'Rzym - City Break',
