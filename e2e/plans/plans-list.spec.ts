@@ -1,34 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { test, expect, createTestPlan, cleanDatabase } from '../fixtures';
-import { LoginPage } from '../page-objects/LoginPage';
+import { authTest as test, expect, createTestPlan, TEST_CONFIG } from '../fixtures';
 import { PlansListPage } from '../page-objects/PlansListPage';
 
-const TEST_USER_EMAIL = process.env.E2E_USERNAME || 'test@example.com';
-const TEST_USER_PASSWORD = process.env.E2E_PASSWORD || 'testpassword123';
-
 test.describe('Plans List', () => {
-  let loginPage: LoginPage;
-  let plansListPage: PlansListPage;
-
-  test.beforeEach(async ({ page, supabase, testUser }) => {
-    // Clean database before each test
-    await cleanDatabase(supabase, testUser.id);
-
-    // Initialize page objects
-    loginPage = new LoginPage(page);
-    plansListPage = new PlansListPage(page);
-
-    // Login
-    await loginPage.goto();
-    await loginPage.login(TEST_USER_EMAIL, TEST_USER_PASSWORD);
-  });
-
-  test.afterEach(async ({ supabase, testUser }) => {
-    // Clean up after each test
-    await cleanDatabase(supabase, testUser.id);
-  });
 
   test('should display empty state when user has no plans', async ({ page, testUser }) => {
+    const plansListPage = new PlansListPage(page);
     // Navigate to plans page (should already be there after login)
     await plansListPage.goto();
 
@@ -48,6 +25,7 @@ test.describe('Plans List', () => {
   });
 
   test('should display list of user plans', async ({ page, supabase, testUser }) => {
+    const plansListPage = new PlansListPage(page);
     // Create test plans
     await createTestPlan(supabase, testUser.id, {
       name: 'Trip to Rome',
@@ -86,6 +64,7 @@ test.describe('Plans List', () => {
   });
 
   test('should not display archived plans in main list', async ({ page, supabase, testUser }) => {
+    const plansListPage = new PlansListPage(page);
     // Create active plans
     await createTestPlan(supabase, testUser.id, {
       name: 'Active Plan 1',
@@ -113,6 +92,7 @@ test.describe('Plans List', () => {
   });
 
   test('should navigate to plan details when clicking on a plan', async ({ page, supabase, testUser }) => {
+    const plansListPage = new PlansListPage(page);
     // Create a test plan
     const { planId } = await createTestPlan(supabase, testUser.id, {
       name: 'Clickable Plan',
@@ -132,6 +112,7 @@ test.describe('Plans List', () => {
   });
 
   test('should display plans with different statuses correctly', async ({ page, supabase, testUser }) => {
+    const plansListPage = new PlansListPage(page);
     // Create plans with different statuses
     await createTestPlan(supabase, testUser.id, {
       name: 'Draft Plan',
@@ -163,6 +144,7 @@ test.describe('Plans List', () => {
   });
 
   test('should show plans sorted by creation date (newest first)', async ({ page, supabase, testUser }) => {
+    const plansListPage = new PlansListPage(page);
     // Create plans with slight delays to ensure different timestamps
     await createTestPlan(supabase, testUser.id, {
       name: 'Oldest Plan',
