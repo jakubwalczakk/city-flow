@@ -18,15 +18,17 @@ export class LoginPage {
     this.passwordInput = page.getByTestId('auth-password-input');
     this.submitButton = page.getByTestId('auth-submit-btn');
     this.googleAuthButton = page.getByTestId('google-auth-btn');
-    this.errorAlert = page.locator('[role="alert"]').filter({ hasText: /błąd|error|nieprawidłowy/i });
-    this.forgotPasswordLink = page.locator('a[href="/forgot-password"]');
-    this.registerLink = page.locator('a[href="/register"]');
+    this.errorAlert = page.getByTestId('error-alert');
+    this.forgotPasswordLink = page.getByTestId('forgot-password-link');
+    this.registerLink = page.getByTestId('register-link');
   }
 
   async goto() {
     await this.page.goto('/login');
     // Wait for the page to load by checking for heading
-    await expect(this.page.getByRole('heading', { name: 'Witaj ponownie' })).toBeVisible();
+    const heading = this.page.getByTestId('auth-heading');
+    await expect(heading).toBeVisible();
+    await expect(heading).toHaveText('Witaj ponownie');
   }
 
   async login(email: string, password: string) {
