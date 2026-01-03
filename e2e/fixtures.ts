@@ -1,8 +1,11 @@
 /* eslint-disable react-hooks/rules-of-hooks */
-import { test as base } from '@playwright/test';
+import { test as base, type Page } from '@playwright/test';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '../src/db/database.types';
 import fs from 'fs';
+import { LoginPage } from './page-objects/LoginPage';
+import { OnboardingModal } from './page-objects/OnboardingModal';
+import { setupCommonMocks } from './test-setup';
 
 type TestFixtures = {
   supabase: SupabaseClient<Database>;
@@ -889,3 +892,83 @@ export async function getFeedbackCount(supabase: SupabaseClient<Database>, userI
 
   return data?.length || 0;
 }
+
+// ============================================================================
+// AUTHENTICATED TEST FIXTURES
+// ============================================================================
+
+/**
+ * Test configuration constants
+ */
+export const TEST_CONFIG = {
+  USER_EMAIL: process.env.E2E_USERNAME || 'test@example.com',
+  USER_PASSWORD: process.env.E2E_PASSWORD || 'testpassword123',
+} as const;
+
+/**
+ * Extended test with automatic authentication.
+ * Use this for tests that require a logged-in user.
+ *
+ * @example
+ * ```typescript
+ * import { authTest as test } from '../fixtures';
+ *
+ * test('should create a plan', async ({ page }) => {
+ *   // User is already logged in
+ *   await page.goto('/plans');
+ *   // ... test logic
+ * });
+ * ```
+ */
+export const authTest = test.extend<{
+  authenticatedPage: Page;
+}>({
+  // Auto-cleanup before test
+  page: async ({ page, supabase, testUser }, use) => {
+    await cleanDatabase(supabase, testUser.id);
+    await setupCommonMocks(page);
+    await use(page);
+    await cleanDatabase(supabase, testUser.id);
+  },
+
+  // Auto-login
+  authenticatedPage: async ({ page }, use) => {
+    const loginPage = new LoginPage(page);
+    await loginPage.goto();
+    await loginPage.login(TEST_CONFIG.USER_EMAIL, TEST_CONFIG.USER_PASSWORD);
+
+    // Handle onboarding if it appears
+    const onboardingModal = new OnboardingModal(page);
+    const isVisible = await onboardingModal.isVisible();
+    if (isVisible) {
+      await onboardingModal.skip();
+    }
+
+    await use(page);
+  },
+});
+
+/**
+ * Test with automatic cleanup but no authentication.
+ * Use this for auth-related tests (login, register, etc.)
+ *
+ * @example
+ * ```typescript
+ * import { cleanTest as test } from '../fixtures';
+ *
+ * test('should login successfully', async ({ page }) => {
+ *   // Database is cleaned, but user is not logged in
+ *   const loginPage = new LoginPage(page);
+ *   await loginPage.goto();
+ *   // ... test logic
+ * });
+ * ```
+ */
+export const cleanTest = test.extend({
+  page: async ({ page, supabase, testUser }, use) => {
+    await cleanDatabase(supabase, testUser.id);
+    await setupCommonMocks(page);
+    await use(page);
+    await cleanDatabase(supabase, testUser.id);
+  },
+});

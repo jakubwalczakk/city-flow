@@ -1,5 +1,4 @@
-import { test, expect, generateTestEmail, createTestUser, cleanDatabase } from '../fixtures';
-import { setupCommonMocks } from '../test-setup';
+import { cleanTest as test, expect, generateTestEmail, createTestUser } from '../fixtures';
 import { LoginPage } from '../page-objects/LoginPage';
 import { OnboardingModal } from '../page-objects/OnboardingModal';
 
@@ -8,24 +7,11 @@ import { OnboardingModal } from '../page-objects/OnboardingModal';
  * Tests cover: successful login, invalid credentials, and redirects
  */
 test.describe('User Login', () => {
-  let loginPage: LoginPage;
-  let onboardingModal: OnboardingModal;
-
-  test.beforeEach(async ({ page, supabase, testUser }) => {
-    // Clean up test user data before each test
-    await cleanDatabase(supabase, testUser.id);
-
-    // Setup common mocks for API calls
-    await setupCommonMocks(page);
-
-    // Initialize page objects
-    loginPage = new LoginPage(page);
-    onboardingModal = new OnboardingModal(page);
-  });
 
   test('should successfully login with correct credentials', async ({ page, supabase }) => {
     const testEmail = generateTestEmail('login-success');
     const testPassword = 'TestPassword123!';
+    const loginPage = new LoginPage(page);
 
     // Create test user with onboarding completed
     await createTestUser(supabase, {
@@ -51,6 +37,7 @@ test.describe('User Login', () => {
     const testEmail = generateTestEmail('wrong-password');
     const correctPassword = 'CorrectPassword123!';
     const wrongPassword = 'WrongPassword123!';
+    const loginPage = new LoginPage(page);
 
     // Create test user
     await createTestUser(supabase, {
@@ -80,6 +67,7 @@ test.describe('User Login', () => {
   test('should show error with non-existent user', async ({ page }) => {
     const nonExistentEmail = generateTestEmail('non-existent');
     const password = 'SomePassword123!';
+    const loginPage = new LoginPage(page);
 
     await loginPage.goto();
 
@@ -101,6 +89,7 @@ test.describe('User Login', () => {
   test('should redirect logged-in user away from login page', async ({ page, supabase }) => {
     const testEmail = generateTestEmail('already-logged');
     const testPassword = 'TestPassword123!';
+    const loginPage = new LoginPage(page);
 
     // Create test user
     await createTestUser(supabase, {
@@ -125,6 +114,7 @@ test.describe('User Login', () => {
   });
 
   test('should navigate to register page when clicking register link', async ({ page }) => {
+    const loginPage = new LoginPage(page);
     await loginPage.goto();
 
     await loginPage.clickRegisterLink();
@@ -133,6 +123,7 @@ test.describe('User Login', () => {
   });
 
   test('should navigate to forgot password page when clicking forgot password link', async ({ page }) => {
+    const loginPage = new LoginPage(page);
     await loginPage.goto();
 
     await loginPage.clickForgotPassword();
@@ -143,6 +134,8 @@ test.describe('User Login', () => {
   test('should show onboarding modal for new user without completed onboarding', async ({ page, supabase }) => {
     const testEmail = generateTestEmail('new-user-onboarding');
     const testPassword = 'TestPassword123!';
+    const loginPage = new LoginPage(page);
+    const onboardingModal = new OnboardingModal(page);
 
     // Create test user WITHOUT onboarding completed
     await createTestUser(supabase, {
