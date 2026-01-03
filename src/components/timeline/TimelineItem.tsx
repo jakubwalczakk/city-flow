@@ -27,7 +27,7 @@ function TimelineItemComponent({ item, currency, onEdit, onDelete }: TimelineIte
   const CategoryIcon = getCategoryIcon(item.category);
 
   return (
-    <div className='relative'>
+    <div className='relative' data-testid='activity-item'>
       {/* Timeline dot */}
       <div className='absolute -left-[29px] top-1.5 flex h-4 w-4 items-center justify-center'>
         <div className='h-3 w-3 rounded-full border-2 border-primary bg-background' />
@@ -40,7 +40,10 @@ function TimelineItemComponent({ item, currency, onEdit, onDelete }: TimelineIte
             <div className='flex items-center gap-2 mb-2 flex-wrap'>
               {/* Time badge */}
               {item.time && (
-                <div className='inline-flex items-center gap-1.5 rounded-md bg-primary/10 px-2 py-1 text-xs font-medium text-primary'>
+                <div
+                  className='inline-flex items-center gap-1.5 rounded-md bg-primary/10 px-2 py-1 text-xs font-medium text-primary'
+                  data-testid='activity-time'
+                >
                   <Clock className='h-3 w-3' />
                   {item.time}
                 </div>
@@ -94,7 +97,7 @@ function TimelineItemComponent({ item, currency, onEdit, onDelete }: TimelineIte
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align='end'>
                   {onEdit && (
-                    <DropdownMenuItem onClick={() => onEdit(item)}>
+                    <DropdownMenuItem onClick={() => onEdit(item)} data-testid='edit-activity'>
                       <Pencil className='mr-2 h-4 w-4' />
                       Edytuj
                     </DropdownMenuItem>
@@ -103,6 +106,7 @@ function TimelineItemComponent({ item, currency, onEdit, onDelete }: TimelineIte
                     <DropdownMenuItem
                       onClick={() => onDelete(item.id)}
                       className='text-destructive focus:text-destructive'
+                      data-testid='delete-activity'
                     >
                       <Trash2 className='mr-2 h-4 w-4' />
                       Usuń

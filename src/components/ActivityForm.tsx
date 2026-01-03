@@ -40,7 +40,7 @@ export default function ActivityForm({ isOpen, onClose, onSubmit, initialData, m
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className='sm:max-w-[500px]'>
+      <DialogContent className='sm:max-w-[500px]' data-testid='activity-form-modal'>
         <DialogHeader>
           <DialogTitle>{dialogTitle}</DialogTitle>
           <DialogDescription>{dialogDescription}</DialogDescription>
@@ -103,10 +103,16 @@ export default function ActivityForm({ isOpen, onClose, onSubmit, initialData, m
             </div>
 
             <DialogFooter>
-              <Button type='button' variant='outline' onClick={onClose} disabled={isSubmitting}>
+              <Button
+                type='button'
+                variant='outline'
+                onClick={onClose}
+                disabled={isSubmitting}
+                data-testid='cancel-activity'
+              >
                 Anuluj
               </Button>
-              <Button type='submit' disabled={isSubmitting}>
+              <Button type='submit' disabled={isSubmitting} data-testid='save-activity'>
                 {isSubmitting ? 'Zapisywanie...' : submitLabel}
               </Button>
             </DialogFooter>
