@@ -38,8 +38,7 @@ test.describe('Plan Details', () => {
       name: 'Draft Plan Details',
       destination: 'Paris, France',
       status: 'draft',
-      month: 'June',
-      description: 'A lovely trip to Paris',
+      notes: 'A lovely trip to Paris',
       withFixedPoints: true,
     });
 
@@ -69,7 +68,6 @@ test.describe('Plan Details', () => {
       name: 'Generated Plan Details',
       destination: 'Barcelona, Spain',
       status: 'generated',
-      month: 'July',
       withFixedPoints: true,
       withActivities: true,
     });
@@ -123,7 +121,6 @@ test.describe('Plan Details', () => {
       name: 'Detailed Metadata Plan',
       destination: 'Rome, Italy',
       status: 'draft',
-      month: 'September',
       startDate: '2026-09-15',
       endDate: '2026-09-20',
       description: 'An amazing Roman holiday',

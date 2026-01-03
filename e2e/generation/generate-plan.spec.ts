@@ -52,8 +52,7 @@ test.describe('Plan Generation', () => {
       name: 'Rzym - City Break',
       destination: 'Rzym',
       status: 'draft',
-      month: 'Czerwiec',
-      description: '3-dniowy city break, sztuka i jedzenie',
+      notes: '3-dniowy city break, sztuka i jedzenie',
       startDate: '2026-06-15',
       endDate: '2026-06-17',
     });

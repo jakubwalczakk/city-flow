@@ -33,7 +33,6 @@ test.describe('PDF Export', () => {
       name: 'Rzym - Czerwiec 2026',
       destination: 'Rzym',
       status: 'generated',
-      month: 'Czerwiec',
       startDate: '2026-06-15',
       endDate: '2026-06-17',
       withActivities: true,
@@ -91,7 +90,6 @@ test.describe('PDF Export', () => {
       name: 'Florence Art Tour',
       destination: 'Florence, Italy',
       status: 'generated',
-      month: 'September',
       startDate: '2026-09-10',
       endDate: '2026-09-12',
       withActivities: true,
@@ -209,7 +207,6 @@ test.describe('PDF Export', () => {
       name: 'Barcelona Trip',
       destination: 'Barcelona',
       status: 'generated',
-      month: 'August',
       withActivities: true,
     });
 

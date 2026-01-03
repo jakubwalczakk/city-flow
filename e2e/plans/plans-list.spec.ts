@@ -53,21 +53,18 @@ test.describe('Plans List', () => {
       name: 'Trip to Rome',
       destination: 'Rome, Italy',
       status: 'draft',
-      month: 'June',
     });
 
     await createTestPlan(supabase, testUser.id, {
       name: 'Barcelona Weekend',
       destination: 'Barcelona, Spain',
       status: 'generated',
-      month: 'July',
     });
 
     await createTestPlan(supabase, testUser.id, {
       name: 'Prague Adventure',
       destination: 'Prague, Czech Republic',
       status: 'draft',
-      month: 'August',
     });
 
     // Navigate to plans page
@@ -206,7 +203,6 @@ test.describe('Plans List', () => {
       name: 'Detailed Plan',
       destination: 'Munich, Germany',
       status: 'draft',
-      month: 'September',
       startDate: '2026-09-15',
       endDate: '2026-09-20',
       description: 'A wonderful trip to Munich',

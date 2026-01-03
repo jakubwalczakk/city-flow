@@ -30,8 +30,8 @@ export class PlanDetailsPage {
 
   constructor(page: Page) {
     this.page = page;
-    this.planTitle = page.getByTestId('plan-title');
-    this.editTitleButton = page.getByTestId('edit-title-button');
+    this.planTitle = page.getByRole('heading', { level: 1 });
+    this.editTitleButton = page.getByRole('button', { name: /edytuj nazwę planu/i });
     this.titleInput = page.getByTestId('title-input');
     this.destination = page.getByTestId('plan-destination');
     this.dates = page.getByTestId('plan-dates');
@@ -40,7 +40,7 @@ export class PlanDetailsPage {
     this.activities = page.getByTestId('activity-item');
     this.generateButton = page.getByTestId('generate-plan-button');
     this.generateAgainButton = page.getByTestId('generate-again-button');
-    this.exportButton = page.getByTestId('export-pdf-button');
+    this.exportButton = page.getByRole('button', { name: /eksportuj do pdf/i });
     this.deleteButton = page.getByTestId('delete-plan-button');
     this.actionsMenu = page.getByTestId('plan-actions-menu');
     this.fixedPointsList = page.getByTestId('fixed-points-list');
