@@ -1,35 +1,14 @@
-import { test, expect, cleanDatabase, createTestPlan, setGenerationLimit, getGenerationCount } from '../fixtures';
+import { authTest as test, expect, createTestPlan, getGenerationCount } from '../fixtures';
 import { mockGenerationError, mockOpenRouterAPI } from '../test-setup';
-import { LoginPage } from '../page-objects/LoginPage';
 import { PlanDetailsPage } from '../page-objects/PlanDetailsPage';
 import { GenerationLoadingPage } from '../page-objects/GenerationLoadingPage';
 
-const TEST_USER_EMAIL = process.env.E2E_USERNAME || 'test@example.com';
-const TEST_USER_PASSWORD = process.env.E2E_PASSWORD || 'testpassword123';
-
 test.describe('Generation Error Handling', () => {
-  let loginPage: LoginPage;
-  let planDetailsPage: PlanDetailsPage;
-  let generationLoadingPage: GenerationLoadingPage;
-
-  test.beforeEach(async ({ page, supabase, testUser }) => {
-    await cleanDatabase(supabase, testUser.id);
-    await setGenerationLimit(supabase, testUser.id, 0);
-
-    loginPage = new LoginPage(page);
-    planDetailsPage = new PlanDetailsPage(page);
-    generationLoadingPage = new GenerationLoadingPage(page);
-
-    await loginPage.goto();
-    await loginPage.login(TEST_USER_EMAIL, TEST_USER_PASSWORD);
-    await page.waitForURL(/\/plans/, { timeout: 10000 });
-  });
-
-  test.afterEach(async ({ supabase, testUser }) => {
-    await cleanDatabase(supabase, testUser.id);
-  });
-
   test('should handle API timeout error', async ({ page, supabase, testUser }) => {
+    // Local initialization (not global)
+    const planDetailsPage = new PlanDetailsPage(page);
+    const generationLoadingPage = new GenerationLoadingPage(page);
+
     // Arrange
     const { planId } = await createTestPlan(supabase, testUser.id, {
       status: 'draft',

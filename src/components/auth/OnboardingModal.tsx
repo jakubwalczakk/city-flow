@@ -39,8 +39,8 @@ export function OnboardingModal() {
         onEscapeKeyDown={(e) => e.preventDefault()}
       >
         <DialogHeader>
-          <DialogTitle>Witaj w CityFlow!</DialogTitle>
-          <DialogDescription>
+          <DialogTitle data-testid='onboarding-title'>Witaj w CityFlow!</DialogTitle>
+          <DialogDescription data-testid='onboarding-description'>
             Opowiedz nam trochę o swoich preferencjach podróżniczych, abyśmy mogli tworzyć lepsze plany dla Ciebie.
           </DialogDescription>
         </DialogHeader>
@@ -48,12 +48,19 @@ export function OnboardingModal() {
         <div className='grid gap-6 py-4'>
           <div className='space-y-2'>
             <TravelPaceSelector value={pace} onChange={setPace} />
-            {errors.pace && <p className='text-sm text-destructive'>{errors.pace}</p>}
+            {errors.pace && (
+              <p className='text-sm text-destructive' data-testid='onboarding-pace-error'>
+                {errors.pace}
+              </p>
+            )}
           </div>
 
           <PreferencesSelector value={preferences} onChange={setPreferences} error={errors.preferences} />
 
-          <div className='rounded-md bg-muted p-3 text-sm text-muted-foreground'>
+          <div
+            className='rounded-md bg-muted p-3 text-sm text-muted-foreground'
+            data-testid='onboarding-generations-info'
+          >
             <p>
               Twoje konto darmowe pozwala na wygenerowanie <strong>{profile?.generations_remaining || 0} planów</strong>
               . Wykorzystaj je mądrze!

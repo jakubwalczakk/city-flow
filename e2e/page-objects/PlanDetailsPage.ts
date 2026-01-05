@@ -322,7 +322,7 @@ export class PlanDetailsPage {
     // Check for 403/404 error or redirect to plans list
     const is403or404 = this.page.url().includes('/plans') && !this.page.url().match(/\/plans\/[^/]+$/);
     const hasErrorMessage = await this.page
-      .getByText(/brak dostępu|nie znaleziono|access denied|not found/i)
+      .getByTestId('plans-list-error')
       .isVisible()
       .catch(() => false);
 

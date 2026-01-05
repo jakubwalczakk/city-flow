@@ -15,15 +15,17 @@ export function TravelPaceSelector({ value, onChange }: TravelPaceSelectorProps)
   const paceOptions: TravelPace[] = ['slow', 'moderate', 'intensive'];
 
   return (
-    <div className='space-y-2'>
-      <Label htmlFor='travel-pace'>Tempo zwiedzania</Label>
+    <div className='space-y-2' data-testid='travel-pace-selector'>
+      <Label htmlFor='travel-pace' data-testid='travel-pace-label'>
+        Tempo zwiedzania
+      </Label>
       <Select value={value || undefined} onValueChange={(newValue) => onChange(newValue as TravelPace)}>
-        <SelectTrigger id='travel-pace'>
+        <SelectTrigger id='travel-pace' data-testid='travel-pace-trigger'>
           <SelectValue placeholder='Wybierz tempo' />
         </SelectTrigger>
         <SelectContent>
           {paceOptions.map((pace) => (
-            <SelectItem key={pace} value={pace}>
+            <SelectItem key={pace} value={pace} data-testid={`travel-pace-${pace}`}>
               {TRAVEL_PACE_LABELS[pace]}
             </SelectItem>
           ))}

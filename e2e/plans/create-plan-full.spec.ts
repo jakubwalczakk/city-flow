@@ -1,42 +1,18 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { test, expect, cleanDatabase } from '../fixtures';
+import { test, expect } from '../fixtures';
 import { mockOpenRouterAPI } from '../test-setup';
-import { LoginPage } from '../page-objects/LoginPage';
 import { NewPlanPage } from '../page-objects/NewPlanPage';
 import { PlansListPage } from '../page-objects/PlansListPage';
 
-const TEST_USER_EMAIL = process.env.E2E_USERNAME || 'test@example.com';
-const TEST_USER_PASSWORD = process.env.E2E_PASSWORD || 'testpassword123';
-
 test.describe('Create Plan - Full Flow', () => {
-  let loginPage: LoginPage;
-  let newPlanPage: NewPlanPage;
-  let plansListPage: PlansListPage;
-
-  test.beforeEach(async ({ page, supabase, testUser }) => {
-    // Clean database before each test
-    await cleanDatabase(supabase, testUser.id);
+  test('should create a draft plan without generating', async ({ page, supabase, testUser }) => {
+    // Local initialization (not global)
+    const newPlanPage = new NewPlanPage(page);
+    const plansListPage = new PlansListPage(page);
 
     // Setup mocks for OpenRouter API (not Plans API - we want to test real DB operations)
     await mockOpenRouterAPI(page);
 
-    // Initialize page objects
-    loginPage = new LoginPage(page);
-    newPlanPage = new NewPlanPage(page);
-    plansListPage = new PlansListPage(page);
-
-    // Login
-    await loginPage.goto();
-    await loginPage.login(TEST_USER_EMAIL, TEST_USER_PASSWORD);
-    await newPlanPage.handleOnboarding();
-  });
-
-  test.afterEach(async ({ supabase, testUser }) => {
-    // Clean up after each test
-    await cleanDatabase(supabase, testUser.id);
-  });
-
-  test('should create a draft plan without generating', async ({ page, supabase, testUser }) => {
     // Open new plan modal
     await newPlanPage.openNewPlanModal();
 
@@ -77,6 +53,12 @@ test.describe('Create Plan - Full Flow', () => {
   });
 
   test('should create and generate a plan (full flow)', async ({ page, supabase, testUser }) => {
+    // Local initialization (not global)
+    const newPlanPage = new NewPlanPage(page);
+
+    // Setup mocks for OpenRouter API (not Plans API - we want to test real DB operations)
+    await mockOpenRouterAPI(page);
+
     // Note: This test needs to wait longer due to plan generation
     test.setTimeout(60000);
 
@@ -111,6 +93,9 @@ test.describe('Create Plan - Full Flow', () => {
   });
 
   test('should show validation errors for empty required fields', async ({ page }) => {
+    // Local initialization (not global)
+    const newPlanPage = new NewPlanPage(page);
+
     // Open new plan modal
     await newPlanPage.openNewPlanModal();
 
@@ -128,7 +113,7 @@ test.describe('Create Plan - Full Flow', () => {
       // Should show validation errors and stay on the same step
       // Check for error messages (these will depend on your actual implementation)
       const hasErrors = await page
-        .getByText(/wymagane|required/i)
+        .getByTestId('form-error-message')
         .isVisible()
         .catch(() => false);
       expect(hasErrors).toBeTruthy();
@@ -139,6 +124,9 @@ test.describe('Create Plan - Full Flow', () => {
   });
 
   test('should allow canceling plan creation', async ({ page, supabase, testUser }) => {
+    // Local initialization (not global)
+    const newPlanPage = new NewPlanPage(page);
+
     // Open new plan modal
     await newPlanPage.openNewPlanModal();
 
@@ -169,6 +157,9 @@ test.describe('Create Plan - Full Flow', () => {
   });
 
   test('should preserve data when navigating between steps', async ({ page }) => {
+    // Local initialization (not global)
+    const newPlanPage = new NewPlanPage(page);
+
     // Open new plan modal
     await newPlanPage.openNewPlanModal();
 
@@ -188,13 +179,16 @@ test.describe('Create Plan - Full Flow', () => {
     // Verify all data is shown in summary
     // This will depend on your summary implementation
     const summaryVisible = await page
-      .getByText(planName)
+      .getByTestId('summary-plan-name')
       .isVisible()
       .catch(() => false);
     expect(summaryVisible).toBeTruthy();
   });
 
   test('should handle multiple fixed points', async ({ page, supabase, testUser }) => {
+    // Local initialization (not global)
+    const newPlanPage = new NewPlanPage(page);
+
     // Open new plan modal
     await newPlanPage.openNewPlanModal();
 

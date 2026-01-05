@@ -27,8 +27,13 @@ export default defineConfig({
   reporter: 'html',
   /* Global timeout for each test - increased for generation tests */
   timeout: 60000, // 60 seconds per test
+  /* Global setup to create shared test users */
+  globalSetup: './e2e/global-setup.ts',
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
+    /* Pass env vars to tests and global setup */
+    supabaseUrl: process.env.SUPABASE_URL,
+    supabaseKey: process.env.SUPABASE_KEY,
     /* Base URL to use in actions like `await page.goto('/')`. */
     baseURL: 'http://localhost:3000',
 
@@ -55,7 +60,11 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: {
+        ...devices['Desktop Chrome'],
+        // Use default test user for tests that don't specify shared user
+        storageState: process.env.E2E_USERNAME ? undefined : './e2e/.auth/BASIC_USER.json',
+      },
     },
   ],
 

@@ -45,6 +45,8 @@ export const PlanCard = ({ plan, onClick, onDelete }: PlanCardProps) => {
       tabIndex={0}
       onKeyDown={handleKeyDown}
       aria-label={`View plan: ${plan.name}`}
+      data-testid='plan-card'
+      data-plan-id={plan.id}
     >
       {/* Delete button in top right corner */}
       <div className='absolute right-2 top-2 z-10'>
@@ -56,11 +58,12 @@ export const PlanCard = ({ plan, onClick, onDelete }: PlanCardProps) => {
               className='h-8 w-8 opacity-0 transition-opacity group-hover:opacity-100'
               onClick={(e) => e.stopPropagation()}
               aria-label='Usuń plan'
+              data-testid='delete-plan-action'
             >
               <Trash2 className='h-4 w-4 text-destructive' />
             </Button>
           </AlertDialogTrigger>
-          <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+          <AlertDialogContent onClick={(e) => e.stopPropagation()} data-testid='confirm-dialog'>
             <AlertDialogHeader>
               <AlertDialogTitle>Czy na pewno chcesz usunąć ten plan?</AlertDialogTitle>
               <AlertDialogDescription>
@@ -68,10 +71,11 @@ export const PlanCard = ({ plan, onClick, onDelete }: PlanCardProps) => {
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Anuluj</AlertDialogCancel>
+              <AlertDialogCancel data-testid='confirm-dialog-cancel'>Anuluj</AlertDialogCancel>
               <AlertDialogAction
                 onClick={handleDelete}
                 className='bg-destructive text-destructive-foreground hover:bg-destructive/90'
+                data-testid='confirm-dialog-confirm'
               >
                 Usuń
               </AlertDialogAction>
@@ -81,25 +85,35 @@ export const PlanCard = ({ plan, onClick, onDelete }: PlanCardProps) => {
       </div>
 
       <CardHeader>
-        <CardTitle className='line-clamp-1 pr-8'>{plan.name}</CardTitle>
-        <CardDescription className='line-clamp-1'>{plan.destination}</CardDescription>
+        <CardTitle className='line-clamp-1 pr-8' data-testid='plan-name'>
+          {plan.name}
+        </CardTitle>
+        <CardDescription className='line-clamp-1' data-testid='plan-destination'>
+          {plan.destination}
+        </CardDescription>
       </CardHeader>
 
       <CardContent>
         <div className='flex flex-col gap-1 text-sm text-muted-foreground'>
           <div className='flex items-center justify-between'>
             <span>Data rozpoczęcia:</span>
-            <span className='font-medium'>{formatCardDateTime(plan.start_date)}</span>
+            <span className='font-medium' data-testid='plan-start-date'>
+              {formatCardDateTime(plan.start_date)}
+            </span>
           </div>
           <div className='flex items-center justify-between'>
             <span>Data zakończenia:</span>
-            <span className='font-medium'>{formatCardDateTime(plan.end_date)}</span>
+            <span className='font-medium' data-testid='plan-end-date'>
+              {formatCardDateTime(plan.end_date)}
+            </span>
           </div>
         </div>
       </CardContent>
 
       <CardFooter>
-        <Badge variant={statusConfig.variant}>{statusConfig.label}</Badge>
+        <Badge variant={statusConfig.variant} data-testid='plan-status'>
+          {statusConfig.label}
+        </Badge>
       </CardFooter>
     </Card>
   );

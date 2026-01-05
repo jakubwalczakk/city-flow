@@ -30,7 +30,11 @@ export default function EventTimeline({ items, currency = 'PLN', onEdit, onDelet
   });
 
   if (!items || items.length === 0) {
-    return <div className='text-center py-8 text-muted-foreground'>Brak zaplanowanych aktywności na ten dzień.</div>;
+    return (
+      <div className='text-center py-8 text-muted-foreground' data-testid='empty-activities-message'>
+        Brak zaplanowanych aktywności na ten dzień.
+      </div>
+    );
   }
 
   return (

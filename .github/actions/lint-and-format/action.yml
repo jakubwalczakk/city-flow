@@ -2,7 +2,7 @@ name: 'Lint and Format Check'
 description: 'Run ESLint and check code formatting with Prettier'
 
 runs:
-  using: "composite"
+  using: 'composite'
   steps:
     - name: Run ESLint
       shell: bash
@@ -11,4 +11,3 @@ runs:
     - name: Check code formatting
       shell: bash
       run: npm run format -- --check
-

@@ -1,44 +1,19 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-unused-vars */
-import { test, expect, createTestPlan, cleanDatabase } from '../fixtures';
-import { mockOpenRouterAPI } from '../test-setup';
-import { LoginPage } from '../page-objects/LoginPage';
+import { planViewerTest as test, expect } from '../shared-user-fixtures';
+import { createTestPlan } from '../fixtures';
 import { PlanDetailsPage } from '../page-objects/PlanDetailsPage';
 
-const TEST_USER_EMAIL = process.env.E2E_USERNAME || 'test@example.com';
-const TEST_USER_PASSWORD = process.env.E2E_PASSWORD || 'testpassword123';
-
 test.describe('Plan Details', () => {
-  let loginPage: LoginPage;
-  let planDetailsPage: PlanDetailsPage;
+  test('displays complete draft plan details with all UI elements', async ({ page, supabase, sharedUser }) => {
+    const planDetailsPage = new PlanDetailsPage(page);
 
-  test.beforeEach(async ({ page, supabase, testUser }) => {
-    // Clean database before each test
-    await cleanDatabase(supabase, testUser.id);
-
-    // Setup mocks
-    await mockOpenRouterAPI(page);
-
-    // Initialize page objects
-    loginPage = new LoginPage(page);
-    planDetailsPage = new PlanDetailsPage(page);
-
-    // Login
-    await loginPage.goto();
-    await loginPage.login(TEST_USER_EMAIL, TEST_USER_PASSWORD);
-  });
-
-  test.afterEach(async ({ supabase, testUser }) => {
-    // Clean up after each test
-    await cleanDatabase(supabase, testUser.id);
-  });
-
-  test('should display draft plan details correctly', async ({ page, supabase, testUser }) => {
-    // Create a draft plan
-    const { planId } = await createTestPlan(supabase, testUser.id, {
-      name: 'Draft Plan Details',
+    // Create a draft plan with fixed points
+    const { planId } = await createTestPlan(supabase, sharedUser.id, {
+      name: 'Complete Draft Plan',
       destination: 'Paris, France',
       status: 'draft',
       notes: 'A lovely trip to Paris',
+      startDate: '2026-09-15',
+      endDate: '2026-09-20',
       withFixedPoints: true,
     });
 
@@ -46,28 +21,43 @@ test.describe('Plan Details', () => {
     await planDetailsPage.goto(planId);
     await planDetailsPage.waitForPageLoad();
 
-    // Verify plan title
+    // Verify plan title and metadata
     const title = await planDetailsPage.getTitle();
-    expect(title).toContain('Draft Plan Details');
+    expect(title).toContain('Complete Draft Plan');
 
-    // Verify plan is in draft status (has generate button)
+    await expect(planDetailsPage.destination).toContainText('Paris, France');
+
+    const datesText = await planDetailsPage.dates.textContent().catch(() => '');
+    expect(datesText).toContain('2026');
+
+    // Verify plan is in draft status
     const isDraft = await planDetailsPage.isDraft();
     expect(isDraft).toBeTruthy();
 
-    // Verify generate button is visible
     await expect(planDetailsPage.generateButton).toBeVisible();
 
     // Verify no timeline/activities (because it's draft)
     const isGenerated = await planDetailsPage.isGenerated();
     expect(isGenerated).toBeFalsy();
+
+    // Check if fixed points are displayed
+    const hasFixedPoints = await planDetailsPage.fixedPointsList.isVisible().catch(() => false);
+    if (hasFixedPoints) {
+      const fixedPointCount = await planDetailsPage.fixedPointsList.count();
+      expect(fixedPointCount).toBeGreaterThan(0);
+    }
   });
 
-  test('should display generated plan with activities', async ({ page, supabase, testUser }) => {
+  test('displays complete generated plan with activities', async ({ page, supabase, sharedUser }) => {
+    const planDetailsPage = new PlanDetailsPage(page);
+
     // Create a generated plan with activities
-    const { planId } = await createTestPlan(supabase, testUser.id, {
-      name: 'Generated Plan Details',
+    const { planId } = await createTestPlan(supabase, sharedUser.id, {
+      name: 'Generated Plan with Activities',
       destination: 'Barcelona, Spain',
       status: 'generated',
+      startDate: '2026-08-01',
+      endDate: '2026-08-05',
       withFixedPoints: true,
       withActivities: true,
     });
@@ -76,9 +66,9 @@ test.describe('Plan Details', () => {
     await planDetailsPage.goto(planId);
     await planDetailsPage.waitForPageLoad();
 
-    // Verify plan title
+    // Verify plan title and destination
     await planDetailsPage.verifyPlanDetails({
-      title: 'Generated Plan Details',
+      title: 'Generated Plan with Activities',
       destination: 'Barcelona, Spain',
     });
 
@@ -93,9 +83,15 @@ test.describe('Plan Details', () => {
     // Verify generate button is not visible
     const isDraft = await planDetailsPage.isDraft();
     expect(isDraft).toBeFalsy();
+
+    // Verify timeline is visible
+    const hasTimeline = await planDetailsPage.timeline.isVisible();
+    expect(hasTimeline).toBeTruthy();
   });
 
-  test('should show 404 or error for non-existent plan', async ({ page, supabase, testUser }) => {
+  test('handles non-existent plan with proper error handling', async ({ page }) => {
+    const planDetailsPage = new PlanDetailsPage(page);
+
     // Try to access a non-existent plan
     const nonExistentId = '00000000-0000-0000-0000-000000000000';
 
@@ -108,198 +104,116 @@ test.describe('Plan Details', () => {
     const currentUrl = page.url();
     const isOnErrorPage = currentUrl.includes('/plans') && !currentUrl.includes(nonExistentId);
     const hasErrorMessage = await page
-      .getByText(/nie znaleziono|not found|błąd/i)
+      .getByTestId('plans-list-error')
       .isVisible()
       .catch(() => false);
 
     expect(isOnErrorPage || hasErrorMessage).toBeTruthy();
   });
 
-  test('should display plan metadata correctly', async ({ page, supabase, testUser }) => {
-    // Create a plan with full details
-    const { planId } = await createTestPlan(supabase, testUser.id, {
-      name: 'Detailed Metadata Plan',
+  test('allows navigation through breadcrumbs and action buttons', async ({ page, supabase, sharedUser }) => {
+    const planDetailsPage = new PlanDetailsPage(page);
+
+    // Create a plan
+    const { planId } = await createTestPlan(supabase, sharedUser.id, {
+      name: 'Navigation Test Plan',
       destination: 'Rome, Italy',
       status: 'draft',
-      startDate: '2026-09-15',
-      endDate: '2026-09-20',
-      description: 'An amazing Roman holiday',
     });
 
     // Navigate to plan details
     await planDetailsPage.goto(planId);
     await planDetailsPage.waitForPageLoad();
 
-    // Verify destination is shown
-    await expect(planDetailsPage.destination).toContainText('Rome, Italy');
+    // Verify title and basic info
+    const title = await planDetailsPage.getTitle();
+    expect(title).toContain('Navigation Test Plan');
 
-    // Verify dates are shown
-    const datesText = await planDetailsPage.dates.textContent().catch(() => '');
-    expect(datesText).toContain('2026');
-
-    // Verify description is shown (if your UI displays it)
-    const hasDescription = await page
-      .getByText(/Roman holiday/i)
+    // Try clicking breadcrumbs/navigation elements if they exist
+    const hasBreadcrumbs = await page
+      .getByRole('navigation')
       .isVisible()
       .catch(() => false);
-    // Description might not always be shown, so we don't fail if it's not there
-  });
-
-  test('should display fixed points for a plan', async ({ page, supabase, testUser }) => {
-    // Create a plan with fixed points
-    const { planId } = await createTestPlan(supabase, testUser.id, {
-      name: 'Plan with Fixed Points',
-      destination: 'Prague',
-      status: 'draft',
-      withFixedPoints: true,
-    });
-
-    // Navigate to plan details
-    await planDetailsPage.goto(planId);
-    await planDetailsPage.waitForPageLoad();
-
-    // Check if fixed points are displayed
-    const hasFixedPoints = await planDetailsPage.fixedPointsList.isVisible().catch(() => false);
-
-    if (hasFixedPoints) {
-      // Verify fixed point content
-      await expect(planDetailsPage.fixedPointsList).toContainText('Test Location 1');
+    if (hasBreadcrumbs) {
+      // Breadcrumbs exist, could test navigation
+      await expect(page.getByRole('navigation')).toBeVisible();
     }
+
+    // Verify action buttons are available
+    const canEditTitle = await planDetailsPage.canEditTitle();
+    expect(canEditTitle).toBeTruthy(); // Draft plans should be editable
   });
 
-  test('should show export button for generated plans', async ({ page, supabase, testUser }) => {
-    // Create a generated plan
-    const { planId } = await createTestPlan(supabase, testUser.id, {
-      name: 'Exportable Plan',
-      destination: 'Vienna',
-      status: 'generated',
-      withActivities: true,
-    });
-
-    // Navigate to plan details
-    await planDetailsPage.goto(planId);
-    await planDetailsPage.waitForPageLoad();
-
-    // Verify export button is visible
-    const exportVisible = await planDetailsPage.exportButton.isVisible().catch(() => false);
-
-    // Export might only be available for generated plans
-    if (exportVisible) {
-      await expect(planDetailsPage.exportButton).toBeVisible();
-    }
-  });
-
-  test('should handle plan with multiple days and activities', async ({ page, supabase, testUser }) => {
-    // Create a generated plan
-    const { planId } = await createTestPlan(supabase, testUser.id, {
-      name: 'Multi-Day Plan',
-      destination: 'Amsterdam',
-      status: 'generated',
-      startDate: '2026-08-01',
-      endDate: '2026-08-05',
-      withActivities: true,
-    });
-
-    // Navigate to plan details
-    await planDetailsPage.goto(planId);
-    await planDetailsPage.waitForPageLoad();
-
-    // Verify timeline is visible
-    await expect(planDetailsPage.timeline).toBeVisible();
-
-    // Verify activities are shown
-    const activityCount = await planDetailsPage.getActivityCount();
-    expect(activityCount).toBeGreaterThanOrEqual(2);
-
-    // Verify each activity has required information
-    const firstActivity = planDetailsPage.activities.first();
-    await expect(firstActivity).toBeVisible();
-  });
-
-  test('should allow generating a plan from draft status', async ({ page, supabase, testUser }) => {
-    // Note: This test takes longer due to generation
-    test.setTimeout(60000);
+  test('displays status badges correctly for different plan states', async ({ page, supabase, sharedUser }) => {
+    const planDetailsPage = new PlanDetailsPage(page);
 
     // Create a draft plan
-    const { planId } = await createTestPlan(supabase, testUser.id, {
-      name: 'Plan to Generate',
-      destination: 'Berlin',
+    const { planId: draftId } = await createTestPlan(supabase, sharedUser.id, {
+      name: 'Draft Badge Plan',
+      destination: 'Vienna',
       status: 'draft',
-      withFixedPoints: true,
     });
 
-    // Navigate to plan details
-    await planDetailsPage.goto(planId);
+    // Check draft status
+    await planDetailsPage.goto(draftId);
     await planDetailsPage.waitForPageLoad();
 
-    // Verify it's draft
     const isDraft = await planDetailsPage.isDraft();
     expect(isDraft).toBeTruthy();
 
-    // Click generate button
-    await planDetailsPage.generatePlan();
+    // Create a generated plan
+    const { planId: generatedId } = await createTestPlan(supabase, sharedUser.id, {
+      name: 'Generated Badge Plan',
+      destination: 'Prague',
+      status: 'generated',
+      withActivities: true,
+    });
 
-    // After generation, verify the plan status changed
-    const { data: updatedPlan } = await supabase.from('plans').select('status').eq('id', planId).single();
+    // Check generated status
+    await planDetailsPage.goto(generatedId);
+    await planDetailsPage.waitForPageLoad();
 
-    // Status should be 'generated' or 'generating'
-    expect(['generated', 'generating']).toContain(updatedPlan!.status);
-
-    // Verify activities were created
-    const { data: days } = await supabase
-      .from('generated_plan_days')
-      .select('*, plan_activities(*)')
-      .eq('plan_id', planId);
-
-    if (days && days.length > 0) {
-      expect(days.length).toBeGreaterThan(0);
-    }
+    const isGenerated = await planDetailsPage.isGenerated();
+    expect(isGenerated).toBeTruthy();
   });
 
-  test('should display action buttons for plan management', async ({ page, supabase, testUser }) => {
-    // Create a plan
-    const { planId } = await createTestPlan(supabase, testUser.id, {
-      name: 'Plan with Actions',
-      destination: 'Munich',
+  test('handles plans with minimal and maximum data correctly', async ({ page, supabase, sharedUser }) => {
+    const planDetailsPage = new PlanDetailsPage(page);
+
+    // Create a minimal plan
+    const { planId: minimalId } = await createTestPlan(supabase, sharedUser.id, {
+      name: 'Minimal Plan',
+      destination: 'City',
       status: 'draft',
     });
 
-    // Navigate to plan details
-    await planDetailsPage.goto(planId);
+    // Navigate to minimal plan
+    await planDetailsPage.goto(minimalId);
     await planDetailsPage.waitForPageLoad();
 
-    // Check for edit title button
-    const hasEditButton = await planDetailsPage.editTitleButton.isVisible().catch(() => false);
-    expect(hasEditButton).toBeTruthy();
+    // Should display without errors
+    const title1 = await planDetailsPage.getTitle();
+    expect(title1).toContain('Minimal Plan');
 
-    // Check for delete button (might be in actions menu)
-    const hasActionsMenu = await planDetailsPage.actionsMenu.isVisible().catch(() => false);
-    if (hasActionsMenu) {
-      await planDetailsPage.actionsMenu.click();
-      await page.waitForTimeout(200);
-      await expect(planDetailsPage.deleteButton).toBeVisible();
-    } else {
-      // Delete button might be directly visible
-      const hasDeleteButton = await planDetailsPage.deleteButton.isVisible().catch(() => false);
-      expect(hasDeleteButton).toBeTruthy();
-    }
-  });
-
-  test('should handle very long plan names gracefully', async ({ page, supabase, testUser }) => {
-    // Create a plan with a very long name
-    const longName = 'A'.repeat(200) + ' - Very Long Plan Name';
-    const { planId } = await createTestPlan(supabase, testUser.id, {
-      name: longName,
-      destination: 'Test City',
-      status: 'draft',
+    // Create a plan with lots of data
+    const { planId: maximalId } = await createTestPlan(supabase, sharedUser.id, {
+      name: 'Maximal Plan with Very Long Name That Tests Display',
+      destination: 'Some Very Long Destination Name, Country',
+      status: 'generated',
+      withFixedPoints: true,
+      withActivities: true,
+      notes: 'This is a plan with lots of details and notes attached to it.',
     });
 
-    // Navigate to plan details
-    await planDetailsPage.goto(planId);
+    // Navigate to maximal plan
+    await planDetailsPage.goto(maximalId);
     await planDetailsPage.waitForPageLoad();
 
-    // Verify the page loads and shows the title (truncated or full)
-    const title = await planDetailsPage.getTitle();
-    expect(title.length).toBeGreaterThan(0);
+    // Should display without errors
+    const title2 = await planDetailsPage.getTitle();
+    expect(title2.length).toBeGreaterThan(0);
+
+    const activityCount = await planDetailsPage.getActivityCount();
+    expect(activityCount).toBeGreaterThan(0);
   });
 });

@@ -29,7 +29,7 @@ concurrency:
 
 # Permissions for workflow operations
 permissions:
-  contents: read       # Read repository contents
+  contents: read # Read repository contents
 
 # ============================================================================
 # JOBS: Validation runs in reusable workflow, deployment happens after

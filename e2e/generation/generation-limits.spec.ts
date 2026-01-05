@@ -1,33 +1,11 @@
-import { test, expect, cleanDatabase, createTestPlan, setGenerationLimit, getGenerationCount } from '../fixtures';
-import { mockOpenRouterAPI } from '../test-setup';
-import { LoginPage } from '../page-objects/LoginPage';
+import { authTest as test, expect, createTestPlan, setGenerationLimit, getGenerationCount } from '../fixtures';
 import { PlanDetailsPage } from '../page-objects/PlanDetailsPage';
 
-const TEST_USER_EMAIL = process.env.E2E_USERNAME || 'test@example.com';
-const TEST_USER_PASSWORD = process.env.E2E_PASSWORD || 'testpassword123';
-
 test.describe('Generation Limits', () => {
-  let loginPage: LoginPage;
-  let planDetailsPage: PlanDetailsPage;
+  test('should generate plan with available limit', async ({ page, supabase, testUser }) => {
+    // Local initialization (not global)
+    const planDetailsPage = new PlanDetailsPage(page);
 
-  test.beforeEach(async ({ page, supabase, testUser }) => {
-    await cleanDatabase(supabase, testUser.id);
-
-    loginPage = new LoginPage(page);
-    planDetailsPage = new PlanDetailsPage(page);
-
-    await mockOpenRouterAPI(page);
-
-    await loginPage.goto();
-    await loginPage.login(TEST_USER_EMAIL, TEST_USER_PASSWORD);
-    await page.waitForURL(/\/plans/, { timeout: 10000 });
-  });
-
-  test.afterEach(async ({ supabase, testUser }) => {
-    await cleanDatabase(supabase, testUser.id);
-  });
-
-  test('should generate plan with available limit', async ({ supabase, testUser }) => {
     // Arrange - Set limit to 5 (0 used)
     await setGenerationLimit(supabase, testUser.id, 0);
 
@@ -51,6 +29,9 @@ test.describe('Generation Limits', () => {
   });
 
   test('should prevent generation when limit exhausted', async ({ page, supabase, testUser }) => {
+    // Local initialization (not global)
+    const planDetailsPage = new PlanDetailsPage(page);
+
     // Arrange - Set limit to 5 (all used)
     await setGenerationLimit(supabase, testUser.id, 5);
 
@@ -98,6 +79,9 @@ test.describe('Generation Limits', () => {
   });
 
   test('should display generation counter in UI', async ({ page, supabase, testUser }) => {
+    // Local initialization (not global)
+    const planDetailsPage = new PlanDetailsPage(page);
+
     // Arrange - Set limit to 3 used
     await setGenerationLimit(supabase, testUser.id, 3);
 
@@ -129,6 +113,9 @@ test.describe('Generation Limits', () => {
   });
 
   test('should update counter after generation', async ({ page, supabase, testUser }) => {
+    // Local initialization (not global)
+    const planDetailsPage = new PlanDetailsPage(page);
+
     // Arrange - Start with 2 used
     await setGenerationLimit(supabase, testUser.id, 2);
 
@@ -163,7 +150,10 @@ test.describe('Generation Limits', () => {
     expect(generationsUsed).toBe(3); // 2 + 1 = 3
   });
 
-  test('should allow generation with 1 generation left', async ({ supabase, testUser }) => {
+  test('should allow generation with 1 generation left', async ({ supabase, testUser, page }) => {
+    // Local initialization (not global)
+    const planDetailsPage = new PlanDetailsPage(page);
+
     // Arrange - Set to 4 used (1 remaining)
     await setGenerationLimit(supabase, testUser.id, 4);
 
@@ -199,6 +189,9 @@ test.describe('Generation Limits', () => {
   });
 
   test('should show informative message about limit reset', async ({ page, supabase, testUser }) => {
+    // Local initialization (not global)
+    const planDetailsPage = new PlanDetailsPage(page);
+
     // Arrange - Exhaust limit
     await setGenerationLimit(supabase, testUser.id, 5);
 
@@ -238,6 +231,9 @@ test.describe('Generation Limits', () => {
   });
 
   test('should not decrease counter on failed generation', async ({ page, supabase, testUser }) => {
+    // Local initialization (not global)
+    const planDetailsPage = new PlanDetailsPage(page);
+
     // Arrange
     await setGenerationLimit(supabase, testUser.id, 2);
 

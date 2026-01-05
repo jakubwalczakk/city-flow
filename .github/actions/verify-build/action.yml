@@ -22,7 +22,7 @@ inputs:
     default: 'true'
 
 runs:
-  using: "composite"
+  using: 'composite'
   steps:
     - name: Build for production
       shell: bash
@@ -50,4 +50,3 @@ runs:
         path: dist/
         retention-days: ${{ inputs.retention-days }}
         if-no-files-found: error
-

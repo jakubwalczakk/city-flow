@@ -35,7 +35,7 @@ inputs:
     required: true
 
 runs:
-  using: "composite"
+  using: 'composite'
   steps:
     - name: Get Playwright version
       id: playwright-version
@@ -129,4 +129,3 @@ runs:
         path: test-results/
         retention-days: ${{ inputs.retention-days-results }}
         if-no-files-found: ignore
-

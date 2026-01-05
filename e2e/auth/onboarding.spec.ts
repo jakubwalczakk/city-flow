@@ -1,5 +1,4 @@
-import { test, expect, generateTestEmail, createTestUser, cleanDatabase } from '../fixtures';
-import { setupCommonMocks } from '../test-setup';
+import { cleanTest as test, expect, generateTestEmail, createTestUser } from '../fixtures';
 import { RegisterPage } from '../page-objects/RegisterPage';
 import { LoginPage } from '../page-objects/LoginPage';
 import { OnboardingModal } from '../page-objects/OnboardingModal';
@@ -9,26 +8,11 @@ import { OnboardingModal } from '../page-objects/OnboardingModal';
  * Tests cover: completing onboarding, skipping onboarding, and preference selection
  */
 test.describe('User Onboarding', () => {
-  let registerPage: RegisterPage;
-  let loginPage: LoginPage;
-  let onboardingModal: OnboardingModal;
-
-  test.beforeEach(async ({ page, supabase, testUser }) => {
-    // Clean up test user data
-    await cleanDatabase(supabase, testUser.id);
-
-    // Setup common mocks
-    await setupCommonMocks(page);
-
-    // Initialize page objects
-    registerPage = new RegisterPage(page);
-    loginPage = new LoginPage(page);
-    onboardingModal = new OnboardingModal(page);
-  });
-
   test('should complete onboarding after registration with preferences', async ({ page }) => {
     const testEmail = generateTestEmail('onboarding-complete');
     const testPassword = 'TestPassword123!';
+    const registerPage = new RegisterPage(page);
+    const onboardingModal = new OnboardingModal(page);
 
     // Register new user
     await registerPage.goto();
@@ -62,6 +46,8 @@ test.describe('User Onboarding', () => {
   test('should skip onboarding and proceed to plans', async ({ page }) => {
     const testEmail = generateTestEmail('onboarding-skip');
     const testPassword = 'TestPassword123!';
+    const registerPage = new RegisterPage(page);
+    const onboardingModal = new OnboardingModal(page);
 
     // Register new user
     await registerPage.goto();
@@ -86,6 +72,8 @@ test.describe('User Onboarding', () => {
   test('should not show onboarding for user who already completed it', async ({ page, supabase }) => {
     const testEmail = generateTestEmail('onboarding-completed');
     const testPassword = 'TestPassword123!';
+    const loginPage = new LoginPage(page);
+    const onboardingModal = new OnboardingModal(page);
 
     // Create user with onboarding already completed
     await createTestUser(supabase, {
@@ -111,6 +99,8 @@ test.describe('User Onboarding', () => {
   test('should show onboarding on first login for new user', async ({ page, supabase }) => {
     const testEmail = generateTestEmail('first-login-onboarding');
     const testPassword = 'TestPassword123!';
+    const loginPage = new LoginPage(page);
+    const onboardingModal = new OnboardingModal(page);
 
     // Create user WITHOUT onboarding completed
     await createTestUser(supabase, {
@@ -134,6 +124,8 @@ test.describe('User Onboarding', () => {
   test('should require at least 2 preferences to save onboarding', async ({ page, supabase }) => {
     const testEmail = generateTestEmail('min-preferences');
     const testPassword = 'TestPassword123!';
+    const loginPage = new LoginPage(page);
+    const onboardingModal = new OnboardingModal(page);
 
     // Create user without onboarding
     await createTestUser(supabase, {

@@ -21,7 +21,7 @@ concurrency:
 
 # Permissions for workflow operations
 permissions:
-  contents: read       # Read repository contents
+  contents: read # Read repository contents
   pull-requests: write # Write PR comments
 
 jobs:

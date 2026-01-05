@@ -54,12 +54,14 @@ export default function FeedbackModule({ planId }: FeedbackModuleProps) {
               selected={selectedRating === 'thumbs_up'}
               onSelect={updateRating}
               disabled={isSubmitting}
+              data-testid='feedback-rate-positive'
             />
             <RatingButton
               type='thumbs_down'
               selected={selectedRating === 'thumbs_down'}
               onSelect={updateRating}
               disabled={isSubmitting}
+              data-testid='feedback-rate-negative'
             />
           </div>
         </div>
@@ -77,6 +79,7 @@ export default function FeedbackModule({ planId }: FeedbackModuleProps) {
             rows={4}
             className='resize-none'
             disabled={isSubmitting}
+            data-testid='feedback-comment-textarea'
           />
         </div>
 
@@ -89,6 +92,7 @@ export default function FeedbackModule({ planId }: FeedbackModuleProps) {
                 : 'bg-red-50 text-red-800 border border-red-200'
             }`}
             role='alert'
+            data-testid={`feedback-message-${submitMessage.type}`}
           >
             {submitMessage.text}
           </div>
@@ -96,7 +100,11 @@ export default function FeedbackModule({ planId }: FeedbackModuleProps) {
 
         {/* Submit button */}
         <div className='flex justify-end'>
-          <Button onClick={handleSubmit} disabled={!selectedRating || !hasChanges || isSubmitting}>
+          <Button
+            onClick={handleSubmit}
+            disabled={!selectedRating || !hasChanges || isSubmitting}
+            data-testid='feedback-submit-btn'
+          >
             {isSubmitting ? 'Wysyłanie...' : feedback ? 'Zaktualizuj opinię' : 'Wyślij opinię'}
           </Button>
         </div>

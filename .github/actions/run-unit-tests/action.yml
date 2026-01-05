@@ -16,7 +16,7 @@ inputs:
     default: '0'
 
 runs:
-  using: "composite"
+  using: 'composite'
   steps:
     - name: Run unit tests with coverage
       shell: bash
@@ -55,4 +55,3 @@ runs:
           fi
           echo "✅ Coverage meets threshold: ${LINES_PCT}% >= ${THRESHOLD}%"
         fi
-

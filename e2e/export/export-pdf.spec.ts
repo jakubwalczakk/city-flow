@@ -1,33 +1,11 @@
-import { test, expect, cleanDatabase, createTestPlan, verifyPdfDownload, verifyPdfContent } from '../fixtures';
-import { mockOpenRouterAPI } from '../test-setup';
-import { LoginPage } from '../page-objects/LoginPage';
+import { authTest as test, expect, createTestPlan, verifyPdfDownload, verifyPdfContent } from '../fixtures';
 import { PlanDetailsPage } from '../page-objects/PlanDetailsPage';
 
-const TEST_USER_EMAIL = process.env.E2E_USERNAME || 'test@example.com';
-const TEST_USER_PASSWORD = process.env.E2E_PASSWORD || 'testpassword123';
-
 test.describe('PDF Export', () => {
-  let loginPage: LoginPage;
-  let planDetailsPage: PlanDetailsPage;
+  test('should export generated plan to PDF', async ({ page, supabase, testUser }) => {
+    // Local initialization (not global)
+    const planDetailsPage = new PlanDetailsPage(page);
 
-  test.beforeEach(async ({ page, supabase, testUser }) => {
-    await cleanDatabase(supabase, testUser.id);
-
-    loginPage = new LoginPage(page);
-    planDetailsPage = new PlanDetailsPage(page);
-
-    await mockOpenRouterAPI(page);
-
-    await loginPage.goto();
-    await loginPage.login(TEST_USER_EMAIL, TEST_USER_PASSWORD);
-    await page.waitForURL(/\/plans/, { timeout: 10000 });
-  });
-
-  test.afterEach(async ({ supabase, testUser }) => {
-    await cleanDatabase(supabase, testUser.id);
-  });
-
-  test('should export generated plan to PDF', async ({ supabase, testUser }) => {
     // Arrange - Create generated plan with activities
     const { planId } = await createTestPlan(supabase, testUser.id, {
       name: 'Rzym - Czerwiec 2026',

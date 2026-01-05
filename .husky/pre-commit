@@ -1,1 +1,1 @@
-npx lint-staged
+. "$HOME/.nvm/nvm.sh" && npx lint-staged

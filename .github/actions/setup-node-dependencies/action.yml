@@ -2,7 +2,7 @@ name: 'Setup Node.js and Dependencies'
 description: 'Setup Node.js from .nvmrc and install dependencies with caching'
 
 runs:
-  using: "composite"
+  using: 'composite'
   steps:
     - name: Setup Node.js
       uses: actions/setup-node@v4
@@ -13,4 +13,3 @@ runs:
     - name: Install dependencies
       shell: bash
       run: npm ci
-

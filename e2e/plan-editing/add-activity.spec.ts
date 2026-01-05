@@ -1,102 +1,15 @@
-import { test, expect, cleanDatabase, createPlanWithActivities } from '../fixtures';
-import { LoginPage } from '../page-objects/LoginPage';
+import { planEditorTest as test, expect } from '../shared-user-fixtures';
+import { createPlanWithActivities, cleanupUserData } from '../fixtures';
 import { PlanTimelinePage } from '../page-objects/PlanTimelinePage';
 import { ActivityFormModal } from '../page-objects/ActivityFormModal';
-import { mockOpenRouterAPI } from '../test-setup';
-
-const TEST_USER_EMAIL = process.env.E2E_USERNAME || 'test@example.com';
-const TEST_USER_PASSWORD = process.env.E2E_PASSWORD || 'testpassword123';
 
 test.describe('Add Activity to Plan', () => {
-  let loginPage: LoginPage;
-  let planTimelinePage: PlanTimelinePage;
-  let activityFormModal: ActivityFormModal;
-  let planId: string;
+  test('adds activity with full and minimal form data to various positions', async ({ page, supabase, sharedUser }) => {
+    const planTimelinePage = new PlanTimelinePage(page);
+    const activityFormModal = new ActivityFormModal(page);
 
-  test.beforeEach(async ({ page, supabase, testUser }) => {
-    // Clean database before each test
-    await cleanDatabase(supabase, testUser.id);
-
-    // Mock OpenRouter API
-    await mockOpenRouterAPI(page);
-
-    // Initialize page objects
-    loginPage = new LoginPage(page);
-    planTimelinePage = new PlanTimelinePage(page);
-    activityFormModal = new ActivityFormModal(page);
-
-    // Create a plan with one day and one existing activity
-    planId = await createPlanWithActivities(supabase, testUser.id, {
-      name: 'Paris Trip',
-      destination: 'Paris',
-      startDate: '2026-06-15',
-      days: [
-        {
-          date: '2026-06-15',
-          activities: [
-            {
-              title: 'Muzeum Luwr',
-              time: '09:00',
-              duration: '2 godziny',
-              category: 'culture',
-              location: 'Rue de Rivoli, Paris',
-              description: 'Wizyta w słynnym muzeum',
-            },
-          ],
-        },
-      ],
-    });
-
-    // Login
-    await loginPage.goto();
-    await loginPage.login(TEST_USER_EMAIL, TEST_USER_PASSWORD);
-  });
-
-  test('should add custom activity to empty day', async ({ supabase, testUser }) => {
-    // Create a plan with one empty day
-    await cleanDatabase(supabase, testUser.id);
-    planId = await createPlanWithActivities(supabase, testUser.id, {
-      name: 'Paris Trip',
-      destination: 'Paris',
-      startDate: '2026-06-15',
-      days: [
-        {
-          date: '2026-06-15',
-          activities: [],
-        },
-      ],
-    });
-
-    // Navigate to plan
-    await planTimelinePage.goto(planId);
-
-    // Open add activity form for Day 1
-    await planTimelinePage.addActivityToDay(1);
-
-    // Fill form
-    await activityFormModal.fillForm({
-      title: 'Lunch w restauracji Le Marais',
-      location: 'Dzielnica Le Marais, Paryż',
-      time: '12:30',
-      duration: 90,
-      category: 'Jedzenie',
-      description: 'Lunch w lokalnej restauracji',
-    });
-
-    // Save
-    await activityFormModal.save();
-
-    // Verify activity was added
-    await expect(planTimelinePage.getActivity('Lunch w restauracji Le Marais')).toBeVisible();
-
-    // Verify toast message
-    await planTimelinePage.waitForToast('Aktywność dodana');
-  });
-
-  test('should add activity between existing activities', async ({ supabase, testUser }) => {
-    // Create plan with activities at 9:00 and 14:00
-    await cleanDatabase(supabase, testUser.id);
-    planId = await createPlanWithActivities(supabase, testUser.id, {
+    // Create plan with existing activities
+    const planId = await createPlanWithActivities(supabase, sharedUser.id, {
       name: 'Paris Trip',
       destination: 'Paris',
       startDate: '2026-06-15',
@@ -121,99 +34,108 @@ test.describe('Add Activity to Plan', () => {
       ],
     });
 
-    // Navigate to plan
     await planTimelinePage.goto(planId);
-
-    // Expand day to see activities
     await planTimelinePage.expandDay(1);
 
-    // Add activity between them
+    // Test 1: Add activity with full form (between existing activities)
     await planTimelinePage.addActivityToDay(1);
-
     await activityFormModal.fillForm({
-      title: 'Lunch',
-      time: '12:00',
-      duration: 60,
+      title: 'Lunch w restauracji Le Marais',
+      location: 'Dzielnica Le Marais, Paryż',
+      time: '12:30',
+      duration: 90,
       category: 'Jedzenie',
+      description: 'Lunch w lokalnej restauracji',
     });
-
     await activityFormModal.save();
 
-    // Verify all 3 activities are visible
-    const count = await planTimelinePage.getActivitiesCount();
-    expect(count).toBe(3);
+    await expect(planTimelinePage.getActivity('Lunch w restauracji Le Marais')).toBeVisible();
+    await planTimelinePage.waitForToast('Aktywność dodana');
 
-    // Verify the new activity is visible
-    await expect(planTimelinePage.getActivity('Lunch')).toBeVisible();
-  });
-
-  test('should add activity with minimal form (only required fields)', async () => {
-    // Navigate to plan
-    await planTimelinePage.goto(planId);
-
-    // Open add form
+    // Test 2: Add activity with minimal form (only required fields)
     await planTimelinePage.addActivityToDay(1);
-
-    // Fill only required field (title)
     await activityFormModal.fillForm({
       title: 'Spacer po Montmartre',
       time: '16:00',
     });
-
-    // Save
     await activityFormModal.save();
 
-    // Verify activity was added
     await expect(planTimelinePage.getActivity('Spacer po Montmartre')).toBeVisible();
+
+    // Verify all 4 activities are now visible
+    let count = await planTimelinePage.getActivitiesCount();
+    expect(count).toBe(4);
+
+    // Test 3: Add to empty day
+    await cleanupUserData(supabase, sharedUser.id, { keepUser: true });
+
+    const emptyPlanId = await createPlanWithActivities(supabase, sharedUser.id, {
+      name: 'Empty Day Plan',
+      destination: 'Rome',
+      startDate: '2026-07-01',
+      days: [
+        {
+          date: '2026-07-01',
+          activities: [],
+        },
+      ],
+    });
+
+    await planTimelinePage.goto(emptyPlanId);
+    await planTimelinePage.addActivityToDay(1);
+    await activityFormModal.fillForm({
+      title: 'Colosseum Visit',
+      time: '10:00',
+    });
+    await activityFormModal.save();
+
+    await expect(planTimelinePage.getActivity('Colosseum Visit')).toBeVisible();
+    count = await planTimelinePage.getActivitiesCount();
+    expect(count).toBe(1);
   });
 
-  test('should cancel adding activity', async () => {
-    // Navigate to plan
-    await planTimelinePage.goto(planId);
+  test('cancels adding activity with button and keyboard', async ({ page, supabase, sharedUser }) => {
+    const planTimelinePage = new PlanTimelinePage(page);
+    const activityFormModal = new ActivityFormModal(page);
 
-    // Get initial activity count
+    const planId = await createPlanWithActivities(supabase, sharedUser.id, {
+      name: 'Paris Trip',
+      destination: 'Paris',
+      startDate: '2026-06-15',
+      days: [
+        {
+          date: '2026-06-15',
+          activities: [],
+        },
+      ],
+    });
+
+    await planTimelinePage.goto(planId);
     await planTimelinePage.expandDay(1);
     const initialCount = await planTimelinePage.getActivitiesCount();
 
-    // Open add form
+    // Test cancel with button
     await planTimelinePage.addActivityToDay(1);
-
-    // Fill form
     await activityFormModal.fillForm({
-      title: 'Test Activity',
+      title: 'Test Activity 1',
       time: '15:00',
     });
-
-    // Cancel
     await activityFormModal.cancel();
 
-    // Verify modal is closed
     expect(await activityFormModal.isVisible()).toBe(false);
+    await expect(planTimelinePage.getActivity('Test Activity 1')).not.toBeVisible();
 
-    // Verify activity count unchanged
-    const finalCount = await planTimelinePage.getActivitiesCount();
-    expect(finalCount).toBe(initialCount);
-
-    // Verify activity not visible
-    await expect(planTimelinePage.getActivity('Test Activity')).not.toBeVisible();
-  });
-
-  test('should close form with Escape key', async () => {
-    // Navigate to plan
-    await planTimelinePage.goto(planId);
-
-    // Open add form
+    // Test cancel with Escape key
     await planTimelinePage.addActivityToDay(1);
-
-    // Fill some data
     await activityFormModal.fillForm({
-      title: 'Test Activity',
+      title: 'Test Activity 2',
     });
-
-    // Press Escape
     await activityFormModal.closeWithEscape();
 
-    // Verify modal is closed
     expect(await activityFormModal.isVisible()).toBe(false);
+
+    // Verify no activities were added
+    const finalCount = await planTimelinePage.getActivitiesCount();
+    expect(finalCount).toBe(initialCount);
   });
 });

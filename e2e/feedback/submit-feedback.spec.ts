@@ -1,7 +1,5 @@
-import { test, expect } from '../fixtures';
+import { authTest as test, expect, createPlanWithActivities, getFeedback } from '../fixtures';
 import { PlanDetailsPage } from '../page-objects/PlanDetailsPage';
-import { LoginPage } from '../page-objects/LoginPage';
-import { cleanDatabase, createPlanWithActivities, getFeedback } from '../fixtures';
 
 /**
  * E2E Tests for Submitting Feedback Comments
@@ -9,21 +7,6 @@ import { cleanDatabase, createPlanWithActivities, getFeedback } from '../fixture
  */
 
 test.describe('Feedback Comments', () => {
-  test.beforeEach(async ({ page, supabase, testUser }) => {
-    // Clean database before each test
-    await cleanDatabase(supabase, testUser.id);
-
-    // Login
-    const loginPage = new LoginPage(page);
-    await loginPage.goto();
-    await loginPage.login(testUser.email, process.env.E2E_PASSWORD || 'TestPassword123!');
-  });
-
-  test.afterEach(async ({ supabase, testUser }) => {
-    // Clean up test data
-    await cleanDatabase(supabase, testUser.id);
-  });
-
   test('should allow adding comment without rating', async ({ page, supabase, testUser }) => {
     // Create a generated plan
     const planId = await createPlanWithActivities(supabase, testUser.id, {

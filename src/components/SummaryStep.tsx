@@ -41,28 +41,32 @@ export const SummaryStep = memo(function SummaryStep({
           <CardTitle className='text-base'>Podstawowe informacje</CardTitle>
         </CardHeader>
         <CardContent className='space-y-3'>
-          <SummaryField label='Nazwa planu'>{basicInfo.name}</SummaryField>
+          <SummaryField label='Nazwa planu'>
+            <span data-testid='summary-plan-name'>{basicInfo.name}</span>
+          </SummaryField>
 
           <SummaryField icon={MapPin} label='Miejsce docelowe'>
-            {basicInfo.destination}
+            <span data-testid='summary-destination'>{basicInfo.destination}</span>
           </SummaryField>
 
           <SummaryField icon={Calendar} label='Daty i godziny podróży'>
             <div className='flex flex-col gap-2'>
               <div className='flex items-center gap-2'>
                 <span className='text-sm text-muted-foreground font-normal'>Początek:</span>
-                <span>{formatDateObjectLong(basicInfo.start_date)}</span>
+                <span data-testid='summary-start-date'>{formatDateObjectLong(basicInfo.start_date)}</span>
               </div>
               <div className='flex items-center gap-2'>
                 <span className='text-sm text-muted-foreground font-normal'>Koniec:</span>
-                <span>{formatDateObjectLong(basicInfo.end_date)}</span>
+                <span data-testid='summary-end-date'>{formatDateObjectLong(basicInfo.end_date)}</span>
               </div>
             </div>
           </SummaryField>
 
           {basicInfo.notes && (
             <SummaryField icon={FileText} label='Notatki'>
-              <p className='text-sm font-normal'>{basicInfo.notes}</p>
+              <p className='text-sm font-normal' data-testid='summary-notes'>
+                {basicInfo.notes}
+              </p>
             </SummaryField>
           )}
         </CardContent>
@@ -78,11 +82,13 @@ export const SummaryStep = memo(function SummaryStep({
         </CardHeader>
         <CardContent>
           {fixedPoints.length === 0 ? (
-            <p className='text-sm text-muted-foreground'>Nie dodano stałych punktów. Możesz dodać je później.</p>
+            <p className='text-sm text-muted-foreground' data-testid='summary-no-fixed-points'>
+              Nie dodano stałych punktów. Możesz dodać je później.
+            </p>
           ) : (
-            <div className='space-y-3'>
+            <div className='space-y-3' data-testid='summary-fixed-points-list'>
               {fixedPoints.map((point, index) => (
-                <FixedPointSummaryItem key={index} point={point} />
+                <FixedPointSummaryItem key={index} point={point} data-testid={`summary-fixed-point-${index}`} />
               ))}
             </div>
           )}
@@ -90,11 +96,15 @@ export const SummaryStep = memo(function SummaryStep({
       </Card>
 
       {/* Error message */}
-      {error && <div className='rounded-lg bg-destructive/15 p-4 text-sm text-destructive'>{error}</div>}
+      {error && (
+        <div className='rounded-lg bg-destructive/15 p-4 text-sm text-destructive' data-testid='summary-error-message'>
+          {error}
+        </div>
+      )}
 
       {/* Navigation buttons */}
       <div className='flex justify-between pt-4'>
-        <Button variant='outline' onClick={goToPrevStep} disabled={isLoading}>
+        <Button variant='outline' onClick={goToPrevStep} disabled={isLoading} data-testid='summary-back-button'>
           Wstecz
         </Button>
         <Button onClick={onSubmit} disabled={isLoading} data-testid='create-plan-button'>

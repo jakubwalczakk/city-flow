@@ -34,7 +34,9 @@ export const PlansDashboard = () => {
     <div className='container mx-auto px-4 py-8'>
       {/* Header */}
       <div className='mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
-        <h1 className='text-3xl font-bold tracking-tight'>Moje Plany</h1>
+        <h1 className='text-3xl font-bold tracking-tight' data-testid='plans-dashboard-title'>
+          Moje Plany
+        </h1>
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
           <DialogTrigger asChild>
             <Button
@@ -48,7 +50,7 @@ export const PlansDashboard = () => {
               + Utwórz nowy plan
             </Button>
           </DialogTrigger>
-          <DialogContent className='sm:max-w-4xl'>
+          <DialogContent className='sm:max-w-4xl' data-testid='new-plan-modal'>
             <NewPlanForm onFinished={handleModalClose} editingPlan={editingPlan} />
           </DialogContent>
         </Dialog>
@@ -56,13 +58,17 @@ export const PlansDashboard = () => {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={handleTabChange} className='w-full'>
-        <TabsList className='mb-6 grid w-full max-w-md grid-cols-2'>
-          <TabsTrigger value='my-plans'>Moje Plany</TabsTrigger>
-          <TabsTrigger value='history'>Historia</TabsTrigger>
+        <TabsList className='mb-6 grid w-full max-w-md grid-cols-2' data-testid='plans-tabs-list'>
+          <TabsTrigger value='my-plans' data-testid='my-plans-tab'>
+            Moje Plany
+          </TabsTrigger>
+          <TabsTrigger value='history' data-testid='history-tab'>
+            Historia
+          </TabsTrigger>
         </TabsList>
 
         {/* Plans Content - same for both tabs, data differs based on status filter */}
-        <TabsContent value='my-plans'>
+        <TabsContent value='my-plans' data-testid='my-plans-tab-content'>
           <PlansTabContent
             plans={plans}
             isLoading={isLoading}
@@ -76,7 +82,7 @@ export const PlansDashboard = () => {
           />
         </TabsContent>
 
-        <TabsContent value='history'>
+        <TabsContent value='history' data-testid='history-tab-content'>
           <PlansTabContent
             plans={plans}
             isLoading={isLoading}

@@ -50,7 +50,7 @@ function PlanDetailsViewContent({ planId }: PlanDetailsViewProps) {
   }
 
   return (
-    <div className='space-y-6'>
+    <div className='space-y-6' data-testid='plan-details-view'>
       {/* Back navigation */}
       <div className='flex items-center gap-2'>
         <BackLink />
@@ -59,7 +59,7 @@ function PlanDetailsViewContent({ planId }: PlanDetailsViewProps) {
       <PlanHeader plan={plan} onUpdate={updatePlanName} onDelete={deletePlan} onArchive={archivePlan} />
 
       {plan.status === 'draft' && (
-        <div className='mt-6'>
+        <div className='mt-6' data-testid='plan-draft-section'>
           <NewPlanForm
             editingPlan={{
               id: plan.id,
@@ -77,12 +77,14 @@ function PlanDetailsViewContent({ planId }: PlanDetailsViewProps) {
 
       {plan.status === 'generated' && (
         <>
-          <GeneratedPlanView
-            plan={plan}
-            onAddActivity={openAddForm}
-            onEditActivity={openEditForm}
-            onDeleteActivity={handleDelete}
-          />
+          <div data-testid='plan-generated-section'>
+            <GeneratedPlanView
+              plan={plan}
+              onAddActivity={openAddForm}
+              onEditActivity={openEditForm}
+              onDeleteActivity={handleDelete}
+            />
+          </div>
           <ActivityForm
             isOpen={formState.isOpen}
             onClose={closeForm}
@@ -94,10 +96,10 @@ function PlanDetailsViewContent({ planId }: PlanDetailsViewProps) {
       )}
 
       {plan.status === 'archived' && (
-        <>
+        <div data-testid='plan-archived-section'>
           <ArchivedBanner />
           <GeneratedPlanView plan={plan} />
-        </>
+        </div>
       )}
     </div>
   );
