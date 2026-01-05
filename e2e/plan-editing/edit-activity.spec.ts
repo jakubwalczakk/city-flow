@@ -52,7 +52,7 @@ test.describe('Edit Activity', () => {
     await activityFormModal.save();
 
     await planTimelinePage.waitForToast('Aktywność zaktualizowana');
-    await expect(planTimelinePage.getActivity('Muzeum Luwr')).toBeVisible();
+    await expect(await planTimelinePage.getActivity('Muzeum Luwr')).toBeVisible();
 
     const activity1 = await getActivityByTitle(supabase, planId, 'Muzeum Luwr');
     expect(activity1).toBeTruthy();
@@ -67,8 +67,8 @@ test.describe('Edit Activity', () => {
     });
     await activityFormModal.save();
 
-    await expect(planTimelinePage.getActivity('Lunch w Le Marais')).toBeVisible();
-    await expect(planTimelinePage.getActivity('Lunch w kawiarni')).not.toBeVisible();
+    await expect(await planTimelinePage.getActivity('Lunch w Le Marais')).toBeVisible();
+    await expect(await planTimelinePage.getActivity('Lunch w kawiarni')).not.toBeVisible();
 
     // Test 3: Edit multiple fields at once
     await planTimelinePage.editActivity('Lunch w Le Marais');
@@ -84,7 +84,7 @@ test.describe('Edit Activity', () => {
     });
     await activityFormModal.save();
 
-    await expect(planTimelinePage.getActivity('Muzeum Orsay')).toBeVisible();
+    await expect(await planTimelinePage.getActivity('Muzeum Orsay')).toBeVisible();
 
     const activity3 = await getActivityByTitle(supabase, planId, 'Muzeum Orsay');
     expect(activity3).toBeTruthy();
@@ -129,8 +129,8 @@ test.describe('Edit Activity', () => {
     await activityFormModal.cancel();
 
     expect(await activityFormModal.isVisible()).toBe(false);
-    await expect(planTimelinePage.getActivity('Muzeum Luwr')).toBeVisible();
-    await expect(planTimelinePage.getActivity('Changed Title 1')).not.toBeVisible();
+    await expect(await planTimelinePage.getActivity('Muzeum Luwr')).toBeVisible();
+    await expect(await planTimelinePage.getActivity('Changed Title 1')).not.toBeVisible();
 
     let currentActivity = await getActivityByTitle(supabase, planId, 'Muzeum Luwr');
     expect(currentActivity).toEqual(originalActivity);
@@ -143,7 +143,7 @@ test.describe('Edit Activity', () => {
     await activityFormModal.closeWithEscape();
 
     expect(await activityFormModal.isVisible()).toBe(false);
-    await expect(planTimelinePage.getActivity('Muzeum Luwr')).toBeVisible();
+    await expect(await planTimelinePage.getActivity('Muzeum Luwr')).toBeVisible();
 
     currentActivity = await getActivityByTitle(supabase, planId, 'Muzeum Luwr');
     expect(currentActivity).toEqual(originalActivity);
@@ -182,6 +182,6 @@ test.describe('Edit Activity', () => {
     });
     await activityFormModal.save();
 
-    await expect(planTimelinePage.getActivity('Lunch w kawiarni')).toBeVisible();
+    await expect(await planTimelinePage.getActivity('Lunch w kawiarni')).toBeVisible();
   });
 });

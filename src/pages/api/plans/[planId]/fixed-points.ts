@@ -84,14 +84,7 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
 
     // Create the fixed point
     const fixedPointService = new FixedPointService(locals);
-    const fixedPoint = await fixedPointService.createFixedPoint(
-      planId,
-      {
-        ...validation.data,
-        event_duration: validation.data.event_duration ?? null,
-      },
-      userId
-    );
+    const fixedPoint = await fixedPointService.createFixedPoint(planId, validation.data, userId);
 
     return successResponse(fixedPoint, 201);
   } catch (error) {

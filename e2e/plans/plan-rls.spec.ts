@@ -472,9 +472,6 @@ test.describe('Plan Row Level Security (RLS)', () => {
       withActivities: true,
     });
 
-    // Get activity IDs
-    const { data: days } = await supabase.from('generated_plan_days').select('id').eq('plan_id', planIdA);
-
     // Create User B
     const userB = await createTestUser(supabase, {
       password: TEST_USER_PASSWORD,

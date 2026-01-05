@@ -24,7 +24,7 @@ export function useFixedPointForm({ onAdd, onUpdate }: UseFixedPointFormProps) {
     defaultValues: {
       location: '',
       event_at: '',
-      event_duration: null,
+      event_duration: undefined,
       description: '',
     },
   });
@@ -33,7 +33,7 @@ export function useFixedPointForm({ onAdd, onUpdate }: UseFixedPointFormProps) {
     form.reset({
       location: '',
       event_at: '',
-      event_duration: null,
+      event_duration: undefined,
       description: '',
     });
     setIsAdding(false);
@@ -63,7 +63,7 @@ export function useFixedPointForm({ onAdd, onUpdate }: UseFixedPointFormProps) {
       const pointToSubmit: FixedPointFormItem = {
         location: data.location,
         event_at: data.event_at ? new Date(data.event_at).toISOString() : '',
-        event_duration: data.event_duration ?? null,
+        event_duration: data.event_duration,
         description: data.description ?? null,
       };
 

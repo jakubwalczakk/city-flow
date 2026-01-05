@@ -10,16 +10,21 @@ vi.mock('@/hooks/useAuth', () => ({
 
 describe('useRegisterForm', () => {
   let mockRegister: ReturnType<typeof vi.fn>;
-  let mockUseAuth: ReturnType<typeof vi.fn>;
+  let mockUseAuth: ReturnType<typeof useAuth>;
 
   beforeEach(() => {
     mockRegister = vi.fn().mockResolvedValue(undefined);
     mockUseAuth = {
       register: mockRegister,
+      login: vi.fn(),
+      resetPassword: vi.fn(),
+      updatePassword: vi.fn(),
       isLoading: false,
       error: null,
       success: null,
-    };
+      clearError: vi.fn(),
+      clearSuccess: vi.fn(),
+    } as ReturnType<typeof useAuth>;
     vi.mocked(useAuth).mockReturnValue(mockUseAuth);
   });
 

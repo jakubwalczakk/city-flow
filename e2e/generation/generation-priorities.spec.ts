@@ -70,15 +70,15 @@ test.describe('Generation Priorities', () => {
       {
         plan_id: planId,
         location: 'Lotnisko Chopina',
-        date: '2026-06-14',
-        time: '08:00',
+        event_at: '2026-06-14T08:00:00Z',
+        event_duration: 60,
         description: 'Airport arrival',
       },
       {
         plan_id: planId,
         location: 'Concert Hall',
-        date: '2026-06-16',
-        time: '20:00',
+        event_at: '2026-06-16T20:00:00Z',
+        event_duration: 120,
         description: 'Evening concert',
       },
     ]);
@@ -105,7 +105,7 @@ test.describe('Generation Priorities', () => {
       name: 'Rome Trip',
       destination: 'Rome',
       status: 'draft',
-      description: 'I want to see the Colosseum and Forum Romanum',
+      notes: 'I want to see the Colosseum and Forum Romanum',
       startDate: '2026-06-15',
       endDate: '2026-06-17',
     });
@@ -237,7 +237,7 @@ test.describe('Generation Priorities', () => {
       name: 'Mixed Priority Plan',
       destination: 'Rome',
       status: 'draft',
-      description: 'I want to visit Vatican Museums', // Note: Museums (Priority 2)
+      notes: 'I want to visit Vatican Museums', // Note: Museums (Priority 2)
       startDate: '2026-06-15',
       endDate: '2026-06-15',
     });
@@ -246,8 +246,8 @@ test.describe('Generation Priorities', () => {
     await supabase.from('fixed_points').insert({
       plan_id: planId,
       location: 'Restaurant Da Enzo',
-      date: '2026-06-15',
-      time: '19:00',
+      event_at: '2026-06-15T19:00:00Z',
+      event_duration: 90,
       description: 'Dinner reservation',
     });
 
@@ -313,15 +313,15 @@ test.describe('Generation Priorities', () => {
       {
         plan_id: planId,
         location: 'Eiffel Tower',
-        date: '2026-06-15',
-        time: '10:00',
+        event_at: '2026-06-15T10:00:00Z',
+        event_duration: 120,
         description: 'Morning visit',
       },
       {
         plan_id: planId,
         location: 'Louvre Museum',
-        date: '2026-06-15',
-        time: '14:00',
+        event_at: '2026-06-15T14:00:00Z',
+        event_duration: 180,
         description: 'Afternoon visit',
       },
     ]);

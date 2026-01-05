@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
-import { chromium, FullConfig } from '@playwright/test';
+import { chromium } from '@playwright/test';
+import type { FullConfig } from '@playwright/test';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '../src/db/database.types';
 import * as fs from 'fs';
@@ -23,22 +24,17 @@ const SHARED_TEST_USERS = {
   PLAN_EDITOR: 'e2e-plan-editor@test.com',
 } as const;
 
-type ConfigUse = {
-  supabaseUrl?: string;
-  supabaseKey?: string;
-};
-
 /**
  * Global setup that runs once before all tests.
  * Creates shared test users and saves their authentication state.
  */
-async function globalSetup(config: FullConfig) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+async function globalSetup(_config: FullConfig) {
   console.log('🚀 Global Setup: Creating shared test users...');
 
-  // Get from config.use (passed from playwright.config.ts)
-  const configUse = config.use as ConfigUse;
-  const supabaseUrl = configUse?.supabaseUrl || process.env.SUPABASE_URL;
-  const supabaseKey = configUse?.supabaseKey || process.env.SUPABASE_KEY;
+  // Get from environment variables (playwright.config.ts sets these)
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseKey = process.env.SUPABASE_KEY;
 
   if (!supabaseUrl || !supabaseKey) {
     console.error('  ❌ Missing SUPABASE_URL or SUPABASE_KEY');
@@ -152,16 +148,9 @@ async function cleanUserData(supabase: SupabaseClient<Database>, userId: string)
   const planIds = plans?.map((p) => p.id) ?? [];
 
   if (planIds.length > 0) {
-    // Delete generated plan days and activities
-    const { data: days } = await supabase.from('generated_plan_days').select('id').in('plan_id', planIds);
-    const dayIds = days?.map((d) => d.id) ?? [];
-
-    if (dayIds.length > 0) {
-      await supabase.from('plan_activities').delete().in('plan_day_id', dayIds);
-    }
-
-    await supabase.from('generated_plan_days').delete().in('plan_id', planIds);
+    // Delete related data
     await supabase.from('fixed_points').delete().in('plan_id', planIds);
+    await supabase.from('feedback').delete().in('plan_id', planIds);
   }
 
   // Delete plans

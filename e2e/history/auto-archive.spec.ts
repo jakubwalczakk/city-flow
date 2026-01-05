@@ -195,9 +195,8 @@ test.describe('Auto-Archive Plans', () => {
     // Get original plan data
     const { data: originalPlan } = await supabase.from('plans').select('*').eq('id', planId).single();
 
-    // Get original activities count
-    const { data: originalDays } = await supabase.from('generated_plan_days').select('*').eq('plan_id', planId);
-    const originalDaysCount = originalDays?.length || 0;
+    // Store original generated content
+    const originalContent = originalPlan?.generated_content;
 
     // Run archiving job
     await runArchivingJob(supabase);
@@ -212,9 +211,8 @@ test.describe('Auto-Archive Plans', () => {
     expect(archivedPlan?.end_date).toBe(originalPlan?.end_date);
     expect(archivedPlan?.status).toBe('archived');
 
-    // Verify activities are preserved
-    const { data: archivedDays } = await supabase.from('generated_plan_days').select('*').eq('plan_id', planId);
-    expect(archivedDays?.length).toBe(originalDaysCount);
+    // Verify generated content is preserved
+    expect(archivedPlan?.generated_content).toEqual(originalContent);
   });
 
   test('respects RLS when archiving plans for different users', async ({ supabase, sharedUser }) => {

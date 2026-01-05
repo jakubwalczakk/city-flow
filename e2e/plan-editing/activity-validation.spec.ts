@@ -203,7 +203,7 @@ test.describe('Activity Form Validation', () => {
     await activityFormModal.fillForm({
       title: 'Test Activity',
       time: '12:00',
-      cost: '-10',
+      estimatedPrice: '-10',
     });
 
     await page.waitForTimeout(500);
@@ -282,7 +282,7 @@ test.describe('Activity Form Validation', () => {
     expect(await activityFormModal.isVisible()).toBe(false);
 
     // Verify activity was added
-    const activities = await planTimelinePage.getActivitiesForDay(1);
-    expect(activities.length).toBeGreaterThan(1); // Original + new one
+    const activities = await planTimelinePage.getActivitiesByDay(1);
+    expect(activities).toBeGreaterThan(1); // Original + new one
   });
 });

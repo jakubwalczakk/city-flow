@@ -11,7 +11,7 @@ export class AuthService {
 
   constructor(clientOrLocals: SupabaseClient | App.Locals) {
     if ('supabase' in clientOrLocals) {
-      this.supabase = clientOrLocals.supabase;
+      this.supabase = (clientOrLocals as App.Locals).supabase as SupabaseClient;
     } else {
       this.supabase = clientOrLocals;
     }

@@ -60,7 +60,7 @@ test.describe('Add Activity to Plan', () => {
     });
     await activityFormModal.save();
 
-    await expect(planTimelinePage.getActivity('Spacer po Montmartre')).toBeVisible();
+    await expect(await planTimelinePage.getActivity('Spacer po Montmartre')).toBeVisible();
 
     // Verify all 4 activities are now visible
     let count = await planTimelinePage.getActivitiesCount();
@@ -89,7 +89,7 @@ test.describe('Add Activity to Plan', () => {
     });
     await activityFormModal.save();
 
-    await expect(planTimelinePage.getActivity('Colosseum Visit')).toBeVisible();
+    await expect(await planTimelinePage.getActivity('Colosseum Visit')).toBeVisible();
     count = await planTimelinePage.getActivitiesCount();
     expect(count).toBe(1);
   });
@@ -123,7 +123,7 @@ test.describe('Add Activity to Plan', () => {
     await activityFormModal.cancel();
 
     expect(await activityFormModal.isVisible()).toBe(false);
-    await expect(planTimelinePage.getActivity('Test Activity 1')).not.toBeVisible();
+    await expect(await planTimelinePage.getActivity('Test Activity 1')).not.toBeVisible();
 
     // Test cancel with Escape key
     await planTimelinePage.addActivityToDay(1);

@@ -45,7 +45,7 @@ test.describe('Plan Generation', () => {
     const { data: plan } = await supabase.from('plans').select('status').eq('id', planId).single();
     expect(plan?.status).toBe('generated');
 
-    // 2. Verify generated_plan_days and plan_activities were created
+    // 2. Verify generated content was created
     const { daysCount, activitiesCount } = await verifyPlanGenerated(supabase, planId);
     expect(daysCount).toBeGreaterThan(0);
     expect(activitiesCount).toBeGreaterThan(0);
@@ -80,8 +80,8 @@ test.describe('Plan Generation', () => {
     await supabase.from('fixed_points').insert({
       plan_id: planId,
       location: 'Koloseum',
-      date: '2026-06-15',
-      time: '10:00',
+      event_at: '2026-06-15T10:00:00Z',
+      event_duration: 120,
       description: 'Visit the Colosseum',
     });
 

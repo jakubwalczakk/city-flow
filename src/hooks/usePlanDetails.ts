@@ -37,7 +37,7 @@ export function formatActivityCommand(activity: Partial<TimelineItem>): AddActiv
     title: activity.title || '',
     description: activity.description,
     location: activity.location,
-    duration: activity.duration,
+    duration: activity.estimated_duration ? parseInt(activity.estimated_duration, 10) : undefined,
     category: activity.category || 'other',
     estimated_cost: activity.estimated_price,
   };
@@ -56,7 +56,7 @@ export function formatActivityUpdateCommand(activity: Partial<TimelineItem>): Up
     title: activity.title,
     description: activity.description,
     location: activity.location,
-    duration: activity.duration,
+    duration: activity.estimated_duration ? parseInt(activity.estimated_duration, 10) : undefined,
     category: activity.category,
     estimated_cost: activity.estimated_price,
   };

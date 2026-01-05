@@ -150,8 +150,10 @@ describe('PDF Service - Pure Functions', () => {
 
 describe('PDF Service - Main Function', () => {
   let mockPdfDoc: {
-    addPage: ReturnType<typeof vi.fn>;
+    registerFontkit: ReturnType<typeof vi.fn>;
     embedFont: ReturnType<typeof vi.fn>;
+    addPage: ReturnType<typeof vi.fn>;
+    getPages: ReturnType<typeof vi.fn>;
     save: ReturnType<typeof vi.fn>;
   };
   let mockPage: {
@@ -184,7 +186,7 @@ describe('PDF Service - Main Function', () => {
     };
 
     // Setup PDFDocument.create mock
-    vi.mocked(PDFDocument.create).mockResolvedValue(mockPdfDoc);
+    vi.mocked(PDFDocument.create).mockResolvedValue(mockPdfDoc as unknown as PDFDocument);
 
     // Mock fs.readFile
     vi.mocked(fs.readFile).mockResolvedValue(Buffer.from('fake-font-data'));
@@ -193,6 +195,7 @@ describe('PDF Service - Main Function', () => {
   describe('generatePlanPdf', () => {
     const mockPlan: PlanDetailsDto = {
       id: 'plan-1',
+      user_id: 'user-1',
       name: 'Paris Trip',
       destination: 'Paris',
       start_date: '2024-06-01',
@@ -200,7 +203,7 @@ describe('PDF Service - Main Function', () => {
       notes: 'Visit museums',
       status: 'generated',
       created_at: '2024-01-01',
-      timeline: [],
+      updated_at: '2024-01-01',
       generated_content: {
         summary: 'A wonderful trip',
         currency: 'EUR',

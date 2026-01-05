@@ -10,3 +10,13 @@ type ImportMetaEnv = {
 type ImportMeta = {
   readonly env: ImportMetaEnv;
 };
+
+declare namespace App {
+  type Locals = {
+    supabase: import('@/db/supabase.client').SupabaseClient;
+    user?: {
+      id: string;
+      email: string;
+    };
+  };
+}

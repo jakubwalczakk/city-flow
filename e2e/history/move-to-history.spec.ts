@@ -279,10 +279,8 @@ test.describe('Move Plan to History', () => {
     expect(archivedPlan?.end_date).toBe(originalPlan?.end_date);
     expect(archivedPlan?.status).toBe('archived');
 
-    // Verify activities are preserved
-    const { data: days } = await supabase.from('generated_plan_days').select('*').eq('plan_id', planId);
-
-    expect(days).toBeDefined();
-    expect(days?.length).toBeGreaterThan(0);
+    // Verify generated content is preserved
+    expect(archivedPlan?.generated_content).toBeDefined();
+    expect(archivedPlan?.generated_content).toEqual(originalPlan?.generated_content);
   });
 });

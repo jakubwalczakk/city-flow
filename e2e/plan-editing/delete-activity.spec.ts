@@ -53,9 +53,9 @@ test.describe('Delete Activity', () => {
 
     let currentCount = await planTimelinePage.getActivitiesCount();
     expect(currentCount).toBe(2);
-    await expect(planTimelinePage.getActivity('Lunch w kawiarni')).not.toBeVisible();
-    await expect(planTimelinePage.getActivity('Muzeum Luwr')).toBeVisible();
-    await expect(planTimelinePage.getActivity('Wieża Eiffla')).toBeVisible();
+    await expect(await planTimelinePage.getActivity('Lunch w kawiarni')).not.toBeVisible();
+    await expect(await planTimelinePage.getActivity('Muzeum Luwr')).toBeVisible();
+    await expect(await planTimelinePage.getActivity('Wieża Eiffla')).toBeVisible();
 
     // Delete from beginning
     await planTimelinePage.deleteActivity('Muzeum Luwr');
@@ -63,8 +63,8 @@ test.describe('Delete Activity', () => {
 
     currentCount = await planTimelinePage.getActivitiesCount();
     expect(currentCount).toBe(1);
-    await expect(planTimelinePage.getActivity('Muzeum Luwr')).not.toBeVisible();
-    await expect(planTimelinePage.getActivity('Wieża Eiffla')).toBeVisible();
+    await expect(await planTimelinePage.getActivity('Muzeum Luwr')).not.toBeVisible();
+    await expect(await planTimelinePage.getActivity('Wieża Eiffla')).toBeVisible();
 
     // Delete last remaining (from end)
     await planTimelinePage.deleteActivity('Wieża Eiffla');
@@ -72,7 +72,7 @@ test.describe('Delete Activity', () => {
 
     currentCount = await planTimelinePage.getActivitiesCount();
     expect(currentCount).toBe(0);
-    await expect(planTimelinePage.getActivity('Wieża Eiffla')).not.toBeVisible();
+    await expect(await planTimelinePage.getActivity('Wieża Eiffla')).not.toBeVisible();
 
     // Verify database
     const dbCount = await countActivities(supabase, planId);
@@ -139,7 +139,7 @@ test.describe('Delete Activity', () => {
     await cancelButton.click();
 
     // Verify nothing changed
-    await expect(planTimelinePage.getActivity('Lunch w kawiarni')).toBeVisible();
+    await expect(await planTimelinePage.getActivity('Lunch w kawiarni')).toBeVisible();
     let currentCount = await planTimelinePage.getActivitiesCount();
     expect(currentCount).toBe(initialCount);
 
@@ -153,7 +153,7 @@ test.describe('Delete Activity', () => {
     // Verify only one remains
     currentCount = await planTimelinePage.getActivitiesCount();
     expect(currentCount).toBe(1);
-    await expect(planTimelinePage.getActivity('Lunch w kawiarni')).toBeVisible();
+    await expect(await planTimelinePage.getActivity('Lunch w kawiarni')).toBeVisible();
 
     const dbCount = await countActivities(supabase, planId);
     expect(dbCount).toBe(1);

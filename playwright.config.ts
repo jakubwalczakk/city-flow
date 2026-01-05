@@ -5,6 +5,17 @@ import path from 'path';
 dotenv.config({ path: path.resolve(process.cwd(), '.env.test') });
 
 /**
+ * Extend Playwright test options with custom properties
+ */
+declare module '@playwright/test' {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+  interface PlaywrightTestOptions {
+    supabaseUrl: string | undefined;
+    supabaseKey: string | undefined;
+  }
+}
+
+/**
  * Read environment variables from file.
  * https://github.com/motdotla/dotenv
  */
@@ -31,9 +42,6 @@ export default defineConfig({
   globalSetup: './e2e/global-setup.ts',
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
-    /* Pass env vars to tests and global setup */
-    supabaseUrl: process.env.SUPABASE_URL,
-    supabaseKey: process.env.SUPABASE_KEY,
     /* Base URL to use in actions like `await page.goto('/')`. */
     baseURL: 'http://localhost:4321',
 

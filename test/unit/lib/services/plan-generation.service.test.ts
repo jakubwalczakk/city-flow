@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { PlanGenerationService } from '@/lib/services/plan-generation.service';
 import { AppError, ForbiddenError, NotFoundError } from '@/lib/errors/app-error';
@@ -238,16 +239,17 @@ describe('PlanGenerationService', () => {
     it('should throw ForbiddenError if no generations remaining', async () => {
       const { ProfileService } = await import('@/lib/services/profile.service');
 
-      const mockProfile: ProfileDto = {
+      const mockProfile = {
         id: 'user-1',
         onboarding_completed: true,
         generations_remaining: 0, // No credits!
-        travel_pace: 'moderate',
+        travel_pace: 'moderate' as const,
         preferences: null,
+        created_at: '2024-01-01',
         updated_at: '2024-01-01',
       };
 
-      vi.mocked(ProfileService.prototype.findProfileByUserId).mockResolvedValue(mockProfile);
+      vi.mocked(ProfileService.prototype.findProfileByUserId).mockResolvedValue(mockProfile as any);
 
       const service = new PlanGenerationService(mockSupabase as unknown as SupabaseClient, mockApiKey);
 

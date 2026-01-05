@@ -103,8 +103,6 @@ describe('FixedPointService', () => {
         event_at: '2024-02-01T10:00:00Z',
         event_duration: 120,
         description: 'Flight arrival',
-        created_at: '2024-01-01T00:00:00Z',
-        updated_at: '2024-01-01T00:00:00Z',
       };
 
       mockSupabase.mocks.single.mockResolvedValue({
@@ -128,10 +126,11 @@ describe('FixedPointService', () => {
       expect(mockSupabase.mocks.single).toHaveBeenCalled();
     });
 
-    it('should handle null event_duration correctly', async () => {
-      const commandWithoutDuration = {
+    it('should handle undefined event_duration correctly', async () => {
+      const commandWithoutDuration: CreateFixedPointCommand = {
         location: 'Hotel',
         event_at: '2024-02-01T15:00:00Z',
+        event_duration: undefined,
         description: 'Check-in',
       };
 
@@ -140,10 +139,8 @@ describe('FixedPointService', () => {
         plan_id: 'plan-1',
         location: 'Hotel',
         event_at: '2024-02-01T15:00:00Z',
-        event_duration: null,
+        event_duration: 0,
         description: 'Check-in',
-        created_at: '2024-01-01T00:00:00Z',
-        updated_at: '2024-01-01T00:00:00Z',
       };
 
       mockSupabase.mocks.single.mockResolvedValue({
@@ -153,7 +150,7 @@ describe('FixedPointService', () => {
 
       const result = await service.createFixedPoint('plan-1', commandWithoutDuration, 'user-1');
 
-      expect(result.event_duration).toBeNull();
+      expect(result.event_duration).toBe(0);
       expect(mockSupabase.mocks.insert).toHaveBeenCalledWith(
         expect.objectContaining({
           event_duration: null,
@@ -179,8 +176,6 @@ describe('FixedPointService', () => {
         event_at: '2024-02-01T10:00:00Z',
         event_duration: 120,
         description: 'Flight arrival',
-        created_at: '2024-01-01T00:00:00Z',
-        updated_at: '2024-01-01T00:00:00Z',
       };
 
       mockSupabase.mocks.single.mockResolvedValue({
@@ -222,18 +217,14 @@ describe('FixedPointService', () => {
           event_at: '2024-02-01T10:00:00Z',
           event_duration: 120,
           description: 'Arrival',
-          created_at: '2024-01-01T00:00:00Z',
-          updated_at: '2024-01-01T00:00:00Z',
         },
         {
           id: 'fp-2',
           plan_id: 'plan-1',
           location: 'Hotel',
           event_at: '2024-02-01T15:00:00Z',
-          event_duration: null,
+          event_duration: 60,
           description: 'Check-in',
-          created_at: '2024-01-01T00:00:00Z',
-          updated_at: '2024-01-01T00:00:00Z',
         },
       ];
 
@@ -316,8 +307,6 @@ describe('FixedPointService', () => {
         event_at: '2024-02-01T11:00:00Z',
         event_duration: 90,
         description: 'Updated arrival',
-        created_at: '2024-01-01T00:00:00Z',
-        updated_at: '2024-01-02T00:00:00Z',
       };
 
       mockSupabase.mocks.eq.mockReturnValueOnce(mockSupabase.mocks);
@@ -355,8 +344,6 @@ describe('FixedPointService', () => {
         event_at: '2024-02-01T10:00:00Z',
         event_duration: 120,
         description: 'Original description',
-        created_at: '2024-01-01T00:00:00Z',
-        updated_at: '2024-01-02T00:00:00Z',
       };
 
       mockSupabase.mocks.eq.mockReturnValueOnce(mockSupabase.mocks);
@@ -375,9 +362,9 @@ describe('FixedPointService', () => {
       );
     });
 
-    it('should handle null event_duration', async () => {
+    it('should handle undefined event_duration', async () => {
       const commandWithNullDuration: UpdateFixedPointCommand = {
-        event_duration: null,
+        event_duration: undefined,
       };
 
       const mockUpdatedPoint: FixedPointDto = {
@@ -385,10 +372,8 @@ describe('FixedPointService', () => {
         plan_id: 'plan-1',
         location: 'Airport',
         event_at: '2024-02-01T10:00:00Z',
-        event_duration: null,
+        event_duration: 0,
         description: 'Arrival',
-        created_at: '2024-01-01T00:00:00Z',
-        updated_at: '2024-01-02T00:00:00Z',
       };
 
       mockSupabase.mocks.eq.mockReturnValueOnce(mockSupabase.mocks);

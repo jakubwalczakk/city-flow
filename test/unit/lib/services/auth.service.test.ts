@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { AuthService } from '@/lib/services/auth.service';
 import { ForbiddenError } from '@/lib/errors/app-error';
 import type { SupabaseClient } from '@/db/supabase.client';
 import type { User } from '@supabase/supabase-js';
+import { AuthError } from '@supabase/supabase-js';
 
 // Mock logger
 vi.mock('@/lib/utils/logger', () => ({
@@ -13,6 +15,11 @@ vi.mock('@/lib/utils/logger', () => ({
     debug: vi.fn(),
   },
 }));
+
+// Helper to create AuthError
+function createAuthError(message: string): AuthError {
+  return new AuthError(message, 401, 'auth_error');
+}
 
 // Helper to create mock Supabase client
 function createMockSupabaseClient(): SupabaseClient {
@@ -79,9 +86,9 @@ describe('AuthService', () => {
 
     it('should throw ForbiddenError when user is null', async () => {
       vi.mocked(mockSupabase.auth.getUser).mockResolvedValue({
-        data: { user: null },
+        data: { user: null as any },
         error: null,
-      });
+      } as any);
 
       await expect(authService.getUser()).rejects.toThrow(ForbiddenError);
       await expect(authService.getUser()).rejects.toThrow('You must be logged in.');
@@ -89,9 +96,9 @@ describe('AuthService', () => {
 
     it('should throw ForbiddenError when there is an error', async () => {
       vi.mocked(mockSupabase.auth.getUser).mockResolvedValue({
-        data: { user: null },
-        error: new Error('Auth error'),
-      });
+        data: { user: null as any },
+        error: createAuthError('Auth error'),
+      } as any);
 
       await expect(authService.getUser()).rejects.toThrow(ForbiddenError);
     });
@@ -100,9 +107,9 @@ describe('AuthService', () => {
       const { logger } = await import('@/lib/utils/logger');
 
       vi.mocked(mockSupabase.auth.getUser).mockResolvedValue({
-        data: { user: null },
-        error: new Error('Not authenticated'),
-      });
+        data: { user: null as any },
+        error: createAuthError('Not authenticated'),
+      } as any);
 
       try {
         await authService.getUser();
@@ -115,9 +122,9 @@ describe('AuthService', () => {
 
     it('should throw ForbiddenError when getUser returns undefined user', async () => {
       vi.mocked(mockSupabase.auth.getUser).mockResolvedValue({
-        data: { user: undefined },
+        data: { user: undefined as any },
         error: null,
-      });
+      } as any);
 
       await expect(authService.getUser()).rejects.toThrow(ForbiddenError);
     });
@@ -148,9 +155,9 @@ describe('AuthService', () => {
 
     it('should throw ForbiddenError when user is not authenticated', async () => {
       vi.mocked(mockSupabase.auth.getUser).mockResolvedValue({
-        data: { user: null },
-        error: new Error('Not authenticated'),
-      });
+        data: { user: null as any },
+        error: createAuthError('Not authenticated'),
+      } as any);
 
       await expect(authService.getUserId()).rejects.toThrow(ForbiddenError);
     });
@@ -188,26 +195,26 @@ describe('AuthService', () => {
 
     it('should handle malformed responses', async () => {
       vi.mocked(mockSupabase.auth.getUser).mockResolvedValue({
-        data: { user: undefined },
+        data: { user: undefined as any },
         error: null,
-      });
+      } as any);
 
       await expect(authService.getUser()).rejects.toThrow(ForbiddenError);
     });
 
     it('should throw ForbiddenError with correct message', async () => {
       vi.mocked(mockSupabase.auth.getUser).mockResolvedValue({
-        data: { user: null },
+        data: { user: null as any },
         error: null,
-      });
+      } as any);
 
       try {
         await authService.getUser();
         expect.fail('Should have thrown ForbiddenError');
-      } catch {
+      } catch (error: any) {
         expect(error).toBeInstanceOf(ForbiddenError);
-        expect((error as ForbiddenError).message).toBe('You must be logged in.');
-        expect((error as ForbiddenError).statusCode).toBe(403);
+        expect(error.message).toBe('You must be logged in.');
+        expect(error.statusCode).toBe(403);
       }
     });
   });

@@ -34,11 +34,13 @@ function createMockSupabaseClient() {
       mockSingle,
       mockUpsert,
     },
-  } as unknown as SupabaseClient;
+  };
 }
 
+type MockSupabaseClient = ReturnType<typeof createMockSupabaseClient>;
+
 describe('FeedbackService', () => {
-  let mockSupabase: ReturnType<typeof createMockSupabaseClient>;
+  let mockSupabase: MockSupabaseClient;
   let feedbackService: FeedbackService;
 
   beforeEach(() => {
@@ -324,7 +326,7 @@ describe('FeedbackService', () => {
       try {
         await feedbackService.getFeedback('plan-1', 'user-1');
         expect.fail('Should have thrown NotFoundError');
-      } catch {
+      } catch (error) {
         expect(error).toBeInstanceOf(NotFoundError);
         expect((error as NotFoundError).statusCode).toBe(404);
       }

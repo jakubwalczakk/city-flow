@@ -34,7 +34,13 @@ export function useBasicInfoStep({ formData, updateFormData, goToNextStep, onSav
   // Sync form values with parent state on blur
   const syncToParent = useCallback(() => {
     const values = form.getValues();
-    updateFormData(values);
+    updateFormData({
+      name: values.name,
+      destination: values.destination,
+      start_date: values.start_date,
+      end_date: values.end_date,
+      notes: values.notes ?? '',
+    });
   }, [form, updateFormData]);
 
   // Handle date selection with auto-open next picker
