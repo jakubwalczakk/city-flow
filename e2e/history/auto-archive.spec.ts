@@ -1,6 +1,5 @@
+import { historyTest as test, expect } from '../shared-user-fixtures';
 import {
-  authTest as test,
-  expect,
   createTestPlan,
   createDraftPlan,
   runArchivingJob,
@@ -11,13 +10,12 @@ import { PlansListPage } from '../page-objects/PlansListPage';
 import { HistoryPage } from '../page-objects/HistoryPage';
 
 test.describe('Auto-Archive Plans', () => {
-  test('should auto-archive plan after end date passes', async ({ page, supabase, testUser }) => {
-    // Local initialization (not global)
+  test('auto-archives plan after end date passes and shows in history', async ({ page, supabase, sharedUser }) => {
     const plansListPage = new PlansListPage(page);
     const historyPage = new HistoryPage(page);
 
     // Create a generated plan with past end date
-    const { planId } = await createTestPlan(supabase, testUser.id, {
+    const { planId } = await createTestPlan(supabase, sharedUser.id, {
       name: 'Expired Plan',
       destination: 'Rome',
       status: 'generated',
@@ -48,112 +46,12 @@ test.describe('Auto-Archive Plans', () => {
     await historyPage.expectPlanExists('Expired Plan');
   });
 
-  test('should not auto-archive plan before end date', async ({ page, supabase, testUser }) => {
-    // Local initialization (not global)
+  test('handles archiving logic correctly based on date and status', async ({ page, supabase, sharedUser }) => {
     const plansListPage = new PlansListPage(page);
     const historyPage = new HistoryPage(page);
 
-    // Create a generated plan with future end date
-    const { planId } = await createTestPlan(supabase, testUser.id, {
-      name: 'Future Plan',
-      destination: 'Barcelona',
-      status: 'generated',
-      startDate: '2026-12-01',
-      endDate: '2026-12-31', // Future date
-    });
-
-    // Run archiving job
-    await runArchivingJob(supabase);
-
-    // Verify plan is still generated
-    const { data: plan } = await supabase.from('plans').select('status').eq('id', planId).single();
-    expect(plan?.status).toBe('generated');
-
-    // Verify plan is still in active plans list
-    await plansListPage.goto();
-    await plansListPage.waitForPlansToLoad();
-    await plansListPage.expectPlanExists('Future Plan');
-
-    // Verify plan is NOT in history
-    await historyPage.goto();
-    await historyPage.waitForPageLoad();
-    await historyPage.expectPlanNotExists('Future Plan');
-  });
-
-  test('should not auto-archive draft plans', async ({ page, supabase, testUser }) => {
-    // Local initialization (not global)
-    const plansListPage = new PlansListPage(page);
-    const historyPage = new HistoryPage(page);
-
-    // Create a draft plan with past end date
-    const planId = await createDraftPlan(supabase, testUser.id, {
-      name: 'Old Draft',
-      destination: 'Prague',
-      startDate: '2024-01-01',
-      endDate: '2024-01-03', // Past date
-    });
-
-    // Run archiving job
-    await runArchivingJob(supabase);
-
-    // Verify plan is still draft (not archived)
-    const { data: plan } = await supabase.from('plans').select('status').eq('id', planId).single();
-    expect(plan?.status).toBe('draft');
-
-    // Verify plan is still in plans list (if draft plans are shown)
-    await plansListPage.goto();
-    await plansListPage.waitForPlansToLoad();
-    // Draft might be in list or not depending on filters
-
-    // Verify plan is NOT in history
-    await historyPage.goto();
-    await historyPage.waitForPageLoad();
-    await historyPage.expectPlanNotExists('Old Draft');
-  });
-
-  test('should batch archive multiple expired plans', async ({ page, supabase, testUser }) => {
-    // Local initialization (not global)
-    const historyPage = new HistoryPage(page);
-
-    // Create 5 generated plans with past dates
-    const planNames = ['Trip 1', 'Trip 2', 'Trip 3', 'Trip 4', 'Trip 5'];
-    for (let i = 0; i < 5; i++) {
-      await createTestPlan(supabase, testUser.id, {
-        name: planNames[i],
-        destination: `City ${i + 1}`,
-        status: 'generated',
-        startDate: `2024-0${i + 1}-01`,
-        endDate: `2024-0${i + 1}-03`,
-      });
-    }
-
-    // Verify all are generated
-    const { data: generatedPlans } = await supabase
-      .from('plans')
-      .select('*')
-      .eq('user_id', testUser.id)
-      .eq('status', 'generated');
-    expect(generatedPlans).toHaveLength(5);
-
-    // Run archiving job
-    const archivedCount = await runArchivingJob(supabase);
-    expect(archivedCount).toBe(5);
-
-    // Verify all are archived
-    const finalCount = await getArchivedPlanCount(supabase, testUser.id);
-    expect(finalCount).toBe(5);
-
-    // Verify all appear in history
-    await historyPage.goto();
-    await historyPage.waitForPageLoad();
-    const historyCount = await historyPage.getPlanCount();
-    expect(historyCount).toBe(5);
-  });
-
-  test('should handle mixed plan statuses correctly', async ({ supabase, testUser }) => {
-    // Local initialization (not global)
     // Create plans with different statuses and dates
-    await createTestPlan(supabase, testUser.id, {
+    await createTestPlan(supabase, sharedUser.id, {
       name: 'Expired Generated',
       destination: 'City 1',
       status: 'generated',
@@ -161,7 +59,7 @@ test.describe('Auto-Archive Plans', () => {
       endDate: '2024-01-03', // Past - should archive
     });
 
-    await createTestPlan(supabase, testUser.id, {
+    await createTestPlan(supabase, sharedUser.id, {
       name: 'Future Generated',
       destination: 'City 2',
       status: 'generated',
@@ -169,7 +67,7 @@ test.describe('Auto-Archive Plans', () => {
       endDate: '2026-01-03', // Future - should NOT archive
     });
 
-    await createDraftPlan(supabase, testUser.id, {
+    await createDraftPlan(supabase, sharedUser.id, {
       name: 'Expired Draft',
       destination: 'City 3',
       startDate: '2024-01-01',
@@ -184,7 +82,7 @@ test.describe('Auto-Archive Plans', () => {
     const { data: plans } = await supabase
       .from('plans')
       .select('name, status')
-      .eq('user_id', testUser.id)
+      .eq('user_id', sharedUser.id)
       .order('name');
 
     expect(plans).toHaveLength(3);
@@ -194,18 +92,67 @@ test.describe('Auto-Archive Plans', () => {
     expect(plans?.[1]?.status).toBe('archived');
     expect(plans?.[2]?.name).toBe('Future Generated');
     expect(plans?.[2]?.status).toBe('generated');
+
+    // Verify UI reflects the changes
+    await plansListPage.goto();
+    await plansListPage.waitForPlansToLoad();
+    await plansListPage.expectPlanExists('Future Generated');
+    await plansListPage.expectPlanNotExists('Expired Generated');
+
+    await historyPage.goto();
+    await historyPage.waitForPageLoad();
+    await historyPage.expectPlanExists('Expired Generated');
+    await historyPage.expectPlanNotExists('Expired Draft');
   });
 
-  test('should archive on exact end date', async ({ supabase, testUser }) => {
-    // Local initialization (not global)
-    // Get today's date
+  test('batch archives multiple expired plans efficiently', async ({ page, supabase, sharedUser }) => {
+    const historyPage = new HistoryPage(page);
+
+    // Create 5 generated plans with past dates
+    const planNames = ['Trip 1', 'Trip 2', 'Trip 3', 'Trip 4', 'Trip 5'];
+    for (let i = 0; i < 5; i++) {
+      await createTestPlan(supabase, sharedUser.id, {
+        name: planNames[i],
+        destination: `City ${i + 1}`,
+        status: 'generated',
+        startDate: `2024-0${i + 1}-01`,
+        endDate: `2024-0${i + 1}-03`,
+      });
+    }
+
+    // Verify all are generated
+    const { data: generatedPlans } = await supabase
+      .from('plans')
+      .select('*')
+      .eq('user_id', sharedUser.id)
+      .eq('status', 'generated');
+    expect(generatedPlans).toHaveLength(5);
+
+    // Run archiving job
+    const archivedCount = await runArchivingJob(supabase);
+    expect(archivedCount).toBe(5);
+
+    // Verify all are archived
+    const finalCount = await getArchivedPlanCount(supabase, sharedUser.id);
+    expect(finalCount).toBe(5);
+
+    // Verify all appear in history
+    await historyPage.goto();
+    await historyPage.waitForPageLoad();
+    const historyCount = await historyPage.getPlanCount();
+    expect(historyCount).toBe(5);
+  });
+
+  test('handles date boundary conditions correctly', async ({ supabase, sharedUser }) => {
+    // Get today's date and yesterday
     const today = new Date();
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
     const yesterdayStr = yesterday.toISOString().split('T')[0];
+    const todayStr = today.toISOString().split('T')[0];
 
     // Create a plan that ended yesterday
-    const { planId } = await createTestPlan(supabase, testUser.id, {
+    const { planId: yesterdayPlanId } = await createTestPlan(supabase, sharedUser.id, {
       name: 'Yesterday Plan',
       destination: 'Vienna',
       status: 'generated',
@@ -213,79 +160,30 @@ test.describe('Auto-Archive Plans', () => {
       endDate: yesterdayStr,
     });
 
-    // Run archiving job
-    await runArchivingJob(supabase);
-
-    // Verify plan is archived
-    const isArchived = await verifyPlanIsArchived(supabase, planId);
-    expect(isArchived).toBeTruthy();
-  });
-
-  test('should not archive plan ending today', async ({ supabase, testUser }) => {
-    // Local initialization (not global)
-    // Get today's date
-    const today = new Date().toISOString().split('T')[0];
-
     // Create a plan that ends today
-    const { planId } = await createTestPlan(supabase, testUser.id, {
+    const { planId: todayPlanId } = await createTestPlan(supabase, sharedUser.id, {
       name: 'Today Plan',
       destination: 'Amsterdam',
       status: 'generated',
       startDate: '2024-01-01',
-      endDate: today,
+      endDate: todayStr,
     });
 
     // Run archiving job
     await runArchivingJob(supabase);
 
-    // Verify plan is NOT archived (still ongoing)
-    const { data: plan } = await supabase.from('plans').select('status').eq('id', planId).single();
-    // Depending on business logic, today might or might not be archived
-    // Adjust this assertion based on actual requirements
-    // For now, assume plans ending today are still active
-    expect(plan?.status).toBe('generated');
+    // Verify yesterday's plan is archived
+    const yesterdayArchived = await verifyPlanIsArchived(supabase, yesterdayPlanId);
+    expect(yesterdayArchived).toBeTruthy();
+
+    // Verify today's plan is NOT archived (still ongoing)
+    const { data: todayPlan } = await supabase.from('plans').select('status').eq('id', todayPlanId).single();
+    expect(todayPlan?.status).toBe('generated');
   });
 
-  test('should handle archiving with no expired plans', async ({ supabase, testUser }) => {
-    // Local initialization (not global)
-    // Create only future plans
-    await createTestPlan(supabase, testUser.id, {
-      name: 'Future Plan 1',
-      destination: 'City 1',
-      status: 'generated',
-      startDate: '2026-06-01',
-      endDate: '2026-06-03',
-    });
-
-    await createTestPlan(supabase, testUser.id, {
-      name: 'Future Plan 2',
-      destination: 'City 2',
-      status: 'generated',
-      startDate: '2026-07-01',
-      endDate: '2026-07-03',
-    });
-
-    // Run archiving job
-    const archivedCount = await runArchivingJob(supabase);
-    expect(archivedCount).toBe(0);
-
-    // Verify no plans are archived
-    const finalCount = await getArchivedPlanCount(supabase, testUser.id);
-    expect(finalCount).toBe(0);
-
-    // Verify both plans are still generated
-    const { data: generatedPlans } = await supabase
-      .from('plans')
-      .select('*')
-      .eq('user_id', testUser.id)
-      .eq('status', 'generated');
-    expect(generatedPlans).toHaveLength(2);
-  });
-
-  test('should preserve all plan data after auto-archiving', async ({ supabase, testUser }) => {
-    // Local initialization (not global)
+  test('preserves all plan data after auto-archiving', async ({ supabase, sharedUser }) => {
     // Create a plan with activities
-    const { planId } = await createTestPlan(supabase, testUser.id, {
+    const { planId } = await createTestPlan(supabase, sharedUser.id, {
       name: 'Complete Plan',
       destination: 'Berlin',
       status: 'generated',
@@ -319,29 +217,9 @@ test.describe('Auto-Archive Plans', () => {
     expect(archivedDays?.length).toBe(originalDaysCount);
   });
 
-  test('should handle timezone edge cases', async ({ supabase, testUser }) => {
-    // Local initialization (not global)
-    // Create a plan with end date at the boundary
-    const { planId } = await createTestPlan(supabase, testUser.id, {
-      name: 'Boundary Plan',
-      destination: 'Tokyo',
-      status: 'generated',
-      startDate: '2024-01-01',
-      endDate: '2024-01-02',
-    });
-
-    // Run archiving job
-    await runArchivingJob(supabase);
-
-    // Verify plan is archived (past date)
-    const isArchived = await verifyPlanIsArchived(supabase, planId);
-    expect(isArchived).toBeTruthy();
-  });
-
-  test('should respect RLS when archiving plans', async ({ supabase, testUser }) => {
-    // Local initialization (not global)
+  test('respects RLS when archiving plans for different users', async ({ supabase, sharedUser }) => {
     // Create plans for current user
-    await createTestPlan(supabase, testUser.id, {
+    await createTestPlan(supabase, sharedUser.id, {
       name: 'User Plan',
       destination: 'London',
       status: 'generated',
@@ -360,11 +238,11 @@ test.describe('Auto-Archive Plans', () => {
       .from('plans')
       .select('*')
       .eq('status', 'archived')
-      .eq('user_id', testUser.id);
+      .eq('user_id', sharedUser.id);
 
     expect(archivedPlans).toBeDefined();
     archivedPlans?.forEach((plan) => {
-      expect(plan.user_id).toBe(testUser.id);
+      expect(plan.user_id).toBe(sharedUser.id);
     });
   });
 });

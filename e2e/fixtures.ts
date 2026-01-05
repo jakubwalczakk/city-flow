@@ -897,6 +897,145 @@ export async function getFeedbackCount(supabase: SupabaseClient<Database>, userI
 // AUTHENTICATED TEST FIXTURES
 // ============================================================================
 
+// ============================================================================
+// SHARED TEST USERS - For Optimization
+// ============================================================================
+
+/**
+ * Shared test users pool to reduce database load.
+ * Each user can be reused across multiple tests with proper cleanup.
+ */
+export const SHARED_TEST_USERS = {
+  BASIC_USER: 'e2e-basic-user@test.com',
+  PLAN_CREATOR: 'e2e-plan-creator@test.com',
+  FEEDBACK_USER: 'e2e-feedback-user@test.com',
+  HISTORY_USER: 'e2e-history-user@test.com',
+  EXPORT_USER: 'e2e-export-user@test.com',
+  RLS_USER_1: 'e2e-rls-user-1@test.com',
+  RLS_USER_2: 'e2e-rls-user-2@test.com',
+  PLAN_VIEWER: 'e2e-plan-viewer@test.com',
+  PLAN_EDITOR: 'e2e-plan-editor@test.com',
+  TEMP_USER: 'e2e-temp-user@test.com',
+} as const;
+
+export const SHARED_USER_PASSWORD = 'TestPass123!';
+
+/**
+ * Checks if a user exists in the database by email.
+ */
+export async function checkUserExists(supabase: SupabaseClient<Database>, email: string): Promise<boolean> {
+  try {
+    // Try to sign in with the email to check if user exists
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password: SHARED_USER_PASSWORD,
+    });
+
+    // If login successful, user exists
+    if (data.user) {
+      return true;
+    }
+
+    // Check specific error messages
+    if (error?.message.includes('Invalid login credentials')) {
+      return false;
+    }
+
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Gets or creates a shared test user.
+ * If the user doesn't exist, creates it. Otherwise, returns existing user credentials.
+ */
+export async function getOrCreateSharedUser(
+  supabase: SupabaseClient<Database>,
+  userKey: keyof typeof SHARED_TEST_USERS
+): Promise<{ email: string; password: string; userId: string }> {
+  const email = SHARED_TEST_USERS[userKey];
+  const password = SHARED_USER_PASSWORD;
+
+  // Try to sign in first
+  const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+
+  // User exists and login successful
+  if (signInData.user && !signInError) {
+    return {
+      email,
+      password,
+      userId: signInData.user.id,
+    };
+  }
+
+  // User doesn't exist, create it
+  const { user } = await createTestUser(supabase, {
+    email,
+    password,
+    onboardingCompleted: true,
+    travelPace: 'moderate',
+    preferences: ['culture', 'food', 'sightseeing'],
+  });
+
+  return {
+    email,
+    password,
+    userId: user.id,
+  };
+}
+
+/**
+ * Cleans up user data while preserving the user account.
+ * This allows tests to reuse the same user without creating new ones.
+ */
+export async function cleanupUserData(
+  supabase: SupabaseClient<Database>,
+  userId: string,
+  options: { keepUser: boolean } = { keepUser: true }
+): Promise<void> {
+  // Delete feedback
+  await supabase.from('feedback').delete().eq('user_id', userId);
+
+  // Get all plan IDs for the user
+  const { data: plans } = await supabase.from('plans').select('id').eq('user_id', userId);
+  const planIds = plans?.map((p) => p.id) ?? [];
+
+  // Delete generated plan days and activities
+  if (planIds.length > 0) {
+    const { data: days } = await supabase.from('generated_plan_days').select('id').in('plan_id', planIds);
+    const dayIds = days?.map((d) => d.id) ?? [];
+
+    if (dayIds.length > 0) {
+      await supabase.from('plan_activities').delete().in('plan_day_id', dayIds);
+    }
+
+    await supabase.from('generated_plan_days').delete().in('plan_id', planIds);
+    await supabase.from('fixed_points').delete().in('plan_id', planIds);
+  }
+
+  // Delete plans
+  await supabase.from('plans').delete().eq('user_id', userId);
+
+  // Reset onboarding if needed
+  await supabase
+    .from('profiles')
+    .update({
+      onboarding_completed: true,
+      generations_used: 0,
+    })
+    .eq('id', userId);
+
+  // Optionally delete the user account
+  if (!options.keepUser) {
+    await supabase.from('profiles').delete().eq('id', userId);
+  }
+}
+
 /**
  * Test configuration constants
  */

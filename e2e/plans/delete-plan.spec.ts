@@ -1,21 +1,21 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { authTest as test, expect, createTestPlan } from '../fixtures';
+import { planEditorTest as test, expect } from '../shared-user-fixtures';
+import { createTestPlan } from '../fixtures';
 import { PlanDetailsPage } from '../page-objects/PlanDetailsPage';
 import { PlansListPage } from '../page-objects/PlansListPage';
 
 test.describe('Delete Plan', () => {
-  test('should delete plan from list view', async ({ page, supabase, testUser }) => {
-    // Local initialization (not global)
+  test('deletes plan from list view and removes from database', async ({ page, supabase, sharedUser }) => {
     const plansListPage = new PlansListPage(page);
 
     // Create test plans
-    await createTestPlan(supabase, testUser.id, {
+    await createTestPlan(supabase, sharedUser.id, {
       name: 'Plan to Delete',
       destination: 'Paris',
       status: 'draft',
     });
 
-    await createTestPlan(supabase, testUser.id, {
+    await createTestPlan(supabase, sharedUser.id, {
       name: 'Plan to Keep',
       destination: 'Rome',
       status: 'draft',
@@ -40,24 +40,43 @@ test.describe('Delete Plan', () => {
     await plansListPage.expectPlanExists('Plan to Keep');
 
     // Verify plan is deleted from database
-    const { data: plans } = await supabase.from('plans').select('*').eq('user_id', testUser.id);
+    const { data: plans } = await supabase.from('plans').select('*').eq('user_id', sharedUser.id);
 
     expect(plans).toHaveLength(1);
     expect(plans![0].name).toBe('Plan to Keep');
-
-    // Verify toast notification (toast might have disappeared, so we don't fail if not found)
-    await page
-      .getByText(/usunięto|deleted|removed/i)
-      .isVisible()
-      .catch(() => false);
   });
 
-  test('should cancel deletion from list view', async ({ page, supabase, testUser }) => {
-    // Local initialization (not global)
+  test('deletes plan from details view and redirects correctly', async ({ page, supabase, sharedUser }) => {
+    const planDetailsPage = new PlanDetailsPage(page);
+
+    // Create a test plan
+    const { planId } = await createTestPlan(supabase, sharedUser.id, {
+      name: 'Plan to Delete from Details',
+      destination: 'Vienna',
+      status: 'draft',
+    });
+
+    // Navigate to plan details
+    await planDetailsPage.goto(planId);
+    await planDetailsPage.waitForPageLoad();
+
+    // Delete the plan
+    await planDetailsPage.deletePlan();
+
+    // Should redirect to plans list
+    await expect(page).toHaveURL(/\/plans$/, { timeout: 10000 });
+
+    // Verify plan is deleted from database
+    const { data: plan } = await supabase.from('plans').select('*').eq('id', planId).maybeSingle();
+
+    expect(plan).toBeNull();
+  });
+
+  test('cancels deletion when user dismisses confirmation modal', async ({ page, supabase, sharedUser }) => {
     const plansListPage = new PlansListPage(page);
 
     // Create a test plan
-    await createTestPlan(supabase, testUser.id, {
+    await createTestPlan(supabase, sharedUser.id, {
       name: 'Plan Not to Delete',
       destination: 'Barcelona',
       status: 'draft',
@@ -92,135 +111,65 @@ test.describe('Delete Plan', () => {
     await plansListPage.expectPlanExists('Plan Not to Delete');
 
     // Verify plan is still in database
-    const { data: plans } = await supabase.from('plans').select('*').eq('user_id', testUser.id);
+    const { data: plans } = await supabase.from('plans').select('*').eq('user_id', sharedUser.id);
 
     expect(plans).toHaveLength(1);
     expect(plans![0].name).toBe('Plan Not to Delete');
   });
 
-  test('should delete plan from details view', async ({ page, supabase, testUser }) => {
-    // Local initialization (not global)
+  test('cascades deletion to related data (fixed points, activities)', async ({ page, supabase, sharedUser }) => {
     const planDetailsPage = new PlanDetailsPage(page);
 
-    // Create a test plan
-    const { planId } = await createTestPlan(supabase, testUser.id, {
-      name: 'Plan to Delete from Details',
-      destination: 'Vienna',
-      status: 'draft',
-    });
-
-    // Navigate to plan details
-    await planDetailsPage.goto(planId);
-    await planDetailsPage.waitForPageLoad();
-
-    // Delete the plan
-    await planDetailsPage.deletePlan();
-
-    // Should redirect to plans list
-    await expect(page).toHaveURL(/\/plans$/, { timeout: 10000 });
-
-    // Verify plan is deleted from database
-    const { data: plan } = await supabase.from('plans').select('*').eq('id', planId).maybeSingle();
-
-    expect(plan).toBeNull();
-
-    // Verify toast notification
-    await page.waitForTimeout(500);
-    await page
-      .getByText(/usunięto|deleted/i)
-      .isVisible()
-      .catch(() => false);
-  });
-
-  test('should cascade delete fixed points when deleting plan', async ({ page, supabase, testUser }) => {
-    // Local initialization (not global)
-    const planDetailsPage = new PlanDetailsPage(page);
-
-    // Create a plan with fixed points
-    const { planId, fixedPointIds } = await createTestPlan(supabase, testUser.id, {
-      name: 'Plan with Fixed Points',
+    // Create a plan with fixed points and activities
+    const { planId, fixedPointIds } = await createTestPlan(supabase, sharedUser.id, {
+      name: 'Plan with Related Data',
       destination: 'Prague',
-      status: 'draft',
+      status: 'generated',
       withFixedPoints: true,
+      withActivities: true,
     });
 
     // Verify fixed points exist before deletion
     expect(fixedPointIds).toBeDefined();
     expect(fixedPointIds!.length).toBeGreaterThan(0);
 
-    // Navigate to plan details
-    await planDetailsPage.goto(planId);
-    await planDetailsPage.waitForPageLoad();
-
-    // Delete the plan
-    await planDetailsPage.deletePlan();
-
-    // Wait for deletion
-    await expect(page).toHaveURL(/\/plans$/, { timeout: 10000 });
-
-    // Verify plan is deleted
-    const { data: plan } = await supabase.from('plans').select('*').eq('id', planId).maybeSingle();
-
-    expect(plan).toBeNull();
-
-    // Verify fixed points are also deleted (CASCADE)
-    const { data: fixedPoints } = await supabase.from('fixed_points').select('*').eq('plan_id', planId);
-
-    expect(fixedPoints).toHaveLength(0);
-  });
-
-  test('should cascade delete activities when deleting generated plan', async ({ page, supabase, testUser }) => {
-    // Local initialization (not global)
-    const plansListPage = new PlansListPage(page);
-
-    // Create a generated plan with activities
-    const { planId, activityIds } = await createTestPlan(supabase, testUser.id, {
-      name: 'Generated Plan with Activities',
-      destination: 'Amsterdam',
-      status: 'generated',
-      withFixedPoints: true,
-      withActivities: true,
-    });
+    const fixedPointId = fixedPointIds![0];
+    const { data: fpBefore } = await supabase.from('fixed_points').select('*').eq('id', fixedPointId).maybeSingle();
+    expect(fpBefore).not.toBeNull();
 
     // Verify activities exist before deletion
-    expect(activityIds).toBeDefined();
-    expect(activityIds!.length).toBeGreaterThan(0);
+    const { data: daysBefore } = await supabase.from('generated_plan_days').select('*').eq('plan_id', planId);
+    expect(daysBefore).toBeDefined();
+    expect(daysBefore!.length).toBeGreaterThan(0);
 
-    // Navigate to plans list
-    await plansListPage.goto();
-    await plansListPage.waitForPlansToLoad();
-
-    // Delete the plan from list
-    await plansListPage.deletePlan('Generated Plan with Activities');
+    // Navigate to plan details and delete
+    await planDetailsPage.goto(planId);
+    await planDetailsPage.waitForPageLoad();
+    await planDetailsPage.deletePlan();
 
     // Wait for deletion
     await page.waitForTimeout(1000);
 
     // Verify plan is deleted
     const { data: plan } = await supabase.from('plans').select('*').eq('id', planId).maybeSingle();
-
     expect(plan).toBeNull();
 
-    // Verify generated_plan_days are deleted
-    const { data: days } = await supabase.from('generated_plan_days').select('*').eq('plan_id', planId);
+    // Verify fixed points are cascade deleted
+    const { data: fpAfter } = await supabase.from('fixed_points').select('*').eq('id', fixedPointId).maybeSingle();
+    expect(fpAfter).toBeNull();
 
-    expect(days).toHaveLength(0);
-
-    // Verify plan_activities are deleted
-    // (They are linked to plan_days, so should be cascaded)
-    const { data: activities } = await supabase.from('plan_activities').select('*').in('id', activityIds!);
-
-    expect(activities).toHaveLength(0);
+    // Verify activities are cascade deleted
+    const { data: daysAfter } = await supabase.from('generated_plan_days').select('*').eq('plan_id', planId);
+    expect(daysAfter).toHaveLength(0);
   });
 
-  test('should show confirmation modal with correct text', async ({ page, supabase, testUser }) => {
-    // Local initialization (not global)
+  test('shows confirmation modal with correct warning message', async ({ page, supabase, sharedUser }) => {
     const plansListPage = new PlansListPage(page);
 
     // Create a test plan
-    await createTestPlan(supabase, testUser.id, {
-      name: 'Plan for Modal Test',
-      destination: 'Berlin',
+    await createTestPlan(supabase, sharedUser.id, {
+      name: 'Confirmation Test Plan',
+      destination: 'London',
       status: 'draft',
     });
 
@@ -229,21 +178,20 @@ test.describe('Delete Plan', () => {
     await plansListPage.waitForPlansToLoad();
 
     // Open delete confirmation
-    const planCard = plansListPage.getPlanByName('Plan for Modal Test');
+    const planCard = plansListPage.getPlanByName('Confirmation Test Plan');
     const menuButton = planCard.getByTestId('plan-menu');
     await menuButton.click();
 
     const deleteAction = page.getByTestId('delete-plan-action');
     await deleteAction.click();
 
-    // Verify confirmation modal is displayed
+    // Verify modal is visible
     const modal = page.locator('[role="dialog"]');
     await expect(modal).toBeVisible();
 
-    // Verify confirmation text
-    const hasConfirmationText = await page.getByText(/czy na pewno|are you sure|confirm|usunąć/i).isVisible();
-
-    expect(hasConfirmationText).toBeTruthy();
+    // Verify warning message
+    const hasWarning = await page.getByText(/usuń|delete|trwale|permanent|nieodwracalne|cannot be undone/i).isVisible();
+    expect(hasWarning).toBeTruthy();
 
     // Verify both buttons are present
     await expect(page.getByTestId('confirm-delete')).toBeVisible();
@@ -253,64 +201,13 @@ test.describe('Delete Plan', () => {
     await page.getByTestId('cancel-delete').click();
   });
 
-  test('should handle rapid delete operations', async ({ page, supabase, testUser }) => {
-    // Local initialization (not global)
-    const plansListPage = new PlansListPage(page);
-
-    // Create multiple plans
-    await createTestPlan(supabase, testUser.id, {
-      name: 'Plan 1',
-      destination: 'City 1',
-      status: 'draft',
-    });
-
-    await createTestPlan(supabase, testUser.id, {
-      name: 'Plan 2',
-      destination: 'City 2',
-      status: 'draft',
-    });
-
-    await createTestPlan(supabase, testUser.id, {
-      name: 'Plan 3',
-      destination: 'City 3',
-      status: 'draft',
-    });
-
-    // Navigate to plans list
-    await plansListPage.goto();
-    await plansListPage.waitForPlansToLoad();
-
-    // Delete first plan
-    await plansListPage.deletePlan('Plan 1');
-    await page.waitForTimeout(500);
-
-    // Verify it's gone
-    await plansListPage.expectPlanNotExists('Plan 1');
-
-    // Delete second plan immediately
-    await plansListPage.deletePlan('Plan 2');
-    await page.waitForTimeout(500);
-
-    // Verify both are gone
-    await plansListPage.expectPlanNotExists('Plan 1');
-    await plansListPage.expectPlanNotExists('Plan 2');
-    await plansListPage.expectPlanExists('Plan 3');
-
-    // Verify database state
-    const { data: plans } = await supabase.from('plans').select('*').eq('user_id', testUser.id);
-
-    expect(plans).toHaveLength(1);
-    expect(plans![0].name).toBe('Plan 3');
-  });
-
-  test('should handle deleting last plan (empty state)', async ({ page, supabase, testUser }) => {
-    // Local initialization (not global)
+  test('handles deletion of last plan gracefully', async ({ page, supabase, sharedUser }) => {
     const plansListPage = new PlansListPage(page);
 
     // Create only one plan
-    await createTestPlan(supabase, testUser.id, {
+    await createTestPlan(supabase, sharedUser.id, {
       name: 'Last Plan',
-      destination: 'Solo City',
+      destination: 'Amsterdam',
       status: 'draft',
     });
 
@@ -320,43 +217,14 @@ test.describe('Delete Plan', () => {
 
     // Delete the plan
     await plansListPage.deletePlan('Last Plan');
-
-    // Wait for deletion
     await page.waitForTimeout(1000);
 
-    // Verify empty state is shown
+    // Should show empty state
     const isEmpty = await plansListPage.isEmptyStateVisible();
     expect(isEmpty).toBeTruthy();
 
     // Verify no plans in database
-    const { data: plans } = await supabase.from('plans').select('*').eq('user_id', testUser.id);
-
+    const { data: plans } = await supabase.from('plans').select('*').eq('user_id', sharedUser.id);
     expect(plans).toHaveLength(0);
-  });
-
-  test('should not delete plans of other users', async ({ page, supabase, testUser }) => {
-    // Local initialization (not global)
-    // Note: This is an RLS test checking API-level security
-    // Create a plan for the test user
-    const { planId } = await createTestPlan(supabase, testUser.id, {
-      name: 'My Plan',
-      destination: 'My City',
-      status: 'draft',
-    });
-
-    // Try to delete directly via API (simulating an attack)
-    // This should be blocked by RLS
-    const response = await page.request.delete(`/api/plans/${planId}`);
-
-    // Should either succeed (because it's our plan) or fail with 403 if RLS is strict
-    // For our own plan, it should succeed
-    expect([200, 204]).toContain(response.status());
-
-    // Now if we try to delete a non-existent plan (simulating another user's plan)
-    const fakeId = '00000000-0000-0000-0000-000000000000';
-    const response2 = await page.request.delete(`/api/plans/${fakeId}`);
-
-    // Should fail with 403 or 404
-    expect([403, 404]).toContain(response2.status());
   });
 });

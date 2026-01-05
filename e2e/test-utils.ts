@@ -162,3 +162,64 @@ export async function waitForNavigation(page: Page, expectedUrl: string | RegExp
   await expect(page).toHaveURL(expectedUrl, { timeout: TIMEOUTS.LONG });
   await page.waitForLoadState('networkidle');
 }
+
+/**
+ * Logs in a user programmatically without using the UI.
+ * Faster than going through the login page for tests that need authentication.
+ */
+export async function loginProgrammatically(page: Page, email: string, password: string): Promise<void> {
+  // Navigate to login page first to establish session
+  await page.goto('/login');
+
+  // Use page.evaluate to call Supabase directly in browser context
+  await page.evaluate(
+    async ({ email: userEmail, password: userPassword }) => {
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabase = createClient(import.meta.env.PUBLIC_SUPABASE_URL, import.meta.env.PUBLIC_SUPABASE_ANON_KEY);
+
+      const { error } = await supabase.auth.signInWithPassword({
+        email: userEmail,
+        password: userPassword,
+      });
+
+      if (error) {
+        throw new Error(`Login failed: ${error.message}`);
+      }
+    },
+    { email, password }
+  );
+
+  // Wait for auth state to be set
+  await page.waitForTimeout(1000);
+
+  // Navigate to a protected page to verify login
+  await page.goto('/plans');
+  await page.waitForLoadState('networkidle');
+}
+
+/**
+ * Seeds test data for a user.
+ * Useful for setting up complex test scenarios.
+ */
+export async function seedUserTestData(
+  page: Page,
+  options: {
+    plansCount?: number;
+    activePlans?: number;
+    archivedPlans?: number;
+    feedbackCount?: number;
+  }
+): Promise<void> {
+  // This would use fixtures to create test data
+  // Implementation depends on specific test needs
+  const { plansCount = 0, activePlans = 0, archivedPlans = 0, feedbackCount = 0 } = options;
+
+  // Placeholder for now - would call appropriate fixture functions
+  await page.waitForTimeout(100);
+
+  // Seeding test data (options available for future use)
+  void plansCount;
+  void activePlans;
+  void archivedPlans;
+  void feedbackCount;
+}

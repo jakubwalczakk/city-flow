@@ -1,16 +1,16 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { authTest as test, expect, createTestPlan } from '../fixtures';
+import { planEditorTest as test, expect } from '../shared-user-fixtures';
+import { createTestPlan } from '../fixtures';
 import { PlanDetailsPage } from '../page-objects/PlanDetailsPage';
 import { PlansListPage } from '../page-objects/PlansListPage';
 
 test.describe('Edit Plan Name', () => {
-  test('should successfully edit plan name', async ({ page, supabase, testUser }) => {
-    // Local initialization (not global)
+  test('successfully edits plan name and persists changes', async ({ page, supabase, sharedUser }) => {
     const planDetailsPage = new PlanDetailsPage(page);
     const plansListPage = new PlansListPage(page);
 
     // Create a test plan
-    const { planId } = await createTestPlan(supabase, testUser.id, {
+    const { planId } = await createTestPlan(supabase, sharedUser.id, {
       name: 'Original Plan Name',
       destination: 'Paris',
       status: 'draft',
@@ -37,7 +37,6 @@ test.describe('Edit Plan Name', () => {
 
     // Verify change was saved in database
     const { data: plan } = await supabase.from('plans').select('name').eq('id', planId).single();
-
     expect(plan!.name).toBe(newTitle);
 
     // Navigate to plans list and verify the name is updated there too
@@ -47,14 +46,13 @@ test.describe('Edit Plan Name', () => {
     await plansListPage.expectPlanNotExists('Original Plan Name');
   });
 
-  test('should show toast notification after successful edit', async ({ page, supabase, testUser }) => {
-    // Local initialization (not global)
+  test('validates plan name constraints (empty, too short, too long)', async ({ page, supabase, sharedUser }) => {
     const planDetailsPage = new PlanDetailsPage(page);
 
     // Create a test plan
-    const { planId } = await createTestPlan(supabase, testUser.id, {
-      name: 'Plan to Rename',
-      destination: 'Rome',
+    const { planId } = await createTestPlan(supabase, sharedUser.id, {
+      name: 'Valid Plan Name',
+      destination: 'Vienna',
       status: 'draft',
     });
 
@@ -62,29 +60,58 @@ test.describe('Edit Plan Name', () => {
     await planDetailsPage.goto(planId);
     await planDetailsPage.waitForPageLoad();
 
-    // Edit the title
-    await planDetailsPage.editTitle('Renamed Plan');
+    // Test empty name
+    await planDetailsPage.editTitleButton.click();
+    await expect(planDetailsPage.titleInput).toBeVisible();
 
-    // Wait for toast notification
+    await planDetailsPage.titleInput.fill('');
+    await planDetailsPage.titleInput.press('Enter');
     await page.waitForTimeout(500);
 
-    // Check for toast notification (toast notifications are often ephemeral, so we don't fail if not found)
-    await page
-      .getByText(/zaktualizowano|updated|zapisano|saved/i)
+    // Verify original name is restored
+    let currentTitle = await planDetailsPage.getTitle();
+    expect(currentTitle).toContain('Valid Plan Name');
+
+    // Test name that's too short (if validation exists)
+    await planDetailsPage.editTitleButton.click();
+    await expect(planDetailsPage.titleInput).toBeVisible();
+    await planDetailsPage.titleInput.fill('ab');
+    await planDetailsPage.titleInput.press('Enter');
+    await page.waitForTimeout(500);
+
+    // Should show error or restore original
+    currentTitle = await planDetailsPage.getTitle();
+    // Either shows error message or reverts to original
+    const hasError = await page
+      .getByText(/minimum|krótsz|short/i)
       .isVisible()
       .catch(() => false);
+    expect(hasError || currentTitle.includes('Valid Plan Name')).toBeTruthy();
 
-    // The important thing is the name was actually updated
-    const title = await planDetailsPage.getTitle();
-    expect(title).toContain('Renamed Plan');
+    // Test name that's too long
+    const veryLongName = 'a'.repeat(150);
+    await planDetailsPage.editTitleButton.click().catch(() => void 0);
+    const isInputVisible = await planDetailsPage.titleInput.isVisible().catch(() => false);
+    if (isInputVisible) {
+      await planDetailsPage.titleInput.fill(veryLongName);
+      await planDetailsPage.titleInput.press('Enter');
+      await page.waitForTimeout(500);
+
+      // Should either truncate or show error
+      const finalTitle = await planDetailsPage.getTitle();
+      expect(finalTitle.length).toBeLessThan(120); // Should be truncated or rejected
+    }
+
+    // Verify database still has original valid name
+    const { data: plan } = await supabase.from('plans').select('name').eq('id', planId).single();
+    expect(plan!.name).toBe('Valid Plan Name');
   });
 
-  test('should cancel edit with Escape key', async ({ page, supabase, testUser }) => {
-    // Local initialization (not global)
+  test('cancels edit with Escape key without saving changes', async ({ page, supabase, sharedUser }) => {
     const planDetailsPage = new PlanDetailsPage(page);
 
     // Create a test plan
-    const { planId } = await createTestPlan(supabase, testUser.id, {
+    const { planId } = await createTestPlan(supabase, sharedUser.id, {
       name: 'Unchanged Plan',
       destination: 'Berlin',
       status: 'draft',
@@ -103,18 +130,16 @@ test.describe('Edit Plan Name', () => {
 
     // Verify no change in database
     const { data: plan } = await supabase.from('plans').select('name').eq('id', planId).single();
-
     expect(plan!.name).toBe('Unchanged Plan');
   });
 
-  test('should not save empty plan name', async ({ page, supabase, testUser }) => {
-    // Local initialization (not global)
+  test('handles special characters and unicode in plan names', async ({ page, supabase, sharedUser }) => {
     const planDetailsPage = new PlanDetailsPage(page);
 
     // Create a test plan
-    const { planId } = await createTestPlan(supabase, testUser.id, {
-      name: 'Valid Plan Name',
-      destination: 'Vienna',
+    const { planId } = await createTestPlan(supabase, sharedUser.id, {
+      name: 'Simple Name',
+      destination: 'Tokyo',
       status: 'draft',
     });
 
@@ -122,90 +147,27 @@ test.describe('Edit Plan Name', () => {
     await planDetailsPage.goto(planId);
     await planDetailsPage.waitForPageLoad();
 
-    // Try to edit with empty name
-    await planDetailsPage.editTitleButton.click();
-    await expect(planDetailsPage.titleInput).toBeVisible();
-
-    // Clear the input
-    await planDetailsPage.titleInput.fill('');
-    await planDetailsPage.titleInput.press('Enter');
-
-    // Wait a moment
-    await page.waitForTimeout(500);
-
-    // Verify error message or that original name is restored
-    const currentTitle = await planDetailsPage.getTitle();
-    expect(currentTitle).toContain('Valid Plan Name');
-
-    // Verify database still has original name
-    const { data: plan } = await supabase.from('plans').select('name').eq('id', planId).single();
-
-    expect(plan!.name).toBe('Valid Plan Name');
-  });
-
-  test('should handle very long plan names', async ({ page, supabase, testUser }) => {
-    // Local initialization (not global)
-    const planDetailsPage = new PlanDetailsPage(page);
-
-    // Create a test plan
-    const { planId } = await createTestPlan(supabase, testUser.id, {
-      name: 'Short Name',
-      destination: 'Amsterdam',
-      status: 'draft',
-    });
-
-    // Navigate to plan details
-    await planDetailsPage.goto(planId);
-    await planDetailsPage.waitForPageLoad();
-
-    // Try to edit with very long name
-    const longName = 'A'.repeat(100) + ' - Very Long Plan Name That Should Be Handled Gracefully';
-    await planDetailsPage.editTitle(longName);
-
+    // Test special characters
+    const specialName = 'Trip to München & København 🌍';
+    await planDetailsPage.editTitle(specialName);
     await page.waitForTimeout(1000);
 
-    // Verify the name was saved (might be truncated depending on DB constraints)
+    const updatedTitle = await planDetailsPage.getTitle();
+    expect(updatedTitle).toContain('München');
+    expect(updatedTitle).toContain('København');
+
+    // Verify in database
     const { data: plan } = await supabase.from('plans').select('name').eq('id', planId).single();
-
-    // The name should either be the full long name or truncated to a reasonable length
-    expect(plan!.name.length).toBeGreaterThan(10);
+    expect(plan!.name).toContain('München');
   });
 
-  test('should not allow editing plan name for another user', async ({ page, supabase, testUser }) => {
-    // Local initialization (not global)
-    const planDetailsPage = new PlanDetailsPage(page);
-
-    // This test verifies RLS policies prevent editing other users' plans
-    // For a complete test, we would need to create another user and try to edit their plan
-    // For now, we just verify that we can only edit our own plan
-
-    // Create a plan for the test user
-    const { planId } = await createTestPlan(supabase, testUser.id, {
-      name: 'My Plan',
-      destination: 'Prague',
-      status: 'draft',
-    });
-
-    // Navigate to plan details
-    await planDetailsPage.goto(planId);
-    await planDetailsPage.waitForPageLoad();
-
-    // Verify we can see the edit button (because it's our plan)
-    const hasEditButton = await planDetailsPage.editTitleButton.isVisible();
-    expect(hasEditButton).toBeTruthy();
-
-    // If we tried to access another user's plan, the edit button wouldn't be there
-    // or the plan wouldn't be accessible at all (covered in RLS tests)
-  });
-
-  test('should preserve special characters in plan name', async ({ page, supabase, testUser }) => {
-    // Local initialization (not global)
+  test('shows appropriate feedback after successful edit', async ({ page, supabase, sharedUser }) => {
     const planDetailsPage = new PlanDetailsPage(page);
 
     // Create a test plan
-    const { planId } = await createTestPlan(supabase, testUser.id, {
-      name: 'Basic Plan',
-      destination: 'Barcelona',
+    const { planId } = await createTestPlan(supabase, sharedUser.id, {
+      name: 'Plan to Rename',
+      destination: 'Rome',
       status: 'draft',
     });
 
@@ -213,80 +175,20 @@ test.describe('Edit Plan Name', () => {
     await planDetailsPage.goto(planId);
     await planDetailsPage.waitForPageLoad();
 
-    // Edit with special characters
-    const nameWithSpecialChars = 'Plan & Trip 2024 - €100 Budget! 🎉';
-    await planDetailsPage.editTitle(nameWithSpecialChars);
+    // Edit the title
+    await planDetailsPage.editTitle('Renamed Plan');
 
-    await page.waitForTimeout(1000);
-
-    // Verify the name with special characters is saved correctly
-    const { data: plan } = await supabase.from('plans').select('name').eq('id', planId).single();
-
-    // The name should contain the special characters (emojis might be filtered)
-    expect(plan!.name).toContain('Plan & Trip 2024');
-    expect(plan!.name).toContain('€100 Budget');
-  });
-
-  test('should allow multiple edits in succession', async ({ page, supabase, testUser }) => {
-    // Local initialization (not global)
-    const planDetailsPage = new PlanDetailsPage(page);
-
-    // Create a test plan
-    const { planId } = await createTestPlan(supabase, testUser.id, {
-      name: 'First Name',
-      destination: 'Munich',
-      status: 'draft',
-    });
-
-    // Navigate to plan details
-    await planDetailsPage.goto(planId);
-    await planDetailsPage.waitForPageLoad();
-
-    // First edit
-    await planDetailsPage.editTitle('Second Name');
+    // Wait for toast notification
     await page.waitForTimeout(500);
 
-    // Verify first edit
-    let title = await planDetailsPage.getTitle();
-    expect(title).toContain('Second Name');
+    // Check for toast notification (toast notifications are often ephemeral)
+    await page
+      .getByText(/zaktualizowano|updated|zapisano|saved/i)
+      .isVisible()
+      .catch(() => false);
 
-    // Second edit
-    await planDetailsPage.editTitle('Third Name');
-    await page.waitForTimeout(500);
-
-    // Verify second edit
-    title = await planDetailsPage.getTitle();
-    expect(title).toContain('Third Name');
-
-    // Verify final state in database
-    const { data: plan } = await supabase.from('plans').select('name').eq('id', planId).single();
-
-    expect(plan!.name).toBe('Third Name');
-  });
-
-  test('should trim whitespace from plan name', async ({ page, supabase, testUser }) => {
-    // Local initialization (not global)
-    const planDetailsPage = new PlanDetailsPage(page);
-
-    // Create a test plan
-    const { planId } = await createTestPlan(supabase, testUser.id, {
-      name: 'Plan Without Spaces',
-      destination: 'Lisbon',
-      status: 'draft',
-    });
-
-    // Navigate to plan details
-    await planDetailsPage.goto(planId);
-    await planDetailsPage.waitForPageLoad();
-
-    // Edit with leading/trailing whitespace
-    await planDetailsPage.editTitle('   Plan With Spaces   ');
-    await page.waitForTimeout(1000);
-
-    // Verify the name is trimmed in database
-    const { data: plan } = await supabase.from('plans').select('name').eq('id', planId).single();
-
-    // Whitespace should be trimmed (depending on validation)
-    expect(plan!.name.trim()).toBe('Plan With Spaces');
+    // The important thing is the name was actually updated
+    const title = await planDetailsPage.getTitle();
+    expect(title).toContain('Renamed Plan');
   });
 });

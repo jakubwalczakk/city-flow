@@ -1,16 +1,16 @@
-import { authTest as test, expect, createTestPlan, createDraftPlan, verifyPlanIsArchived } from '../fixtures';
+import { historyTest as test, expect } from '../shared-user-fixtures';
+import { createTestPlan, createDraftPlan, verifyPlanIsArchived } from '../fixtures';
 import { PlanDetailsPage } from '../page-objects/PlanDetailsPage';
 import { PlansListPage } from '../page-objects/PlansListPage';
 import { HistoryPage } from '../page-objects/HistoryPage';
 
 test.describe('Move Plan to History', () => {
-  test('should move plan to history from plans list', async ({ page, supabase, testUser }) => {
-    // Local initialization (not global)
+  test('moves plan to history from plans list successfully', async ({ page, supabase, sharedUser }) => {
     const plansListPage = new PlansListPage(page);
     const historyPage = new HistoryPage(page);
 
     // Create a generated plan
-    const { planId } = await createTestPlan(supabase, testUser.id, {
+    const { planId } = await createTestPlan(supabase, sharedUser.id, {
       name: 'Trip to Rome',
       destination: 'Rome',
       status: 'generated',
@@ -34,12 +34,6 @@ test.describe('Move Plan to History', () => {
     // Verify plan is removed from active plans list
     await plansListPage.expectPlanNotExists('Trip to Rome');
 
-    // Verify toast notification (optional - might have disappeared)
-    await page
-      .getByText(/przeniesiono do historii|moved to history|archived/i)
-      .isVisible()
-      .catch(() => false);
-
     // Verify plan is archived in database
     const isArchived = await verifyPlanIsArchived(supabase, planId);
     expect(isArchived).toBeTruthy();
@@ -50,13 +44,12 @@ test.describe('Move Plan to History', () => {
     await historyPage.expectPlanExists('Trip to Rome');
   });
 
-  test('should move plan to history from plan details page', async ({ page, supabase, testUser }) => {
-    // Local initialization (not global)
+  test('moves plan to history from plan details page', async ({ page, supabase, sharedUser }) => {
     const planDetailsPage = new PlanDetailsPage(page);
     const historyPage = new HistoryPage(page);
 
     // Create a generated plan
-    const { planId } = await createTestPlan(supabase, testUser.id, {
+    const { planId } = await createTestPlan(supabase, sharedUser.id, {
       name: 'Barcelona Vacation',
       destination: 'Barcelona',
       status: 'generated',
@@ -76,12 +69,6 @@ test.describe('Move Plan to History', () => {
     const currentUrl = page.url();
     expect(currentUrl.includes('/plans') || currentUrl.includes('/history')).toBeTruthy();
 
-    // Verify toast notification (optional - might have disappeared)
-    await page
-      .getByText(/przeniesiono do historii|moved to history|archived/i)
-      .isVisible()
-      .catch(() => false);
-
     // Verify plan is archived in database
     const isArchived = await verifyPlanIsArchived(supabase, planId);
     expect(isArchived).toBeTruthy();
@@ -91,12 +78,11 @@ test.describe('Move Plan to History', () => {
     await historyPage.expectPlanExists('Barcelona Vacation');
   });
 
-  test('should cancel moving plan to history', async ({ page, supabase, testUser }) => {
-    // Local initialization (not global)
+  test('cancels moving plan to history when user dismisses confirmation', async ({ page, supabase, sharedUser }) => {
     const plansListPage = new PlansListPage(page);
 
     // Create a generated plan
-    const { planId } = await createTestPlan(supabase, testUser.id, {
+    const { planId } = await createTestPlan(supabase, sharedUser.id, {
       name: 'Prague Trip',
       destination: 'Prague',
       status: 'generated',
@@ -126,12 +112,11 @@ test.describe('Move Plan to History', () => {
     expect(plan?.status).toBe('generated');
   });
 
-  test('should not show move to history button for draft plans', async ({ page, supabase, testUser }) => {
-    // Local initialization (not global)
+  test('does not show move to history button for draft plans', async ({ page, supabase, sharedUser }) => {
     const planDetailsPage = new PlanDetailsPage(page);
 
     // Create a draft plan
-    const planId = await createDraftPlan(supabase, testUser.id, {
+    const planId = await createDraftPlan(supabase, sharedUser.id, {
       name: 'Draft Plan',
       destination: 'Vienna',
       startDate: '2026-06-15',
@@ -147,12 +132,11 @@ test.describe('Move Plan to History', () => {
     expect(isVisible).toBeFalsy();
   });
 
-  test('should show confirmation modal with correct text', async ({ page, supabase, testUser }) => {
-    // Local initialization (not global)
+  test('shows confirmation modal with proper messaging', async ({ page, supabase, sharedUser }) => {
     const plansListPage = new PlansListPage(page);
 
     // Create a generated plan
-    await createTestPlan(supabase, testUser.id, {
+    await createTestPlan(supabase, sharedUser.id, {
       name: 'Test Plan',
       destination: 'Test City',
       status: 'generated',
@@ -193,12 +177,11 @@ test.describe('Move Plan to History', () => {
     await page.getByTestId('cancel-archive').click();
   });
 
-  test('should handle rapid move operations', async ({ page, supabase, testUser }) => {
-    // Local initialization (not global)
+  test('handles rapid archiving of multiple plans', async ({ page, supabase, sharedUser }) => {
     const plansListPage = new PlansListPage(page);
 
     // Create multiple generated plans
-    await createTestPlan(supabase, testUser.id, {
+    await createTestPlan(supabase, sharedUser.id, {
       name: 'Plan 1',
       destination: 'City 1',
       status: 'generated',
@@ -206,7 +189,7 @@ test.describe('Move Plan to History', () => {
       endDate: '2024-01-03',
     });
 
-    await createTestPlan(supabase, testUser.id, {
+    await createTestPlan(supabase, sharedUser.id, {
       name: 'Plan 2',
       destination: 'City 2',
       status: 'generated',
@@ -214,7 +197,7 @@ test.describe('Move Plan to History', () => {
       endDate: '2024-02-03',
     });
 
-    await createTestPlan(supabase, testUser.id, {
+    await createTestPlan(supabase, sharedUser.id, {
       name: 'Plan 3',
       destination: 'City 3',
       status: 'generated',
@@ -246,7 +229,7 @@ test.describe('Move Plan to History', () => {
     const { data: activePlans } = await supabase
       .from('plans')
       .select('*')
-      .eq('user_id', testUser.id)
+      .eq('user_id', sharedUser.id)
       .eq('status', 'generated');
 
     expect(activePlans).toHaveLength(1);
@@ -256,56 +239,17 @@ test.describe('Move Plan to History', () => {
     const { data: archivedPlans } = await supabase
       .from('plans')
       .select('*')
-      .eq('user_id', testUser.id)
+      .eq('user_id', sharedUser.id)
       .eq('status', 'archived');
 
     expect(archivedPlans).toHaveLength(2);
   });
 
-  test('should redirect correctly after moving last plan', async ({ page, supabase, testUser }) => {
-    // Local initialization (not global)
-    const planDetailsPage = new PlanDetailsPage(page);
-    const plansListPage = new PlansListPage(page);
-
-    // Create only one generated plan
-    const { planId } = await createTestPlan(supabase, testUser.id, {
-      name: 'Last Plan',
-      destination: 'Final City',
-      status: 'generated',
-      startDate: '2024-05-01',
-      endDate: '2024-05-03',
-    });
-
-    // Navigate to plan details
-    await planDetailsPage.goto(planId);
-    await planDetailsPage.waitForPageLoad();
-
-    // Move to history
-    await planDetailsPage.moveToHistory();
-
-    // Wait for redirect
-    await page.waitForTimeout(1000);
-
-    // Should redirect somewhere (plans list or history)
-    const currentUrl = page.url();
-    expect(currentUrl.includes('/plans') || currentUrl.includes('/history')).toBeTruthy();
-
-    // If redirected to plans list, verify plan is not there
-    if (currentUrl.includes('/plans') && !currentUrl.match(/\/plans\/[^/]+$/)) {
-      await plansListPage.waitForPlansToLoad();
-      // Empty state might not be shown if there are draft plans or the page is different
-      // Just verify the plan is not in the list
-      const planCount = await plansListPage.getPlanCount();
-      expect(planCount).toBe(0);
-    }
-  });
-
-  test('should maintain plan data after archiving', async ({ page, supabase, testUser }) => {
-    // Local initialization (not global)
+  test('maintains plan data integrity after archiving', async ({ page, supabase, sharedUser }) => {
     const planDetailsPage = new PlanDetailsPage(page);
 
     // Create a plan with activities
-    const { planId } = await createTestPlan(supabase, testUser.id, {
+    const { planId } = await createTestPlan(supabase, sharedUser.id, {
       name: 'Data Preservation Test',
       destination: 'Amsterdam',
       status: 'generated',

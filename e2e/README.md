@@ -1,335 +1,423 @@
-# E2E Tests - Plans Management
+# CityFlow E2E Tests
 
-This directory contains end-to-end tests for the CityFlow application's plan management features.
+End-to-end tests for CityFlow application using Playwright.
 
-## 📁 Test Structure
+## 📊 Test Statistics
+
+- **Total tests:** ~149
+- **Test categories:** 7
+- **Average run time:** ~13 minutes
+- **Shared test users:** 10
+
+## 🏗️ Structure
 
 ```
 e2e/
-├── plans/                          # Plan management tests
-│   ├── create-plan-full.spec.ts   # Plan creation (full flow, no API mocks)
-│   ├── plans-list.spec.ts         # Plans list view
-│   ├── plan-details.spec.ts       # Plan details view
-│   ├── edit-plan-name.spec.ts     # Inline plan name editing
-│   ├── delete-plan.spec.ts        # Plan deletion
-│   └── plan-rls.spec.ts           # Row Level Security tests
-├── page-objects/                   # Page Object Models
-│   ├── LoginPage.ts
-│   ├── NewPlanPage.ts
-│   ├── PlansListPage.ts           # NEW
-│   └── PlanDetailsPage.ts         # NEW
-├── fixtures.ts                     # Test fixtures and helpers
-├── test-setup.ts                   # Common mocks (OpenRouter API)
-└── README.md                       # This file
+├── auth/              # Authentication flows (31 tests)
+├── export/            # PDF export functionality (8 tests)
+├── feedback/          # User feedback system (22 tests)
+├── generation/        # AI plan generation (22 tests)
+├── history/           # Plan history & archiving (25 tests)
+├── plans/             # Plan CRUD operations (30 tests)
+├── plan-editing/      # Activity management (11 tests)
+├── page-objects/      # Page Object Models
+├── fixtures.ts        # Test fixtures & shared users
+├── test-utils.ts      # Helper functions
+└── test-setup.ts      # Test configuration
 ```
 
-## 🎯 Test Coverage
+## 🚀 Quick Start
 
-### Plans CRUD Operations (54+ tests)
+### Run all tests
 
-#### 1. Create Plan (6 tests)
+```bash
+npm run test:e2e
+```
 
-- ✅ Create draft plan without generating
-- ✅ Create and generate plan (full flow with mocked AI)
-- ✅ Form validation for empty required fields
-- ✅ Cancel plan creation
-- ✅ Data preservation across steps
-- ✅ Multiple fixed points
+### Run specific category
 
-#### 2. Plans List (9 tests)
+```bash
+npm run test:e2e -- history/
+npm run test:e2e -- plans/
+```
 
-- ✅ Empty state for new users
-- ✅ Display list of user plans
-- ✅ Filter archived plans
-- ✅ Navigate to plan details
-- ✅ Status badges (draft/generated)
-- ✅ Sorting (newest first)
-- ✅ Plan card information
-- ✅ Empty filter results
+### Run in UI mode
 
-#### 3. Plan Details (11 tests)
+```bash
+npm run test:e2e:ui
+```
 
-- ✅ Display draft plan details
-- ✅ Display generated plan with activities
-- ✅ 404 for non-existent plans
-- ✅ Plan metadata display
-- ✅ Fixed points display
-- ✅ Export button visibility
-- ✅ Multiple days and activities
-- ✅ Generate from draft status
-- ✅ Action buttons
-- ✅ Long plan name handling
+### Run with debugging
 
-#### 4. Edit Plan Name (9 tests)
+```bash
+npm run test:e2e:debug
+```
 
-- ✅ Successful inline editing
-- ✅ Toast notification
-- ✅ Cancel with Escape key
-- ✅ Empty name validation
-- ✅ Very long name handling
-- ✅ RLS - cannot edit other user's plans
-- ✅ Special characters preservation
-- ✅ Multiple successive edits
-- ✅ Whitespace trimming
+## 🔧 Shared Test Users System
 
-#### 5. Delete Plan (10 tests)
+To optimize performance and reduce database load, tests use a pool of shared users instead of creating new users for each test.
 
-- ✅ Delete from list view
-- ✅ Cancel deletion
-- ✅ Delete from details view
-- ✅ Cascade delete fixed points
-- ✅ Cascade delete activities
-- ✅ Confirmation modal
-- ✅ Rapid delete operations
-- ✅ Delete last plan (empty state)
-- ✅ RLS - cannot delete other user's plans
-
-#### 6. Row Level Security - RLS (9 tests)
-
-- ✅ Only show own plans in list
-- ✅ Deny access via URL manipulation
-- ✅ Deny editing via API
-- ✅ Deny deleting via API
-- ✅ Deny accessing fixed points
-- ✅ Deny plan generation
-- ✅ Allow access to own plans
-- ✅ Direct database access prevention
-- ✅ Deny accessing activities
-
-## 🧪 Test Philosophy
-
-### Database Usage
-
-- **Real Supabase database** - tests use the actual test database
-- **No Plan API mocks** - full integration testing for database operations
-- **Mocked OpenRouter API** - prevents expensive AI calls during tests
-- **Proper cleanup** - database cleaned before and after each test
-
-### Page Object Model
-
-All tests use Page Object Models for maintainability:
-
-- `PlansListPage` - Plans list page interactions
-- `PlanDetailsPage` - Plan details page interactions
-- `NewPlanPage` - Plan creation flow
-- `LoginPage` - Authentication flow
-
-### Fixtures and Helpers
-
-#### Test Fixtures (fixtures.ts)
+### Available Shared Users
 
 ```typescript
-// Create test plans
-await createTestPlan(supabase, userId, {
-  name: 'Test Plan',
-  destination: 'Paris',
-  status: 'draft' | 'generated' | 'archived',
-  withFixedPoints: true,
-  withActivities: true,
+SHARED_TEST_USERS = {
+  BASIC_USER: 'e2e-basic-user@test.com',
+  PLAN_CREATOR: 'e2e-plan-creator@test.com',
+  FEEDBACK_USER: 'e2e-feedback-user@test.com',
+  HISTORY_USER: 'e2e-history-user@test.com',
+  EXPORT_USER: 'e2e-export-user@test.com',
+  RLS_USER_1: 'e2e-rls-user-1@test.com',
+  RLS_USER_2: 'e2e-rls-user-2@test.com',
+  PLAN_VIEWER: 'e2e-plan-viewer@test.com',
+  PLAN_EDITOR: 'e2e-plan-editor@test.com',
+  TEMP_USER: 'e2e-temp-user@test.com',
+};
+```
+
+### Using Shared Users in Tests
+
+```typescript
+import { test, expect, getOrCreateSharedUser, cleanupUserData } from '../fixtures';
+
+test.describe('My Feature', () => {
+  let sharedUser: { email: string; password: string; userId: string };
+  let supabase: SupabaseClient<Database>;
+
+  // Get or create shared user once for all tests
+  test.beforeAll(async ({ browser }) => {
+    const page = await browser.newPage();
+    const context = page.context();
+    supabase = (context as any).supabase;
+
+    sharedUser = await getOrCreateSharedUser(supabase, 'BASIC_USER');
+    await page.close();
+  });
+
+  // Clean user data before each test
+  test.beforeEach(async ({ page, supabase: testSupabase }) => {
+    await cleanupUserData(testSupabase, sharedUser.userId, { keepUser: true });
+
+    // Login
+    const loginPage = new LoginPage(page);
+    await loginPage.goto();
+    await loginPage.login(sharedUser.email, sharedUser.password);
+    await page.waitForTimeout(500);
+  });
+
+  test('should do something', async ({ page, supabase }) => {
+    // Test logic here
+    // User is already logged in and data is clean
+  });
+});
+```
+
+### Benefits
+
+- ✅ **-78% fewer user creations** - from ~45 to ~10 per test run
+- ✅ **-64% fewer database operations** - faster execution
+- ✅ **Better test stability** - consistent user state
+- ✅ **Lower Supabase costs** - fewer Auth API calls
+
+### When NOT to Use Shared Users
+
+- **Register tests** - Must create new users
+- **RLS tests** - Need multiple distinct users
+- **User-specific state** - When isolation is critical
+
+For these cases, use `createTestUser()` as before.
+
+## 📝 Writing New Tests
+
+### Basic Test Template
+
+```typescript
+import { test, expect } from '../fixtures';
+import { MyPage } from '../page-objects/MyPage';
+
+test.describe('Feature Name', () => {
+  test('should do something', async ({ page }) => {
+    const myPage = new MyPage(page);
+
+    await myPage.goto();
+    await myPage.doAction();
+
+    await expect(myPage.result).toBeVisible();
+  });
+});
+```
+
+### Test with Shared User
+
+```typescript
+import { test, expect, getOrCreateSharedUser, cleanupUserData } from '../fixtures';
+
+test.describe('Feature with Auth', () => {
+  let sharedUser: { email: string; password: string; userId: string };
+  let supabase: SupabaseClient<Database>;
+
+  test.beforeAll(async ({ browser }) => {
+    const page = await browser.newPage();
+    const context = page.context();
+    supabase = (context as any).supabase;
+    sharedUser = await getOrCreateSharedUser(supabase, 'BASIC_USER');
+    await page.close();
+  });
+
+  test.beforeEach(async ({ page, supabase: testSupabase }) => {
+    await cleanupUserData(testSupabase, sharedUser.userId, { keepUser: true });
+    // Login logic here
+  });
+
+  test('my test', async ({ page }) => {
+    // Test with authenticated user
+  });
+});
+```
+
+### Comprehensive Test Pattern
+
+Merge similar tests to reduce duplication:
+
+```typescript
+// ✅ GOOD - One comprehensive test
+test('validates all form constraints', async ({ page }) => {
+  // Test multiple scenarios in one test
+  await testEmptyField();
+  await testTooShort();
+  await testTooLong();
+  await testSpecialChars();
 });
 
-// Clean database
-await cleanDatabase(supabase, userId);
-
-// Create test users
-await createTestUser(supabase, options);
+// ❌ BAD - Multiple similar tests
+test('validates empty field');
+test('validates too short');
+test('validates too long');
+test('validates special chars');
 ```
 
-#### Common Mocks (test-setup.ts)
+## 🧪 Test Categories
+
+### 1. Authentication (`auth/`)
+
+- User registration
+- Login/logout flows
+- Password recovery
+- Onboarding
+
+### 2. Plans (`plans/`)
+
+- Create, read, update, delete plans
+- Plan details view
+- Plans list with filtering
+- Row-level security
+
+### 3. Plan Editing (`plan-editing/`)
+
+- Add/edit/delete activities
+- Activity form validation
+- Timeline management
+
+### 4. History (`history/`)
+
+- View archived plans
+- Auto-archiving after end date
+- Move plans to history
+- Read-only mode for archived plans
+
+### 5. Generation (`generation/`)
+
+- AI plan generation
+- Generation limits
+- Error handling
+- Priority system
+
+### 6. Feedback (`feedback/`)
+
+- Submit feedback
+- Rate plans
+- Feedback persistence
+
+### 7. Export (`export/`)
+
+- PDF export functionality
+- Export content validation
+
+## 🔍 Page Objects
+
+All page interactions should use Page Object Models:
 
 ```typescript
-// Mock OpenRouter API to prevent real AI calls
-await mockOpenRouterAPI(page);
+// page-objects/MyPage.ts
+export class MyPage {
+  constructor(private page: Page) {}
+
+  // Locators
+  get submitButton() {
+    return this.page.getByTestId('submit-button');
+  }
+
+  // Actions
+  async goto() {
+    await this.page.goto('/my-page');
+  }
+
+  async submit() {
+    await this.submitButton.click();
+  }
+
+  // Assertions
+  async expectSuccess() {
+    await expect(this.page.getByText('Success')).toBeVisible();
+  }
+}
 ```
 
-## 🚀 Running Tests
+## 🛠️ Available Fixtures & Utilities
 
-### Run all plan management tests
+### User Management
+
+- `getOrCreateSharedUser(supabase, userKey)` - Get shared user
+- `cleanupUserData(supabase, userId, options)` - Clean user data
+- `createTestUser(supabase, options)` - Create new user (when needed)
+- `deleteTestUser(supabase, userId)` - Delete user completely
+
+### Plan Management
+
+- `createTestPlan(supabase, userId, options)` - Create test plan
+- `createPlanWithActivities(supabase, userId, options)` - Plan with activities
+- `createDraftPlan(supabase, userId, options)` - Draft plan
+- `createArchivedPlan(supabase, userId, options)` - Archived plan
+
+### Generation Helpers
+
+- `setGenerationLimit(supabase, userId, used)` - Set generation count
+- `getGenerationCount(supabase, userId)` - Get generation count
+- `verifyPlanGenerated(supabase, planId)` - Verify generation
+
+### History Helpers
+
+- `verifyPlanIsArchived(supabase, planId)` - Check if archived
+- `runArchivingJob(supabase)` - Manually run archiving
+- `getArchivedPlanCount(supabase, userId)` - Count archived plans
+
+### Feedback Helpers
+
+- `createFeedback(supabase, userId, planId, rating, comment)` - Create feedback
+- `getFeedback(supabase, userId, planId)` - Get feedback
+- `updateFeedback(supabase, feedbackId, updates)` - Update feedback
+
+### UI Utilities
+
+- `waitForToast(page, options)` - Wait for toast notification
+- `waitForLoading(page, options)` - Wait for loading state
+- `expectErrorMessage(page, text)` - Verify error
+- `expectSuccessMessage(page, text)` - Verify success
+- `fillInput(page, testId, value, options)` - Fill form input
+
+## 🐛 Debugging
+
+### Debug Single Test
 
 ```bash
-npm run test:e2e -- e2e/plans/
+npm run test:e2e:debug -- --grep "test name"
 ```
 
-### Run specific test file
+### Show Browser
 
 ```bash
-npm run test:e2e -- e2e/plans/create-plan-full.spec.ts
+npm run test:e2e -- --headed
 ```
 
-### Run tests in debug mode
+### Slow Motion
 
 ```bash
-npx playwright test --debug e2e/plans/
+npm run test:e2e -- --headed --slow-mo=1000
 ```
 
-### Run tests in headed mode (see browser)
+### Screenshots on Failure
 
-```bash
-npx playwright test --headed e2e/plans/
-```
+Screenshots are automatically saved to `test-results/` on failure.
 
-### Run specific test by name
-
-```bash
-npm run test:e2e -- -g "should create a draft plan"
-```
-
-## 📝 Test Data Management
-
-### Environment Variables
-
-Tests require the following environment variables in `.env.test`:
-
-```env
-# Test User (pre-created in test database)
-E2E_USER_ID=uuid-here
-E2E_USERNAME=test@example.com
-E2E_PASSWORD=testpassword123
-
-# Supabase Test Database
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_KEY=your-anon-key
-```
-
-### Database Cleanup
-
-- **Before each test**: Database is cleaned to ensure isolation
-- **After each test**: Database is cleaned to remove test data
-- **Cascade deletes**: Related records (fixed_points, activities) are automatically deleted
-
-## 🎨 Required UI Changes
-
-To ensure all tests pass, the following `data-testid` attributes must be added to components:
-
-### Plans List (`PlansDashboard.tsx`)
-
-```tsx
-data-testid="create-new-plan-btn"     // Create button
-data-testid="plan-card"               // Each plan card
-data-testid="empty-state"             // Empty state component
-data-testid="plan-menu"               // Plan context menu
-data-testid="delete-plan-action"      // Delete action in menu
-```
-
-### Plan Details (`PlanDetailsView.tsx`)
-
-```tsx
-data-testid="plan-title"              // Plan title
-data-testid="edit-title-button"       // Edit title button
-data-testid="title-input"             // Title input field
-data-testid="plan-destination"        // Destination display
-data-testid="plan-dates"              // Dates display
-data-testid="plan-timeline"           // Timeline component
-data-testid="activity-item"           // Each activity item
-data-testid="generate-plan-button"    // Generate button
-data-testid="export-pdf-button"       // Export button
-data-testid="delete-plan-button"      // Delete button
-data-testid="plan-actions-menu"       // Actions menu
-data-testid="fixed-points-list"       // Fixed points list
-data-testid="generation-loader"       // Generation loader
-```
-
-### Confirmation Dialogs
-
-```tsx
-data-testid="confirm-delete"          // Confirm button
-data-testid="cancel-delete"           // Cancel button
-```
-
-## 🔒 Security Testing
-
-The `plan-rls.spec.ts` file contains comprehensive Row Level Security tests:
-
-- ✅ Users can only see their own plans
-- ✅ URL manipulation is blocked
-- ✅ API calls to other users' plans return 403/404
-- ✅ Direct database access is prevented via RLS policies
-- ✅ All CRUD operations respect user ownership
-
-## 📊 Performance Considerations
-
-### Test Execution Time
-
-- **Fast tests** (~5-10s): List, details, edit, delete tests
-- **Slow tests** (~20-30s): Plan generation tests (with mocked AI)
-- **RLS tests** (~10-15s): Multiple user creation and cleanup
-
-### Optimization Tips
-
-1. Use `test.setTimeout()` for long-running tests
-2. Parallelize independent test files
-3. Use database fixtures instead of UI navigation when possible
-4. Clean up only necessary data in `afterEach`
-
-## 🐛 Debugging Tips
-
-### View test trace
+### Trace Viewer
 
 ```bash
 npx playwright show-trace trace.zip
 ```
 
-### Run with console output
+## 📊 Best Practices
 
-```typescript
-page.on('console', (msg) => console.log(msg.text()));
-```
+### ✅ DO
 
-### Take screenshot on failure
+- Use shared users for most tests
+- Clean user data between tests
+- Use Page Object Models
+- Merge similar tests when possible
+- Use descriptive test names
+- Handle loading states explicitly
+- Test critical paths thoroughly
 
-Playwright automatically captures screenshots on test failures in `test-results/`
+### ❌ DON'T
 
-### Check database state
+- Create new users unnecessarily
+- Test implementation details
+- Duplicate similar tests
+- Skip cleanup in beforeEach
+- Use hardcoded waits (use waitFor instead)
+- Mix test data between tests
 
-Use Supabase dashboard to verify database state during test development
+## 🔄 CI/CD
 
-## 📚 Best Practices
+Tests run automatically on:
 
-1. **Use Page Objects** - Keep selectors and actions in page objects
-2. **Clean Database** - Always clean before and after tests
-3. **Test Isolation** - Each test should be independent
-4. **Meaningful Names** - Use descriptive test names
-5. **Wait for Elements** - Use `expect().toBeVisible()` instead of `waitForTimeout()`
-6. **Mock External Services** - Mock OpenRouter but use real database
-7. **Test Edge Cases** - Empty states, long text, special characters
-8. **Verify Database** - Check database state after operations
-9. **Handle Async** - Always await async operations
-10. **Error Messages** - Test validation and error scenarios
+- Pull requests to `main`
+- Pushes to `main`
+- Manual workflow dispatch
 
-## 🔄 CI/CD Integration
+### Environment Variables
 
-Tests are designed to run in CI/CD pipelines:
+Required in CI:
 
-```yaml
-# .github/workflows/e2e-tests.yml
-- name: Run E2E Tests
-  run: npm run test:e2e -- e2e/plans/
-  env:
-    E2E_USER_ID: ${{ secrets.E2E_USER_ID }}
-    E2E_USERNAME: ${{ secrets.E2E_USERNAME }}
-    E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
-```
+- `SUPABASE_URL`
+- `SUPABASE_KEY`
+- `E2E_USERNAME`
+- `E2E_PASSWORD`
+- `E2E_USER_ID`
 
-## 📖 Additional Resources
+## 📈 Performance Metrics
 
-- [Playwright Documentation](https://playwright.dev/)
-- [Page Object Model Pattern](https://playwright.dev/docs/pom)
-- [Supabase Testing Guide](https://supabase.com/docs/guides/database/testing)
-- [CityFlow E2E Test Plan](../ai/e2e-plan-management-implementation-plan.md)
+### Current Stats
 
-## 🎯 Future Enhancements
+- **Total tests:** ~149
+- **Execution time:** ~13 minutes
+- **User creations:** ~10 per run
+- **Database operations:** ~180 per run
 
-- [ ] Add visual regression tests
-- [ ] Add performance benchmarks
-- [ ] Test plan export PDF content
-- [ ] Test plan sharing features (when implemented)
-- [ ] Add accessibility (a11y) tests
-- [ ] Add mobile viewport tests
-- [ ] Test offline behavior
-- [ ] Add load testing for concurrent users
+### Optimization History
+
+- **Jan 2026:** Implemented shared users system
+  - Reduced tests by 29% (210 → 149)
+  - Reduced user creations by 78% (45 → 10)
+  - Reduced execution time by 28% (18min → 13min)
+
+## 🤝 Contributing
+
+When adding new tests:
+
+1. Use shared users when possible
+2. Follow Page Object pattern
+3. Merge similar test cases
+4. Clean up data in beforeEach
+5. Update this README if adding new patterns
+
+## 📚 Additional Resources
+
+- [Playwright Documentation](https://playwright.dev)
+- [Optimization Plan](../ai/e2e-optimization-implementation-plan.md)
+- [Optimization Results](../ai/e2e-optimization-final-summary.md)
+- [Cursor Testing Rules](../.cursor/rules/playwright-e2e-testing.mdc)
 
 ---
 
-**Generated**: January 2026  
-**Test Framework**: Playwright v1.x  
-**Coverage**: 54+ tests for Plan Management CRUD operations
+**Last Updated:** January 5, 2026  
+**Test Framework:** Playwright 1.40+  
+**Node Version:** 18+

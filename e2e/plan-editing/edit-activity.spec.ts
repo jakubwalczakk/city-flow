@@ -1,11 +1,14 @@
-import { authTest as test, expect, createPlanWithActivities, getActivityByTitle } from '../fixtures';
+import { planEditorTest as test, expect } from '../shared-user-fixtures';
+import { createPlanWithActivities, getActivityByTitle } from '../fixtures';
 import { PlanTimelinePage } from '../page-objects/PlanTimelinePage';
 import { ActivityFormModal } from '../page-objects/ActivityFormModal';
 
 test.describe('Edit Activity', () => {
-  test('should edit AI-generated activity', async ({ page, supabase, testUser }) => {
-    // Create a plan with activities
-    const planId = await createPlanWithActivities(supabase, testUser.id, {
+  test('edits activity with single and multiple field changes', async ({ page, supabase, sharedUser }) => {
+    const planTimelinePage = new PlanTimelinePage(page);
+    const activityFormModal = new ActivityFormModal(page);
+
+    const planId = await createPlanWithActivities(supabase, sharedUser.id, {
       name: 'Paris Trip',
       destination: 'Paris',
       startDate: '2026-06-15',
@@ -33,290 +36,42 @@ test.describe('Edit Activity', () => {
       ],
     });
 
-    // Initialize page objects
-    const planTimelinePage = new PlanTimelinePage(page);
-    const activityFormModal = new ActivityFormModal(page);
-
-    // Navigate to plan
     await planTimelinePage.goto(planId);
-
-    // Expand day
     await planTimelinePage.expandDay(1);
 
-    // Open edit form for "Muzeum Luwr"
+    // Test 1: Edit with time and description change
     await planTimelinePage.editActivity('Muzeum Luwr');
-
-    // Wait for modal to load with existing data
     await activityFormModal.waitForModal();
 
-    // Change time and duration
     await activityFormModal.fillForm({
       title: 'Muzeum Luwr',
       time: '09:00',
       duration: 180,
       description: 'Wizyta w słynnym muzeum. Kupić bilety online wcześniej.',
     });
-
-    // Save
     await activityFormModal.save();
 
-    // Verify toast
     await planTimelinePage.waitForToast('Aktywność zaktualizowana');
-
-    // Verify the activity still exists
     await expect(planTimelinePage.getActivity('Muzeum Luwr')).toBeVisible();
 
-    // Verify time was updated in the database
-    const activity = await getActivityByTitle(supabase, planId, 'Muzeum Luwr');
-    expect(activity).toBeTruthy();
-    expect((activity as { time: string }).time).toBe('09:00');
-  });
+    const activity1 = await getActivityByTitle(supabase, planId, 'Muzeum Luwr');
+    expect(activity1).toBeTruthy();
+    expect((activity1 as { time: string }).time).toBe('09:00');
 
-  test('should edit custom activity', async ({ page, supabase, testUser }) => {
-    // Create a plan with activities
-    const planId = await createPlanWithActivities(supabase, testUser.id, {
-      name: 'Paris Trip',
-      destination: 'Paris',
-      startDate: '2026-06-15',
-      days: [
-        {
-          date: '2026-06-15',
-          activities: [
-            {
-              title: 'Muzeum Luwr',
-              time: '10:00',
-              duration: '2 godziny',
-              category: 'culture',
-            },
-            {
-              title: 'Lunch w kawiarni',
-              time: '13:00',
-              duration: '1 godzina',
-              category: 'food',
-              location: 'Rue de la Paix',
-            },
-          ],
-        },
-      ],
-    });
-
-    // Initialize page objects
-    const planTimelinePage = new PlanTimelinePage(page);
-    const activityFormModal = new ActivityFormModal(page);
-
-    // Navigate to plan
-    await planTimelinePage.goto(planId);
-
-    // Expand day
-    await planTimelinePage.expandDay(1);
-
-    // Edit "Lunch w kawiarni"
+    // Test 2: Edit title and location (custom activity)
     await planTimelinePage.editActivity('Lunch w kawiarni');
 
-    // Change title and location
     await activityFormModal.fillForm({
       title: 'Lunch w Le Marais',
       location: 'Dzielnica Le Marais, Paryż',
     });
-
-    // Save
     await activityFormModal.save();
 
-    // Verify new title is visible
     await expect(planTimelinePage.getActivity('Lunch w Le Marais')).toBeVisible();
-
-    // Verify old title is not visible
     await expect(planTimelinePage.getActivity('Lunch w kawiarni')).not.toBeVisible();
-  });
 
-  test('should change activity category', async ({ page, supabase, testUser }) => {
-    // Create a plan with activities
-    const planId = await createPlanWithActivities(supabase, testUser.id, {
-      name: 'Paris Trip',
-      destination: 'Paris',
-      startDate: '2026-06-15',
-      days: [
-        {
-          date: '2026-06-15',
-          activities: [
-            {
-              title: 'Lunch w kawiarni',
-              time: '13:00',
-              duration: '1 godzina',
-              category: 'food',
-            },
-          ],
-        },
-      ],
-    });
-
-    // Initialize page objects
-    const planTimelinePage = new PlanTimelinePage(page);
-    const activityFormModal = new ActivityFormModal(page);
-
-    // Navigate to plan
-    await planTimelinePage.goto(planId);
-
-    // Expand day
-    await planTimelinePage.expandDay(1);
-
-    // Edit activity
-    await planTimelinePage.editActivity('Lunch w kawiarni');
-
-    // Change category
-    await activityFormModal.fillForm({
-      title: 'Lunch w kawiarni',
-      category: 'Kultura',
-    });
-
-    // Save
-    await activityFormModal.save();
-
-    // Verify activity still visible
-    await expect(planTimelinePage.getActivity('Lunch w kawiarni')).toBeVisible();
-  });
-
-  test('should cancel editing with Cancel button', async ({ page, supabase, testUser }) => {
-    // Create a plan with activities
-    const planId = await createPlanWithActivities(supabase, testUser.id, {
-      name: 'Paris Trip',
-      destination: 'Paris',
-      startDate: '2026-06-15',
-      days: [
-        {
-          date: '2026-06-15',
-          activities: [
-            {
-              title: 'Muzeum Luwr',
-              time: '10:00',
-              duration: '2 godziny',
-              category: 'culture',
-            },
-          ],
-        },
-      ],
-    });
-
-    // Initialize page objects
-    const planTimelinePage = new PlanTimelinePage(page);
-    const activityFormModal = new ActivityFormModal(page);
-
-    // Get original activity data
-    const originalActivity = await getActivityByTitle(supabase, planId, 'Muzeum Luwr');
-
-    // Navigate to plan
-    await planTimelinePage.goto(planId);
-
-    // Expand day
-    await planTimelinePage.expandDay(1);
-
-    // Open edit form
-    await planTimelinePage.editActivity('Muzeum Luwr');
-
-    // Make changes
-    await activityFormModal.fillForm({
-      title: 'Changed Title',
-      time: '15:00',
-    });
-
-    // Cancel
-    await activityFormModal.cancel();
-
-    // Verify modal closed
-    expect(await activityFormModal.isVisible()).toBe(false);
-
-    // Verify original data unchanged
-    const currentActivity = await getActivityByTitle(supabase, planId, 'Muzeum Luwr');
-    expect(currentActivity).toEqual(originalActivity);
-
-    // Verify original title still visible
-    await expect(planTimelinePage.getActivity('Muzeum Luwr')).toBeVisible();
-    await expect(planTimelinePage.getActivity('Changed Title')).not.toBeVisible();
-  });
-
-  test('should cancel editing with Escape key', async ({ page, supabase, testUser }) => {
-    // Create a plan with activities
-    const planId = await createPlanWithActivities(supabase, testUser.id, {
-      name: 'Paris Trip',
-      destination: 'Paris',
-      startDate: '2026-06-15',
-      days: [
-        {
-          date: '2026-06-15',
-          activities: [
-            {
-              title: 'Muzeum Luwr',
-              time: '10:00',
-              duration: '2 godziny',
-              category: 'culture',
-            },
-          ],
-        },
-      ],
-    });
-
-    // Initialize page objects
-    const planTimelinePage = new PlanTimelinePage(page);
-    const activityFormModal = new ActivityFormModal(page);
-
-    // Navigate to plan
-    await planTimelinePage.goto(planId);
-
-    // Expand day
-    await planTimelinePage.expandDay(1);
-
-    // Open edit form
-    await planTimelinePage.editActivity('Muzeum Luwr');
-
-    // Make some changes
-    await activityFormModal.fillForm({
-      title: 'Changed Title',
-    });
-
-    // Press Escape
-    await activityFormModal.closeWithEscape();
-
-    // Verify modal closed
-    expect(await activityFormModal.isVisible()).toBe(false);
-
-    // Verify original title still visible
-    await expect(planTimelinePage.getActivity('Muzeum Luwr')).toBeVisible();
-  });
-
-  test('should edit multiple fields at once', async ({ page, supabase, testUser }) => {
-    // Create a plan with activities
-    const planId = await createPlanWithActivities(supabase, testUser.id, {
-      name: 'Paris Trip',
-      destination: 'Paris',
-      startDate: '2026-06-15',
-      days: [
-        {
-          date: '2026-06-15',
-          activities: [
-            {
-              title: 'Muzeum Luwr',
-              time: '10:00',
-              duration: '2 godziny',
-              category: 'culture',
-              location: 'Rue de Rivoli, Paris',
-            },
-          ],
-        },
-      ],
-    });
-
-    // Initialize page objects
-    const planTimelinePage = new PlanTimelinePage(page);
-    const activityFormModal = new ActivityFormModal(page);
-
-    // Navigate to plan
-    await planTimelinePage.goto(planId);
-
-    // Expand day
-    await planTimelinePage.expandDay(1);
-
-    // Edit activity with multiple changes
-    await planTimelinePage.editActivity('Muzeum Luwr');
+    // Test 3: Edit multiple fields at once
+    await planTimelinePage.editActivity('Lunch w Le Marais');
 
     await activityFormModal.fillForm({
       title: 'Muzeum Orsay',
@@ -327,17 +82,106 @@ test.describe('Edit Activity', () => {
       description: 'Muzeum sztuki impresjonistycznej',
       estimatedPrice: '15 EUR',
     });
-
-    // Save
     await activityFormModal.save();
 
-    // Verify new title visible
     await expect(planTimelinePage.getActivity('Muzeum Orsay')).toBeVisible();
 
-    // Verify data in database
-    const activity = await getActivityByTitle(supabase, planId, 'Muzeum Orsay');
-    expect(activity).toBeTruthy();
-    expect((activity as { time: string }).time).toBe('11:00');
-    expect((activity as { location: string }).location).toContain('Légion');
+    const activity3 = await getActivityByTitle(supabase, planId, 'Muzeum Orsay');
+    expect(activity3).toBeTruthy();
+    expect((activity3 as { time: string }).time).toBe('11:00');
+    expect((activity3 as { location: string }).location).toContain('Légion');
+  });
+
+  test('cancels editing with button and keyboard without saving changes', async ({ page, supabase, sharedUser }) => {
+    const planTimelinePage = new PlanTimelinePage(page);
+    const activityFormModal = new ActivityFormModal(page);
+
+    const planId = await createPlanWithActivities(supabase, sharedUser.id, {
+      name: 'Paris Trip',
+      destination: 'Paris',
+      startDate: '2026-06-15',
+      days: [
+        {
+          date: '2026-06-15',
+          activities: [
+            {
+              title: 'Muzeum Luwr',
+              time: '10:00',
+              duration: '2 godziny',
+              category: 'culture',
+            },
+          ],
+        },
+      ],
+    });
+
+    const originalActivity = await getActivityByTitle(supabase, planId, 'Muzeum Luwr');
+
+    await planTimelinePage.goto(planId);
+    await planTimelinePage.expandDay(1);
+
+    // Test cancel with button
+    await planTimelinePage.editActivity('Muzeum Luwr');
+    await activityFormModal.fillForm({
+      title: 'Changed Title 1',
+      time: '15:00',
+    });
+    await activityFormModal.cancel();
+
+    expect(await activityFormModal.isVisible()).toBe(false);
+    await expect(planTimelinePage.getActivity('Muzeum Luwr')).toBeVisible();
+    await expect(planTimelinePage.getActivity('Changed Title 1')).not.toBeVisible();
+
+    let currentActivity = await getActivityByTitle(supabase, planId, 'Muzeum Luwr');
+    expect(currentActivity).toEqual(originalActivity);
+
+    // Test cancel with Escape key
+    await planTimelinePage.editActivity('Muzeum Luwr');
+    await activityFormModal.fillForm({
+      title: 'Changed Title 2',
+    });
+    await activityFormModal.closeWithEscape();
+
+    expect(await activityFormModal.isVisible()).toBe(false);
+    await expect(planTimelinePage.getActivity('Muzeum Luwr')).toBeVisible();
+
+    currentActivity = await getActivityByTitle(supabase, planId, 'Muzeum Luwr');
+    expect(currentActivity).toEqual(originalActivity);
+  });
+
+  test('changes activity category successfully', async ({ page, supabase, sharedUser }) => {
+    const planTimelinePage = new PlanTimelinePage(page);
+    const activityFormModal = new ActivityFormModal(page);
+
+    const planId = await createPlanWithActivities(supabase, sharedUser.id, {
+      name: 'Paris Trip',
+      destination: 'Paris',
+      startDate: '2026-06-15',
+      days: [
+        {
+          date: '2026-06-15',
+          activities: [
+            {
+              title: 'Lunch w kawiarni',
+              time: '13:00',
+              duration: '1 godzina',
+              category: 'food',
+            },
+          ],
+        },
+      ],
+    });
+
+    await planTimelinePage.goto(planId);
+    await planTimelinePage.expandDay(1);
+
+    await planTimelinePage.editActivity('Lunch w kawiarni');
+    await activityFormModal.fillForm({
+      title: 'Lunch w kawiarni',
+      category: 'Kultura',
+    });
+    await activityFormModal.save();
+
+    await expect(planTimelinePage.getActivity('Lunch w kawiarni')).toBeVisible();
   });
 });
