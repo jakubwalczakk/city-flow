@@ -99,7 +99,7 @@
     "typescript": "^5.7.2",
     "typescript-eslint": "^8.18.1",
     "vite": "^6.0.7",
-    "vite-plugin-istanbul": "^6.0.2",
+    "vite-plugin-istanbul": "^7.2.1",
     "vitest": "^2.1.8"
   },
   "overrides": {
