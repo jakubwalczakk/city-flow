@@ -1,6 +1,5 @@
 /* eslint-disable no-console */
-import { chromium } from '@playwright/test';
-import type { FullConfig } from '@playwright/test';
+import { chromium, FullConfig } from '@playwright/test';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '../src/db/database.types';
 import * as fs from 'fs';

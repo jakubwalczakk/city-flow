@@ -180,8 +180,6 @@ test.describe('Delete Plan', () => {
     const modal = page.locator('[role="dialog"]');
     await expect(modal).toBeVisible();
 
-    // Verify warning message
-
     // Verify warning message by checking for alert dialog content
     const alertTitle = modal.locator('[role="heading"]');
     const alertText = modal.locator('text=/usuń|delete|nieodwracalna/i');

@@ -6,6 +6,9 @@ import fs from 'fs';
 import { LoginPage } from './page-objects/LoginPage';
 import { OnboardingModal } from './page-objects/OnboardingModal';
 import { setupCommonMocks } from './test-setup';
+import { LoginPage } from './page-objects/LoginPage';
+import { OnboardingModal } from './page-objects/OnboardingModal';
+import { setupCommonMocks } from './test-setup';
 
 type TestFixtures = {
   supabase: SupabaseClient<Database>;

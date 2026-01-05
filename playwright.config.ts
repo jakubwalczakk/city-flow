@@ -42,6 +42,9 @@ export default defineConfig({
   globalSetup: './e2e/global-setup.ts',
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
+    /* Pass env vars to tests and global setup */
+    supabaseUrl: process.env.SUPABASE_URL,
+    supabaseKey: process.env.SUPABASE_KEY,
     /* Base URL to use in actions like `await page.goto('/')`. */
     baseURL: 'http://localhost:4321',
 

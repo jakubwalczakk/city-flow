@@ -1,6 +1,6 @@
 import { cleanTest as test, expect, generateTestEmail, createTestUser } from '../fixtures';
+import { cleanTest as test, expect, generateTestEmail, createTestUser } from '../fixtures';
 import { ForgotPasswordPage } from '../page-objects/ForgotPasswordPage';
-import { UpdatePasswordPage } from '../page-objects/UpdatePasswordPage';
 
 /**
  * E2E Tests for Password Recovery
@@ -10,6 +10,7 @@ test.describe('Password Recovery', () => {
   test('should display success message when requesting password reset', async ({ page, supabase }) => {
     const testEmail = generateTestEmail('forgot-password');
     const testPassword = 'OldPassword123!';
+    const forgotPasswordPage = new ForgotPasswordPage(page);
     const forgotPasswordPage = new ForgotPasswordPage(page);
 
     // Create test user
@@ -32,6 +33,7 @@ test.describe('Password Recovery', () => {
 
   test('should show same message for non-existent email (security)', async ({ page }) => {
     const nonExistentEmail = generateTestEmail('non-existent');
+    const forgotPasswordPage = new ForgotPasswordPage(page);
     const forgotPasswordPage = new ForgotPasswordPage(page);
 
     await forgotPasswordPage.goto();
