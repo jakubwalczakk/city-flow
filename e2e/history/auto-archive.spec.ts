@@ -6,13 +6,16 @@ import {
   runArchivingJob,
   verifyPlanIsArchived,
   getArchivedPlanCount,
-  TEST_CONFIG,
 } from '../fixtures';
 import { PlansListPage } from '../page-objects/PlansListPage';
 import { HistoryPage } from '../page-objects/HistoryPage';
 
 test.describe('Auto-Archive Plans', () => {
-  test('should auto-archive plan after end date passes', async ({ supabase, testUser }) => {
+  test('should auto-archive plan after end date passes', async ({ page, supabase, testUser }) => {
+    // Local initialization (not global)
+    const plansListPage = new PlansListPage(page);
+    const historyPage = new HistoryPage(page);
+
     // Create a generated plan with past end date
     const { planId } = await createTestPlan(supabase, testUser.id, {
       name: 'Expired Plan',
@@ -45,7 +48,11 @@ test.describe('Auto-Archive Plans', () => {
     await historyPage.expectPlanExists('Expired Plan');
   });
 
-  test('should not auto-archive plan before end date', async ({ supabase, testUser }) => {
+  test('should not auto-archive plan before end date', async ({ page, supabase, testUser }) => {
+    // Local initialization (not global)
+    const plansListPage = new PlansListPage(page);
+    const historyPage = new HistoryPage(page);
+
     // Create a generated plan with future end date
     const { planId } = await createTestPlan(supabase, testUser.id, {
       name: 'Future Plan',
@@ -73,7 +80,11 @@ test.describe('Auto-Archive Plans', () => {
     await historyPage.expectPlanNotExists('Future Plan');
   });
 
-  test('should not auto-archive draft plans', async ({ supabase, testUser }) => {
+  test('should not auto-archive draft plans', async ({ page, supabase, testUser }) => {
+    // Local initialization (not global)
+    const plansListPage = new PlansListPage(page);
+    const historyPage = new HistoryPage(page);
+
     // Create a draft plan with past end date
     const planId = await createDraftPlan(supabase, testUser.id, {
       name: 'Old Draft',
@@ -100,7 +111,10 @@ test.describe('Auto-Archive Plans', () => {
     await historyPage.expectPlanNotExists('Old Draft');
   });
 
-  test('should batch archive multiple expired plans', async ({ supabase, testUser }) => {
+  test('should batch archive multiple expired plans', async ({ page, supabase, testUser }) => {
+    // Local initialization (not global)
+    const historyPage = new HistoryPage(page);
+
     // Create 5 generated plans with past dates
     const planNames = ['Trip 1', 'Trip 2', 'Trip 3', 'Trip 4', 'Trip 5'];
     for (let i = 0; i < 5; i++) {
@@ -137,6 +151,7 @@ test.describe('Auto-Archive Plans', () => {
   });
 
   test('should handle mixed plan statuses correctly', async ({ supabase, testUser }) => {
+    // Local initialization (not global)
     // Create plans with different statuses and dates
     await createTestPlan(supabase, testUser.id, {
       name: 'Expired Generated',
@@ -182,6 +197,7 @@ test.describe('Auto-Archive Plans', () => {
   });
 
   test('should archive on exact end date', async ({ supabase, testUser }) => {
+    // Local initialization (not global)
     // Get today's date
     const today = new Date();
     const yesterday = new Date(today);
@@ -206,6 +222,7 @@ test.describe('Auto-Archive Plans', () => {
   });
 
   test('should not archive plan ending today', async ({ supabase, testUser }) => {
+    // Local initialization (not global)
     // Get today's date
     const today = new Date().toISOString().split('T')[0];
 
@@ -230,6 +247,7 @@ test.describe('Auto-Archive Plans', () => {
   });
 
   test('should handle archiving with no expired plans', async ({ supabase, testUser }) => {
+    // Local initialization (not global)
     // Create only future plans
     await createTestPlan(supabase, testUser.id, {
       name: 'Future Plan 1',
@@ -265,6 +283,7 @@ test.describe('Auto-Archive Plans', () => {
   });
 
   test('should preserve all plan data after auto-archiving', async ({ supabase, testUser }) => {
+    // Local initialization (not global)
     // Create a plan with activities
     const { planId } = await createTestPlan(supabase, testUser.id, {
       name: 'Complete Plan',
@@ -301,6 +320,7 @@ test.describe('Auto-Archive Plans', () => {
   });
 
   test('should handle timezone edge cases', async ({ supabase, testUser }) => {
+    // Local initialization (not global)
     // Create a plan with end date at the boundary
     const { planId } = await createTestPlan(supabase, testUser.id, {
       name: 'Boundary Plan',
@@ -319,6 +339,7 @@ test.describe('Auto-Archive Plans', () => {
   });
 
   test('should respect RLS when archiving plans', async ({ supabase, testUser }) => {
+    // Local initialization (not global)
     // Create plans for current user
     await createTestPlan(supabase, testUser.id, {
       name: 'User Plan',

@@ -1,16 +1,12 @@
-import {
-  authTest as test,
-  expect,
-  createTestPlan,
-  setGenerationLimit,
-  verifyFixedPointInPlan,
-  TEST_CONFIG,
-} from '../fixtures';
+import { authTest as test, expect, createTestPlan, verifyFixedPointInPlan } from '../fixtures';
 import { mockOpenRouterAPI, mockOpenRouterWithCustomData } from '../test-setup';
 import { PlanDetailsPage } from '../page-objects/PlanDetailsPage';
 
 test.describe('Generation Priorities', () => {
   test('Priority 1: Fixed points should be present in generated plan', async ({ page, supabase, testUser }) => {
+    // Local initialization (not global)
+    const planDetailsPage = new PlanDetailsPage(page);
+
     // Arrange - Mock OpenRouter to return plan with fixed points
     await mockOpenRouterWithCustomData(page, [
       {
@@ -101,6 +97,9 @@ test.describe('Generation Priorities', () => {
   });
 
   test('Priority 2: User notes should influence plan', async ({ page, supabase, testUser }) => {
+    // Local initialization (not global)
+    const planDetailsPage = new PlanDetailsPage(page);
+
     // Arrange
     const { planId } = await createTestPlan(supabase, testUser.id, {
       name: 'Rome Trip',
@@ -151,6 +150,9 @@ test.describe('Generation Priorities', () => {
   });
 
   test('Priority 3: Profile preferences should be considered', async ({ page, supabase, testUser }) => {
+    // Local initialization (not global)
+    const planDetailsPage = new PlanDetailsPage(page);
+
     // Arrange - Set user preferences
     await supabase
       .from('profiles')
@@ -219,6 +221,9 @@ test.describe('Generation Priorities', () => {
   });
 
   test('Hierarchy: Fixed points > Notes > Preferences', async ({ page, supabase, testUser }) => {
+    // Local initialization (not global)
+    const planDetailsPage = new PlanDetailsPage(page);
+
     // Arrange - Set profile preferences for "Nature"
     await supabase
       .from('profiles')
@@ -292,6 +297,9 @@ test.describe('Generation Priorities', () => {
   });
 
   test('should handle plan with only fixed points', async ({ page, supabase, testUser }) => {
+    // Local initialization (not global)
+    const planDetailsPage = new PlanDetailsPage(page);
+
     // Arrange
     const { planId } = await createTestPlan(supabase, testUser.id, {
       name: 'Fixed Points Only',

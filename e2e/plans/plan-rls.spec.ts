@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-unused-vars */
-import { test, expect, createTestUser, createTestPlan, cleanDatabase, deleteTestUser } from '../fixtures';
+import { authTest as test, expect, createTestUser, createTestPlan, cleanDatabase, deleteTestUser } from '../fixtures';
 import { LoginPage } from '../page-objects/LoginPage';
 import { PlansListPage } from '../page-objects/PlansListPage';
 import { PlanDetailsPage } from '../page-objects/PlanDetailsPage';
@@ -7,11 +7,11 @@ import { PlanDetailsPage } from '../page-objects/PlanDetailsPage';
 const TEST_USER_PASSWORD = 'TestPassword123!';
 
 test.describe('Plan Row Level Security (RLS)', () => {
-  let loginPage: LoginPage;
-  let plansListPage: PlansListPage;
-  let planDetailsPage: PlanDetailsPage;
-
   test('should only show own plans in list view', async ({ page, supabase }) => {
+    // Local initialization (not global)
+    const loginPage = new LoginPage(page);
+    const plansListPage = new PlansListPage(page);
+
     // Create User A with a plan
     const userA = await createTestUser(supabase, {
       password: TEST_USER_PASSWORD,
@@ -84,6 +84,10 @@ test.describe('Plan Row Level Security (RLS)', () => {
   });
 
   test('should deny access to another user plan via URL manipulation', async ({ page, supabase }) => {
+    // Local initialization (not global)
+    const loginPage = new LoginPage(page);
+    const planDetailsPage = new PlanDetailsPage(page);
+
     // Create User A with a plan
     const userA = await createTestUser(supabase, {
       password: TEST_USER_PASSWORD,
@@ -140,6 +144,9 @@ test.describe('Plan Row Level Security (RLS)', () => {
   });
 
   test('should deny editing another user plan name via API', async ({ page, supabase }) => {
+    // Local initialization (not global)
+    const loginPage = new LoginPage(page);
+
     // Create User A with a plan
     const userA = await createTestUser(supabase, {
       password: TEST_USER_PASSWORD,
@@ -188,6 +195,9 @@ test.describe('Plan Row Level Security (RLS)', () => {
   });
 
   test('should deny deleting another user plan via API', async ({ page, supabase }) => {
+    // Local initialization (not global)
+    const loginPage = new LoginPage(page);
+
     // Create User A with a plan
     const userA = await createTestUser(supabase, {
       password: TEST_USER_PASSWORD,
@@ -233,6 +243,9 @@ test.describe('Plan Row Level Security (RLS)', () => {
   });
 
   test('should deny accessing fixed points of another user plan', async ({ page, supabase }) => {
+    // Local initialization (not global)
+    const loginPage = new LoginPage(page);
+
     // Create User A with a plan and fixed points
     const userA = await createTestUser(supabase, {
       password: TEST_USER_PASSWORD,
@@ -273,6 +286,9 @@ test.describe('Plan Row Level Security (RLS)', () => {
   });
 
   test('should deny generating plan for another user', async ({ page, supabase }) => {
+    // Local initialization (not global)
+    const loginPage = new LoginPage(page);
+
     // Create User A with a draft plan
     const userA = await createTestUser(supabase, {
       password: TEST_USER_PASSWORD,
@@ -317,6 +333,11 @@ test.describe('Plan Row Level Security (RLS)', () => {
   });
 
   test('should allow user to access their own plans after creating multiple', async ({ page, supabase }) => {
+    // Local initialization (not global)
+    const loginPage = new LoginPage(page);
+    const plansListPage = new PlansListPage(page);
+    const planDetailsPage = new PlanDetailsPage(page);
+
     // Create a user with multiple plans
     const user = await createTestUser(supabase, {
       password: TEST_USER_PASSWORD,
@@ -442,6 +463,9 @@ test.describe('Plan Row Level Security (RLS)', () => {
   });
 
   test('should deny access to activities of another user plan', async ({ page, supabase }) => {
+    // Local initialization (not global)
+    const loginPage = new LoginPage(page);
+
     // Create User A with a generated plan
     const userA = await createTestUser(supabase, {
       password: TEST_USER_PASSWORD,

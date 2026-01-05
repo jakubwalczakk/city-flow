@@ -58,13 +58,17 @@ export const PlansDashboard = () => {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={handleTabChange} className='w-full'>
-        <TabsList className='mb-6 grid w-full max-w-md grid-cols-2'>
-          <TabsTrigger value='my-plans'>Moje Plany</TabsTrigger>
-          <TabsTrigger value='history'>Historia</TabsTrigger>
+        <TabsList className='mb-6 grid w-full max-w-md grid-cols-2' data-testid='plans-tabs-list'>
+          <TabsTrigger value='my-plans' data-testid='my-plans-tab'>
+            Moje Plany
+          </TabsTrigger>
+          <TabsTrigger value='history' data-testid='history-tab'>
+            Historia
+          </TabsTrigger>
         </TabsList>
 
         {/* Plans Content - same for both tabs, data differs based on status filter */}
-        <TabsContent value='my-plans'>
+        <TabsContent value='my-plans' data-testid='my-plans-tab-content'>
           <PlansTabContent
             plans={plans}
             isLoading={isLoading}
@@ -78,7 +82,7 @@ export const PlansDashboard = () => {
           />
         </TabsContent>
 
-        <TabsContent value='history'>
+        <TabsContent value='history' data-testid='history-tab-content'>
           <PlansTabContent
             plans={plans}
             isLoading={isLoading}

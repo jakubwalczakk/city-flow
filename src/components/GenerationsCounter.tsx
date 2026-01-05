@@ -19,14 +19,16 @@ export function GenerationsCounter({ generationsRemaining }: GenerationsCounterP
     <div className='space-y-4' data-testid='generations-counter'>
       <div>
         <h3 className='text-lg font-semibold'>Limit generacji</h3>
-        <p className='text-sm text-muted-foreground mt-1'>
+        <p className='text-sm text-muted-foreground mt-1' data-testid='generations-count'>
           Pozostało planów: {generationsRemaining}/{MAX_GENERATIONS}
         </p>
       </div>
 
-      <Progress value={progressValue} className='h-2' />
+      <Progress value={progressValue} className='h-2' data-testid='generations-progress' />
 
-      <p className='text-xs text-muted-foreground'>Limit odnowi się {resetDate}</p>
+      <p className='text-xs text-muted-foreground' data-testid='generations-reset-date'>
+        Limit odnowi się {resetDate}
+      </p>
     </div>
   );
 }

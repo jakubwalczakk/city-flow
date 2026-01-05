@@ -22,7 +22,7 @@ export const PlanList = ({ plans, isLoading, error, onPlanClick, onPlanDelete, o
   // Loading state
   if (isLoading) {
     return (
-      <div className='grid gap-6 sm:grid-cols-2 lg:grid-cols-3'>
+      <div className='grid gap-6 sm:grid-cols-2 lg:grid-cols-3' data-testid='plans-list-loading'>
         {Array.from({ length: 6 }).map((_, index) => (
           <div key={index} className='h-48 animate-pulse rounded-lg border bg-muted' aria-label='Loading plan card' />
         ))}
@@ -33,7 +33,10 @@ export const PlanList = ({ plans, isLoading, error, onPlanClick, onPlanDelete, o
   // Error state
   if (error) {
     return (
-      <div className='rounded-lg border border-destructive bg-destructive/10 p-6 text-center'>
+      <div
+        className='rounded-lg border border-destructive bg-destructive/10 p-6 text-center'
+        data-testid='plans-list-error'
+      >
         <p className='text-sm text-destructive'>Wystąpił błąd podczas pobierania planów. Spróbuj odświeżyć stronę.</p>
         <p className='mt-2 text-xs text-muted-foreground'>{error}</p>
       </div>
@@ -47,9 +50,11 @@ export const PlanList = ({ plans, isLoading, error, onPlanClick, onPlanDelete, o
 
   // Plans grid
   return (
-    <div className='grid gap-6 sm:grid-cols-2 lg:grid-cols-3'>
+    <div className='grid gap-6 sm:grid-cols-2 lg:grid-cols-3' data-testid='plans-list-container'>
       {plans.map((plan) => (
-        <PlanCard key={plan.id} plan={plan} onClick={() => onPlanClick(plan)} onDelete={onPlanDelete} />
+        <div key={plan.id} data-testid={`plan-card-${plan.id}`}>
+          <PlanCard plan={plan} onClick={() => onPlanClick(plan)} onDelete={onPlanDelete} />
+        </div>
       ))}
     </div>
   );

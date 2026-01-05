@@ -12,8 +12,8 @@ import { GenerationLoadingPage } from '../page-objects/GenerationLoadingPage';
 
 test.describe('Plan Generation', () => {
   test('should successfully generate a plan from draft', async ({ page, supabase, testUser }) => {
+    // Local initialization (not global)
     const planDetailsPage = new PlanDetailsPage(page);
-    const generationLoadingPage = new GenerationLoadingPage(page);
     // Mock OpenRouter API
     await mockOpenRouterAPI(page);
 
@@ -62,7 +62,10 @@ test.describe('Plan Generation', () => {
     await expect(successToast).toBeVisible({ timeout: 5000 });
   });
 
-  test('should generate plan with fixed point', async ({ supabase, testUser }) => {
+  test('should generate plan with fixed point', async ({ page, supabase, testUser }) => {
+    // Local initialization (not global)
+    const planDetailsPage = new PlanDetailsPage(page);
+
     // Arrange
     const { planId } = await createTestPlan(supabase, testUser.id, {
       name: 'Rzym z Koloseum',
@@ -97,7 +100,11 @@ test.describe('Plan Generation', () => {
     expect(hasColosseum).toBe(true);
   });
 
-  test('should show loader during generation', async ({ supabase, testUser }) => {
+  test('should show loader during generation', async ({ page, supabase, testUser }) => {
+    // Local initialization (not global)
+    const planDetailsPage = new PlanDetailsPage(page);
+    const generationLoadingPage = new GenerationLoadingPage(page);
+
     // Arrange
     const { planId } = await createTestPlan(supabase, testUser.id, {
       status: 'draft',
@@ -126,7 +133,10 @@ test.describe('Plan Generation', () => {
     expect(await generationLoadingPage.isLoaderVisible()).toBe(false);
   });
 
-  test('should handle regeneration of existing plan', async ({ supabase, testUser }) => {
+  test('should handle regeneration of existing plan', async ({ page, supabase, testUser }) => {
+    // Local initialization (not global)
+    const planDetailsPage = new PlanDetailsPage(page);
+
     // Arrange - Create already generated plan
     const { planId } = await createTestPlan(supabase, testUser.id, {
       name: 'Existing Plan',
@@ -161,7 +171,11 @@ test.describe('Plan Generation', () => {
     // Note: If regenerate button doesn't exist, test will pass without regeneration check
   });
 
-  test('should respect generation timeout', async ({ supabase, testUser }) => {
+  test('should respect generation timeout', async ({ page, supabase, testUser }) => {
+    // Local initialization (not global)
+    const planDetailsPage = new PlanDetailsPage(page);
+    const generationLoadingPage = new GenerationLoadingPage(page);
+
     // Arrange
     const { planId } = await createTestPlan(supabase, testUser.id, {
       status: 'draft',
