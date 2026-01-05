@@ -1,8 +1,14 @@
-import { authTest as test, expect, createTestPlan } from '../fixtures';
-import { mockGenerationError } from '../test-setup';
+import { authTest as test, expect, createTestPlan, getGenerationCount } from '../fixtures';
+import { mockGenerationError, mockOpenRouterAPI } from '../test-setup';
+import { PlanDetailsPage } from '../page-objects/PlanDetailsPage';
+import { GenerationLoadingPage } from '../page-objects/GenerationLoadingPage';
 
 test.describe('Generation Error Handling', () => {
   test('should handle API timeout error', async ({ page, supabase, testUser }) => {
+    // Local initialization (not global)
+    const planDetailsPage = new PlanDetailsPage(page);
+    const generationLoadingPage = new GenerationLoadingPage(page);
+
     // Arrange
     const { planId } = await createTestPlan(supabase, testUser.id, {
       status: 'draft',

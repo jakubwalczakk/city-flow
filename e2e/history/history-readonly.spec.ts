@@ -1,8 +1,11 @@
-import { authTest as test, expect, createArchivedPlan, TEST_CONFIG } from '../fixtures';
+import { authTest as test, expect, createArchivedPlan } from '../fixtures';
 import { PlanDetailsPage } from '../page-objects/PlanDetailsPage';
 
 test.describe('History Read-Only Mode', () => {
-  test('should display read-only badge on archived plan', async ({ supabase, testUser }) => {
+  test('should display read-only badge on archived plan', async ({ page, supabase, testUser }) => {
+    // Local initialization (not global)
+    const planDetailsPage = new PlanDetailsPage(page);
+
     // Create an archived plan
     const planId = await createArchivedPlan(supabase, testUser.id, {
       name: 'Read-Only Plan',
@@ -21,7 +24,10 @@ test.describe('History Read-Only Mode', () => {
     expect(isReadOnly).toBeTruthy();
   });
 
-  test('should not allow editing plan title', async ({ supabase, testUser }) => {
+  test('should not allow editing plan title', async ({ page, supabase, testUser }) => {
+    // Local initialization (not global)
+    const planDetailsPage = new PlanDetailsPage(page);
+
     // Create an archived plan
     const planId = await createArchivedPlan(supabase, testUser.id, {
       name: 'Locked Title Plan',
@@ -43,7 +49,9 @@ test.describe('History Read-Only Mode', () => {
     expect(title).toContain('Locked Title Plan');
   });
 
-  test('should not allow adding activities', async ({ supabase, testUser }) => {
+  test('should not allow adding activities', async ({ page, supabase, testUser }) => {
+    // Local initialization (not global)
+    const planDetailsPage = new PlanDetailsPage(page);
     // Create an archived plan with activities
     const planId = await createArchivedPlan(supabase, testUser.id, {
       name: 'No Add Activities',

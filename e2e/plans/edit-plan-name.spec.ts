@@ -1,22 +1,13 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-unused-vars */
-import { authTest as test, expect, createTestPlan, cleanDatabase } from '../fixtures';
-import { LoginPage } from '../page-objects/LoginPage';
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { authTest as test, expect, createTestPlan } from '../fixtures';
 import { PlanDetailsPage } from '../page-objects/PlanDetailsPage';
 import { PlansListPage } from '../page-objects/PlansListPage';
-
-const TEST_USER_EMAIL = process.env.E2E_USERNAME || 'test@example.com';
-const TEST_USER_PASSWORD = process.env.E2E_PASSWORD || 'testpassword123';
 
 test.describe('Edit Plan Name', () => {
   test('should successfully edit plan name', async ({ page, supabase, testUser }) => {
     // Local initialization (not global)
-    const loginPage = new LoginPage(page);
     const planDetailsPage = new PlanDetailsPage(page);
     const plansListPage = new PlansListPage(page);
-
-    // Login
-    await loginPage.goto();
-    await loginPage.login(TEST_USER_EMAIL, TEST_USER_PASSWORD);
 
     // Create a test plan
     const { planId } = await createTestPlan(supabase, testUser.id, {
@@ -58,12 +49,7 @@ test.describe('Edit Plan Name', () => {
 
   test('should show toast notification after successful edit', async ({ page, supabase, testUser }) => {
     // Local initialization (not global)
-    const loginPage = new LoginPage(page);
     const planDetailsPage = new PlanDetailsPage(page);
-
-    // Login
-    await loginPage.goto();
-    await loginPage.login(TEST_USER_EMAIL, TEST_USER_PASSWORD);
 
     // Create a test plan
     const { planId } = await createTestPlan(supabase, testUser.id, {
@@ -95,12 +81,7 @@ test.describe('Edit Plan Name', () => {
 
   test('should cancel edit with Escape key', async ({ page, supabase, testUser }) => {
     // Local initialization (not global)
-    const loginPage = new LoginPage(page);
     const planDetailsPage = new PlanDetailsPage(page);
-
-    // Login
-    await loginPage.goto();
-    await loginPage.login(TEST_USER_EMAIL, TEST_USER_PASSWORD);
 
     // Create a test plan
     const { planId } = await createTestPlan(supabase, testUser.id, {
@@ -128,12 +109,7 @@ test.describe('Edit Plan Name', () => {
 
   test('should not save empty plan name', async ({ page, supabase, testUser }) => {
     // Local initialization (not global)
-    const loginPage = new LoginPage(page);
     const planDetailsPage = new PlanDetailsPage(page);
-
-    // Login
-    await loginPage.goto();
-    await loginPage.login(TEST_USER_EMAIL, TEST_USER_PASSWORD);
 
     // Create a test plan
     const { planId } = await createTestPlan(supabase, testUser.id, {
@@ -169,12 +145,7 @@ test.describe('Edit Plan Name', () => {
 
   test('should handle very long plan names', async ({ page, supabase, testUser }) => {
     // Local initialization (not global)
-    const loginPage = new LoginPage(page);
     const planDetailsPage = new PlanDetailsPage(page);
-
-    // Login
-    await loginPage.goto();
-    await loginPage.login(TEST_USER_EMAIL, TEST_USER_PASSWORD);
 
     // Create a test plan
     const { planId } = await createTestPlan(supabase, testUser.id, {
@@ -202,12 +173,7 @@ test.describe('Edit Plan Name', () => {
 
   test('should not allow editing plan name for another user', async ({ page, supabase, testUser }) => {
     // Local initialization (not global)
-    const loginPage = new LoginPage(page);
     const planDetailsPage = new PlanDetailsPage(page);
-
-    // Login
-    await loginPage.goto();
-    await loginPage.login(TEST_USER_EMAIL, TEST_USER_PASSWORD);
 
     // This test verifies RLS policies prevent editing other users' plans
     // For a complete test, we would need to create another user and try to edit their plan
@@ -234,12 +200,7 @@ test.describe('Edit Plan Name', () => {
 
   test('should preserve special characters in plan name', async ({ page, supabase, testUser }) => {
     // Local initialization (not global)
-    const loginPage = new LoginPage(page);
     const planDetailsPage = new PlanDetailsPage(page);
-
-    // Login
-    await loginPage.goto();
-    await loginPage.login(TEST_USER_EMAIL, TEST_USER_PASSWORD);
 
     // Create a test plan
     const { planId } = await createTestPlan(supabase, testUser.id, {
@@ -268,12 +229,7 @@ test.describe('Edit Plan Name', () => {
 
   test('should allow multiple edits in succession', async ({ page, supabase, testUser }) => {
     // Local initialization (not global)
-    const loginPage = new LoginPage(page);
     const planDetailsPage = new PlanDetailsPage(page);
-
-    // Login
-    await loginPage.goto();
-    await loginPage.login(TEST_USER_EMAIL, TEST_USER_PASSWORD);
 
     // Create a test plan
     const { planId } = await createTestPlan(supabase, testUser.id, {
@@ -310,12 +266,7 @@ test.describe('Edit Plan Name', () => {
 
   test('should trim whitespace from plan name', async ({ page, supabase, testUser }) => {
     // Local initialization (not global)
-    const loginPage = new LoginPage(page);
     const planDetailsPage = new PlanDetailsPage(page);
-
-    // Login
-    await loginPage.goto();
-    await loginPage.login(TEST_USER_EMAIL, TEST_USER_PASSWORD);
 
     // Create a test plan
     const { planId } = await createTestPlan(supabase, testUser.id, {

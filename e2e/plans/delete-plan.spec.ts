@@ -1,21 +1,12 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { authTest as test, expect, createTestPlan } from '../fixtures';
-import { LoginPage } from '../page-objects/LoginPage';
 import { PlanDetailsPage } from '../page-objects/PlanDetailsPage';
 import { PlansListPage } from '../page-objects/PlansListPage';
-
-const TEST_USER_EMAIL = process.env.E2E_USERNAME || 'test@example.com';
-const TEST_USER_PASSWORD = process.env.E2E_PASSWORD || 'testpassword123';
 
 test.describe('Delete Plan', () => {
   test('should delete plan from list view', async ({ page, supabase, testUser }) => {
     // Local initialization (not global)
-    const loginPage = new LoginPage(page);
     const plansListPage = new PlansListPage(page);
-
-    // Login
-    await loginPage.goto();
-    await loginPage.login(TEST_USER_EMAIL, TEST_USER_PASSWORD);
 
     // Create test plans
     await createTestPlan(supabase, testUser.id, {
@@ -63,12 +54,7 @@ test.describe('Delete Plan', () => {
 
   test('should cancel deletion from list view', async ({ page, supabase, testUser }) => {
     // Local initialization (not global)
-    const loginPage = new LoginPage(page);
     const plansListPage = new PlansListPage(page);
-
-    // Login
-    await loginPage.goto();
-    await loginPage.login(TEST_USER_EMAIL, TEST_USER_PASSWORD);
 
     // Create a test plan
     await createTestPlan(supabase, testUser.id, {
@@ -114,12 +100,7 @@ test.describe('Delete Plan', () => {
 
   test('should delete plan from details view', async ({ page, supabase, testUser }) => {
     // Local initialization (not global)
-    const loginPage = new LoginPage(page);
     const planDetailsPage = new PlanDetailsPage(page);
-
-    // Login
-    await loginPage.goto();
-    await loginPage.login(TEST_USER_EMAIL, TEST_USER_PASSWORD);
 
     // Create a test plan
     const { planId } = await createTestPlan(supabase, testUser.id, {
@@ -153,12 +134,7 @@ test.describe('Delete Plan', () => {
 
   test('should cascade delete fixed points when deleting plan', async ({ page, supabase, testUser }) => {
     // Local initialization (not global)
-    const loginPage = new LoginPage(page);
     const planDetailsPage = new PlanDetailsPage(page);
-
-    // Login
-    await loginPage.goto();
-    await loginPage.login(TEST_USER_EMAIL, TEST_USER_PASSWORD);
 
     // Create a plan with fixed points
     const { planId, fixedPointIds } = await createTestPlan(supabase, testUser.id, {
@@ -195,12 +171,7 @@ test.describe('Delete Plan', () => {
 
   test('should cascade delete activities when deleting generated plan', async ({ page, supabase, testUser }) => {
     // Local initialization (not global)
-    const loginPage = new LoginPage(page);
     const plansListPage = new PlansListPage(page);
-
-    // Login
-    await loginPage.goto();
-    await loginPage.login(TEST_USER_EMAIL, TEST_USER_PASSWORD);
 
     // Create a generated plan with activities
     const { planId, activityIds } = await createTestPlan(supabase, testUser.id, {
@@ -244,12 +215,7 @@ test.describe('Delete Plan', () => {
 
   test('should show confirmation modal with correct text', async ({ page, supabase, testUser }) => {
     // Local initialization (not global)
-    const loginPage = new LoginPage(page);
     const plansListPage = new PlansListPage(page);
-
-    // Login
-    await loginPage.goto();
-    await loginPage.login(TEST_USER_EMAIL, TEST_USER_PASSWORD);
 
     // Create a test plan
     await createTestPlan(supabase, testUser.id, {
@@ -289,12 +255,7 @@ test.describe('Delete Plan', () => {
 
   test('should handle rapid delete operations', async ({ page, supabase, testUser }) => {
     // Local initialization (not global)
-    const loginPage = new LoginPage(page);
     const plansListPage = new PlansListPage(page);
-
-    // Login
-    await loginPage.goto();
-    await loginPage.login(TEST_USER_EMAIL, TEST_USER_PASSWORD);
 
     // Create multiple plans
     await createTestPlan(supabase, testUser.id, {
@@ -344,12 +305,7 @@ test.describe('Delete Plan', () => {
 
   test('should handle deleting last plan (empty state)', async ({ page, supabase, testUser }) => {
     // Local initialization (not global)
-    const loginPage = new LoginPage(page);
     const plansListPage = new PlansListPage(page);
-
-    // Login
-    await loginPage.goto();
-    await loginPage.login(TEST_USER_EMAIL, TEST_USER_PASSWORD);
 
     // Create only one plan
     await createTestPlan(supabase, testUser.id, {
@@ -380,13 +336,7 @@ test.describe('Delete Plan', () => {
 
   test('should not delete plans of other users', async ({ page, supabase, testUser }) => {
     // Local initialization (not global)
-    const loginPage = new LoginPage(page);
-
-    // Login
-    await loginPage.goto();
-    await loginPage.login(TEST_USER_EMAIL, TEST_USER_PASSWORD);
-
-    // This is more of an RLS test, but worth checking here too
+    // Note: This is an RLS test checking API-level security
     // Create a plan for the test user
     const { planId } = await createTestPlan(supabase, testUser.id, {
       name: 'My Plan',

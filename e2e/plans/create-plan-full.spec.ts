@@ -1,27 +1,17 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { authTest as test, expect } from '../fixtures';
 import { mockOpenRouterAPI } from '../test-setup';
-import { LoginPage } from '../page-objects/LoginPage';
 import { NewPlanPage } from '../page-objects/NewPlanPage';
 import { PlansListPage } from '../page-objects/PlansListPage';
-
-const TEST_USER_EMAIL = process.env.E2E_USERNAME || 'test@example.com';
-const TEST_USER_PASSWORD = process.env.E2E_PASSWORD || 'testpassword123';
 
 test.describe('Create Plan - Full Flow', () => {
   test('should create a draft plan without generating', async ({ page, supabase, testUser }) => {
     // Local initialization (not global)
-    const loginPage = new LoginPage(page);
     const newPlanPage = new NewPlanPage(page);
     const plansListPage = new PlansListPage(page);
 
     // Setup mocks for OpenRouter API (not Plans API - we want to test real DB operations)
     await mockOpenRouterAPI(page);
 
-    // Login
-    await loginPage.goto();
-    await loginPage.login(TEST_USER_EMAIL, TEST_USER_PASSWORD);
-    await newPlanPage.handleOnboarding();
     // Open new plan modal
     await newPlanPage.openNewPlanModal();
 
@@ -63,16 +53,10 @@ test.describe('Create Plan - Full Flow', () => {
 
   test('should create and generate a plan (full flow)', async ({ page, supabase, testUser }) => {
     // Local initialization (not global)
-    const loginPage = new LoginPage(page);
     const newPlanPage = new NewPlanPage(page);
 
     // Setup mocks for OpenRouter API (not Plans API - we want to test real DB operations)
     await mockOpenRouterAPI(page);
-
-    // Login
-    await loginPage.goto();
-    await loginPage.login(TEST_USER_EMAIL, TEST_USER_PASSWORD);
-    await newPlanPage.handleOnboarding();
 
     // Note: This test needs to wait longer due to plan generation
     test.setTimeout(60000);

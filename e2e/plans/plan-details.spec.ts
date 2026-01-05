@@ -1,38 +1,15 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-unused-vars */
-import { test, expect, createTestPlan, cleanDatabase } from '../fixtures';
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { authTest as test, expect, createTestPlan } from '../fixtures';
 import { mockOpenRouterAPI } from '../test-setup';
-import { LoginPage } from '../page-objects/LoginPage';
 import { PlanDetailsPage } from '../page-objects/PlanDetailsPage';
 
-const TEST_USER_EMAIL = process.env.E2E_USERNAME || 'test@example.com';
-const TEST_USER_PASSWORD = process.env.E2E_PASSWORD || 'testpassword123';
-
 test.describe('Plan Details', () => {
-  let loginPage: LoginPage;
-  let planDetailsPage: PlanDetailsPage;
-
-  test.beforeEach(async ({ page, supabase, testUser }) => {
-    // Clean database before each test
-    await cleanDatabase(supabase, testUser.id);
+  test('should display draft plan details correctly', async ({ page, supabase, testUser }) => {
+    // Local initialization (not global)
+    const planDetailsPage = new PlanDetailsPage(page);
 
     // Setup mocks
     await mockOpenRouterAPI(page);
-
-    // Initialize page objects
-    loginPage = new LoginPage(page);
-    planDetailsPage = new PlanDetailsPage(page);
-
-    // Login
-    await loginPage.goto();
-    await loginPage.login(TEST_USER_EMAIL, TEST_USER_PASSWORD);
-  });
-
-  test.afterEach(async ({ supabase, testUser }) => {
-    // Clean up after each test
-    await cleanDatabase(supabase, testUser.id);
-  });
-
-  test('should display draft plan details correctly', async ({ page, supabase, testUser }) => {
     // Create a draft plan
     const { planId } = await createTestPlan(supabase, testUser.id, {
       name: 'Draft Plan Details',
@@ -63,6 +40,9 @@ test.describe('Plan Details', () => {
   });
 
   test('should display generated plan with activities', async ({ page, supabase, testUser }) => {
+    // Local initialization (not global)
+    const planDetailsPage = new PlanDetailsPage(page);
+
     // Create a generated plan with activities
     const { planId } = await createTestPlan(supabase, testUser.id, {
       name: 'Generated Plan Details',
@@ -95,7 +75,10 @@ test.describe('Plan Details', () => {
     expect(isDraft).toBeFalsy();
   });
 
-  test('should show 404 or error for non-existent plan', async ({ page, supabase, testUser }) => {
+  test('should show 404 or error for non-existent plan', async ({ page }) => {
+    // Local initialization (not global)
+    const planDetailsPage = new PlanDetailsPage(page);
+
     // Try to access a non-existent plan
     const nonExistentId = '00000000-0000-0000-0000-000000000000';
 
@@ -116,6 +99,9 @@ test.describe('Plan Details', () => {
   });
 
   test('should display plan metadata correctly', async ({ page, supabase, testUser }) => {
+    // Local initialization (not global)
+    const planDetailsPage = new PlanDetailsPage(page);
+
     // Create a plan with full details
     const { planId } = await createTestPlan(supabase, testUser.id, {
       name: 'Detailed Metadata Plan',
@@ -138,14 +124,13 @@ test.describe('Plan Details', () => {
     expect(datesText).toContain('2026');
 
     // Verify description is shown (if your UI displays it)
-    const hasDescription = await page
-      .getByText(/Roman holiday/i)
-      .isVisible()
-      .catch(() => false);
     // Description might not always be shown, so we don't fail if it's not there
   });
 
   test('should display fixed points for a plan', async ({ page, supabase, testUser }) => {
+    // Local initialization (not global)
+    const planDetailsPage = new PlanDetailsPage(page);
+
     // Create a plan with fixed points
     const { planId } = await createTestPlan(supabase, testUser.id, {
       name: 'Plan with Fixed Points',
@@ -168,6 +153,9 @@ test.describe('Plan Details', () => {
   });
 
   test('should show export button for generated plans', async ({ page, supabase, testUser }) => {
+    // Local initialization (not global)
+    const planDetailsPage = new PlanDetailsPage(page);
+
     // Create a generated plan
     const { planId } = await createTestPlan(supabase, testUser.id, {
       name: 'Exportable Plan',
@@ -190,6 +178,9 @@ test.describe('Plan Details', () => {
   });
 
   test('should handle plan with multiple days and activities', async ({ page, supabase, testUser }) => {
+    // Local initialization (not global)
+    const planDetailsPage = new PlanDetailsPage(page);
+
     // Create a generated plan
     const { planId } = await createTestPlan(supabase, testUser.id, {
       name: 'Multi-Day Plan',
@@ -217,6 +208,9 @@ test.describe('Plan Details', () => {
   });
 
   test('should allow generating a plan from draft status', async ({ page, supabase, testUser }) => {
+    // Local initialization (not global)
+    const planDetailsPage = new PlanDetailsPage(page);
+
     // Note: This test takes longer due to generation
     test.setTimeout(60000);
 
@@ -257,6 +251,9 @@ test.describe('Plan Details', () => {
   });
 
   test('should display action buttons for plan management', async ({ page, supabase, testUser }) => {
+    // Local initialization (not global)
+    const planDetailsPage = new PlanDetailsPage(page);
+
     // Create a plan
     const { planId } = await createTestPlan(supabase, testUser.id, {
       name: 'Plan with Actions',
@@ -286,6 +283,9 @@ test.describe('Plan Details', () => {
   });
 
   test('should handle very long plan names gracefully', async ({ page, supabase, testUser }) => {
+    // Local initialization (not global)
+    const planDetailsPage = new PlanDetailsPage(page);
+
     // Create a plan with a very long name
     const longName = 'A'.repeat(200) + ' - Very Long Plan Name';
     const { planId } = await createTestPlan(supabase, testUser.id, {

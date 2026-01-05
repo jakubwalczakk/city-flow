@@ -1,6 +1,5 @@
 import { cleanTest as test, expect, generateTestEmail, createTestUser } from '../fixtures';
 import { ForgotPasswordPage } from '../page-objects/ForgotPasswordPage';
-import { UpdatePasswordPage } from '../page-objects/UpdatePasswordPage';
 
 /**
  * E2E Tests for Password Recovery

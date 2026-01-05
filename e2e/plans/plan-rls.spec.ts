@@ -38,22 +38,22 @@ test.describe('Plan Row Level Security (RLS)', () => {
 
     try {
       // Login as User A
-      loginPage = new LoginPage(page);
-      plansListPage = new PlansListPage(page);
+      const loginPageA = new LoginPage(page);
+      const plansListPageA = new PlansListPage(page);
 
-      await loginPage.goto();
-      await loginPage.login(userA.email, TEST_USER_PASSWORD);
+      await loginPageA.goto();
+      await loginPageA.login(userA.email, TEST_USER_PASSWORD);
 
       // Navigate to plans list
-      await plansListPage.goto();
-      await plansListPage.waitForPlansToLoad();
+      await plansListPageA.goto();
+      await plansListPageA.waitForPlansToLoad();
 
       // Verify User A can see only their own plan
-      await plansListPage.expectPlanExists('User A Plan');
-      await plansListPage.expectPlanNotExists('User B Plan');
+      await plansListPageA.expectPlanExists('User A Plan');
+      await plansListPageA.expectPlanNotExists('User B Plan');
 
       // Verify plan count
-      const planCount = await plansListPage.getPlanCount();
+      const planCount = await plansListPageA.getPlanCount();
       expect(planCount).toBe(1);
 
       // Logout
@@ -61,18 +61,21 @@ test.describe('Plan Row Level Security (RLS)', () => {
       await page.waitForTimeout(1000);
 
       // Login as User B
-      await loginPage.goto();
-      await loginPage.login(userB.email, TEST_USER_PASSWORD);
+      const loginPageB = new LoginPage(page);
+      const plansListPageB = new PlansListPage(page);
+
+      await loginPageB.goto();
+      await loginPageB.login(userB.email, TEST_USER_PASSWORD);
 
       // Navigate to plans list
-      await plansListPage.goto();
-      await plansListPage.waitForPlansToLoad();
+      await plansListPageB.goto();
+      await plansListPageB.waitForPlansToLoad();
 
       // Verify User B can see only their own plan
-      await plansListPage.expectPlanExists('User B Plan');
-      await plansListPage.expectPlanNotExists('User A Plan');
+      await plansListPageB.expectPlanExists('User B Plan');
+      await plansListPageB.expectPlanNotExists('User A Plan');
 
-      const planCountB = await plansListPage.getPlanCount();
+      const planCountB = await plansListPageB.getPlanCount();
       expect(planCountB).toBe(1);
     } finally {
       // Cleanup
@@ -85,7 +88,6 @@ test.describe('Plan Row Level Security (RLS)', () => {
 
   test('should deny access to another user plan via URL manipulation', async ({ page, supabase }) => {
     // Local initialization (not global)
-    const loginPage = new LoginPage(page);
     const planDetailsPage = new PlanDetailsPage(page);
 
     // Create User A with a plan
@@ -108,11 +110,10 @@ test.describe('Plan Row Level Security (RLS)', () => {
 
     try {
       // Login as User B
-      loginPage = new LoginPage(page);
-      planDetailsPage = new PlanDetailsPage(page);
+      const loginPageB = new LoginPage(page);
 
-      await loginPage.goto();
-      await loginPage.login(userB.email, TEST_USER_PASSWORD);
+      await loginPageB.goto();
+      await loginPageB.login(userB.email, TEST_USER_PASSWORD);
 
       // Try to access User A's plan directly via URL
       await planDetailsPage.goto(planIdA);
@@ -145,7 +146,6 @@ test.describe('Plan Row Level Security (RLS)', () => {
 
   test('should deny editing another user plan name via API', async ({ page, supabase }) => {
     // Local initialization (not global)
-    const loginPage = new LoginPage(page);
 
     // Create User A with a plan
     const userA = await createTestUser(supabase, {
@@ -167,9 +167,9 @@ test.describe('Plan Row Level Security (RLS)', () => {
 
     try {
       // Login as User B
-      loginPage = new LoginPage(page);
-      await loginPage.goto();
-      await loginPage.login(userB.email, TEST_USER_PASSWORD);
+      const loginPageEdit = new LoginPage(page);
+      await loginPageEdit.goto();
+      await loginPageEdit.login(userB.email, TEST_USER_PASSWORD);
 
       // Try to update User A's plan via API
       const response = await page.request.patch(`/api/plans/${planIdA}`, {
@@ -196,7 +196,6 @@ test.describe('Plan Row Level Security (RLS)', () => {
 
   test('should deny deleting another user plan via API', async ({ page, supabase }) => {
     // Local initialization (not global)
-    const loginPage = new LoginPage(page);
 
     // Create User A with a plan
     const userA = await createTestUser(supabase, {
@@ -218,9 +217,9 @@ test.describe('Plan Row Level Security (RLS)', () => {
 
     try {
       // Login as User B
-      loginPage = new LoginPage(page);
-      await loginPage.goto();
-      await loginPage.login(userB.email, TEST_USER_PASSWORD);
+      const loginPageDelete = new LoginPage(page);
+      await loginPageDelete.goto();
+      await loginPageDelete.login(userB.email, TEST_USER_PASSWORD);
 
       // Try to delete User A's plan via API
       const response = await page.request.delete(`/api/plans/${planIdA}`);
@@ -244,7 +243,6 @@ test.describe('Plan Row Level Security (RLS)', () => {
 
   test('should deny accessing fixed points of another user plan', async ({ page, supabase }) => {
     // Local initialization (not global)
-    const loginPage = new LoginPage(page);
 
     // Create User A with a plan and fixed points
     const userA = await createTestUser(supabase, {
@@ -267,9 +265,9 @@ test.describe('Plan Row Level Security (RLS)', () => {
 
     try {
       // Login as User B
-      loginPage = new LoginPage(page);
-      await loginPage.goto();
-      await loginPage.login(userB.email, TEST_USER_PASSWORD);
+      const loginPageFixedPoints = new LoginPage(page);
+      await loginPageFixedPoints.goto();
+      await loginPageFixedPoints.login(userB.email, TEST_USER_PASSWORD);
 
       // Try to access User A's fixed points via API
       const response = await page.request.get(`/api/plans/${planIdA}/fixed-points`);
@@ -287,7 +285,6 @@ test.describe('Plan Row Level Security (RLS)', () => {
 
   test('should deny generating plan for another user', async ({ page, supabase }) => {
     // Local initialization (not global)
-    const loginPage = new LoginPage(page);
 
     // Create User A with a draft plan
     const userA = await createTestUser(supabase, {
@@ -309,9 +306,9 @@ test.describe('Plan Row Level Security (RLS)', () => {
 
     try {
       // Login as User B
-      loginPage = new LoginPage(page);
-      await loginPage.goto();
-      await loginPage.login(userB.email, TEST_USER_PASSWORD);
+      const loginPageGenerate = new LoginPage(page);
+      await loginPageGenerate.goto();
+      await loginPageGenerate.login(userB.email, TEST_USER_PASSWORD);
 
       // Try to generate User A's plan via API
       const response = await page.request.post(`/api/plans/${planIdA}/generate`);
@@ -334,8 +331,6 @@ test.describe('Plan Row Level Security (RLS)', () => {
 
   test('should allow user to access their own plans after creating multiple', async ({ page, supabase }) => {
     // Local initialization (not global)
-    const loginPage = new LoginPage(page);
-    const plansListPage = new PlansListPage(page);
     const planDetailsPage = new PlanDetailsPage(page);
 
     // Create a user with multiple plans
@@ -365,19 +360,18 @@ test.describe('Plan Row Level Security (RLS)', () => {
 
     try {
       // Login as the user
-      loginPage = new LoginPage(page);
-      plansListPage = new PlansListPage(page);
-      planDetailsPage = new PlanDetailsPage(page);
+      const loginPageMultiple = new LoginPage(page);
+      const plansListPageMultiple = new PlansListPage(page);
 
-      await loginPage.goto();
-      await loginPage.login(user.email, TEST_USER_PASSWORD);
+      await loginPageMultiple.goto();
+      await loginPageMultiple.login(user.email, TEST_USER_PASSWORD);
 
       // Navigate to plans list
-      await plansListPage.goto();
-      await plansListPage.waitForPlansToLoad();
+      await plansListPageMultiple.goto();
+      await plansListPageMultiple.waitForPlansToLoad();
 
       // Verify all plans are visible
-      const planCount = await plansListPage.getPlanCount();
+      const planCount = await plansListPageMultiple.getPlanCount();
       expect(planCount).toBe(3);
 
       // Access each plan details
@@ -464,7 +458,6 @@ test.describe('Plan Row Level Security (RLS)', () => {
 
   test('should deny access to activities of another user plan', async ({ page, supabase }) => {
     // Local initialization (not global)
-    const loginPage = new LoginPage(page);
 
     // Create User A with a generated plan
     const userA = await createTestUser(supabase, {
@@ -482,8 +475,6 @@ test.describe('Plan Row Level Security (RLS)', () => {
     // Get activity IDs
     const { data: days } = await supabase.from('generated_plan_days').select('id').eq('plan_id', planIdA);
 
-    const dayId = days![0].id;
-
     // Create User B
     const userB = await createTestUser(supabase, {
       password: TEST_USER_PASSWORD,
@@ -492,9 +483,9 @@ test.describe('Plan Row Level Security (RLS)', () => {
 
     try {
       // Login as User B
-      loginPage = new LoginPage(page);
-      await loginPage.goto();
-      await loginPage.login(userB.email, TEST_USER_PASSWORD);
+      const loginPageActivities = new LoginPage(page);
+      await loginPageActivities.goto();
+      await loginPageActivities.login(userB.email, TEST_USER_PASSWORD);
 
       // Try to access activities via API (if such endpoint exists)
       const response = await page.request.get(`/api/plans/${planIdA}/activities`);

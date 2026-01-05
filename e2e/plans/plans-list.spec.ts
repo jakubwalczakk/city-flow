@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { authTest as test, expect, createTestPlan, TEST_CONFIG } from '../fixtures';
+import { authTest as test, expect, createTestPlan } from '../fixtures';
 import { PlansListPage } from '../page-objects/PlansListPage';
 
 test.describe('Plans List', () => {

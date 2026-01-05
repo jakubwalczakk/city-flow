@@ -1,12 +1,11 @@
 import { authTest as test, expect, createTestPlan, verifyPdfDownload, verifyPdfContent } from '../fixtures';
-import { mockOpenRouterAPI } from '../test-setup';
+import { PlanDetailsPage } from '../page-objects/PlanDetailsPage';
 
 test.describe('PDF Export', () => {
-  test.afterEach(async ({ supabase, testUser }) => {
-    await cleanDatabase(supabase, testUser.id);
-  });
+  test('should export generated plan to PDF', async ({ page, supabase, testUser }) => {
+    // Local initialization (not global)
+    const planDetailsPage = new PlanDetailsPage(page);
 
-  test('should export generated plan to PDF', async ({ supabase, testUser }) => {
     // Arrange - Create generated plan with activities
     const { planId } = await createTestPlan(supabase, testUser.id, {
       name: 'Rzym - Czerwiec 2026',

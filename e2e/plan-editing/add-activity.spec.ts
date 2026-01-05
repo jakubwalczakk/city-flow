@@ -1,47 +1,15 @@
-import { authTest as test, expect, createPlanWithActivities, TEST_CONFIG } from '../fixtures';
+import { authTest as test, expect, createPlanWithActivities } from '../fixtures';
 import { PlanTimelinePage } from '../page-objects/PlanTimelinePage';
 import { ActivityFormModal } from '../page-objects/ActivityFormModal';
-import { mockOpenRouterAPI } from '../test-setup';
 
 test.describe('Add Activity to Plan', () => {
-    await mockOpenRouterAPI(page);
+  test('should add custom activity to empty day', async ({ page, supabase, testUser }) => {
+    // Local initialization (not global)
+    const planTimelinePage = new PlanTimelinePage(page);
+    const activityFormModal = new ActivityFormModal(page);
 
-    // Initialize page objects
-    loginPage = new LoginPage(page);
-    planTimelinePage = new PlanTimelinePage(page);
-    activityFormModal = new ActivityFormModal(page);
-
-    // Create a plan with one day and one existing activity
-    planId = await createPlanWithActivities(supabase, testUser.id, {
-      name: 'Paris Trip',
-      destination: 'Paris',
-      startDate: '2026-06-15',
-      days: [
-        {
-          date: '2026-06-15',
-          activities: [
-            {
-              title: 'Muzeum Luwr',
-              time: '09:00',
-              duration: '2 godziny',
-              category: 'culture',
-              location: 'Rue de Rivoli, Paris',
-              description: 'Wizyta w słynnym muzeum',
-            },
-          ],
-        },
-      ],
-    });
-
-    // Login
-    await loginPage.goto();
-    await loginPage.login(TEST_USER_EMAIL, TEST_USER_PASSWORD);
-  });
-
-  test('should add custom activity to empty day', async ({ supabase, testUser }) => {
     // Create a plan with one empty day
-    await cleanDatabase(supabase, testUser.id);
-    planId = await createPlanWithActivities(supabase, testUser.id, {
+    const { planId } = await createPlanWithActivities(supabase, testUser.id, {
       name: 'Paris Trip',
       destination: 'Paris',
       startDate: '2026-06-15',
@@ -79,10 +47,13 @@ test.describe('Add Activity to Plan', () => {
     await planTimelinePage.waitForToast('Aktywność dodana');
   });
 
-  test('should add activity between existing activities', async ({ supabase, testUser }) => {
+  test('should add activity between existing activities', async ({ page, supabase, testUser }) => {
+    // Local initialization (not global)
+    const planTimelinePage = new PlanTimelinePage(page);
+    const activityFormModal = new ActivityFormModal(page);
+
     // Create plan with activities at 9:00 and 14:00
-    await cleanDatabase(supabase, testUser.id);
-    planId = await createPlanWithActivities(supabase, testUser.id, {
+    const { planId } = await createPlanWithActivities(supabase, testUser.id, {
       name: 'Paris Trip',
       destination: 'Paris',
       startDate: '2026-06-15',
@@ -133,7 +104,24 @@ test.describe('Add Activity to Plan', () => {
     await expect(planTimelinePage.getActivity('Lunch')).toBeVisible();
   });
 
-  test('should add activity with minimal form (only required fields)', async () => {
+  test('should add activity with minimal form (only required fields)', async ({ page, supabase, testUser }) => {
+    // Local initialization (not global)
+    const planTimelinePage = new PlanTimelinePage(page);
+    const activityFormModal = new ActivityFormModal(page);
+
+    // Create a plan first
+    const { planId } = await createPlanWithActivities(supabase, testUser.id, {
+      name: 'Paris Trip',
+      destination: 'Paris',
+      startDate: '2026-06-15',
+      days: [
+        {
+          date: '2026-06-15',
+          activities: [],
+        },
+      ],
+    });
+
     // Navigate to plan
     await planTimelinePage.goto(planId);
 
@@ -153,7 +141,24 @@ test.describe('Add Activity to Plan', () => {
     await expect(planTimelinePage.getActivity('Spacer po Montmartre')).toBeVisible();
   });
 
-  test('should cancel adding activity', async () => {
+  test('should cancel adding activity', async ({ page, supabase, testUser }) => {
+    // Local initialization (not global)
+    const planTimelinePage = new PlanTimelinePage(page);
+    const activityFormModal = new ActivityFormModal(page);
+
+    // Create a plan first
+    const { planId } = await createPlanWithActivities(supabase, testUser.id, {
+      name: 'Paris Trip',
+      destination: 'Paris',
+      startDate: '2026-06-15',
+      days: [
+        {
+          date: '2026-06-15',
+          activities: [],
+        },
+      ],
+    });
+
     // Navigate to plan
     await planTimelinePage.goto(planId);
 
@@ -184,7 +189,24 @@ test.describe('Add Activity to Plan', () => {
     await expect(planTimelinePage.getActivity('Test Activity')).not.toBeVisible();
   });
 
-  test('should close form with Escape key', async () => {
+  test('should close form with Escape key', async ({ page, supabase, testUser }) => {
+    // Local initialization (not global)
+    const planTimelinePage = new PlanTimelinePage(page);
+    const activityFormModal = new ActivityFormModal(page);
+
+    // Create a plan first
+    const { planId } = await createPlanWithActivities(supabase, testUser.id, {
+      name: 'Paris Trip',
+      destination: 'Paris',
+      startDate: '2026-06-15',
+      days: [
+        {
+          date: '2026-06-15',
+          activities: [],
+        },
+      ],
+    });
+
     // Navigate to plan
     await planTimelinePage.goto(planId);
 
