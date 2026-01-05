@@ -190,8 +190,6 @@ test.describe('Delete Plan', () => {
     await expect(modal).toBeVisible();
 
     // Verify warning message
-    const modal = page.locator('[role="dialog"]');
-    await expect(modal).toBeVisible();
 
     // Verify warning message by checking for alert dialog content
     const alertTitle = modal.locator('[role="heading"]');

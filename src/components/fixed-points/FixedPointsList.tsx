@@ -35,17 +35,26 @@ export function FixedPointsList({ points, onEdit, onRemove, editingIndex }: Fixe
                   <div className='flex items-start gap-2'>
                     <MapPin className='h-4 w-4 mt-1 text-muted-foreground' />
                     <div>
-                      <p className='font-medium'>{point.location}</p>
-                      {point.description && <p className='text-sm text-muted-foreground'>{point.description}</p>}
+                      <p className='font-medium' data-testid={`summary-fixed-point-${index}-location`}>
+                        {point.location}
+                      </p>
+                      {point.description && (
+                        <p
+                          className='text-sm text-muted-foreground'
+                          data-testid={`summary-fixed-point-${index}-description`}
+                        >
+                          {point.description}
+                        </p>
+                      )}
                     </div>
                   </div>
                   <div className='flex items-center gap-2 text-sm text-muted-foreground'>
                     <Clock className='h-4 w-4' />
-                    <span>{formatDateTime(point.event_at)}</span>
+                    <span data-testid={`summary-fixed-point-${index}-datetime`}>{formatDateTime(point.event_at)}</span>
                     {point.event_duration && (
                       <>
                         <span>•</span>
-                        <span>{point.event_duration} minut</span>
+                        <span data-testid={`summary-fixed-point-${index}-duration`}>{point.event_duration} minut</span>
                       </>
                     )}
                   </div>
