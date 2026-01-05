@@ -1,4 +1,12 @@
-import { authTest as test, expect, createPlanWithActivities, createFeedback, getFeedback } from '../fixtures';
+import {
+  authTest as test,
+  expect,
+  createPlanWithActivities,
+  createFeedback,
+  getFeedback,
+  createTestUser,
+  deleteTestUser,
+} from '../fixtures';
 import { PlanDetailsPage } from '../page-objects/PlanDetailsPage';
 import { PlansListPage } from '../page-objects/PlansListPage';
 
@@ -50,7 +58,7 @@ test.describe('Feedback Persistence', () => {
 
     // Verify in database
     const feedback = await getFeedback(supabase, testUser.id, planId);
-    expect(feedback?.rating).toBe('positive');
+    expect(feedback?.rating).toBe('thumbs_up');
     expect(feedback?.comment).toBe(commentText);
   });
 
@@ -131,7 +139,7 @@ test.describe('Feedback Persistence', () => {
 
     // Verify User 1 feedback
     const user1Feedback = await getFeedback(supabase, testUser.id, planId);
-    expect(user1Feedback?.rating).toBe('positive');
+    expect(user1Feedback?.rating).toBe('thumbs_up');
     expect(user1Feedback?.comment).toBe(user1Comment);
 
     // Create second user and give them access to the plan (if needed)
@@ -144,15 +152,15 @@ test.describe('Feedback Persistence', () => {
 
     try {
       // Create User 2 feedback for the same plan (simulating separate access)
-      await createFeedback(supabase, user2.user.id, planId, 'negative', 'User 2 dislikes this plan');
+      await createFeedback(supabase, user2.user.id, planId, 'thumbs_down', 'User 2 dislikes this plan');
 
       // Verify both feedbacks exist
       const user1FeedbackCheck = await getFeedback(supabase, testUser.id, planId);
       const user2FeedbackCheck = await getFeedback(supabase, user2.user.id, planId);
 
-      expect(user1FeedbackCheck?.rating).toBe('positive');
+      expect(user1FeedbackCheck?.rating).toBe('thumbs_up');
       expect(user1FeedbackCheck?.comment).toBe(user1Comment);
-      expect(user2FeedbackCheck?.rating).toBe('negative');
+      expect(user2FeedbackCheck?.rating).toBe('thumbs_down');
       expect(user2FeedbackCheck?.comment).toBe('User 2 dislikes this plan');
 
       // Verify they have different IDs
@@ -202,7 +210,7 @@ test.describe('Feedback Persistence', () => {
 
     try {
       // User 2 creates feedback
-      await createFeedback(supabase, user2.user.id, planId, 'negative', 'User 2 comment');
+      await createFeedback(supabase, user2.user.id, planId, 'thumbs_down', 'User 2 comment');
 
       // Refresh page as User 1
       await page.reload();
@@ -241,7 +249,7 @@ test.describe('Feedback Persistence', () => {
     });
 
     // Create feedback directly in database
-    await createFeedback(supabase, testUser.id, planId, 'positive', 'Pre-existing feedback');
+    await createFeedback(supabase, testUser.id, planId, 'thumbs_up', 'Pre-existing feedback');
 
     // Visit plan page
     const planDetailsPage = new PlanDetailsPage(page);
@@ -299,7 +307,7 @@ test.describe('Feedback Persistence', () => {
     // Verify it's an UPDATE not INSERT
     const updatedFeedback = await getFeedback(supabase, testUser.id, planId);
     expect(updatedFeedback?.id).toBe(initialFeedbackId);
-    expect(updatedFeedback?.rating).toBe('negative');
+    expect(updatedFeedback?.rating).toBe('thumbs_down');
     expect(updatedFeedback?.comment).toBe('Updated comment');
   });
 
@@ -356,7 +364,7 @@ test.describe('Feedback Persistence', () => {
 
     // Final database check
     const finalFeedback = await getFeedback(supabase, testUser.id, planId);
-    expect(finalFeedback?.rating).toBe('negative');
+    expect(finalFeedback?.rating).toBe('thumbs_down');
     expect(finalFeedback?.comment).toBe('Visit 2');
   });
 });

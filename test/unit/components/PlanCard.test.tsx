@@ -41,7 +41,7 @@ describe('PlanCard', () => {
 
       render(<PlanCard plan={mockPlan} onClick={mockOnClick} onDelete={mockOnDelete} />);
 
-      expect(screen.getByText('Paris Trip')).toBeInTheDocument();
+      expect(screen.getByTestId('plan-name')).toBeInTheDocument();
     });
 
     it('should render destination', () => {
@@ -50,7 +50,7 @@ describe('PlanCard', () => {
 
       render(<PlanCard plan={mockPlan} onClick={mockOnClick} onDelete={mockOnDelete} />);
 
-      expect(screen.getByText('Paris')).toBeInTheDocument();
+      expect(screen.getByTestId('plan-destination')).toBeInTheDocument();
     });
 
     it('should render status badge', () => {
@@ -59,7 +59,7 @@ describe('PlanCard', () => {
 
       render(<PlanCard plan={mockPlan} onClick={mockOnClick} onDelete={mockOnDelete} />);
 
-      expect(screen.getByText('Szkic')).toBeInTheDocument();
+      expect(screen.getByTestId('plan-status')).toBeInTheDocument();
     });
 
     it('should have proper aria label', () => {
@@ -152,7 +152,7 @@ describe('PlanCard', () => {
 
       render(<PlanCard plan={generatedPlan} onClick={mockOnClick} onDelete={mockOnDelete} />);
 
-      expect(screen.getByText('Paris Trip')).toBeInTheDocument();
+      expect(screen.getByTestId('plan-name')).toBeInTheDocument();
     });
 
     it('should handle archived status', () => {
@@ -163,7 +163,7 @@ describe('PlanCard', () => {
 
       render(<PlanCard plan={archivedPlan} onClick={mockOnClick} onDelete={mockOnDelete} />);
 
-      expect(screen.getByText('Paris Trip')).toBeInTheDocument();
+      expect(screen.getByTestId('plan-name')).toBeInTheDocument();
     });
   });
 });

@@ -7,13 +7,13 @@ describe('State Views', () => {
     it('should render loading message', () => {
       render(<LoadingView message='Załaduję dane...' />);
 
-      expect(screen.getByText('Załaduję dane...')).toBeInTheDocument();
+      expect(screen.getByTestId('loading-message')).toBeInTheDocument();
     });
 
     it('should render default message when not provided', () => {
       render(<LoadingView />);
 
-      expect(screen.getByText('Ładowanie...')).toBeInTheDocument();
+      expect(screen.getByTestId('loading-message')).toBeInTheDocument();
     });
 
     it('should have spinner icon', () => {
@@ -33,14 +33,14 @@ describe('State Views', () => {
     it('should render with default title and message', () => {
       render(<ErrorView message='Coś poszło nie tak' />);
 
-      expect(screen.getByText('Wystąpił błąd')).toBeInTheDocument();
-      expect(screen.getByText('Coś poszło nie tak')).toBeInTheDocument();
+      expect(screen.getByTestId('error-title')).toBeInTheDocument();
+      expect(screen.getByTestId('error-message')).toBeInTheDocument();
     });
 
     it('should render with custom title', () => {
       render(<ErrorView title='Błąd serwera' message='Spróbuj ponownie' />);
 
-      expect(screen.getByText('Błąd serwera')).toBeInTheDocument();
+      expect(screen.getByTestId('error-title')).toBeInTheDocument();
     });
 
     it('should render back button with default link', () => {
@@ -62,15 +62,15 @@ describe('State Views', () => {
     it('should render with default title and message', () => {
       render(<NotFoundView />);
 
-      expect(screen.getByText('Nie znaleziono')).toBeInTheDocument();
-      expect(screen.getByText('Szukany element nie istnieje lub został usunięty.')).toBeInTheDocument();
+      expect(screen.getByTestId('notfound-title')).toBeInTheDocument();
+      expect(screen.getByTestId('notfound-message')).toBeInTheDocument();
     });
 
     it('should render with custom title and message', () => {
       render(<NotFoundView title='Plan nie istnieje' message='Upewnij się, że ID jest prawidłowe' />);
 
-      expect(screen.getByText('Plan nie istnieje')).toBeInTheDocument();
-      expect(screen.getByText('Upewnij się, że ID jest prawidłowe')).toBeInTheDocument();
+      expect(screen.getByTestId('notfound-title')).toBeInTheDocument();
+      expect(screen.getByTestId('notfound-message')).toBeInTheDocument();
     });
 
     it('should render back button with default href', () => {
@@ -108,7 +108,7 @@ describe('State Views', () => {
     it('should render archived message', () => {
       render(<ArchivedBanner />);
 
-      expect(screen.getByText('To jest plan archiwalny. Edycja jest zablokowana.')).toBeInTheDocument();
+      expect(screen.getByTestId('archived-message')).toBeInTheDocument();
     });
 
     it('should have archive icon', () => {

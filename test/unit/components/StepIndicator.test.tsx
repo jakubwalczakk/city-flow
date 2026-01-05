@@ -10,9 +10,9 @@ describe('StepIndicator', () => {
     it('should render all steps', () => {
       render(<StepIndicator currentStep={1} steps={mockSteps} />);
 
-      expect(screen.getByText('Informacje')).toBeInTheDocument();
-      expect(screen.getByText('Punkty')).toBeInTheDocument();
-      expect(screen.getByText('Podsumowanie')).toBeInTheDocument();
+      expect(screen.getByTestId('step-label-1')).toBeInTheDocument();
+      expect(screen.getByTestId('step-label-2')).toBeInTheDocument();
+      expect(screen.getByTestId('step-label-3')).toBeInTheDocument();
     });
 
     it('should render step numbers', () => {

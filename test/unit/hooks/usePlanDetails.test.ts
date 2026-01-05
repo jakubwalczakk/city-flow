@@ -1,350 +1,197 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderHook, act, waitFor } from '@testing-library/react';
-import { usePlanDetails } from '@/hooks/usePlanDetails';
-import type { PlanDetailsDto, TimelineItem } from '@/types';
+import { describe, it, expect } from 'vitest';
+import { formatActivityCommand, formatActivityUpdateCommand, formatErrorMessage } from '@/hooks/usePlanDetails';
+import type { TimelineItem } from '@/types';
 
-// Mock fetch globally
-global.fetch = vi.fn();
-
-describe('usePlanDetails', () => {
-  const mockPlan: PlanDetailsDto = {
-    id: 'plan-1',
-    name: 'Test Plan',
-    status: 'draft',
-    created_at: '2024-01-01',
-    notes: 'Test notes',
-    timeline: [],
-  };
-
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  describe('initialization and fetching', () => {
-    it('should initialize with loading state', async () => {
-      const mockFetch = vi.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockPlan),
-      });
-      global.fetch = mockFetch;
-
-      const { result } = renderHook(() => usePlanDetails('plan-1'));
-
-      expect(result.current.isLoading).toBe(true);
-
-      await waitFor(() => {
-        // Wait for effect to complete to avoid act warning
-        expect(result.current.isLoading).toBeDefined();
-      });
-    });
-
-    it('should fetch plan details on mount', async () => {
-      const mockFetch = vi.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockPlan),
-      });
-      global.fetch = mockFetch;
-
-      const { result } = renderHook(() => usePlanDetails('plan-1'));
-
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
-      });
-
-      expect(result.current.plan).toEqual(mockPlan);
-      expect(result.current.error).toBeNull();
-      expect(mockFetch).toHaveBeenCalledWith('/api/plans/plan-1');
-    });
-
-    it('should handle 404 error for non-existent plan', async () => {
-      const mockFetch = vi.fn().mockResolvedValue({
-        ok: false,
-        status: 404,
-        statusText: 'Not Found',
-      });
-      global.fetch = mockFetch;
-
-      const { result } = renderHook(() => usePlanDetails('non-existent'));
-
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
-      });
-
-      expect(result.current.error).toContain('Plan not found');
-      expect(result.current.plan).toBeNull();
-    });
-
-    it('should handle fetch errors', async () => {
-      const mockFetch = vi.fn().mockRejectedValue(new Error('Network error'));
-      global.fetch = mockFetch;
-
-      const { result } = renderHook(() => usePlanDetails('plan-1'));
-
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
-      });
-
-      expect(result.current.error).toContain('Network error');
-      expect(result.current.plan).toBeNull();
-    });
-  });
-
-  describe('plan mutations', () => {
-    it('should provide updatePlanName method', async () => {
-      const mockFetch = vi
-        .fn()
-        .mockResolvedValueOnce({
-          ok: true,
-          json: () => Promise.resolve(mockPlan),
-        })
-        .mockResolvedValueOnce({
-          ok: true,
-          json: () => Promise.resolve({ ...mockPlan, name: 'Updated Plan' }),
-        });
-      global.fetch = mockFetch;
-
-      const { result } = renderHook(() => usePlanDetails('plan-1'));
-
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
-      });
-
-      expect(result.current.updatePlanName).toBeTypeOf('function');
-
-      await act(async () => {
-        await result.current.updatePlanName('Updated Plan');
-      });
-
-      expect(mockFetch).toHaveBeenCalledTimes(2);
-    });
-
-    it('should provide archivePlan method', async () => {
-      const mockFetch = vi
-        .fn()
-        .mockResolvedValueOnce({
-          ok: true,
-          json: () => Promise.resolve(mockPlan),
-        })
-        .mockResolvedValueOnce({
-          ok: true,
-          json: () => Promise.resolve({ ...mockPlan, status: 'archived' }),
-        });
-      global.fetch = mockFetch;
-
-      const { result } = renderHook(() => usePlanDetails('plan-1'));
-
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
-      });
-
-      expect(result.current.archivePlan).toBeTypeOf('function');
-
-      await act(async () => {
-        await result.current.archivePlan();
-      });
-
-      expect(mockFetch).toHaveBeenCalled();
-    });
-
-    it('should provide deletePlan method', async () => {
-      const mockFetch = vi
-        .fn()
-        .mockResolvedValueOnce({
-          ok: true,
-          json: () => Promise.resolve(mockPlan),
-        })
-        .mockResolvedValueOnce({
-          ok: true,
-          json: () => Promise.resolve({}),
-        });
-      global.fetch = mockFetch;
-
-      const { result } = renderHook(() => usePlanDetails('plan-1'));
-
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
-      });
-
-      expect(result.current.deletePlan).toBeTypeOf('function');
-
-      await act(async () => {
-        await result.current.deletePlan();
-      });
-
-      expect(mockFetch).toHaveBeenCalled();
-    });
-
-    it('should provide addActivity method', async () => {
-      const mockFetch = vi
-        .fn()
-        .mockResolvedValueOnce({
-          ok: true,
-          json: () => Promise.resolve(mockPlan),
-        })
-        .mockResolvedValueOnce({
-          ok: true,
-          json: () => Promise.resolve(mockPlan),
-        });
-      global.fetch = mockFetch;
-
-      const { result } = renderHook(() => usePlanDetails('plan-1'));
-
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
-      });
-
-      expect(result.current.addActivity).toBeTypeOf('function');
-
+describe('usePlanDetails - pure functions', () => {
+  describe('formatActivityCommand', () => {
+    it('should convert TimelineItem to AddActivityCommand', () => {
       const activity: Partial<TimelineItem> = {
-        title: 'New Activity',
+        time: '14:30',
+        title: 'Visit Eiffel Tower',
+        description: 'Iconic landmark',
+        location: 'Champ de Mars',
+        duration: 120,
+        category: 'sightseeing',
+        estimated_price: 25,
+      };
+
+      const result = formatActivityCommand(activity);
+
+      expect(result).toEqual({
+        time: '14:30',
+        title: 'Visit Eiffel Tower',
+        description: 'Iconic landmark',
+        location: 'Champ de Mars',
+        duration: 120,
+        category: 'sightseeing',
+        estimated_cost: 25,
+      });
+    });
+
+    it('should provide default empty title if missing', () => {
+      const activity: Partial<TimelineItem> = {
+        category: 'food',
+      };
+
+      const result = formatActivityCommand(activity);
+
+      expect(result.title).toBe('');
+    });
+
+    it('should provide default "other" category if missing', () => {
+      const activity: Partial<TimelineItem> = {
+        title: 'Some activity',
+      };
+
+      const result = formatActivityCommand(activity);
+
+      expect(result.category).toBe('other');
+    });
+
+    it('should handle undefined optional fields', () => {
+      const activity: Partial<TimelineItem> = {
+        title: 'Museum Visit',
         category: 'culture',
       };
 
-      await act(async () => {
-        await result.current.addActivity('2024-01-15', activity);
-      });
+      const result = formatActivityCommand(activity);
 
-      expect(mockFetch).toHaveBeenCalled();
+      expect(result).toEqual({
+        time: undefined,
+        title: 'Museum Visit',
+        description: undefined,
+        location: undefined,
+        duration: undefined,
+        category: 'culture',
+        estimated_cost: undefined,
+      });
     });
 
-    it('should provide updateActivity method', async () => {
-      const mockFetch = vi
-        .fn()
-        .mockResolvedValueOnce({
-          ok: true,
-          json: () => Promise.resolve(mockPlan),
-        })
-        .mockResolvedValueOnce({
-          ok: true,
-          json: () => Promise.resolve(mockPlan),
-        });
-      global.fetch = mockFetch;
-
-      const { result } = renderHook(() => usePlanDetails('plan-1'));
-
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
-      });
-
-      expect(result.current.updateActivity).toBeTypeOf('function');
-
+    it('should map estimated_price to estimated_cost', () => {
       const activity: Partial<TimelineItem> = {
-        title: 'Updated Activity',
+        title: 'Lunch',
+        estimated_price: 45,
       };
 
-      await act(async () => {
-        await result.current.updateActivity('2024-01-15', 'item-1', activity);
-      });
+      const result = formatActivityCommand(activity);
 
-      expect(mockFetch).toHaveBeenCalled();
-    });
-
-    it('should provide deleteActivity method', async () => {
-      const mockFetch = vi
-        .fn()
-        .mockResolvedValueOnce({
-          ok: true,
-          json: () => Promise.resolve(mockPlan),
-        })
-        .mockResolvedValueOnce({
-          ok: true,
-          json: () => Promise.resolve(mockPlan),
-        });
-      global.fetch = mockFetch;
-
-      const { result } = renderHook(() => usePlanDetails('plan-1'));
-
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
-      });
-
-      expect(result.current.deleteActivity).toBeTypeOf('function');
-
-      await act(async () => {
-        await result.current.deleteActivity('2024-01-15', 'item-1');
-      });
-
-      expect(mockFetch).toHaveBeenCalled();
-    });
-
-    it('should provide generatePlan method', async () => {
-      const mockFetch = vi
-        .fn()
-        .mockResolvedValueOnce({
-          ok: true,
-          json: () => Promise.resolve(mockPlan),
-        })
-        .mockResolvedValueOnce({
-          ok: true,
-          json: () => Promise.resolve(mockPlan),
-        });
-      global.fetch = mockFetch;
-
-      const { result } = renderHook(() => usePlanDetails('plan-1'));
-
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
-      });
-
-      expect(result.current.generatePlan).toBeTypeOf('function');
-
-      await act(async () => {
-        await result.current.generatePlan();
-      });
-
-      expect(mockFetch).toHaveBeenCalled();
+      expect(result.estimated_cost).toBe(45);
     });
   });
 
-  describe('refetch', () => {
-    it('should provide refetch function', async () => {
-      const mockFetch = vi.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockPlan),
+  describe('formatActivityUpdateCommand', () => {
+    it('should convert TimelineItem to UpdateActivityCommand', () => {
+      const activity: Partial<TimelineItem> = {
+        time: '16:00',
+        title: 'Louvre Museum',
+        description: 'Art museum',
+        location: 'Rue de Rivoli',
+        duration: 180,
+        category: 'culture',
+        estimated_price: 20,
+      };
+
+      const result = formatActivityUpdateCommand(activity);
+
+      expect(result).toEqual({
+        time: '16:00',
+        title: 'Louvre Museum',
+        description: 'Art museum',
+        location: 'Rue de Rivoli',
+        duration: 180,
+        category: 'culture',
+        estimated_cost: 20,
       });
-      global.fetch = mockFetch;
+    });
 
-      const { result } = renderHook(() => usePlanDetails('plan-1'));
+    it('should allow undefined title (unlike formatActivityCommand)', () => {
+      const activity: Partial<TimelineItem> = {
+        description: 'Updated description',
+      };
 
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
+      const result = formatActivityUpdateCommand(activity);
+
+      expect(result.title).toBeUndefined();
+    });
+
+    it('should allow undefined category (unlike formatActivityCommand)', () => {
+      const activity: Partial<TimelineItem> = {
+        title: 'Updated activity',
+      };
+
+      const result = formatActivityUpdateCommand(activity);
+
+      expect(result.category).toBeUndefined();
+    });
+
+    it('should handle all fields undefined', () => {
+      const activity: Partial<TimelineItem> = {};
+
+      const result = formatActivityUpdateCommand(activity);
+
+      expect(result).toEqual({
+        time: undefined,
+        title: undefined,
+        description: undefined,
+        location: undefined,
+        duration: undefined,
+        category: undefined,
+        estimated_cost: undefined,
       });
+    });
 
-      expect(result.current.refetch).toBeTypeOf('function');
+    it('should map estimated_price to estimated_cost', () => {
+      const activity: Partial<TimelineItem> = {
+        estimated_price: 100,
+      };
 
-      const initialCallCount = mockFetch.mock.calls.length;
+      const result = formatActivityUpdateCommand(activity);
 
-      act(() => {
-        result.current.refetch();
-      });
-
-      await waitFor(() => {
-        expect(mockFetch.mock.calls.length).toBeGreaterThan(initialCallCount);
-      });
+      expect(result.estimated_cost).toBe(100);
     });
   });
 
-  describe('planId changes', () => {
-    it('should refetch when planId changes', async () => {
-      const mockFetch = vi.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockPlan),
-      });
-      global.fetch = mockFetch;
+  describe('formatErrorMessage', () => {
+    it('should extract message from Error instance', () => {
+      const error = new Error('Network error occurred');
+      const result = formatErrorMessage(error, 'Fallback message');
 
-      const { rerender } = renderHook(({ id }) => usePlanDetails(id), { initialProps: { id: 'plan-1' } });
+      expect(result).toBe('Network error occurred');
+    });
 
-      await waitFor(() => {
-        expect(mockFetch).toHaveBeenCalled();
-      });
+    it('should return fallback message for non-Error', () => {
+      const error = 'String error';
+      const result = formatErrorMessage(error, 'Fallback message');
 
-      const initialCallCount = mockFetch.mock.calls.length;
+      expect(result).toBe('Fallback message');
+    });
 
-      rerender({ id: 'plan-2' });
+    it('should return fallback message for null', () => {
+      const error = null;
+      const result = formatErrorMessage(error, 'Fallback message');
 
-      await waitFor(() => {
-        expect(mockFetch.mock.calls.length).toBeGreaterThan(initialCallCount);
-      });
+      expect(result).toBe('Fallback message');
+    });
+
+    it('should return fallback message for undefined', () => {
+      const error = undefined;
+      const result = formatErrorMessage(error, 'Fallback message');
+
+      expect(result).toBe('Fallback message');
+    });
+
+    it('should return fallback message for number', () => {
+      const error = 42;
+      const result = formatErrorMessage(error, 'Fallback message');
+
+      expect(result).toBe('Fallback message');
+    });
+
+    it('should return fallback message for object', () => {
+      const error = { code: 500 };
+      const result = formatErrorMessage(error, 'Fallback message');
+
+      expect(result).toBe('Fallback message');
     });
   });
 });

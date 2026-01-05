@@ -28,7 +28,7 @@ describe('PaginationControls', () => {
       render(<PaginationControls pagination={{ total: 84, limit: 12, offset: 0 }} onPageChange={mockOnPageChange} />);
 
       // Should have page buttons
-      expect(screen.getByText('1')).toBeInTheDocument();
+      expect(screen.getByTestId('pagination-page-1')).toBeInTheDocument();
     });
 
     it('should show ellipsis when many pages', () => {
@@ -57,7 +57,7 @@ describe('PaginationControls', () => {
       render(<PaginationControls pagination={{ total: 48, limit: 12, offset: 0 }} onPageChange={mockOnPageChange} />);
 
       // Should have pages 1, 2, 3, 4
-      expect(screen.getByText('1')).toBeInTheDocument();
+      expect(screen.getByTestId('pagination-page-1')).toBeInTheDocument();
     });
   });
 

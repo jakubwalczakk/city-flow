@@ -103,6 +103,7 @@ export const PaginationControls = ({ pagination, onPageChange }: PaginationContr
                 onClick={() => handlePageClick(page)}
                 isActive={page === currentPage}
                 className='cursor-pointer'
+                data-testid={`pagination-page-${page}`}
               >
                 {page}
               </PaginationLink>
