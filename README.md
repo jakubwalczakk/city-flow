@@ -137,9 +137,19 @@ CityFlow is an AI-powered web application (MVP) designed to simplify the process
 ### Testing
 
 - `npm run test:unit`: Runs unit tests with Vitest.
+- `npm run test:unit:watch`: Runs unit tests in watch mode.
 - `npm run test:unit:ui`: Runs unit tests with Vitest UI.
+- `npm run test:coverage`: Generates code coverage report.
 - `npm run test:e2e`: Runs end-to-end tests with Playwright.
 - `npm run test:e2e:ui`: Runs end-to-end tests with Playwright UI.
+
+**Testing Documentation**:
+
+For comprehensive testing documentation, see:
+
+- **Unit Tests**: [`ai/UNIT-TESTS-INDEX.md`](./ai/UNIT-TESTS-INDEX.md) - Complete guide to unit testing
+- **E2E Tests**: [`e2e/README.md`](./e2e/README.md) - End-to-end testing guide
+- **Test Plan**: [`ai/test-plan.md`](./ai/test-plan.md) - Overall testing strategy
 
 ### CI/CD
 

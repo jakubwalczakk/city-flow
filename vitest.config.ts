@@ -9,17 +9,34 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./test/setup.ts'],
-    include: ['src/**/*.{test,spec}.{ts,tsx}'],
+    include: ['test/unit/**/*.test.{ts,tsx}'],
     coverage: {
       provider: 'v8',
-      reporter: ['text', 'json', 'json-summary', 'html'],
-      include: ['src/**/*.{ts,tsx}'],
-      exclude: ['src/**/*.{test,spec}.{ts,tsx}', 'src/**/*.d.ts', 'src/env.d.ts', 'src/components/ui/**'],
+      reporter: ['text', 'json', 'json-summary', 'html', 'lcov'],
+      include: [
+        'src/lib/utils/**',
+        'src/lib/services/**',
+        'src/lib/schemas/**',
+        'src/lib/errors/**',
+        'src/lib/constants/**',
+        'src/hooks/**',
+        'src/components/**',
+      ],
+      exclude: [
+        'node_modules/',
+        'test/',
+        '**/*.d.ts',
+        '**/*.config.*',
+        '**/dist/',
+        'src/components/ui/**', // Shadcn components
+        'src/env.d.ts',
+        'src/pages/**', // Astro pages (E2E tested)
+      ],
       thresholds: {
-        lines: 1,
-        functions: 1,
-        branches: 1,
-        statements: 1,
+        lines: 80,
+        functions: 80,
+        branches: 75,
+        statements: 80,
       },
     },
     server: {
