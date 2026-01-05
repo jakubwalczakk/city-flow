@@ -1,4 +1,4 @@
-import { authTest as test, expect, createPlanWithActivities, createFeedback, getFeedback, createTestUser, deleteTestUser, TEST_CONFIG } from '../fixtures';
+import { authTest as test, expect, createPlanWithActivities, createFeedback, getFeedback } from '../fixtures';
 import { PlanDetailsPage } from '../page-objects/PlanDetailsPage';
 import { PlansListPage } from '../page-objects/PlansListPage';
 
@@ -8,20 +8,6 @@ import { PlansListPage } from '../page-objects/PlansListPage';
  */
 
 test.describe('Feedback Persistence', () => {
-    // Clean database before each test
-    await cleanDatabase(supabase, testUser.id);
-
-    // Login
-    const loginPage = new LoginPage(page);
-    await loginPage.goto();
-    await loginPage.login(testUser.email, process.env.E2E_PASSWORD || 'TestPassword123!');
-  });
-
-  test.afterEach(async ({ supabase, testUser }) => {
-    // Clean up test data
-    await cleanDatabase(supabase, testUser.id);
-  });
-
   test('should preserve feedback after page refresh', async ({ page, supabase, testUser }) => {
     // Create a generated plan
     const planId = await createPlanWithActivities(supabase, testUser.id, {

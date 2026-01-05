@@ -17,7 +17,7 @@ type PlanHeaderProps = {
  */
 export default function PlanHeader({ plan, onUpdate, onDelete, onArchive }: PlanHeaderProps) {
   return (
-    <div className='flex items-start justify-between gap-4 pb-6 border-b'>
+    <div className='flex items-start justify-between gap-4 pb-6 border-b' data-testid='plan-header'>
       <div className='flex-1 min-w-0'>
         <EditableTitle title={plan.name} onSave={onUpdate} />
         <PlanMetadata startDate={plan.start_date} endDate={plan.end_date} destination={plan.destination} />

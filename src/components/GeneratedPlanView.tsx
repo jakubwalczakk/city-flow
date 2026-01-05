@@ -60,7 +60,7 @@ export default function GeneratedPlanView({
   }
 
   return (
-    <div className='space-y-6'>
+    <div className='space-y-6' data-testid='generated-plan-view'>
       {/* Plan Summary */}
       <PlanSummaryCard summary={generatedContent.summary} />
 
@@ -80,7 +80,9 @@ export default function GeneratedPlanView({
       />
 
       {/* Feedback module */}
-      <FeedbackModule planId={plan.id} />
+      <div data-testid='feedback-section'>
+        <FeedbackModule planId={plan.id} />
+      </div>
     </div>
   );
 }

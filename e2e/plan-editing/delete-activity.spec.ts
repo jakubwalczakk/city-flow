@@ -1,8 +1,10 @@
-import { authTest as test, expect, createPlanWithActivities, countActivities, TEST_CONFIG } from '../fixtures';
+import { authTest as test, expect, createPlanWithActivities, countActivities } from '../fixtures';
 import { PlanTimelinePage } from '../page-objects/PlanTimelinePage';
-import { mockOpenRouterAPI } from '../test-setup';
 
 test.describe('Delete Activity', () => {
+  test('should delete AI-generated activity with confirmation', async ({ page, supabase, testUser }) => {
+    // Create a plan with activities
+    const planId = await createPlanWithActivities(supabase, testUser.id, {
       name: 'Paris Trip',
       destination: 'Paris',
       startDate: '2026-06-15',
@@ -33,12 +35,9 @@ test.describe('Delete Activity', () => {
       ],
     });
 
-    // Login
-    await loginPage.goto();
-    await loginPage.login(TEST_USER_EMAIL, TEST_USER_PASSWORD);
-  });
+    // Initialize page objects
+    const planTimelinePage = new PlanTimelinePage(page);
 
-  test('should delete AI-generated activity with confirmation', async ({ supabase }) => {
     // Navigate to plan
     await planTimelinePage.goto(planId);
 
@@ -71,7 +70,42 @@ test.describe('Delete Activity', () => {
     expect(dbCount).toBe(2);
   });
 
-  test('should cancel deletion when clicking Cancel in confirmation dialog', async ({ page, supabase }) => {
+  test('should cancel deletion when clicking Cancel in confirmation dialog', async ({ page, supabase, testUser }) => {
+    // Create a plan with activities
+    const planId = await createPlanWithActivities(supabase, testUser.id, {
+      name: 'Paris Trip',
+      destination: 'Paris',
+      startDate: '2026-06-15',
+      days: [
+        {
+          date: '2026-06-15',
+          activities: [
+            {
+              title: 'Muzeum Luwr',
+              time: '09:00',
+              duration: '2 godziny',
+              category: 'culture',
+            },
+            {
+              title: 'Lunch w kawiarni',
+              time: '13:00',
+              duration: '1 godzina',
+              category: 'food',
+            },
+            {
+              title: 'Wieża Eiffla',
+              time: '15:00',
+              duration: '2 godziny',
+              category: 'culture',
+            },
+          ],
+        },
+      ],
+    });
+
+    // Initialize page objects
+    const planTimelinePage = new PlanTimelinePage(page);
+
     // Navigate to plan
     await planTimelinePage.goto(planId);
 
@@ -114,7 +148,42 @@ test.describe('Delete Activity', () => {
     expect(dbCount).toBe(initialCount);
   });
 
-  test('should delete first activity in timeline', async () => {
+  test('should delete first activity in timeline', async ({ page, supabase, testUser }) => {
+    // Create a plan with activities
+    const planId = await createPlanWithActivities(supabase, testUser.id, {
+      name: 'Paris Trip',
+      destination: 'Paris',
+      startDate: '2026-06-15',
+      days: [
+        {
+          date: '2026-06-15',
+          activities: [
+            {
+              title: 'Muzeum Luwr',
+              time: '09:00',
+              duration: '2 godziny',
+              category: 'culture',
+            },
+            {
+              title: 'Lunch w kawiarni',
+              time: '13:00',
+              duration: '1 godzina',
+              category: 'food',
+            },
+            {
+              title: 'Wieża Eiffla',
+              time: '15:00',
+              duration: '2 godziny',
+              category: 'culture',
+            },
+          ],
+        },
+      ],
+    });
+
+    // Initialize page objects
+    const planTimelinePage = new PlanTimelinePage(page);
+
     // Navigate to plan
     await planTimelinePage.goto(planId);
 
@@ -136,7 +205,42 @@ test.describe('Delete Activity', () => {
     expect(count).toBe(2);
   });
 
-  test('should delete last activity in timeline', async () => {
+  test('should delete last activity in timeline', async ({ page, supabase, testUser }) => {
+    // Create a plan with activities
+    const planId = await createPlanWithActivities(supabase, testUser.id, {
+      name: 'Paris Trip',
+      destination: 'Paris',
+      startDate: '2026-06-15',
+      days: [
+        {
+          date: '2026-06-15',
+          activities: [
+            {
+              title: 'Muzeum Luwr',
+              time: '09:00',
+              duration: '2 godziny',
+              category: 'culture',
+            },
+            {
+              title: 'Lunch w kawiarni',
+              time: '13:00',
+              duration: '1 godzina',
+              category: 'food',
+            },
+            {
+              title: 'Wieża Eiffla',
+              time: '15:00',
+              duration: '2 godziny',
+              category: 'culture',
+            },
+          ],
+        },
+      ],
+    });
+
+    // Initialize page objects
+    const planTimelinePage = new PlanTimelinePage(page);
+
     // Navigate to plan
     await planTimelinePage.goto(planId);
 
@@ -158,7 +262,42 @@ test.describe('Delete Activity', () => {
     expect(count).toBe(2);
   });
 
-  test('should delete all activities from a day', async ({ page, supabase }) => {
+  test('should delete all activities from a day', async ({ page, supabase, testUser }) => {
+    // Create a plan with activities
+    const planId = await createPlanWithActivities(supabase, testUser.id, {
+      name: 'Paris Trip',
+      destination: 'Paris',
+      startDate: '2026-06-15',
+      days: [
+        {
+          date: '2026-06-15',
+          activities: [
+            {
+              title: 'Muzeum Luwr',
+              time: '09:00',
+              duration: '2 godziny',
+              category: 'culture',
+            },
+            {
+              title: 'Lunch w kawiarni',
+              time: '13:00',
+              duration: '1 godzina',
+              category: 'food',
+            },
+            {
+              title: 'Wieża Eiffla',
+              time: '15:00',
+              duration: '2 godziny',
+              category: 'culture',
+            },
+          ],
+        },
+      ],
+    });
+
+    // Initialize page objects
+    const planTimelinePage = new PlanTimelinePage(page);
+
     // Navigate to plan
     await planTimelinePage.goto(planId);
 
@@ -190,7 +329,42 @@ test.describe('Delete Activity', () => {
     await expect(page.getByTestId('add-activity-button')).toBeVisible();
   });
 
-  test('should delete multiple activities in sequence', async ({ supabase }) => {
+  test('should delete multiple activities in sequence', async ({ page, supabase, testUser }) => {
+    // Create a plan with activities
+    const planId = await createPlanWithActivities(supabase, testUser.id, {
+      name: 'Paris Trip',
+      destination: 'Paris',
+      startDate: '2026-06-15',
+      days: [
+        {
+          date: '2026-06-15',
+          activities: [
+            {
+              title: 'Muzeum Luwr',
+              time: '09:00',
+              duration: '2 godziny',
+              category: 'culture',
+            },
+            {
+              title: 'Lunch w kawiarni',
+              time: '13:00',
+              duration: '1 godzina',
+              category: 'food',
+            },
+            {
+              title: 'Wieża Eiffla',
+              time: '15:00',
+              duration: '2 godziny',
+              category: 'culture',
+            },
+          ],
+        },
+      ],
+    });
+
+    // Initialize page objects
+    const planTimelinePage = new PlanTimelinePage(page);
+
     // Navigate to plan
     await planTimelinePage.goto(planId);
 

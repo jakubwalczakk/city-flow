@@ -1,10 +1,11 @@
-import { authTest as test, expect, createArchivedPlan, createMultipleArchivedPlans, TEST_CONFIG } from '../fixtures';
+import { authTest as test, expect, createArchivedPlan, createMultipleArchivedPlans } from '../fixtures';
 import { HistoryPage } from '../page-objects/HistoryPage';
 import { PlanDetailsPage } from '../page-objects/PlanDetailsPage';
 
 test.describe('View History', () => {
-  test('should display empty state when no archived plans exist', async () => {
+  test('should display empty state when no archived plans exist', async ({ page }) => {
     // Navigate to history page
+    const historyPage = new HistoryPage(page);
     await historyPage.goto();
     await historyPage.waitForPageLoad();
 
@@ -17,7 +18,7 @@ test.describe('View History', () => {
     expect(message.toLowerCase()).toMatch(/nie masz|no plans|empty|history|brak/);
   });
 
-  test('should display list of archived plans', async ({ supabase, testUser }) => {
+  test('should display list of archived plans', async ({ page, supabase, testUser }) => {
     // Create 3 archived plans
     await createArchivedPlan(supabase, testUser.id, {
       name: 'Rome 2024',
@@ -41,6 +42,7 @@ test.describe('View History', () => {
     });
 
     // Navigate to history page
+    const historyPage = new HistoryPage(page);
     await historyPage.goto();
     await historyPage.waitForPageLoad();
 
@@ -54,7 +56,7 @@ test.describe('View History', () => {
     expect(count).toBe(3);
   });
 
-  test('should sort plans by end date (newest first)', async ({ supabase, testUser }) => {
+  test('should sort plans by end date (newest first)', async ({ page, supabase, testUser }) => {
     // Create plans with different dates
     await createArchivedPlan(supabase, testUser.id, {
       name: 'Oldest Trip',
@@ -78,6 +80,7 @@ test.describe('View History', () => {
     });
 
     // Navigate to history page
+    const historyPage = new HistoryPage(page);
     await historyPage.goto();
     await historyPage.waitForPageLoad();
 
@@ -100,6 +103,7 @@ test.describe('View History', () => {
     });
 
     // Navigate to history page
+    const historyPage = new HistoryPage(page);
     await historyPage.goto();
     await historyPage.waitForPageLoad();
 
@@ -112,12 +116,13 @@ test.describe('View History', () => {
     expect(page.url()).toContain(planId);
 
     // Verify plan details page loaded
+    const planDetailsPage = new PlanDetailsPage(page);
     await planDetailsPage.waitForPageLoad();
     const title = await planDetailsPage.getTitle();
     expect(title).toContain('Clickable Plan');
   });
 
-  test('should display archived status badge on plan cards', async ({ supabase, testUser }) => {
+  test('should display archived status badge on plan cards', async ({ page, supabase, testUser }) => {
     // Create an archived plan
     await createArchivedPlan(supabase, testUser.id, {
       name: 'Archived Trip',
@@ -127,6 +132,7 @@ test.describe('View History', () => {
     });
 
     // Navigate to history page
+    const historyPage = new HistoryPage(page);
     await historyPage.goto();
     await historyPage.waitForPageLoad();
 
@@ -138,7 +144,7 @@ test.describe('View History', () => {
     await expect(badge).toBeVisible();
   });
 
-  test('should show plan destination and dates', async ({ supabase, testUser }) => {
+  test('should show plan destination and dates', async ({ page, supabase, testUser }) => {
     // Create an archived plan
     await createArchivedPlan(supabase, testUser.id, {
       name: 'Complete Info Plan',
@@ -148,6 +154,7 @@ test.describe('View History', () => {
     });
 
     // Navigate to history page
+    const historyPage = new HistoryPage(page);
     await historyPage.goto();
     await historyPage.waitForPageLoad();
 
@@ -165,11 +172,12 @@ test.describe('View History', () => {
       .catch(() => false);
   });
 
-  test('should handle large number of archived plans', async ({ supabase, testUser }) => {
+  test('should handle large number of archived plans', async ({ page, supabase, testUser }) => {
     // Create many archived plans
     await createMultipleArchivedPlans(supabase, testUser.id, 10);
 
     // Navigate to history page
+    const historyPage = new HistoryPage(page);
     await historyPage.goto();
     await historyPage.waitForPageLoad();
 
@@ -182,7 +190,7 @@ test.describe('View History', () => {
     await expect(historyPage.planCards.first()).toBeVisible();
   });
 
-  test('should only show archived plans for current user (RLS)', async ({ supabase, testUser }) => {
+  test('should only show archived plans for current user (RLS)', async ({ page, supabase, testUser }) => {
     // Create archived plans for current user
     await createArchivedPlan(supabase, testUser.id, {
       name: 'My Archived Plan',
@@ -192,6 +200,7 @@ test.describe('View History', () => {
     });
 
     // Navigate to history page
+    const historyPage = new HistoryPage(page);
     await historyPage.goto();
     await historyPage.waitForPageLoad();
 
@@ -222,12 +231,14 @@ test.describe('View History', () => {
     });
 
     // Navigate to history page
+    const historyPage = new HistoryPage(page);
     await historyPage.goto();
     await historyPage.waitForPageLoad();
     await historyPage.expectPlanExists('Navigation Test');
 
     // Click on plan to view details
     await historyPage.clickPlan('Navigation Test');
+    const planDetailsPage = new PlanDetailsPage(page);
     await planDetailsPage.waitForPageLoad();
 
     // Navigate back to history
@@ -240,7 +251,7 @@ test.describe('View History', () => {
     expect(count).toBe(1);
   });
 
-  test('should handle plans with missing optional data', async ({ supabase, testUser }) => {
+  test('should handle plans with missing optional data', async ({ page, supabase, testUser }) => {
     // Create an archived plan with minimal data
     await createArchivedPlan(supabase, testUser.id, {
       name: 'Minimal Plan',
@@ -250,6 +261,7 @@ test.describe('View History', () => {
     });
 
     // Navigate to history page
+    const historyPage = new HistoryPage(page);
     await historyPage.goto();
     await historyPage.waitForPageLoad();
 
@@ -264,6 +276,7 @@ test.describe('View History', () => {
     await createMultipleArchivedPlans(supabase, testUser.id, 15);
 
     // Navigate to history page
+    const historyPage = new HistoryPage(page);
     await historyPage.goto();
     await historyPage.waitForPageLoad();
 
@@ -280,6 +293,7 @@ test.describe('View History', () => {
 
   test('should show correct page title', async ({ page }) => {
     // Navigate to history page
+    const historyPage = new HistoryPage(page);
     await historyPage.goto();
     await historyPage.waitForPageLoad();
 
@@ -293,8 +307,9 @@ test.describe('View History', () => {
     expect(hasTitle).toBeTruthy();
   });
 
-  test('should navigate from empty state with helpful message', async () => {
+  test('should navigate from empty state with helpful message', async ({ page }) => {
     // Navigate to history page (no archived plans)
+    const historyPage = new HistoryPage(page);
     await historyPage.goto();
     await historyPage.waitForPageLoad();
 

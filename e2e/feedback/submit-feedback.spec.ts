@@ -7,11 +7,6 @@ import { PlanDetailsPage } from '../page-objects/PlanDetailsPage';
  */
 
 test.describe('Feedback Comments', () => {
-  test.afterEach(async ({ supabase, testUser }) => {
-    // Clean up test data
-    await cleanDatabase(supabase, testUser.id);
-  });
-
   test('should allow adding comment without rating', async ({ page, supabase, testUser }) => {
     // Create a generated plan
     const planId = await createPlanWithActivities(supabase, testUser.id, {

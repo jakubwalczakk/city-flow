@@ -70,12 +70,12 @@ export function ProfileView() {
   const welcomeMessage = isNewUser ? 'Witaj! Uzupełnij swój profil, aby AI mogło tworzyć lepsze plany.' : null;
 
   return (
-    <div className='container mx-auto py-8 px-4 max-w-4xl'>
+    <div className='container mx-auto py-8 px-4 max-w-4xl' data-testid='profile-view'>
       <div className='space-y-8'>
         <ProfileHeader />
 
         {welcomeMessage && (
-          <Card className='border-primary/50 bg-primary/5'>
+          <Card className='border-primary/50 bg-primary/5' data-testid='profile-welcome-message'>
             <CardContent className='pt-6'>
               <p className='text-sm'>{welcomeMessage}</p>
             </CardContent>
@@ -83,7 +83,7 @@ export function ProfileView() {
         )}
 
         {/* Generations Counter Card */}
-        <Card>
+        <Card data-testid='profile-stats-card'>
           <CardHeader>
             <CardTitle>Twoje statystyki</CardTitle>
           </CardHeader>
@@ -93,7 +93,7 @@ export function ProfileView() {
         </Card>
 
         {/* Preferences Form Card */}
-        <Card>
+        <Card data-testid='profile-preferences-card'>
           <CardHeader>
             <CardTitle>Preferencje podróżnicze</CardTitle>
           </CardHeader>

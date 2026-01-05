@@ -1,9 +1,11 @@
-import { authTest as test, expect, createPlanWithActivities, TEST_CONFIG } from '../fixtures';
+import { authTest as test, expect, createPlanWithActivities } from '../fixtures';
 import { PlanTimelinePage } from '../page-objects/PlanTimelinePage';
 import { ActivityFormModal } from '../page-objects/ActivityFormModal';
-import { mockOpenRouterAPI } from '../test-setup';
 
 test.describe('Activity Form Validation', () => {
+  test('should show error when title is empty', async ({ page, supabase, testUser }) => {
+    // Create a plan with one activity
+    const planId = await createPlanWithActivities(supabase, testUser.id, {
       name: 'Paris Trip',
       destination: 'Paris',
       startDate: '2026-06-15',
@@ -22,15 +24,13 @@ test.describe('Activity Form Validation', () => {
       ],
     });
 
-    // Login
-    await loginPage.goto();
-    await loginPage.login(TEST_USER_EMAIL, TEST_USER_PASSWORD);
+    // Initialize page objects
+    const planTimelinePage = new PlanTimelinePage(page);
+    const activityFormModal = new ActivityFormModal(page);
 
     // Navigate to plan
     await planTimelinePage.goto(planId);
-  });
 
-  test('should show error when title is empty', async ({ page }) => {
     // Open add form
     await planTimelinePage.addActivityToDay(1);
 
@@ -67,7 +67,34 @@ test.describe('Activity Form Validation', () => {
     }
   });
 
-  test('should show error when duration is zero or negative', async ({ page }) => {
+  test('should show error when duration is zero or negative', async ({ page, supabase, testUser }) => {
+    // Create a plan with one activity
+    const planId = await createPlanWithActivities(supabase, testUser.id, {
+      name: 'Paris Trip',
+      destination: 'Paris',
+      startDate: '2026-06-15',
+      days: [
+        {
+          date: '2026-06-15',
+          activities: [
+            {
+              title: 'Muzeum Luwr',
+              time: '10:00',
+              duration: '2 godziny',
+              category: 'culture',
+            },
+          ],
+        },
+      ],
+    });
+
+    // Initialize page objects
+    const planTimelinePage = new PlanTimelinePage(page);
+    const activityFormModal = new ActivityFormModal(page);
+
+    // Navigate to plan
+    await planTimelinePage.goto(planId);
+
     // Open add form
     await planTimelinePage.addActivityToDay(1);
 
@@ -99,7 +126,34 @@ test.describe('Activity Form Validation', () => {
     }
   });
 
-  test('should accept negative duration values but show warning', async ({ page }) => {
+  test('should accept negative duration values but show warning', async ({ page, supabase, testUser }) => {
+    // Create a plan with one activity
+    const planId = await createPlanWithActivities(supabase, testUser.id, {
+      name: 'Paris Trip',
+      destination: 'Paris',
+      startDate: '2026-06-15',
+      days: [
+        {
+          date: '2026-06-15',
+          activities: [
+            {
+              title: 'Muzeum Luwr',
+              time: '10:00',
+              duration: '2 godziny',
+              category: 'culture',
+            },
+          ],
+        },
+      ],
+    });
+
+    // Initialize page objects
+    const planTimelinePage = new PlanTimelinePage(page);
+    const activityFormModal = new ActivityFormModal(page);
+
+    // Navigate to plan
+    await planTimelinePage.goto(planId);
+
     // Open add form
     await planTimelinePage.addActivityToDay(1);
 
@@ -127,7 +181,34 @@ test.describe('Activity Form Validation', () => {
     }
   });
 
-  test('should allow saving with valid minimum data', async () => {
+  test('should allow saving with valid minimum data', async ({ page, supabase, testUser }) => {
+    // Create a plan with one activity
+    const planId = await createPlanWithActivities(supabase, testUser.id, {
+      name: 'Paris Trip',
+      destination: 'Paris',
+      startDate: '2026-06-15',
+      days: [
+        {
+          date: '2026-06-15',
+          activities: [
+            {
+              title: 'Muzeum Luwr',
+              time: '10:00',
+              duration: '2 godziny',
+              category: 'culture',
+            },
+          ],
+        },
+      ],
+    });
+
+    // Initialize page objects
+    const planTimelinePage = new PlanTimelinePage(page);
+    const activityFormModal = new ActivityFormModal(page);
+
+    // Navigate to plan
+    await planTimelinePage.goto(planId);
+
     // Open add form
     await planTimelinePage.addActivityToDay(1);
 
@@ -151,7 +232,34 @@ test.describe('Activity Form Validation', () => {
     await expect(planTimelinePage.getActivity('Valid Activity')).toBeVisible();
   });
 
-  test('should handle very long activity titles', async () => {
+  test('should handle very long activity titles', async ({ page, supabase, testUser }) => {
+    // Create a plan with one activity
+    const planId = await createPlanWithActivities(supabase, testUser.id, {
+      name: 'Paris Trip',
+      destination: 'Paris',
+      startDate: '2026-06-15',
+      days: [
+        {
+          date: '2026-06-15',
+          activities: [
+            {
+              title: 'Muzeum Luwr',
+              time: '10:00',
+              duration: '2 godziny',
+              category: 'culture',
+            },
+          ],
+        },
+      ],
+    });
+
+    // Initialize page objects
+    const planTimelinePage = new PlanTimelinePage(page);
+    const activityFormModal = new ActivityFormModal(page);
+
+    // Navigate to plan
+    await planTimelinePage.goto(planId);
+
     // Open add form
     await planTimelinePage.addActivityToDay(1);
 
@@ -170,7 +278,34 @@ test.describe('Activity Form Validation', () => {
     await expect(planTimelinePage.getActivity(longTitle)).toBeVisible();
   });
 
-  test('should handle special characters in fields', async () => {
+  test('should handle special characters in fields', async ({ page, supabase, testUser }) => {
+    // Create a plan with one activity
+    const planId = await createPlanWithActivities(supabase, testUser.id, {
+      name: 'Paris Trip',
+      destination: 'Paris',
+      startDate: '2026-06-15',
+      days: [
+        {
+          date: '2026-06-15',
+          activities: [
+            {
+              title: 'Muzeum Luwr',
+              time: '10:00',
+              duration: '2 godziny',
+              category: 'culture',
+            },
+          ],
+        },
+      ],
+    });
+
+    // Initialize page objects
+    const planTimelinePage = new PlanTimelinePage(page);
+    const activityFormModal = new ActivityFormModal(page);
+
+    // Navigate to plan
+    await planTimelinePage.goto(planId);
+
     // Open add form
     await planTimelinePage.addActivityToDay(1);
 
@@ -191,7 +326,34 @@ test.describe('Activity Form Validation', () => {
     await expect(planTimelinePage.getActivity(specialTitle)).toBeVisible();
   });
 
-  test('should accept activities at midnight (00:00)', async () => {
+  test('should accept activities at midnight (00:00)', async ({ page, supabase, testUser }) => {
+    // Create a plan with one activity
+    const planId = await createPlanWithActivities(supabase, testUser.id, {
+      name: 'Paris Trip',
+      destination: 'Paris',
+      startDate: '2026-06-15',
+      days: [
+        {
+          date: '2026-06-15',
+          activities: [
+            {
+              title: 'Muzeum Luwr',
+              time: '10:00',
+              duration: '2 godziny',
+              category: 'culture',
+            },
+          ],
+        },
+      ],
+    });
+
+    // Initialize page objects
+    const planTimelinePage = new PlanTimelinePage(page);
+    const activityFormModal = new ActivityFormModal(page);
+
+    // Navigate to plan
+    await planTimelinePage.goto(planId);
+
     // Open add form
     await planTimelinePage.addActivityToDay(1);
 
@@ -207,7 +369,34 @@ test.describe('Activity Form Validation', () => {
     await expect(planTimelinePage.getActivity('Late Night Activity')).toBeVisible();
   });
 
-  test('should accept activities late in the evening', async () => {
+  test('should accept activities late in the evening', async ({ page, supabase, testUser }) => {
+    // Create a plan with one activity
+    const planId = await createPlanWithActivities(supabase, testUser.id, {
+      name: 'Paris Trip',
+      destination: 'Paris',
+      startDate: '2026-06-15',
+      days: [
+        {
+          date: '2026-06-15',
+          activities: [
+            {
+              title: 'Muzeum Luwr',
+              time: '10:00',
+              duration: '2 godziny',
+              category: 'culture',
+            },
+          ],
+        },
+      ],
+    });
+
+    // Initialize page objects
+    const planTimelinePage = new PlanTimelinePage(page);
+    const activityFormModal = new ActivityFormModal(page);
+
+    // Navigate to plan
+    await planTimelinePage.goto(planId);
+
     // Open add form
     await planTimelinePage.addActivityToDay(1);
 
@@ -224,7 +413,34 @@ test.describe('Activity Form Validation', () => {
     await expect(planTimelinePage.getActivity('Evening Show')).toBeVisible();
   });
 
-  test('should handle activities with very long duration', async () => {
+  test('should handle activities with very long duration', async ({ page, supabase, testUser }) => {
+    // Create a plan with one activity
+    const planId = await createPlanWithActivities(supabase, testUser.id, {
+      name: 'Paris Trip',
+      destination: 'Paris',
+      startDate: '2026-06-15',
+      days: [
+        {
+          date: '2026-06-15',
+          activities: [
+            {
+              title: 'Muzeum Luwr',
+              time: '10:00',
+              duration: '2 godziny',
+              category: 'culture',
+            },
+          ],
+        },
+      ],
+    });
+
+    // Initialize page objects
+    const planTimelinePage = new PlanTimelinePage(page);
+    const activityFormModal = new ActivityFormModal(page);
+
+    // Navigate to plan
+    await planTimelinePage.goto(planId);
+
     // Open add form
     await planTimelinePage.addActivityToDay(1);
 
@@ -241,7 +457,34 @@ test.describe('Activity Form Validation', () => {
     await expect(planTimelinePage.getActivity('All Day Activity')).toBeVisible();
   });
 
-  test('should allow optional fields to be empty', async () => {
+  test('should allow optional fields to be empty', async ({ page, supabase, testUser }) => {
+    // Create a plan with one activity
+    const planId = await createPlanWithActivities(supabase, testUser.id, {
+      name: 'Paris Trip',
+      destination: 'Paris',
+      startDate: '2026-06-15',
+      days: [
+        {
+          date: '2026-06-15',
+          activities: [
+            {
+              title: 'Muzeum Luwr',
+              time: '10:00',
+              duration: '2 godziny',
+              category: 'culture',
+            },
+          ],
+        },
+      ],
+    });
+
+    // Initialize page objects
+    const planTimelinePage = new PlanTimelinePage(page);
+    const activityFormModal = new ActivityFormModal(page);
+
+    // Navigate to plan
+    await planTimelinePage.goto(planId);
+
     // Open add form
     await planTimelinePage.addActivityToDay(1);
 
@@ -259,7 +502,34 @@ test.describe('Activity Form Validation', () => {
     await expect(planTimelinePage.getActivity('Minimal Activity')).toBeVisible();
   });
 
-  test('should preserve form data when reopening after cancel', async () => {
+  test('should preserve form data when reopening after cancel', async ({ page, supabase, testUser }) => {
+    // Create a plan with one activity
+    const planId = await createPlanWithActivities(supabase, testUser.id, {
+      name: 'Paris Trip',
+      destination: 'Paris',
+      startDate: '2026-06-15',
+      days: [
+        {
+          date: '2026-06-15',
+          activities: [
+            {
+              title: 'Muzeum Luwr',
+              time: '10:00',
+              duration: '2 godziny',
+              category: 'culture',
+            },
+          ],
+        },
+      ],
+    });
+
+    // Initialize page objects
+    const planTimelinePage = new PlanTimelinePage(page);
+    const activityFormModal = new ActivityFormModal(page);
+
+    // Navigate to plan
+    await planTimelinePage.goto(planId);
+
     // Open add form
     await planTimelinePage.addActivityToDay(1);
 

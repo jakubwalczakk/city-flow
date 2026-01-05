@@ -33,15 +33,15 @@ export function PreferencesSelector({ value, onChange, error }: PreferencesSelec
   const isMaxReached = value.length >= maxPreferences;
 
   return (
-    <div className='space-y-3'>
+    <div className='space-y-3' data-testid='preferences-selector'>
       <div>
-        <Label>Preferencje turystyczne</Label>
-        <p className='text-sm text-muted-foreground mt-1'>
+        <Label data-testid='preferences-label'>Preferencje turystyczne</Label>
+        <p className='text-sm text-muted-foreground mt-1' data-testid='preferences-info'>
           Wybierz od {minPreferences} do {maxPreferences} preferencji
         </p>
       </div>
 
-      <div className='flex flex-wrap gap-2'>
+      <div className='flex flex-wrap gap-2' data-testid='preferences-badges'>
         {AVAILABLE_PREFERENCES.map((preference) => {
           const selected = isSelected(preference);
           const disabled = !selected && isMaxReached;
@@ -54,6 +54,7 @@ export function PreferencesSelector({ value, onChange, error }: PreferencesSelec
                 disabled ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'
               }`}
               onClick={() => !disabled && handleTogglePreference(preference)}
+              data-testid={`preference-badge-${preference}`}
             >
               {PREFERENCE_LABELS[preference]}
             </Badge>
@@ -61,9 +62,13 @@ export function PreferencesSelector({ value, onChange, error }: PreferencesSelec
         })}
       </div>
 
-      {error && <p className='text-sm text-destructive'>{error}</p>}
+      {error && (
+        <p className='text-sm text-destructive' data-testid='preferences-error'>
+          {error}
+        </p>
+      )}
 
-      <p className='text-xs text-muted-foreground'>
+      <p className='text-xs text-muted-foreground' data-testid='preferences-counter'>
         Wybrano: {value.length}/{maxPreferences}
       </p>
     </div>

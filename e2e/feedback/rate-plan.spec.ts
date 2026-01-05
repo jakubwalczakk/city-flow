@@ -7,11 +7,6 @@ import { PlanDetailsPage } from '../page-objects/PlanDetailsPage';
  */
 
 test.describe('Plan Rating - Thumbs Up/Down', () => {
-  test.afterEach(async ({ supabase, testUser }) => {
-    // Clean up test data
-    await cleanDatabase(supabase, testUser.id);
-  });
-
   test('should allow rating plan positively with thumbs up', async ({ page, supabase, testUser }) => {
     // Create a generated plan
     const planId = await createPlanWithActivities(supabase, testUser.id, {

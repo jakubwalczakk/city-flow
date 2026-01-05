@@ -25,12 +25,12 @@ export function PreferencesForm({ initialPreferences, initialTravelPace, onSave,
   });
 
   return (
-    <form onSubmit={handleSubmit} className='space-y-6'>
+    <form onSubmit={handleSubmit} className='space-y-6' data-testid='preferences-form'>
       <Controller
         control={form.control}
         name='travel_pace'
         render={({ field, fieldState }) => (
-          <div>
+          <div data-testid='travel-pace-section'>
             <TravelPaceSelector value={field.value || null} onChange={field.onChange} />
             {fieldState.error && <p className='text-sm text-destructive mt-2'>{fieldState.error.message}</p>}
           </div>
@@ -45,7 +45,12 @@ export function PreferencesForm({ initialPreferences, initialTravelPace, onSave,
         )}
       />
 
-      <Button type='submit' disabled={!hasChanges || !isValid || isSaving} className='w-full sm:w-auto'>
+      <Button
+        type='submit'
+        disabled={!hasChanges || !isValid || isSaving}
+        className='w-full sm:w-auto'
+        data-testid='preferences-save-btn'
+      >
         {isSaving ? 'Zapisywanie...' : 'Zapisz zmiany'}
       </Button>
     </form>

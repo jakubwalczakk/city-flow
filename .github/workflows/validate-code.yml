@@ -50,7 +50,7 @@ on:
         required: true
     outputs:
       all-checks-passed:
-        description: "Whether all validation checks passed"
+        description: 'Whether all validation checks passed'
         value: ${{ jobs.summary.outputs.status }}
 
 concurrency:
@@ -159,7 +159,7 @@ jobs:
     needs: [lint, unit-tests, e2e-tests, verify-build]
     if: always()
     timeout-minutes: 5
-    
+
     outputs:
       status: ${{ steps.status.outputs.result }}
 
@@ -187,10 +187,9 @@ jobs:
           echo "| 🎭 E2E Tests | \`${{ needs.e2e-tests.result }}\` |" >> $GITHUB_STEP_SUMMARY
           echo "| 🔨 Verify Build | \`${{ needs.verify-build.result }}\` |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           if [ "${{ steps.status.outputs.result }}" == "success" ]; then
             echo "### ✅ All checks passed!" >> $GITHUB_STEP_SUMMARY
           else
             echo "### ❌ Some checks failed" >> $GITHUB_STEP_SUMMARY
           fi
-
