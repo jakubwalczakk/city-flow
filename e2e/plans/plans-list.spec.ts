@@ -66,7 +66,7 @@ test.describe('Plans List', () => {
 
     // Generated plans should have different visual indicators than drafts
     const hasGeneratedIndicator = await barcelonaPlan
-      .getByText(/generated|wygenerowano/i)
+      .getByTestId('plan-status-badge')
       .isVisible()
       .catch(() => false);
     // This is optional, depends on UI implementation

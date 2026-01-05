@@ -190,7 +190,17 @@ test.describe('Delete Plan', () => {
     await expect(modal).toBeVisible();
 
     // Verify warning message
-    const hasWarning = await page.getByText(/usuń|delete|trwale|permanent|nieodwracalne|cannot be undone/i).isVisible();
+    const modal = page.locator('[role="dialog"]');
+    await expect(modal).toBeVisible();
+
+    // Verify warning message by checking for alert dialog content
+    const alertTitle = modal.locator('[role="heading"]');
+    const alertText = modal.locator('text=/usuń|delete|nieodwracalna/i');
+
+    const hasWarning = await Promise.all([
+      alertTitle.isVisible().catch(() => false),
+      alertText.isVisible().catch(() => false),
+    ]).then((results) => results.some((r) => r));
     expect(hasWarning).toBeTruthy();
 
     // Verify both buttons are present

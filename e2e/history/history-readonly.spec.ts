@@ -43,7 +43,7 @@ test.describe('History Read-Only Mode', () => {
 
     // Verify visual indication that plan is archived
     const hasArchivedText = await page
-      .getByText(/archived|zarchiwizowany|history|historia/i)
+      .getByTestId('archived-badge')
       .isVisible()
       .catch(() => false);
     expect(hasArchivedText).toBeTruthy();

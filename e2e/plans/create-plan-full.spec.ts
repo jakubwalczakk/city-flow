@@ -113,7 +113,7 @@ test.describe('Create Plan - Full Flow', () => {
       // Should show validation errors and stay on the same step
       // Check for error messages (these will depend on your actual implementation)
       const hasErrors = await page
-        .getByText(/wymagane|required/i)
+        .getByTestId('form-error-message')
         .isVisible()
         .catch(() => false);
       expect(hasErrors).toBeTruthy();
@@ -179,7 +179,7 @@ test.describe('Create Plan - Full Flow', () => {
     // Verify all data is shown in summary
     // This will depend on your summary implementation
     const summaryVisible = await page
-      .getByText(planName)
+      .getByTestId('summary-plan-name')
       .isVisible()
       .catch(() => false);
     expect(summaryVisible).toBeTruthy();

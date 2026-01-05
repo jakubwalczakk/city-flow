@@ -79,7 +79,7 @@ test.describe('Delete Activity', () => {
     expect(dbCount).toBe(0);
 
     // Verify empty state
-    await expect(page.getByText('Brak zaplanowanych aktywności na ten dzień')).toBeVisible();
+    await expect(page.getByTestId('empty-activities-message')).toBeVisible();
     await expect(page.getByTestId('add-activity-button')).toBeVisible();
   });
 

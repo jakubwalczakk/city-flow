@@ -83,7 +83,7 @@ test.describe('Edit Plan Name', () => {
     currentTitle = await planDetailsPage.getTitle();
     // Either shows error message or reverts to original
     const hasError = await page
-      .getByText(/minimum|krótsz|short/i)
+      .getByTestId('form-error-message')
       .isVisible()
       .catch(() => false);
     expect(hasError || currentTitle.includes('Valid Plan Name')).toBeTruthy();
@@ -181,13 +181,7 @@ test.describe('Edit Plan Name', () => {
     // Wait for toast notification
     await page.waitForTimeout(500);
 
-    // Check for toast notification (toast notifications are often ephemeral)
-    await page
-      .getByText(/zaktualizowano|updated|zapisano|saved/i)
-      .isVisible()
-      .catch(() => false);
-
-    // The important thing is the name was actually updated
+    // Check for toast notification (sonner doesn't have stable selectors, so we'll verify via title)
     const title = await planDetailsPage.getTitle();
     expect(title).toContain('Renamed Plan');
   });

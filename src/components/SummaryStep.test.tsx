@@ -51,9 +51,9 @@ describe('SummaryStep', () => {
     render(<SummaryStep {...defaultProps} />);
 
     // Assert
-    expect(screen.getByText('Trip to the Future')).toBeInTheDocument();
-    expect(screen.getByText('Future City')).toBeInTheDocument();
-    expect(screen.getByText('Bring a time machine.')).toBeInTheDocument();
+    expect(screen.getByTestId('summary-plan-name')).toHaveTextContent('Trip to the Future');
+    expect(screen.getByTestId('summary-destination')).toHaveTextContent('Future City');
+    expect(screen.getByTestId('summary-notes')).toHaveTextContent('Bring a time machine.');
     // Check for mocked date formats (multiple instances for start and end dates)
     expect(screen.getAllByText(/Formatted:/).length).toBeGreaterThan(0);
   });
@@ -63,11 +63,11 @@ describe('SummaryStep', () => {
     render(<SummaryStep {...defaultProps} />);
 
     // Assert
-    expect(screen.getByText('Time Port')).toBeInTheDocument();
-    expect(screen.getByText('Arrival')).toBeInTheDocument();
-    expect(screen.getByText('Cyber Hotel')).toBeInTheDocument();
-    expect(screen.getByText('Check-in')).toBeInTheDocument();
-    expect(screen.getByText('120 min')).toBeInTheDocument();
+    expect(screen.getByTestId('summary-fixed-point-0-location')).toHaveTextContent('Time Port');
+    expect(screen.getByTestId('summary-fixed-point-0-description')).toHaveTextContent('Arrival');
+    expect(screen.getByTestId('summary-fixed-point-1-location')).toHaveTextContent('Cyber Hotel');
+    expect(screen.getByTestId('summary-fixed-point-1-description')).toHaveTextContent('Check-in');
+    expect(screen.getByTestId('summary-fixed-point-0-duration')).toHaveTextContent('120 min');
   });
 
   it('should display a message when there are no fixed points', () => {
@@ -82,7 +82,7 @@ describe('SummaryStep', () => {
     render(<SummaryStep {...props} />);
 
     // Assert
-    expect(screen.getByText(/Nie dodano stałych punktów/)).toBeInTheDocument();
+    expect(screen.getByTestId('summary-no-fixed-points')).toHaveTextContent(/Nie dodano stałych punktów/);
   });
 
   it('should display a message when there are no notes', () => {
@@ -106,7 +106,7 @@ describe('SummaryStep', () => {
     render(<SummaryStep {...defaultProps} error='An error has occurred.' />);
 
     // Assert
-    expect(screen.getByText('An error has occurred.')).toBeInTheDocument();
+    expect(screen.getByTestId('summary-error-message')).toHaveTextContent('An error has occurred.');
   });
 
   it('should show loading state in the submit button when isLoading is true', () => {

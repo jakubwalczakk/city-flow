@@ -126,7 +126,7 @@ test.describe('Plan Row Level Security (RLS)', () => {
       const isBlocked =
         (currentUrl.includes('/plans') && !currentUrl.includes(planIdA)) ||
         (await page
-          .getByText(/nie znaleziono|not found|brak dostępu|access denied|403|404/i)
+          .getByTestId('plans-list-error')
           .isVisible()
           .catch(() => false));
 

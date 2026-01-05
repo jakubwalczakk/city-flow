@@ -104,7 +104,7 @@ test.describe('Plan Details', () => {
     const currentUrl = page.url();
     const isOnErrorPage = currentUrl.includes('/plans') && !currentUrl.includes(nonExistentId);
     const hasErrorMessage = await page
-      .getByText(/nie znaleziono|not found|błąd/i)
+      .getByTestId('plans-list-error')
       .isVisible()
       .catch(() => false);
 

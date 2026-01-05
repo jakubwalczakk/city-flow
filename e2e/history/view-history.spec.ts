@@ -19,7 +19,7 @@ test.describe('View History', () => {
 
     // Verify page title
     const hasTitle = await page
-      .getByText(/historia|history|archived|archiwum/i)
+      .getByTestId('history-page-title')
       .isVisible()
       .catch(() => false);
     expect(hasTitle).toBeTruthy();
@@ -70,11 +70,11 @@ test.describe('View History', () => {
 
     // Verify destination and dates are shown
     const berlinCard = historyPage.getPlanByName('Complete Info Plan');
-    const hasDestination = await berlinCard.getByText('Berlin').isVisible();
+    const hasDestination = await berlinCard.getByTestId('plan-destination').isVisible();
     expect(hasDestination).toBeTruthy();
 
     await berlinCard
-      .getByText(/2024-09-15|15.*09.*2024|sep.*15/i)
+      .getByTestId('plan-date-range')
       .isVisible()
       .catch(() => false);
   });

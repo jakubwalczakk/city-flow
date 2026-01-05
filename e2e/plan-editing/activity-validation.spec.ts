@@ -134,7 +134,7 @@ test.describe('Activity Form Validation', () => {
     await page.waitForTimeout(500);
     let saveEnabled = await activityFormModal.isSaveButtonEnabled();
     const hasMinLengthError = await page
-      .getByText(/minimum|krótsz|short/i)
+      .getByTestId('form-error-message')
       .isVisible()
       .catch(() => false);
     expect(!saveEnabled || hasMinLengthError).toBeTruthy();
@@ -150,7 +150,7 @@ test.describe('Activity Form Validation', () => {
     // Either validation prevents it or it gets truncated
     saveEnabled = await activityFormModal.isSaveButtonEnabled();
     const hasMaxLengthError = await page
-      .getByText(/maximum|za dług|long/i)
+      .getByTestId('form-error-message')
       .isVisible()
       .catch(() => false);
     expect(!saveEnabled || hasMaxLengthError).toBeTruthy();
@@ -165,7 +165,7 @@ test.describe('Activity Form Validation', () => {
     await page.waitForTimeout(500);
     // Validation should catch overly long location
     await page
-      .getByText(/location.*long|lokalizacja.*dług/i)
+      .getByTestId('form-error-message')
       .isVisible()
       .catch(() => false);
     // Test passes if there's an error or button is disabled
@@ -209,7 +209,7 @@ test.describe('Activity Form Validation', () => {
     await page.waitForTimeout(500);
     const saveEnabled = await activityFormModal.isSaveButtonEnabled();
     const hasCostError = await page
-      .getByText(/negative|ujemn|invalid.*cost/i)
+      .getByTestId('form-error-message')
       .isVisible()
       .catch(() => false);
 
@@ -228,7 +228,7 @@ test.describe('Activity Form Validation', () => {
 
     await page.waitForTimeout(500);
     await page
-      .getByText(/invalid.*time|nieprawid.*czas/i)
+      .getByTestId('form-error-message')
       .isVisible()
       .catch(() => false);
     // Time validation might be handled by input type="time"

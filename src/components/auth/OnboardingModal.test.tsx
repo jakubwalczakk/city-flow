@@ -41,7 +41,7 @@ describe('OnboardingModal', () => {
     });
 
     render(<OnboardingModal />);
-    expect(screen.queryByText('Witaj w CityFlow!')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('onboarding-title')).not.toBeInTheDocument();
   });
 
   it('should not render when onboarding is already completed', () => {
@@ -62,7 +62,7 @@ describe('OnboardingModal', () => {
     });
 
     render(<OnboardingModal />);
-    expect(screen.queryByText('Witaj w CityFlow!')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('onboarding-title')).not.toBeInTheDocument();
   });
 
   it('should render when onboarding is not completed', async () => {
@@ -83,8 +83,8 @@ describe('OnboardingModal', () => {
     });
 
     render(<OnboardingModal />);
-    expect(screen.getByText('Witaj w CityFlow!')).toBeInTheDocument();
-    expect(screen.getByText(/Twoje konto darmowe pozwala na wygenerowanie/)).toBeInTheDocument();
+    expect(screen.getByTestId('onboarding-title')).toBeInTheDocument();
+    expect(screen.getByTestId('onboarding-generations-info')).toBeInTheDocument();
   });
 
   it('should show validation error when trying to save without selecting pace', async () => {
@@ -107,10 +107,10 @@ describe('OnboardingModal', () => {
     render(<OnboardingModal />);
 
     // Click save
-    const saveButton = screen.getByText('Zapisz i przejdź dalej');
+    const saveButton = screen.getByTestId('onboarding-save-btn');
     fireEvent.click(saveButton);
 
-    expect(screen.getByText('Wybierz preferowane tempo zwiedzania.')).toBeInTheDocument();
+    expect(screen.getByTestId('onboarding-pace-error')).toHaveTextContent('Wybierz preferowane tempo zwiedzania.');
     expect(updateProfileMock).not.toHaveBeenCalled();
   });
 
@@ -133,7 +133,7 @@ describe('OnboardingModal', () => {
 
     render(<OnboardingModal />);
 
-    const skipButton = screen.getByText('Pomiń');
+    const skipButton = screen.getByTestId('onboarding-skip-btn');
     fireEvent.click(skipButton);
 
     await waitFor(() => {

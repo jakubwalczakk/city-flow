@@ -73,8 +73,8 @@ describe('FixedPointsStep', () => {
     render(<FixedPointsStep {...defaultProps} />);
 
     // Assert
-    expect(screen.getByText('Airport')).toBeInTheDocument();
-    expect(screen.getByText('Hotel')).toBeInTheDocument();
+    expect(screen.getByTestId('summary-fixed-point-0-location')).toHaveTextContent('Airport');
+    expect(screen.getByTestId('summary-fixed-point-1-location')).toHaveTextContent('Hotel');
   });
 
   it("should show the add form when 'Dodaj stały punkt' is clicked", async () => {

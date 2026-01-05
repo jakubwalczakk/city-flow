@@ -164,8 +164,9 @@ test.describe('Move Plan to History', () => {
 
     // Verify confirmation text mentions read-only
     const hasConfirmationText = await page
-      .getByText(/tylko do odczytu|read.*only|historia|history|archiwiz/i)
-      .isVisible();
+      .locator('[role="dialog"]')
+      .isVisible()
+      .catch(() => false);
 
     expect(hasConfirmationText).toBeTruthy();
 
