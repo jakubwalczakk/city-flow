@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { test, expect } from '../fixtures';
 import { mockOpenRouterAPI } from '../test-setup';
 import { NewPlanPage } from '../page-objects/NewPlanPage';
 import { PlansListPage } from '../page-objects/PlansListPage';
