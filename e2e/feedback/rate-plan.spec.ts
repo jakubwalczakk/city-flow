@@ -1,4 +1,5 @@
-import { authTest as test, expect, createPlanWithActivities, createDraftPlan, getFeedback } from '../fixtures';
+import { feedbackTest as test, expect } from '../shared-user-fixtures';
+import { createPlanWithActivities, createDraftPlan, getFeedback } from '../fixtures';
 import { PlanDetailsPage } from '../page-objects/PlanDetailsPage';
 
 /**
@@ -7,9 +8,9 @@ import { PlanDetailsPage } from '../page-objects/PlanDetailsPage';
  */
 
 test.describe('Plan Rating - Thumbs Up/Down', () => {
-  test('should allow rating plan positively with thumbs up', async ({ page, supabase, testUser }) => {
+  test('should allow rating plan positively with thumbs up', async ({ page, supabase, sharedUser }) => {
     // Create a generated plan
-    const planId = await createPlanWithActivities(supabase, testUser.id, {
+    const planId = await createPlanWithActivities(supabase, sharedUser.id, {
       name: 'Paris Weekend',
       destination: 'Paris',
       startDate: '2026-06-15',
@@ -46,16 +47,16 @@ test.describe('Plan Rating - Thumbs Up/Down', () => {
     expect(await planDetailsPage.feedbackModule.isThumbsDownActive()).toBe(false);
 
     // Verify feedback saved in database
-    const feedback = await getFeedback(supabase, testUser.id, planId);
+    const feedback = await getFeedback(supabase, sharedUser.id, planId);
     expect(feedback).not.toBeNull();
     expect(feedback?.rating).toBe('positive');
-    expect(feedback?.user_id).toBe(testUser.id);
+    expect(feedback?.user_id).toBe(sharedUser.id);
     expect(feedback?.plan_id).toBe(planId);
   });
 
-  test('should allow rating plan negatively with thumbs down', async ({ page, supabase, testUser }) => {
+  test('should allow rating plan negatively with thumbs down', async ({ page, supabase, sharedUser }) => {
     // Create a generated plan
-    const planId = await createPlanWithActivities(supabase, testUser.id, {
+    const planId = await createPlanWithActivities(supabase, sharedUser.id, {
       name: 'Rome Adventure',
       destination: 'Rome',
       startDate: '2026-07-01',
@@ -87,14 +88,14 @@ test.describe('Plan Rating - Thumbs Up/Down', () => {
     expect(await planDetailsPage.feedbackModule.isThumbsUpActive()).toBe(false);
 
     // Verify feedback saved in database
-    const feedback = await getFeedback(supabase, testUser.id, planId);
+    const feedback = await getFeedback(supabase, sharedUser.id, planId);
     expect(feedback).not.toBeNull();
     expect(feedback?.rating).toBe('negative');
   });
 
-  test('should allow changing rating from positive to negative', async ({ page, supabase, testUser }) => {
+  test('should allow changing rating from positive to negative', async ({ page, supabase, sharedUser }) => {
     // Create a generated plan
-    const planId = await createPlanWithActivities(supabase, testUser.id, {
+    const planId = await createPlanWithActivities(supabase, sharedUser.id, {
       name: 'Barcelona Trip',
       destination: 'Barcelona',
       startDate: '2026-08-01',
@@ -122,7 +123,7 @@ test.describe('Plan Rating - Thumbs Up/Down', () => {
     expect(await planDetailsPage.feedbackModule.isThumbsUpActive()).toBe(true);
 
     // Get initial feedback
-    const initialFeedback = await getFeedback(supabase, testUser.id, planId);
+    const initialFeedback = await getFeedback(supabase, sharedUser.id, planId);
     expect(initialFeedback?.rating).toBe('positive');
     const initialFeedbackId = initialFeedback?.id;
 
@@ -132,14 +133,14 @@ test.describe('Plan Rating - Thumbs Up/Down', () => {
     expect(await planDetailsPage.feedbackModule.isThumbsUpActive()).toBe(false);
 
     // Verify feedback updated (not created new)
-    const updatedFeedback = await getFeedback(supabase, testUser.id, planId);
+    const updatedFeedback = await getFeedback(supabase, sharedUser.id, planId);
     expect(updatedFeedback?.rating).toBe('negative');
     expect(updatedFeedback?.id).toBe(initialFeedbackId); // Same ID = UPDATE not INSERT
   });
 
-  test('should allow changing rating from negative to positive', async ({ page, supabase, testUser }) => {
+  test('should allow changing rating from negative to positive', async ({ page, supabase, sharedUser }) => {
     // Create a generated plan
-    const planId = await createPlanWithActivities(supabase, testUser.id, {
+    const planId = await createPlanWithActivities(supabase, sharedUser.id, {
       name: 'Amsterdam Weekend',
       destination: 'Amsterdam',
       startDate: '2026-09-01',
@@ -164,7 +165,7 @@ test.describe('Plan Rating - Thumbs Up/Down', () => {
 
     // Rate negatively first
     await planDetailsPage.feedbackModule.rateNegative();
-    const initialFeedback = await getFeedback(supabase, testUser.id, planId);
+    const initialFeedback = await getFeedback(supabase, sharedUser.id, planId);
     const initialFeedbackId = initialFeedback?.id;
 
     // Change to positive
@@ -173,14 +174,14 @@ test.describe('Plan Rating - Thumbs Up/Down', () => {
     expect(await planDetailsPage.feedbackModule.isThumbsDownActive()).toBe(false);
 
     // Verify feedback updated
-    const updatedFeedback = await getFeedback(supabase, testUser.id, planId);
+    const updatedFeedback = await getFeedback(supabase, sharedUser.id, planId);
     expect(updatedFeedback?.rating).toBe('positive');
     expect(updatedFeedback?.id).toBe(initialFeedbackId);
   });
 
-  test('should not show feedback module for draft plans', async ({ page, supabase, testUser }) => {
+  test('should not show feedback module for draft plans', async ({ page, supabase, sharedUser }) => {
     // Create a draft plan (not generated)
-    const planId = await createDraftPlan(supabase, testUser.id, {
+    const planId = await createDraftPlan(supabase, sharedUser.id, {
       name: 'Draft Plan',
       destination: 'London',
       startDate: '2026-10-01',
@@ -197,9 +198,9 @@ test.describe('Plan Rating - Thumbs Up/Down', () => {
     expect(await planDetailsPage.feedbackModule.isVisible()).toBe(false);
   });
 
-  test('should preserve rating when clicking same thumb again', async ({ page, supabase, testUser }) => {
+  test('should preserve rating when clicking same thumb again', async ({ page, supabase, sharedUser }) => {
     // Create a generated plan
-    const planId = await createPlanWithActivities(supabase, testUser.id, {
+    const planId = await createPlanWithActivities(supabase, sharedUser.id, {
       name: 'Prague Visit',
       destination: 'Prague',
       startDate: '2026-11-01',
@@ -232,13 +233,13 @@ test.describe('Plan Rating - Thumbs Up/Down', () => {
     // Rating should remain (not be removed)
     expect(await planDetailsPage.feedbackModule.isThumbsUpActive()).toBe(true);
 
-    const feedback = await getFeedback(supabase, testUser.id, planId);
+    const feedback = await getFeedback(supabase, sharedUser.id, planId);
     expect(feedback?.rating).toBe('positive');
   });
 
-  test('should show feedback module only for generated plans', async ({ page, supabase, testUser }) => {
+  test('should show feedback module only for generated plans', async ({ page, supabase, sharedUser }) => {
     // Create generated plan
-    const generatedPlanId = await createPlanWithActivities(supabase, testUser.id, {
+    const generatedPlanId = await createPlanWithActivities(supabase, sharedUser.id, {
       name: 'Generated Plan',
       destination: 'Vienna',
       startDate: '2026-12-01',

@@ -167,15 +167,19 @@ async function createStorageState(email: string, password: string, userKey: stri
   try {
     // Navigate to login page
     const baseURL = process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:4321';
-    await page.goto(`${baseURL}/login`);
+    await page.goto(`${baseURL}/login`, { waitUntil: 'networkidle' });
+
+    // Wait for the form to be ready (React hydration)
+    await page.waitForSelector('[data-testid="auth-email-input"]', { state: 'visible', timeout: 30000 });
+    await page.waitForSelector('[data-testid="auth-password-input"]', { state: 'visible', timeout: 30000 });
 
     // Fill login form
-    await page.fill('[name="email"]', email);
-    await page.fill('[name="password"]', password);
-    await page.click('button[type="submit"]');
+    await page.fill('[data-testid="auth-email-input"]', email);
+    await page.fill('[data-testid="auth-password-input"]', password);
+    await page.click('[data-testid="auth-submit-btn"]');
 
     // Wait for navigation after login
-    await page.waitForURL(/\/plans|\//, { timeout: 10000 });
+    await page.waitForURL(/\/plans|\//, { timeout: 15000 });
 
     // Handle onboarding modal if it appears
     const onboardingModal = page.locator('[data-testid="onboarding-modal"]');

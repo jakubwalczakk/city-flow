@@ -1,13 +1,14 @@
-import { authTest as test, expect, createTestPlan, verifyPdfDownload, verifyPdfContent } from '../fixtures';
+import { exportTest as test, expect } from '../shared-user-fixtures';
+import { createTestPlan, verifyPdfDownload, verifyPdfContent } from '../fixtures';
 import { PlanDetailsPage } from '../page-objects/PlanDetailsPage';
 
 test.describe('PDF Export', () => {
-  test('should export generated plan to PDF', async ({ page, supabase, testUser }) => {
+  test('should export generated plan to PDF', async ({ page, supabase, sharedUser }) => {
     // Local initialization (not global)
     const planDetailsPage = new PlanDetailsPage(page);
 
     // Arrange - Create generated plan with activities
-    const { planId } = await createTestPlan(supabase, testUser.id, {
+    const { planId } = await createTestPlan(supabase, sharedUser.id, {
       name: 'Rzym - Czerwiec 2026',
       destination: 'Rzym',
       status: 'generated',
@@ -45,12 +46,12 @@ test.describe('PDF Export', () => {
     expect(hasExpectedContent).toBe(true);
   });
 
-  test('should not allow export of draft plan', async ({ page, supabase, testUser }) => {
+  test('should not allow export of draft plan', async ({ page, supabase, sharedUser }) => {
     // Local initialization (not global)
     const planDetailsPage = new PlanDetailsPage(page);
 
     // Arrange - Create draft plan (not generated)
-    const { planId } = await createTestPlan(supabase, testUser.id, {
+    const { planId } = await createTestPlan(supabase, sharedUser.id, {
       name: 'Draft Plan',
       status: 'draft',
     });
@@ -65,12 +66,12 @@ test.describe('PDF Export', () => {
     expect(isExportEnabled).toBe(false);
   });
 
-  test('should include all plan details in PDF', async ({ page, supabase, testUser }) => {
+  test('should include all plan details in PDF', async ({ page, supabase, sharedUser }) => {
     // Local initialization (not global)
     const planDetailsPage = new PlanDetailsPage(page);
 
     // Arrange
-    const { planId } = await createTestPlan(supabase, testUser.id, {
+    const { planId } = await createTestPlan(supabase, sharedUser.id, {
       name: 'Florence Art Tour',
       destination: 'Florence, Italy',
       status: 'generated',
@@ -97,12 +98,12 @@ test.describe('PDF Export', () => {
     expect(hasContent).toBe(true);
   });
 
-  test('should include AI warning in PDF', async ({ page, supabase, testUser }) => {
+  test('should include AI warning in PDF', async ({ page, supabase, sharedUser }) => {
     // Local initialization (not global)
     const planDetailsPage = new PlanDetailsPage(page);
 
     // Arrange
-    const { planId } = await createTestPlan(supabase, testUser.id, {
+    const { planId } = await createTestPlan(supabase, sharedUser.id, {
       status: 'generated',
       withActivities: true,
     });
@@ -119,12 +120,12 @@ test.describe('PDF Export', () => {
     expect(hasAIWarning).toBe(true);
   });
 
-  test('should handle PDF export for multi-day plan', async ({ page, supabase, testUser }) => {
+  test('should handle PDF export for multi-day plan', async ({ page, supabase, sharedUser }) => {
     // Local initialization (not global)
     const planDetailsPage = new PlanDetailsPage(page);
 
     // Arrange - Create plan with multiple days
-    const { planId } = await createTestPlan(supabase, testUser.id, {
+    const { planId } = await createTestPlan(supabase, sharedUser.id, {
       name: '5-Day Paris Adventure',
       destination: 'Paris',
       status: 'generated',
@@ -197,12 +198,12 @@ test.describe('PDF Export', () => {
     }
   });
 
-  test('should generate unique filename for each export', async ({ page, supabase, testUser }) => {
+  test('should generate unique filename for each export', async ({ page, supabase, sharedUser }) => {
     // Local initialization (not global)
     const planDetailsPage = new PlanDetailsPage(page);
 
     // Arrange
-    const { planId } = await createTestPlan(supabase, testUser.id, {
+    const { planId } = await createTestPlan(supabase, sharedUser.id, {
       name: 'Barcelona Trip',
       destination: 'Barcelona',
       status: 'generated',
@@ -227,12 +228,12 @@ test.describe('PDF Export', () => {
     expect(filename).not.toMatch(/[<>:"|?*]/);
   });
 
-  test('should maintain proper PDF structure', async ({ page, supabase, testUser }) => {
+  test('should maintain proper PDF structure', async ({ page, supabase, sharedUser }) => {
     // Local initialization (not global)
     const planDetailsPage = new PlanDetailsPage(page);
 
     // Arrange
-    const { planId } = await createTestPlan(supabase, testUser.id, {
+    const { planId } = await createTestPlan(supabase, sharedUser.id, {
       name: 'Rome 3-Day Tour',
       destination: 'Rome',
       status: 'generated',
@@ -260,12 +261,12 @@ test.describe('PDF Export', () => {
     }
   });
 
-  test('should handle export after regeneration', async ({ page, supabase, testUser }) => {
+  test('should handle export after regeneration', async ({ page, supabase, sharedUser }) => {
     // Local initialization (not global)
     const planDetailsPage = new PlanDetailsPage(page);
 
     // Arrange - Create generated plan
-    const { planId } = await createTestPlan(supabase, testUser.id, {
+    const { planId } = await createTestPlan(supabase, sharedUser.id, {
       name: 'Regenerated Plan',
       status: 'generated',
       withActivities: true,
