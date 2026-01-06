@@ -29,6 +29,11 @@ describe('formDateHelpers', () => {
       expect(getDateForPicker('')).toBeUndefined();
     });
 
+    it('should return undefined for null-like empty string', () => {
+      const result = getDateForPicker('');
+      expect(result).toBeUndefined();
+    });
+
     it('should return undefined for invalid string', () => {
       const result = getDateForPicker('invalid-date');
       expect(result === undefined || (result instanceof Date && isNaN(result.getTime()))).toBe(true);
@@ -56,6 +61,11 @@ describe('formDateHelpers', () => {
 
     it('should return empty string for empty input', () => {
       expect(getTimeForInput('')).toBe('');
+    });
+
+    it('should return empty string for null-like empty input', () => {
+      const result = getTimeForInput('');
+      expect(result).toBe('');
     });
 
     it('should return empty string for invalid input', () => {

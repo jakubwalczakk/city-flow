@@ -12,6 +12,7 @@ describe('SummaryStep', () => {
     render(
       <SummaryStep formData={formData} goToPrevStep={vi.fn()} onSubmit={vi.fn()} isSubmitting={false} error={null} />
     );
-    expect(screen.getByText(/Paris/)).toBeInTheDocument();
+    expect(screen.getByTestId('summary-destination')).toBeInTheDocument();
+    expect(screen.getByTestId('summary-destination')).toHaveTextContent(/Paris/);
   });
 });

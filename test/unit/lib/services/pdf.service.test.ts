@@ -473,5 +473,47 @@ describe('PDF Service - Main Function', () => {
         })
       );
     });
+
+    it('should create new page when content exceeds page height', async () => {
+      // Create a plan with large content to trigger page break
+      const largePlan: PlanDetailsDto = {
+        ...mockPlan,
+        generated_content: {
+          summary: 'A'.repeat(500), // Very long summary
+          currency: 'EUR',
+          days: [
+            {
+              date: '2024-06-01',
+              items: Array(20)
+                .fill(null)
+                .map((_, i) => ({
+                  id: `item-${i}`,
+                  type: 'activity' as const,
+                  time: '10:00',
+                  title: `Activity ${i}`,
+                  description: 'B'.repeat(200),
+                  category: 'culture' as const,
+                  estimated_price: '25',
+                  estimated_duration: '2 hours',
+                  location: 'Location',
+                })),
+            },
+          ],
+        },
+      };
+
+      const mockPage2 = {
+        getSize: vi.fn(() => ({ height: 800, width: 600 })),
+        drawText: vi.fn(),
+      };
+
+      mockPdfDoc.addPage.mockReturnValueOnce(mockPage2);
+      mockPdfDoc.getPages.mockReturnValue([mockPage, mockPage2]);
+
+      await generatePlanPdf(largePlan);
+
+      // Should have called addPage multiple times (initial + page breaks for content)
+      expect(mockPdfDoc.addPage.mock.calls.length).toBeGreaterThanOrEqual(2);
+    });
   });
 });

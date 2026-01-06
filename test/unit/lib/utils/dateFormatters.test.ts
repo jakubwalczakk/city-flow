@@ -106,6 +106,17 @@ describe('dateFormatters', () => {
       expect(result).not.toContain('2024');
     });
 
+    it('should handle null options parameter', () => {
+      const result = formatDateTime('2024-01-15T14:30:00Z', undefined);
+      expect(result).toBeDefined();
+      expect(result).toContain('2024');
+    });
+
+    it('should handle partial options object', () => {
+      const result = formatDateTime('2024-01-15T14:30:00Z', { dateStyle: 'long' });
+      expect(result).toContain('stycznia');
+    });
+
     it('should return original string on invalid date', () => {
       const invalidDate = 'invalid-date';
       const result = formatDateTime(invalidDate);

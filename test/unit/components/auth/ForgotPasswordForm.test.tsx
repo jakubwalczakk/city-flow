@@ -63,7 +63,8 @@ describe('ForgotPasswordForm', () => {
     it('should show instructions text', () => {
       render(<ForgotPasswordForm />);
 
-      expect(screen.getByText('Pamiętasz hasło?')).toBeInTheDocument();
+      expect(screen.getByTestId('instructions-text')).toBeInTheDocument();
+      expect(screen.getByTestId('instructions-text')).toHaveTextContent('Pamiętasz hasło?');
     });
   });
 
@@ -192,8 +193,10 @@ describe('ForgotPasswordForm', () => {
       await user.click(submitButton);
 
       await waitFor(() => {
-        expect(screen.getByText(/Sprawdź swoją skrzynkę odbiorczą/)).toBeInTheDocument();
-        expect(screen.getByText(/Link jest ważny przez 1 godzinę/)).toBeInTheDocument();
+        expect(screen.getByTestId('success-instructions')).toBeInTheDocument();
+        const instructions = screen.getByTestId('success-instructions');
+        expect(instructions).toHaveTextContent(/Sprawdź swoją skrzynkę odbiorczą/);
+        expect(instructions).toHaveTextContent(/Link jest ważny przez 1 godzinę/);
       });
     });
 
@@ -210,7 +213,7 @@ describe('ForgotPasswordForm', () => {
       await user.click(submitButton);
 
       await waitFor(() => {
-        expect(screen.getByText('Spróbuj ponownie')).toBeInTheDocument();
+        expect(screen.getByTestId('try-again-button')).toBeInTheDocument();
       });
     });
 
@@ -227,7 +230,7 @@ describe('ForgotPasswordForm', () => {
       await user.click(submitButton);
 
       await waitFor(() => {
-        const backLink = screen.getByText('← Powrót do logowania');
+        const backLink = screen.getByTestId('back-to-login-link');
         expect(backLink).toBeInTheDocument();
         expect(backLink).toHaveAttribute('href', '/login');
       });
@@ -248,11 +251,11 @@ describe('ForgotPasswordForm', () => {
 
       // Wait for success state
       await waitFor(() => {
-        expect(screen.getByText('Spróbuj ponownie')).toBeInTheDocument();
+        expect(screen.getByTestId('try-again-button')).toBeInTheDocument();
       });
 
       // Click try again
-      const tryAgainButton = screen.getByText('Spróbuj ponownie');
+      const tryAgainButton = screen.getByTestId('try-again-button');
       await user.click(tryAgainButton);
 
       // Should return to form

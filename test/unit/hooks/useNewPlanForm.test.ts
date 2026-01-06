@@ -20,7 +20,7 @@ vi.mock('@/lib/services/planFormApi.service', () => ({
 vi.mock('@/lib/utils/planFormHelpers', () => ({
   getDefaultStartDate: vi.fn(() => new Date('2024-06-01')),
   getDefaultEndDate: vi.fn(() => new Date('2024-06-08')),
-  determineStartingStep: vi.fn(() => 1),
+  determineStartingStep: vi.fn(() => 0),
   convertFixedPointsToFormItems: vi.fn((points) =>
     points.map((p: FixedPointDto) => ({
       id: p.id,
@@ -45,7 +45,7 @@ describe('useNewPlanForm', () => {
     it('should initialize with default values for new plan', () => {
       const { result } = renderHook(() => useNewPlanForm());
 
-      expect(result.current.currentStep).toBe(1);
+      expect(result.current.currentStep).toBe(0);
       expect(result.current.formData.basicInfo.name).toBe('');
       expect(result.current.formData.basicInfo.destination).toBe('');
       expect(result.current.formData.fixedPoints).toEqual([]);
@@ -243,13 +243,13 @@ describe('useNewPlanForm', () => {
     it('should navigate to next step', () => {
       const { result } = renderHook(() => useNewPlanForm());
 
-      expect(result.current.currentStep).toBe(1);
+      expect(result.current.currentStep).toBe(0);
 
       act(() => {
         result.current.nextStep();
       });
 
-      expect(result.current.currentStep).toBe(2);
+      expect(result.current.currentStep).toBe(1);
     });
 
     it('should navigate to previous step', () => {
@@ -260,16 +260,16 @@ describe('useNewPlanForm', () => {
         result.current.nextStep();
       });
 
-      expect(result.current.currentStep).toBe(3);
+      expect(result.current.currentStep).toBe(2);
 
       act(() => {
         result.current.prevStep();
       });
 
-      expect(result.current.currentStep).toBe(2);
+      expect(result.current.currentStep).toBe(1);
     });
 
-    it('should not go beyond step 3', () => {
+    it('should not go beyond step 2', () => {
       const { result } = renderHook(() => useNewPlanForm());
 
       act(() => {
@@ -279,10 +279,10 @@ describe('useNewPlanForm', () => {
         result.current.nextStep(); // Try to go beyond
       });
 
-      expect(result.current.currentStep).toBe(3);
+      expect(result.current.currentStep).toBe(2);
     });
 
-    it('should not go below step 1', () => {
+    it('should not go below step 0', () => {
       const { result } = renderHook(() => useNewPlanForm());
 
       act(() => {
@@ -290,7 +290,7 @@ describe('useNewPlanForm', () => {
         result.current.prevStep();
       });
 
-      expect(result.current.currentStep).toBe(1);
+      expect(result.current.currentStep).toBe(0);
     });
 
     it('should go to specific step within allowed range', () => {
@@ -301,25 +301,25 @@ describe('useNewPlanForm', () => {
         result.current.nextStep();
       });
 
-      expect(result.current.currentStep).toBe(3);
+      expect(result.current.currentStep).toBe(2);
 
       act(() => {
-        result.current.goToStep(1);
+        result.current.goToStep(0);
       });
 
-      expect(result.current.currentStep).toBe(1);
+      expect(result.current.currentStep).toBe(0);
     });
 
     it('should not allow jumping to future steps', () => {
       const { result } = renderHook(() => useNewPlanForm());
 
-      expect(result.current.currentStep).toBe(1);
+      expect(result.current.currentStep).toBe(0);
 
       act(() => {
-        result.current.goToStep(3); // Try to jump ahead
+        result.current.goToStep(2); // Try to jump ahead
       });
 
-      expect(result.current.currentStep).toBe(1); // Should stay at 1
+      expect(result.current.currentStep).toBe(0); // Should stay at 0
     });
 
     it('should clear error when navigating', () => {
@@ -335,7 +335,7 @@ describe('useNewPlanForm', () => {
   });
 
   describe('saveDraft', () => {
-    it('should save basic info on step 1', async () => {
+    it('should save basic info on step 0 (BasicInfoStep)', async () => {
       vi.mocked(PlanFormApiService.createPlan).mockResolvedValue({
         id: 'new-plan-id',
         user_id: 'user-1',
@@ -373,7 +373,7 @@ describe('useNewPlanForm', () => {
       expect(onFinished).toHaveBeenCalled();
     });
 
-    it('should save fixed points on step 2', async () => {
+    it('should save fixed points on step 1 (FixedPointsStep)', async () => {
       vi.mocked(PlanFormApiService.createPlan).mockResolvedValue({
         id: 'plan-1',
         user_id: 'user-1',

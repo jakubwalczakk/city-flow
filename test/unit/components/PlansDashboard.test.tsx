@@ -7,8 +7,16 @@ import { createMockPlan } from '../../utils/mock-factories';
 
 vi.mock('@/hooks/usePlansDashboard');
 vi.mock('@/components/PlanList', () => ({ PlanList: () => <div data-testid='plan-list'>Plans</div> }));
-vi.mock('@/components/PaginationControls', () => ({ PaginationControls: () => <div>Pagination</div> }));
-vi.mock('./NewPlanForm', () => ({ default: () => <div>NewPlanForm</div> }));
+vi.mock('@/components/PaginationControls', () => ({
+  PaginationControls: () => <div data-testid='pagination-controls'>Pagination</div>,
+}));
+vi.mock('./NewPlanForm', () => ({
+  default: () => (
+    <>
+      <div>NewPlanForm</div>
+    </>
+  ),
+}));
 
 describe('PlansDashboard', () => {
   const mockHandleTabChange = vi.fn();
@@ -110,12 +118,12 @@ describe('PlansDashboard', () => {
         showPagination: true,
       });
       render(<PlansDashboard />);
-      expect(screen.getByText('Pagination')).toBeInTheDocument();
+      expect(screen.getByTestId('pagination-controls')).toBeInTheDocument();
     });
 
     it('should not show pagination when showPagination is false', () => {
       render(<PlansDashboard />);
-      expect(screen.queryByText('Pagination')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('pagination-controls')).not.toBeInTheDocument();
     });
   });
 });

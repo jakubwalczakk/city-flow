@@ -97,8 +97,8 @@ describe('SummaryStep', () => {
     render(<SummaryStep {...props} />);
 
     // Assert
-    expect(screen.queryByText('Notatki')).not.toBeInTheDocument();
-    expect(screen.queryByText('Bring a time machine.')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('summary-notes')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('summary-notes-label')).not.toBeInTheDocument();
   });
 
   it('should display an error message if one is provided', () => {

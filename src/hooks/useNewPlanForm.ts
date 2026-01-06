@@ -24,7 +24,7 @@ export function useNewPlanForm({
   onFinished,
   editingPlan,
 }: { onFinished?: () => void; editingPlan?: PlanListItemDto | null } = {}) {
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState<NewPlanViewModel>(INITIAL_FORM_DATA);
   const [isLoading, setIsLoading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -145,10 +145,10 @@ export function useNewPlanForm({
     setIsLoading(true);
 
     try {
-      if (currentStep === 1) {
+      if (currentStep === 0) {
         await saveBasicInfo();
-      } else if (currentStep === 2) {
-        // Ensure step 1 is saved first
+      } else if (currentStep === 1) {
+        // Ensure step 0 is saved first
         const currentPlanId = planId || (await saveBasicInfo());
 
         if (!currentPlanId) {
@@ -172,18 +172,18 @@ export function useNewPlanForm({
   // Navigation methods
   const nextStep = () => {
     setError(null);
-    setCurrentStep((prev) => Math.min(prev + 1, 3));
+    setCurrentStep((prev) => Math.min(prev + 1, 2));
   };
 
   const prevStep = () => {
     setError(null);
-    setCurrentStep((prev) => Math.max(prev - 1, 1));
+    setCurrentStep((prev) => Math.max(prev - 1, 0));
   };
 
   const goToStep = (step: number) => {
     setError(null);
-    // Only allow navigation to step 1 and current or previous steps
-    if (step >= 1 && step <= currentStep) {
+    // Only allow navigation to step 0 and current or previous steps
+    if (step >= 0 && step <= currentStep) {
       setCurrentStep(step);
     }
   };

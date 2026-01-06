@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { usePlansDashboard } from '@/hooks/usePlansDashboard';
 import { PlanList } from '@/components/PlanList';
 import { PaginationControls } from '@/components/PaginationControls';
@@ -51,6 +51,8 @@ export const PlansDashboard = () => {
             </Button>
           </DialogTrigger>
           <DialogContent className='sm:max-w-4xl' data-testid='new-plan-modal'>
+            <DialogTitle className='sr-only'>Utwórz nowy plan</DialogTitle>
+            <DialogDescription className='sr-only'>Formularz do tworzenia nowego planu podróży</DialogDescription>
             <NewPlanForm onFinished={handleModalClose} editingPlan={editingPlan} />
           </DialogContent>
         </Dialog>

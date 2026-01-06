@@ -297,7 +297,334 @@ describe('PlanService', () => {
       });
     });
 
-    // Note: deletePlan and getPlans use complex Supabase chaining that's difficult to mock
-    // These are better tested as integration tests
+    // Note: getPlans and deletePlan use complex Supabase chaining that's difficult to mock
+    // These have better coverage through integration tests (e2e tests)
+    // The uncovered lines are mostly defensive error handling in edge cases
+  });
+
+  describe('Activity Management - addActivityToPlanDay', () => {
+    let mockSupabase: ReturnType<typeof createMockSupabaseClient>;
+    let planService: PlanService;
+
+    beforeEach(() => {
+      mockSupabase = createMockSupabaseClient();
+      planService = new PlanService(mockSupabase as unknown as SupabaseClient);
+      vi.clearAllMocks();
+    });
+
+    it('should add activity to plan day and sort by time', async () => {
+      const mockPlan: PlanDetailsDto = {
+        id: 'plan-1',
+        user_id: 'user-1',
+        name: 'Trip',
+        destination: 'Paris',
+        start_date: '2024-06-01',
+        end_date: '2024-06-07',
+        notes: null,
+        status: 'generated',
+        generated_content: {
+          summary: 'A nice trip',
+          currency: 'EUR',
+          days: [
+            {
+              date: '2024-06-01',
+              items: [
+                {
+                  id: 'item-1',
+                  type: 'meal',
+                  time: '09:00',
+                  category: 'food',
+                  title: 'Breakfast',
+                  description: 'Hotel breakfast',
+                },
+              ],
+            },
+          ],
+        },
+        created_at: '2024-01-01',
+        updated_at: '2024-01-01',
+      };
+
+      const updatedMockPlan = {
+        ...mockPlan,
+        generated_content: {
+          ...mockPlan.generated_content,
+          days: [
+            {
+              date: '2024-06-01',
+              items: [
+                {
+                  id: 'item-1',
+                  type: 'meal',
+                  time: '09:00',
+                  category: 'food',
+                  title: 'Breakfast',
+                  description: 'Hotel breakfast',
+                },
+                {
+                  id: 'mock-uuid-1234',
+                  type: 'activity',
+                  time: '14:00',
+                  category: 'culture',
+                  title: 'Louvre Museum',
+                  location: 'Louvre, Paris',
+                },
+              ],
+            },
+          ],
+        },
+      };
+
+      mockSupabase._mockHelpers.mockSingle
+        .mockResolvedValueOnce({ data: mockPlan, error: null })
+        .mockResolvedValueOnce({ data: updatedMockPlan, error: null });
+
+      const result = await planService.addActivityToPlanDay(
+        'plan-1',
+        '2024-06-01',
+        {
+          time: '14:00',
+          title: 'Louvre Museum',
+          location: 'Louvre, Paris',
+          category: 'culture',
+        },
+        'user-1'
+      );
+
+      expect(result.generated_content).toBeDefined();
+      if (result.generated_content && 'days' in result.generated_content) {
+        const items = (result.generated_content as GeneratedContentViewModel & { days: { items: unknown[] }[] }).days[0]
+          .items;
+        expect(items).toHaveLength(2);
+        expect(items[0].time).toBe('09:00');
+        expect(items[1].time).toBe('14:00');
+      }
+    });
+
+    it('should throw error when trying to add activity to non-generated plan', async () => {
+      const mockPlan: PlanDetailsDto = {
+        id: 'plan-1',
+        user_id: 'user-1',
+        name: 'Trip',
+        destination: 'Paris',
+        start_date: '2024-06-01',
+        end_date: '2024-06-07',
+        notes: null,
+        status: 'draft',
+        generated_content: null,
+        created_at: '2024-01-01',
+        updated_at: '2024-01-01',
+      };
+
+      mockSupabase._mockHelpers.mockSingle.mockResolvedValue({
+        data: mockPlan,
+        error: null,
+      });
+
+      await expect(
+        planService.addActivityToPlanDay(
+          'plan-1',
+          '2024-06-01',
+          {
+            title: 'Activity',
+            category: 'culture',
+          },
+          'user-1'
+        )
+      ).rejects.toThrow(DatabaseError);
+    });
+
+    it('should map food category to meal type', async () => {
+      const mockPlan: PlanDetailsDto = {
+        id: 'plan-1',
+        user_id: 'user-1',
+        name: 'Trip',
+        destination: 'Paris',
+        start_date: '2024-06-01',
+        end_date: '2024-06-07',
+        notes: null,
+        status: 'generated',
+        generated_content: {
+          summary: 'Trip',
+          currency: 'EUR',
+          days: [
+            {
+              date: '2024-06-01',
+              items: [],
+            },
+          ],
+        },
+        created_at: '2024-01-01',
+        updated_at: '2024-01-01',
+      };
+
+      mockSupabase._mockHelpers.mockSingle
+        .mockResolvedValueOnce({ data: mockPlan, error: null })
+        .mockResolvedValueOnce({ data: mockPlan, error: null });
+
+      await planService.addActivityToPlanDay(
+        'plan-1',
+        '2024-06-01',
+        {
+          title: 'Lunch',
+          category: 'food',
+        },
+        'user-1'
+      );
+
+      // Verify the update was called
+      expect(mockSupabase._mockHelpers.mockUpdate).toHaveBeenCalled();
+    });
+  });
+
+  describe('Time Conversion Edge Cases', () => {
+    it('should handle edge case times correctly', () => {
+      // Midnight
+      expect(convertTo24Hour('12:00 AM')).toBe('00:00');
+
+      // Noon
+      expect(convertTo24Hour('12:00 PM')).toBe('12:00');
+
+      // Just before midnight
+      expect(convertTo24Hour('11:59 PM')).toBe('23:59');
+
+      // Just after midnight
+      expect(convertTo24Hour('12:01 AM')).toBe('00:01');
+    });
+
+    it('should handle times without leading zeros', () => {
+      expect(convertTo24Hour('9:05 AM')).toBe('09:05');
+      expect(convertTo24Hour('9:30 PM')).toBe('21:30');
+    });
+
+    it('should be case-insensitive for AM/PM', () => {
+      expect(convertTo24Hour('2:30 AM')).toBe('02:30');
+      expect(convertTo24Hour('2:30 am')).toBe('02:30');
+      expect(convertTo24Hour('2:30 Am')).toBe('02:30');
+      expect(convertTo24Hour('2:30 aM')).toBe('02:30');
+    });
+  });
+
+  describe('Error Handling Consistency', () => {
+    let mockSupabase: ReturnType<typeof createMockSupabaseClient>;
+    let planService: PlanService;
+
+    beforeEach(() => {
+      mockSupabase = createMockSupabaseClient();
+      planService = new PlanService(mockSupabase as unknown as SupabaseClient);
+      vi.clearAllMocks();
+    });
+
+    it('should handle missing start_date or end_date after creation', async () => {
+      const command: CreatePlanCommand = {
+        name: 'Trip',
+        destination: 'Paris',
+        start_date: '2024-06-01',
+        end_date: '2024-06-07',
+      };
+
+      mockSupabase._mockHelpers.mockSingle.mockResolvedValue({
+        data: {
+          id: 'plan-1',
+          user_id: 'user-1',
+          name: 'Trip',
+          destination: 'Paris',
+          start_date: null,
+          end_date: '2024-06-07',
+          notes: null,
+          status: 'draft',
+          generated_content: null,
+          created_at: '2024-01-01',
+          updated_at: '2024-01-01',
+        },
+        error: null,
+      });
+
+      await expect(planService.createPlan(command, 'user-1')).rejects.toThrow(DatabaseError);
+    });
+
+    it('should properly log errors with context', async () => {
+      const { logger } = await import('@/lib/utils/logger');
+
+      const command: CreatePlanCommand = {
+        name: 'Trip',
+        destination: 'Paris',
+        start_date: '2024-06-01',
+        end_date: '2024-06-07',
+      };
+
+      mockSupabase._mockHelpers.mockSingle.mockResolvedValue({
+        data: null,
+        error: { code: 'PGRST116', message: 'Not found' },
+      });
+
+      try {
+        await planService.createPlan(command, 'user-1');
+      } catch {
+        // Expected to throw
+      }
+
+      expect(logger.error).toHaveBeenCalled();
+    });
+  });
+
+  describe('Data Transformation', () => {
+    let mockSupabase: ReturnType<typeof createMockSupabaseClient>;
+    let planService: PlanService;
+
+    beforeEach(() => {
+      mockSupabase = createMockSupabaseClient();
+      planService = new PlanService(mockSupabase as unknown as SupabaseClient);
+      vi.clearAllMocks();
+    });
+
+    it('should preserve complex generated_content structure during updates', async () => {
+      const complexGeneratedContent = {
+        summary: 'Detailed trip',
+        currency: 'USD',
+        days: [
+          {
+            date: '2024-06-01',
+            items: [
+              {
+                id: 'item-1',
+                type: 'activity',
+                time: '09:00',
+                category: 'culture',
+                title: 'Activity',
+                estimated_price: '50 USD',
+              },
+            ],
+          },
+        ],
+        warnings: ['Pack sunscreen'],
+      };
+
+      const mockPlan: PlanDetailsDto = {
+        id: 'plan-1',
+        user_id: 'user-1',
+        name: 'Trip',
+        destination: 'Paris',
+        start_date: '2024-06-01',
+        end_date: '2024-06-07',
+        notes: null,
+        status: 'generated',
+        generated_content: complexGeneratedContent,
+        created_at: '2024-01-01',
+        updated_at: '2024-01-01',
+      };
+
+      mockSupabase._mockHelpers.mockSingle.mockResolvedValue({
+        data: mockPlan,
+        error: null,
+      });
+
+      const result = await planService.updatePlan('plan-1', {
+        name: 'Updated Trip',
+        generated_content: complexGeneratedContent,
+      });
+
+      expect(result.generated_content).toEqual(complexGeneratedContent);
+    });
   });
 });

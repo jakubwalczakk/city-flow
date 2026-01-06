@@ -122,7 +122,8 @@ describe('GoogleAuthButton', () => {
 
       render(<GoogleAuthButton />);
 
-      expect(screen.getByText(errorMessage)).toBeInTheDocument();
+      expect(screen.getByTestId('google-auth-error')).toBeInTheDocument();
+      expect(screen.getByTestId('google-auth-error')).toHaveTextContent(errorMessage);
     });
 
     it('should not show error message when no error', () => {

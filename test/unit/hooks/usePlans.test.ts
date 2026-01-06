@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderHook, waitFor } from '@testing-library/react';
+import { renderHook, waitFor, act } from '@testing-library/react';
 import { usePlans, type UsePlansParams } from '@/hooks/usePlans';
 import type { PaginatedPlansDto } from '@/types';
 
@@ -298,7 +298,9 @@ describe('usePlans', () => {
       });
 
       // Manual refetch
-      result.current.refetch();
+      await act(async () => {
+        result.current.refetch();
+      });
 
       await waitFor(() => {
         expect(mockFetch).toHaveBeenCalledTimes(2);
@@ -318,7 +320,9 @@ describe('usePlans', () => {
       });
 
       // Trigger manual refetch
-      result.current.refetch();
+      await act(async () => {
+        result.current.refetch();
+      });
 
       // Should briefly set isLoading to true
       await waitFor(() => {
@@ -347,7 +351,9 @@ describe('usePlans', () => {
         json: async () => mockPlansData,
       });
 
-      result.current.refetch();
+      await act(async () => {
+        result.current.refetch();
+      });
 
       await waitFor(() => {
         expect(result.current.error).toBeNull();

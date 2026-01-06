@@ -82,7 +82,7 @@ export const PaginationControls = ({ pagination, onPageChange }: PaginationContr
   };
 
   return (
-    <Pagination>
+    <Pagination data-testid='pagination-controls'>
       <PaginationContent>
         {/* Previous button */}
         <PaginationItem>

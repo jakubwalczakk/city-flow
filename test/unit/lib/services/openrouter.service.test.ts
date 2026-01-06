@@ -585,5 +585,31 @@ describe('OpenRouterService', () => {
         })
       ).rejects.toThrow(ValidationError);
     });
+
+    it('should handle unexpected non-error exceptions', async () => {
+      const { logger } = await import('@/lib/utils/logger');
+
+      vi.mocked(global.fetch).mockImplementation(() => {
+        // Simulate an unexpected error (not caught by known error types)
+        throw 'String error instead of Error object';
+      });
+
+      const service = new OpenRouterService({ apiKey: 'test-key' });
+
+      await expect(
+        service.getStructuredResponse({
+          systemPrompt: 'Test',
+          userPrompt: 'Test',
+          responseSchema: testSchema,
+        })
+      ).rejects.toThrow(ExternalServiceError);
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'Network error while calling OpenRouter API',
+        expect.objectContaining({
+          error: 'String error instead of Error object',
+        })
+      );
+    });
   });
 });
