@@ -21,7 +21,7 @@ describe('BasicInfoStep', () => {
   beforeEach(() => {
     vi.mocked(useBasicInfoStepModule.useBasicInfoStep).mockReturnValue({
       form: {
-        control: {},
+        control: vi.fn(),
         formState: {
           isDirty: false,
           dirtyFields: {},
@@ -35,11 +35,21 @@ describe('BasicInfoStep', () => {
           touchedFields: {},
           validatingFields: {},
           isValidating: false,
-        },
+          disabled: false,
+          isReady: true,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } as any,
         handleSubmit: vi.fn((fn) => fn),
         reset: vi.fn(),
         watch: vi.fn(),
-      },
+        getValues: vi.fn(),
+        getFieldState: vi.fn(),
+        setError: vi.fn(),
+        clearErrors: vi.fn(),
+        setValue: vi.fn(),
+        trigger: vi.fn(),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any,
       isStartOpen: false,
       setIsStartOpen: vi.fn(),
       isEndOpen: false,
@@ -54,7 +64,13 @@ describe('BasicInfoStep', () => {
   });
 
   it('should render form fields', () => {
-    const formData = { name: '', destination: '', start_date: '', end_date: '', notes: '' };
+    const formData = {
+      name: '',
+      destination: '',
+      start_date: new Date(),
+      end_date: new Date(),
+      notes: '',
+    };
     render(
       <BasicInfoStep
         formData={formData}

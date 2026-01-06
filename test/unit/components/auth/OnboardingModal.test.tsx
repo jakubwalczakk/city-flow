@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { OnboardingModal } from '@/components/auth/OnboardingModal';
 import * as useOnboardingModalModule from '@/hooks/useOnboardingModal';
+import type { TravelPace } from '@/types';
 
 // Mock useOnboardingModal hook
 vi.mock('@/hooks/useOnboardingModal');
@@ -48,13 +49,20 @@ describe('OnboardingModal', () => {
   const defaultHookReturn = {
     isOpen: true,
     setIsOpen: mockSetIsOpen,
-    pace: 'moderate' as const,
+    pace: 'moderate' as TravelPace,
     setPace: mockSetPace,
-    preferences: ['sightseeing'],
+    preferences: ['art_museums'],
     setPreferences: mockSetPreferences,
     errors: {},
     isSubmitting: false,
-    profile: { generations_remaining: 5 },
+    profile: {
+      id: 'user-123',
+      preferences: ['art_museums'],
+      travel_pace: 'moderate' as TravelPace,
+      generations_remaining: 5,
+      onboarding_completed: false,
+      updated_at: '2024-01-01T00:00:00Z',
+    },
     handleSave: mockHandleSave,
     handleSkip: mockHandleSkip,
   };
@@ -257,7 +265,14 @@ describe('OnboardingModal', () => {
     it('should show correct number of generations', () => {
       vi.mocked(useOnboardingModalModule.useOnboardingModal).mockReturnValue({
         ...defaultHookReturn,
-        profile: { generations_remaining: 3 },
+        profile: {
+          id: 'user-123',
+          preferences: ['art_museums'],
+          travel_pace: 'moderate',
+          generations_remaining: 3,
+          onboarding_completed: false,
+          updated_at: '2024-01-01T00:00:00Z',
+        },
       });
 
       render(<OnboardingModal />);

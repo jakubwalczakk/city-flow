@@ -29,11 +29,12 @@ describe('PlansDashboard', () => {
   const mockSetEditingPlan = vi.fn();
 
   const defaultHookReturn = {
-    activeTab: 'my-plans',
+    activeTab: 'my-plans' as const,
+    currentPage: 1,
     isModalOpen: false,
     editingPlan: null,
     plans: [createMockPlan()],
-    pagination: { currentPage: 1, totalPages: 1, pageSize: 12, totalItems: 1 },
+    pagination: { total: 1, limit: 12, offset: 0 },
     isLoading: false,
     error: null,
     showPagination: false,

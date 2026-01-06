@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { ActivityForm } from '@/components/ActivityForm';
 import * as useActivityFormModule from '@/hooks/useActivityForm';
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 vi.mock('@/hooks/useActivityForm');
 vi.mock('@/components/ui/form', () => ({
@@ -18,7 +19,7 @@ describe('ActivityForm', () => {
   beforeEach(() => {
     vi.mocked(useActivityFormModule.useActivityForm).mockReturnValue({
       form: {
-        control: {},
+        control: {} as any,
         formState: {
           isDirty: false,
           dirtyFields: {},
@@ -32,15 +33,18 @@ describe('ActivityForm', () => {
           touchedFields: {},
           validatingFields: {},
           isValidating: false,
+          disabled: false,
+          isReady: true,
         },
         handleSubmit: vi.fn((fn) => fn),
         reset: vi.fn(),
         watch: vi.fn(),
-      },
+      } as any,
       submitHandler: vi.fn(),
       isSubmitting: false,
     });
   });
+  /* eslint-enable @typescript-eslint/no-explicit-any */
 
   it('should render form', () => {
     render(<ActivityForm isOpen={true} onClose={vi.fn()} onSubmit={vi.fn()} initialData={undefined} mode='add' />);

@@ -2,7 +2,7 @@ import { usePlanDetails } from '@/hooks/usePlanDetails';
 import { useActivityFormState } from '@/hooks/useActivityFormState';
 import PlanHeader from '@/components/PlanHeader';
 import GeneratedPlanView from '@/components/GeneratedPlanView';
-import ActivityForm from '@/components/ActivityForm';
+import { ActivityForm } from '@/components/ActivityForm';
 import NewPlanForm from '@/components/NewPlanForm';
 import { LoadingView, ErrorView, NotFoundView, BackLink, ArchivedBanner } from '@/components/ui/state-views';
 import { QueryProvider } from '@/components/providers/QueryProvider';

@@ -2,9 +2,9 @@ import type {
   PlanListItemDto,
   TimelineItem,
   PlanDetailsDto,
-  FixedPoint,
-  ActivityCategory,
-  TravelPaceType,
+  FixedPointDto,
+  TimelineItemCategory,
+  TravelPace,
 } from '@/types';
 
 /**
@@ -26,14 +26,14 @@ export const createMockPlan = (overrides?: Partial<PlanListItemDto>): PlanListIt
  */
 export const createMockActivity = (overrides?: Partial<TimelineItem>): TimelineItem => ({
   id: 'test-activity-id',
+  type: 'activity',
   title: 'Test Activity',
   description: 'Test description',
   time: '10:00',
-  category: 'sightseeing' as ActivityCategory,
+  category: 'culture' as TimelineItemCategory,
   location: 'Test Location',
-  duration: 60,
-  price: 0,
-  day: 1,
+  estimated_duration: '60',
+  estimated_price: '0',
   ...overrides,
 });
 
@@ -42,49 +42,45 @@ export const createMockActivity = (overrides?: Partial<TimelineItem>): TimelineI
  */
 export const createMockPlanDetails = (overrides?: Partial<PlanDetailsDto>): PlanDetailsDto => ({
   id: 'test-plan-id',
+  user_id: 'test-user-id',
   name: 'Test Plan',
   destination: 'Test City',
   status: 'generated',
   created_at: '2024-01-01T00:00:00Z',
+  updated_at: '2024-01-01T00:00:00Z',
   start_date: '2024-02-01',
   end_date: '2024-02-07',
-  start_time: '09:00',
-  end_time: '18:00',
   notes: 'Test notes',
-  content: {
+  generated_content: {
     days: [
       {
-        day: 1,
         date: '2024-02-01',
-        activities: [createMockActivity()],
+        items: [createMockActivity()],
       },
     ],
   },
-  fixed_points: [],
   ...overrides,
 });
 
 /**
  * Creates a mock fixed point for testing
  */
-export const createMockFixedPoint = (overrides?: Partial<FixedPoint>): FixedPoint => ({
+export const createMockFixedPoint = (overrides?: Partial<FixedPointDto>): FixedPointDto => ({
   id: 'test-fixed-point-id',
   plan_id: 'test-plan-id',
-  name: 'Test Fixed Point',
-  time: '12:00',
-  date: '2024-02-01',
-  description: 'Test fixed point description',
   location: 'Test Location',
-  created_at: '2024-01-01T00:00:00Z',
+  event_at: '2024-02-01T12:00:00Z',
+  event_duration: 60,
+  description: 'Test fixed point description',
   ...overrides,
 });
 
 /**
  * Creates mock user preferences for testing
  */
-export const createMockPreferences = (overrides?: Partial<{ preferences: string[]; travel_pace: TravelPaceType }>) => ({
-  preferences: ['sightseeing', 'food'],
-  travel_pace: 'moderate' as TravelPaceType,
+export const createMockPreferences = (overrides?: Partial<{ preferences: string[]; travel_pace: TravelPace }>) => ({
+  preferences: ['art_museums', 'local_food'],
+  travel_pace: 'moderate' as TravelPace,
   ...overrides,
 });
 

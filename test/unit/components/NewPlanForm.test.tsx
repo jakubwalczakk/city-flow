@@ -19,7 +19,16 @@ vi.mock('@/components/PlanGenerationLoading', () => ({
 describe('NewPlanForm', () => {
   const defaultReturn = {
     currentStep: 0,
-    formData: { basicInfo: { name: '', destination: '', start_date: '', end_date: '', notes: '' }, fixedPoints: [] },
+    formData: {
+      basicInfo: {
+        name: '',
+        destination: '',
+        start_date: new Date(),
+        end_date: new Date(),
+        notes: '',
+      },
+      fixedPoints: [],
+    },
     isLoading: false,
     isGenerating: false,
     error: null,

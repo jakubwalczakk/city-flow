@@ -23,7 +23,7 @@ describe('PlanFormApiService', () => {
         created_at: '2024-01-15',
         updated_at: '2024-01-15',
         notes: null,
-        content: null,
+        generated_content: null,
       };
 
       vi.mocked(fetch).mockResolvedValue({
@@ -42,7 +42,7 @@ describe('PlanFormApiService', () => {
         ok: false,
         status: 404,
         json: async () => ({ error: 'Plan not found' }),
-      } as Response);
+      } as unknown as Response);
 
       await expect(PlanFormApiService.fetchPlanDetails('plan-123')).rejects.toThrow('Plan not found');
     });
@@ -54,7 +54,7 @@ describe('PlanFormApiService', () => {
         json: async () => {
           throw new Error('Invalid JSON');
         },
-      } as Response);
+      } as unknown as Response);
 
       await expect(PlanFormApiService.fetchPlanDetails('plan-123')).rejects.toThrow();
     });
@@ -70,7 +70,6 @@ describe('PlanFormApiService', () => {
           event_at: '2024-02-01T10:00:00Z',
           event_duration: 120,
           description: 'Visit tower',
-          created_at: '2024-01-15',
         },
       ];
 
@@ -108,12 +107,16 @@ describe('PlanFormApiService', () => {
 
       const mockResponse: PlanDetailsDto = {
         id: 'plan-new',
-        ...command,
+        name: command.name,
+        destination: command.destination,
+        start_date: command.start_date,
+        end_date: command.end_date,
+        notes: command.notes || null,
         status: 'draft',
         user_id: 'user-1',
         created_at: '2024-01-15',
         updated_at: '2024-01-15',
-        content: null,
+        generated_content: null,
       };
 
       vi.mocked(fetch).mockResolvedValue({
@@ -352,7 +355,6 @@ describe('PlanFormApiService', () => {
             event_at: '2024-03-01T10:00:00Z',
             event_duration: 60,
             description: null,
-            created_at: '2024-01-15',
           },
           {
             id: 'fp-2',
@@ -361,7 +363,6 @@ describe('PlanFormApiService', () => {
             event_at: '2024-03-01T12:00:00Z',
             event_duration: 60,
             description: null,
-            created_at: '2024-01-15',
           },
         ],
       } as Response);
@@ -410,7 +411,6 @@ describe('PlanFormApiService', () => {
             event_at: '2024-03-01T10:00:00Z',
             event_duration: 60,
             description: null,
-            created_at: '2024-01-15',
           },
         ],
       } as Response);
@@ -474,7 +474,7 @@ describe('PlanFormApiService', () => {
         json: async () => {
           throw new Error('Invalid JSON');
         },
-      } as Response);
+      } as unknown as Response);
 
       await expect(PlanFormApiService.generatePlan('plan-123')).rejects.toThrow();
     });

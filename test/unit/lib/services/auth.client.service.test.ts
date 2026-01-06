@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { AuthService, AuthError } from '@/lib/services/auth.client.service';
-import type { User } from '@supabase/supabase-js';
+import type { User, AuthTokenResponsePassword } from '@supabase/supabase-js';
 
 // Mock supabaseClient
 vi.mock('@/db/supabase.client', () => ({
@@ -29,6 +29,22 @@ describe('AuthService (client)', () => {
     vi.clearAllMocks();
   });
 
+  const createMockSession = (): any => ({
+    access_token: 'mock-access-token',
+    refresh_token: 'mock-refresh-token',
+    expires_in: 3600,
+    token_type: 'bearer',
+    user: null,
+  });
+
+  const createMockAuthError = (message: string): any => ({
+    code: 'MOCK_ERROR',
+    status: 400,
+    message,
+    __isAuthError: true,
+    name: 'AuthError',
+  });
+
   describe('login', () => {
     it('should successfully login with valid credentials', async () => {
       const mockUser: User = {
@@ -43,7 +59,7 @@ describe('AuthService (client)', () => {
       };
 
       mockSignInWithPassword.mockResolvedValue({
-        data: { user: mockUser, session: {} },
+        data: { user: mockUser, session: createMockSession() },
         error: null,
       });
 
@@ -62,7 +78,7 @@ describe('AuthService (client)', () => {
     it('should throw AuthError when login fails with error', async () => {
       mockSignInWithPassword.mockResolvedValue({
         data: { user: null, session: null },
-        error: { message: 'Invalid credentials' },
+        error: createMockAuthError('Invalid credentials'),
       });
 
       await expect(
@@ -84,7 +100,7 @@ describe('AuthService (client)', () => {
       mockSignInWithPassword.mockResolvedValue({
         data: { user: null, session: null },
         error: null,
-      });
+      } as unknown as AuthTokenResponsePassword);
 
       await expect(
         AuthService.login({
@@ -116,13 +132,14 @@ describe('AuthService (client)', () => {
       };
 
       mockSignUp.mockResolvedValue({
-        data: { user: mockUser, session: {} },
+        data: { user: mockUser, session: createMockSession() },
         error: null,
       });
 
       const result = await AuthService.register({
         email: 'newuser@example.com',
         password: 'password123',
+        confirmPassword: 'password123',
       });
 
       expect(result).toEqual(mockUser);
@@ -141,13 +158,14 @@ describe('AuthService (client)', () => {
     it('should throw AuthError when registration fails with error', async () => {
       mockSignUp.mockResolvedValue({
         data: { user: null, session: null },
-        error: { message: 'User already exists' },
+        error: createMockAuthError('User already exists'),
       });
 
       await expect(
         AuthService.register({
           email: 'existing@example.com',
           password: 'password123',
+          confirmPassword: 'password123',
         })
       ).rejects.toThrow(AuthError);
 
@@ -155,6 +173,7 @@ describe('AuthService (client)', () => {
         AuthService.register({
           email: 'existing@example.com',
           password: 'password123',
+          confirmPassword: 'password123',
         })
       ).rejects.toThrow('User already exists');
     });
@@ -169,6 +188,7 @@ describe('AuthService (client)', () => {
         AuthService.register({
           email: 'newuser@example.com',
           password: 'password123',
+          confirmPassword: 'password123',
         })
       ).rejects.toThrow(AuthError);
 
@@ -176,6 +196,7 @@ describe('AuthService (client)', () => {
         AuthService.register({
           email: 'newuser@example.com',
           password: 'password123',
+          confirmPassword: 'password123',
         })
       ).rejects.toThrow('Registration failed');
     });
@@ -207,7 +228,7 @@ describe('AuthService (client)', () => {
     it('should throw AuthError when password reset fails', async () => {
       mockResetPasswordForEmail.mockResolvedValue({
         data: null,
-        error: { message: 'Email not found' },
+        error: createMockAuthError('Email not found'),
       });
 
       await expect(AuthService.resetPassword('notfound@example.com')).rejects.toThrow(AuthError);
@@ -219,7 +240,18 @@ describe('AuthService (client)', () => {
   describe('updatePassword', () => {
     it('should successfully update password', async () => {
       mockUpdateUser.mockResolvedValue({
-        data: { user: {} },
+        data: {
+          user: {
+            id: 'user-123',
+            email: 'test@example.com',
+            aud: 'authenticated',
+            role: 'authenticated',
+            created_at: '2024-01-01',
+            updated_at: '2024-01-01',
+            app_metadata: {},
+            user_metadata: {},
+          },
+        },
         error: null,
       });
 
@@ -232,8 +264,8 @@ describe('AuthService (client)', () => {
 
     it('should throw AuthError when password update fails', async () => {
       mockUpdateUser.mockResolvedValue({
-        data: null,
-        error: { message: 'Password update failed' },
+        data: { user: null },
+        error: createMockAuthError('Password update failed'),
       });
 
       await expect(AuthService.updatePassword('newpassword123')).rejects.toThrow(AuthError);
@@ -255,7 +287,7 @@ describe('AuthService (client)', () => {
 
     it('should throw AuthError when sign out fails', async () => {
       mockSignOut.mockResolvedValue({
-        error: { message: 'Sign out failed' },
+        error: createMockAuthError('Sign out failed'),
       });
 
       await expect(AuthService.signOut()).rejects.toThrow(AuthError);

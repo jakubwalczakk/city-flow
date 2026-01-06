@@ -4,13 +4,19 @@ import { SummaryStep } from '@/components/SummaryStep';
 
 describe('SummaryStep', () => {
   const formData = {
-    basicInfo: { name: 'Test', destination: 'Paris', start_date: '2024-01-01', end_date: '2024-01-07', notes: '' },
+    basicInfo: {
+      name: 'Test',
+      destination: 'Paris',
+      start_date: new Date('2024-01-01'),
+      end_date: new Date('2024-01-07'),
+      notes: '',
+    },
     fixedPoints: [],
   };
 
   it('should render summary', () => {
     render(
-      <SummaryStep formData={formData} goToPrevStep={vi.fn()} onSubmit={vi.fn()} isSubmitting={false} error={null} />
+      <SummaryStep formData={formData} goToPrevStep={vi.fn()} onSubmit={vi.fn()} isLoading={false} error={null} />
     );
     expect(screen.getByTestId('summary-destination')).toBeInTheDocument();
     expect(screen.getByTestId('summary-destination')).toHaveTextContent(/Paris/);

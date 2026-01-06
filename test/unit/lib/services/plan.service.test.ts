@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { PlanService, convertTo24Hour } from '@/lib/services/plan.service';
 import { DatabaseError, NotFoundError } from '@/lib/errors/app-error';
 import type { SupabaseClient } from '@/db/supabase.client';
-import type { CreatePlanCommand, UpdatePlanCommand, PlanDetailsDto } from '@/types';
+import type { CreatePlanCommand, UpdatePlanCommand, PlanDetailsDto, GeneratedContentViewModel } from '@/types';
 
 // Mock logger
 vi.mock('@/lib/utils/logger', () => ({
@@ -348,7 +348,7 @@ describe('PlanService', () => {
       const updatedMockPlan = {
         ...mockPlan,
         generated_content: {
-          ...mockPlan.generated_content,
+          ...(mockPlan.generated_content as GeneratedContentViewModel),
           days: [
             {
               date: '2024-06-01',
@@ -392,9 +392,12 @@ describe('PlanService', () => {
       );
 
       expect(result.generated_content).toBeDefined();
-      if (result.generated_content && 'days' in result.generated_content) {
-        const items = (result.generated_content as GeneratedContentViewModel & { days: { items: unknown[] }[] }).days[0]
-          .items;
+      if (
+        result.generated_content &&
+        typeof result.generated_content === 'object' &&
+        'days' in result.generated_content
+      ) {
+        const items = (result.generated_content as GeneratedContentViewModel).days[0].items;
         expect(items).toHaveLength(2);
         expect(items[0].time).toBe('09:00');
         expect(items[1].time).toBe('14:00');

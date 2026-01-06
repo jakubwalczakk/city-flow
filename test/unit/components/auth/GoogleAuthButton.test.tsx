@@ -14,6 +14,7 @@ describe('GoogleAuthButton', () => {
     handleGoogleAuth: mockHandleGoogleAuth,
     isLoading: false,
     error: null,
+    clearError: vi.fn(),
   };
 
   beforeEach(() => {

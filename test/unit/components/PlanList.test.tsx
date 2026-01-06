@@ -2,9 +2,11 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { PlanList } from '@/components/PlanList';
 import { createMockPlan } from '../../utils/mock-factories';
-import type { Plan } from '@/types';
+import type { PlanListItemDto } from '@/types';
 
-vi.mock('@/components/PlanCard', () => ({ PlanCard: ({ plan }: { plan: Plan }) => <div>Card-{plan.id}</div> }));
+vi.mock('@/components/PlanCard', () => ({
+  PlanCard: ({ plan }: { plan: PlanListItemDto }) => <div>Card-{plan.id}</div>,
+}));
 vi.mock('@/components/EmptyState', () => ({ EmptyState: () => <div data-testid='empty-state'>Empty</div> }));
 
 describe('PlanList', () => {

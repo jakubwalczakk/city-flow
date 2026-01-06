@@ -201,7 +201,6 @@ describe('planFormHelpers', () => {
           event_at: '2024-02-01T10:00:00Z',
           event_duration: 120,
           description: 'Visit the tower',
-          created_at: '2024-01-15',
         },
       ];
 
@@ -226,7 +225,6 @@ describe('planFormHelpers', () => {
           event_at: '2024-02-01T10:00:00Z',
           event_duration: 120,
           description: 'Visit the tower',
-          created_at: '2024-01-15',
         },
         {
           id: 'fp2',
@@ -235,7 +233,6 @@ describe('planFormHelpers', () => {
           event_at: '2024-02-01T14:00:00Z',
           event_duration: 180,
           description: 'Art museum',
-          created_at: '2024-01-15',
         },
       ];
 
@@ -255,7 +252,6 @@ describe('planFormHelpers', () => {
           event_at: '2024-02-01T10:00:00Z',
           event_duration: 60,
           description: null,
-          created_at: '2024-01-15',
         },
       ];
 
@@ -273,7 +269,6 @@ describe('planFormHelpers', () => {
           event_at: '2024-02-01T10:00:00Z',
           event_duration: 60,
           description: null,
-          created_at: '2024-01-15',
         },
       ];
 
@@ -291,7 +286,6 @@ describe('planFormHelpers', () => {
           event_at: '2024-02-01T10:00:00Z',
           event_duration: 60,
           description: 'Test',
-          created_at: '2024-01-15',
         },
       ];
 
