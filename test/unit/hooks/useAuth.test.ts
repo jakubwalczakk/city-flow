@@ -21,6 +21,19 @@ vi.mock('@/lib/constants/authErrors', () => ({
 }));
 
 describe('useAuth', () => {
+  /**
+   * Helper to create a mock Supabase User object
+   */
+  const createMockUser = (overrides?: { id?: string; email?: string }) => ({
+    id: 'user-123',
+    email: 'test@example.com',
+    app_metadata: {},
+    user_metadata: {},
+    aud: 'authenticated',
+    created_at: new Date().toISOString(),
+    ...overrides,
+  });
+
   beforeEach(() => {
     vi.clearAllMocks();
     // Mock window.location.replace to prevent actual navigation
@@ -54,7 +67,7 @@ describe('useAuth', () => {
 
   describe('login', () => {
     it('should call AuthService.login with credentials', async () => {
-      vi.mocked(AuthService.login).mockResolvedValue(undefined);
+      vi.mocked(AuthService.login).mockResolvedValue(createMockUser());
 
       const { result } = renderHook(() => useAuth());
       const credentials: LoginFormData = {
@@ -92,7 +105,7 @@ describe('useAuth', () => {
 
   describe('register', () => {
     it('should call AuthService.register with credentials', async () => {
-      vi.mocked(AuthService.register).mockResolvedValue(undefined);
+      vi.mocked(AuthService.register).mockResolvedValue(createMockUser());
 
       const { result } = renderHook(() => useAuth());
       const credentials: RegisterFormData = {

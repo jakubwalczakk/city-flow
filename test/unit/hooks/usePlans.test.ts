@@ -7,7 +7,7 @@ describe('usePlans', () => {
   let mockFetch: ReturnType<typeof vi.fn>;
 
   const mockPlansData: PaginatedPlansDto = {
-    plans: [
+    data: [
       {
         id: 'plan-1',
         name: 'Paris Trip',
@@ -16,8 +16,6 @@ describe('usePlans', () => {
         end_date: '2024-06-03',
         status: 'generated',
         created_at: '2024-01-01',
-        has_generated_content: true,
-        has_fixed_points: false,
       },
       {
         id: 'plan-2',
@@ -27,13 +25,12 @@ describe('usePlans', () => {
         end_date: '2024-07-05',
         status: 'draft',
         created_at: '2024-01-02',
-        has_generated_content: false,
-        has_fixed_points: true,
       },
     ],
-    meta: {
-      total_count: 2,
-      has_more: false,
+    pagination: {
+      total: 2,
+      limit: 10,
+      offset: 0,
     },
   };
 
@@ -363,10 +360,11 @@ describe('usePlans', () => {
   describe('edge cases', () => {
     it('should handle empty plans array', async () => {
       const emptyData: PaginatedPlansDto = {
-        plans: [],
-        meta: {
-          total_count: 0,
-          has_more: false,
+        data: [],
+        pagination: {
+          total: 0,
+          limit: 10,
+          offset: 0,
         },
       };
 
@@ -382,7 +380,7 @@ describe('usePlans', () => {
       });
 
       expect(result.current.data).toEqual(emptyData);
-      expect(result.current.data?.plans).toHaveLength(0);
+      expect(result.current.data?.data).toHaveLength(0);
     });
 
     it('should handle limit of 0', async () => {

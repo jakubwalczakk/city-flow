@@ -50,8 +50,8 @@ describe('useExportPlan', () => {
     });
 
     // Mock append/remove methods
-    document.body.appendChild = vi.fn((node: Node) => node);
-    document.body.removeChild = vi.fn((node: Node) => node);
+    document.body.appendChild = vi.fn((node) => node) as typeof document.body.appendChild;
+    document.body.removeChild = vi.fn((node) => node) as typeof document.body.removeChild;
 
     vi.clearAllMocks();
   });

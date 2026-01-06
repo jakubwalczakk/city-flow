@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useProfile } from '@/hooks/useProfile';
-import type { ProfileDto } from '@/types';
+import type { ProfileDto, TravelPace } from '@/types';
 
 // Mock fetch globally
 global.fetch = vi.fn();
@@ -15,10 +15,10 @@ Object.defineProperty(window, 'location', {
 describe('useProfile', () => {
   const mockProfile: ProfileDto = {
     id: 'user-1',
-    preferences: ['Art', 'Food'],
-    travel_pace: 'moderate',
+    preferences: ['art_museums', 'local_food'],
+    travel_pace: 'moderate' as TravelPace,
     onboarding_completed: true,
-    created_at: '2024-01-01',
+    generations_remaining: 5,
     updated_at: '2024-01-01',
   };
 
@@ -159,7 +159,7 @@ describe('useProfile', () => {
           json: () =>
             Promise.resolve({
               ...mockProfile,
-              travel_pace: 'intensive',
+              travel_pace: 'intensive' as TravelPace,
             }),
         });
       global.fetch = mockFetch;

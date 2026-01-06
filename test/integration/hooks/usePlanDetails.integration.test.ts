@@ -9,11 +9,16 @@ global.fetch = vi.fn();
 describe('usePlanDetails', () => {
   const mockPlan: PlanDetailsDto = {
     id: 'plan-1',
+    user_id: 'user-1',
     name: 'Test Plan',
+    destination: 'Paris',
+    start_date: '2024-06-01',
+    end_date: '2024-06-08',
     status: 'draft',
-    created_at: '2024-01-01',
     notes: 'Test notes',
-    timeline: [],
+    generated_content: null,
+    created_at: '2024-01-01',
+    updated_at: '2024-01-01',
   };
 
   beforeEach(() => {

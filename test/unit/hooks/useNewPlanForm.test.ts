@@ -24,9 +24,9 @@ vi.mock('@/lib/utils/planFormHelpers', () => ({
   convertFixedPointsToFormItems: vi.fn((points) =>
     points.map((p: FixedPointDto) => ({
       id: p.id,
-      date: new Date(p.date),
-      time: p.time,
-      title: p.title,
+      location: p.location,
+      event_at: p.event_at,
+      event_duration: p.event_duration,
       description: p.description || '',
     }))
   ),
@@ -38,7 +38,7 @@ describe('useNewPlanForm', () => {
     vi.clearAllMocks();
     // Reset window.location.href
     delete (window as unknown as { location: unknown }).location;
-    window.location = { href: '' } as unknown as Location;
+    (window as unknown as { location: { href: string } }).location = { href: '' };
   });
 
   describe('initialization', () => {
@@ -70,30 +70,30 @@ describe('useNewPlanForm', () => {
         end_date: '2024-07-05',
         status: 'draft',
         created_at: '2024-01-01',
-        has_fixed_points: true,
       };
 
       const mockPlanDetails = {
         id: 'plan-1',
+        user_id: 'user-1',
         name: 'Existing Plan',
         destination: 'Paris',
         start_date: '2024-07-01',
         end_date: '2024-07-05',
         notes: 'Visit museums',
-        status: 'draft',
+        status: 'draft' as const,
+        generated_content: null,
         created_at: '2024-01-01',
-        timeline: [],
+        updated_at: '2024-01-01',
       };
 
       const mockFixedPoints: FixedPointDto[] = [
         {
           id: 'fp-1',
           plan_id: 'plan-1',
-          date: '2024-07-02',
-          time: '14:00',
-          title: 'Eiffel Tower',
+          location: 'Eiffel Tower',
+          event_at: '2024-07-02T14:00:00Z',
+          event_duration: 120,
           description: 'Visit',
-          created_at: '2024-01-01',
         },
       ];
 
@@ -124,7 +124,6 @@ describe('useNewPlanForm', () => {
         end_date: '2024-07-05',
         status: 'draft',
         created_at: '2024-01-01',
-        has_fixed_points: false,
       };
 
       vi.mocked(PlanFormApiService.fetchPlanDetails).mockRejectedValue(new Error('Network error'));
@@ -169,9 +168,9 @@ describe('useNewPlanForm', () => {
       const { result } = renderHook(() => useNewPlanForm());
 
       const fixedPoint = {
-        date: new Date('2024-06-02'),
-        time: '10:00',
-        title: 'Museum Visit',
+        location: 'Museum Visit',
+        event_at: '2024-06-02T10:00:00Z',
+        event_duration: 120,
         description: 'Art museum',
       };
 
@@ -180,7 +179,7 @@ describe('useNewPlanForm', () => {
       });
 
       expect(result.current.formData.fixedPoints).toHaveLength(1);
-      expect(result.current.formData.fixedPoints[0].title).toBe('Museum Visit');
+      expect(result.current.formData.fixedPoints[0].location).toBe('Museum Visit');
     });
 
     it('should remove fixed point by index', () => {
@@ -188,15 +187,15 @@ describe('useNewPlanForm', () => {
 
       act(() => {
         result.current.addFixedPoint({
-          date: new Date('2024-06-02'),
-          time: '10:00',
-          title: 'Point 1',
+          location: 'Point 1',
+          event_at: '2024-06-02T10:00:00Z',
+          event_duration: 120,
           description: '',
         });
         result.current.addFixedPoint({
-          date: new Date('2024-06-03'),
-          time: '14:00',
-          title: 'Point 2',
+          location: 'Point 2',
+          event_at: '2024-06-03T14:00:00Z',
+          event_duration: 120,
           description: '',
         });
       });
@@ -208,7 +207,7 @@ describe('useNewPlanForm', () => {
       });
 
       expect(result.current.formData.fixedPoints).toHaveLength(1);
-      expect(result.current.formData.fixedPoints[0].title).toBe('Point 2');
+      expect(result.current.formData.fixedPoints[0].location).toBe('Point 2');
     });
 
     it('should update fixed point by index', () => {
@@ -217,24 +216,24 @@ describe('useNewPlanForm', () => {
       act(() => {
         result.current.addFixedPoint({
           id: 'fp-1',
-          date: new Date('2024-06-02'),
-          time: '10:00',
-          title: 'Original',
+          location: 'Original',
+          event_at: '2024-06-02T10:00:00Z',
+          event_duration: 120,
           description: '',
         });
       });
 
       act(() => {
         result.current.updateFixedPoint(0, {
-          date: new Date('2024-06-02'),
-          time: '11:00',
-          title: 'Updated',
+          location: 'Updated',
+          event_at: '2024-06-02T11:00:00Z',
+          event_duration: 90,
           description: 'New description',
         });
       });
 
-      expect(result.current.formData.fixedPoints[0].title).toBe('Updated');
-      expect(result.current.formData.fixedPoints[0].time).toBe('11:00');
+      expect(result.current.formData.fixedPoints[0].location).toBe('Updated');
+      expect(result.current.formData.fixedPoints[0].event_at).toBe('2024-06-02T11:00:00Z');
       // Should preserve ID
       expect(result.current.formData.fixedPoints[0].id).toBe('fp-1');
     });
@@ -339,13 +338,16 @@ describe('useNewPlanForm', () => {
     it('should save basic info on step 1', async () => {
       vi.mocked(PlanFormApiService.createPlan).mockResolvedValue({
         id: 'new-plan-id',
+        user_id: 'user-1',
         name: 'Trip to Paris',
         destination: 'Paris',
         start_date: '2024-06-01',
         end_date: '2024-06-08',
         status: 'draft',
+        notes: null,
+        generated_content: null,
         created_at: '2024-01-01',
-        has_fixed_points: false,
+        updated_at: '2024-01-01',
       });
 
       const onFinished = vi.fn();
@@ -374,13 +376,16 @@ describe('useNewPlanForm', () => {
     it('should save fixed points on step 2', async () => {
       vi.mocked(PlanFormApiService.createPlan).mockResolvedValue({
         id: 'plan-1',
+        user_id: 'user-1',
         name: 'Trip to Paris',
         destination: 'Paris',
         start_date: '2024-06-01',
         end_date: '2024-06-08',
         status: 'draft',
+        notes: null,
+        generated_content: null,
         created_at: '2024-01-01',
-        has_fixed_points: false,
+        updated_at: '2024-01-01',
       });
 
       vi.mocked(PlanFormApiService.syncFixedPoints).mockResolvedValue({
@@ -394,9 +399,9 @@ describe('useNewPlanForm', () => {
         result.current.updateBasicInfo({ destination: 'Paris' });
         result.current.nextStep(); // Go to step 2
         result.current.addFixedPoint({
-          date: new Date('2024-06-02'),
-          time: '10:00',
-          title: 'Museum',
+          location: 'Museum',
+          event_at: '2024-06-02T10:00:00Z',
+          event_duration: 120,
           description: '',
         });
       });
@@ -429,13 +434,16 @@ describe('useNewPlanForm', () => {
     it('should create plan and generate', async () => {
       vi.mocked(PlanFormApiService.createPlan).mockResolvedValue({
         id: 'plan-1',
+        user_id: 'user-1',
         name: 'Trip to Rome',
         destination: 'Rome',
         start_date: '2024-06-01',
         end_date: '2024-06-08',
         status: 'draft',
+        notes: null,
+        generated_content: null,
         created_at: '2024-01-01',
-        has_fixed_points: false,
+        updated_at: '2024-01-01',
       });
 
       vi.mocked(PlanFormApiService.generatePlan).mockResolvedValue(undefined);
@@ -459,13 +467,16 @@ describe('useNewPlanForm', () => {
     it('should set isGenerating during generation', async () => {
       vi.mocked(PlanFormApiService.createPlan).mockResolvedValue({
         id: 'plan-1',
+        user_id: 'user-1',
         name: 'Trip',
         destination: 'Paris',
         start_date: '2024-06-01',
         end_date: '2024-06-08',
         status: 'draft',
+        notes: null,
+        generated_content: null,
         created_at: '2024-01-01',
-        has_fixed_points: false,
+        updated_at: '2024-01-01',
       });
 
       vi.mocked(PlanFormApiService.generatePlan).mockResolvedValue(undefined);
@@ -506,13 +517,16 @@ describe('useNewPlanForm', () => {
     it('should redirect when no onFinished callback', async () => {
       vi.mocked(PlanFormApiService.createPlan).mockResolvedValue({
         id: 'plan-123',
+        user_id: 'user-1',
         name: 'Trip',
         destination: 'Paris',
         start_date: '2024-06-01',
         end_date: '2024-06-08',
         status: 'draft',
+        notes: null,
+        generated_content: null,
         created_at: '2024-01-01',
-        has_fixed_points: false,
+        updated_at: '2024-01-01',
       });
 
       vi.mocked(PlanFormApiService.generatePlan).mockResolvedValue(undefined);
@@ -533,13 +547,16 @@ describe('useNewPlanForm', () => {
     it('should sync fixed points if they exist', async () => {
       vi.mocked(PlanFormApiService.createPlan).mockResolvedValue({
         id: 'plan-1',
+        user_id: 'user-1',
         name: 'Trip',
         destination: 'Paris',
         start_date: '2024-06-01',
         end_date: '2024-06-08',
         status: 'draft',
+        notes: null,
+        generated_content: null,
         created_at: '2024-01-01',
-        has_fixed_points: false,
+        updated_at: '2024-01-01',
       });
 
       vi.mocked(PlanFormApiService.syncFixedPoints).mockResolvedValue({
@@ -554,9 +571,9 @@ describe('useNewPlanForm', () => {
       act(() => {
         result.current.updateBasicInfo({ destination: 'Paris' });
         result.current.addFixedPoint({
-          date: new Date('2024-06-02'),
-          time: '10:00',
-          title: 'Museum',
+          location: 'Museum',
+          event_at: '2024-06-02T10:00:00Z',
+          event_duration: 120,
           description: '',
         });
       });

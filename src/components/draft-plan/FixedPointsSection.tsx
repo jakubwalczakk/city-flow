@@ -47,7 +47,7 @@ export function FixedPointsSection({ fixedPoints, isLoading, onEdit }: FixedPoin
                   <div className='flex items-center gap-2 mt-1 text-sm text-muted-foreground'>
                     <Clock className='h-3 w-3' />
                     <span>{formatDateTime(point.event_at)}</span>
-                    {point.event_duration > 0 && (
+                    {point.event_duration !== null && point.event_duration > 0 && (
                       <>
                         <span>•</span>
                         <span>{point.event_duration} min</span>

@@ -1,10 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { usePreferencesForm } from '@/hooks/usePreferencesForm';
-import type { UpdateProfileCommand } from '@/types';
 
 describe('usePreferencesForm', () => {
-  const mockOnSave = vi.fn<[UpdateProfileCommand], Promise<void>>();
+  const mockOnSave = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -369,13 +368,9 @@ describe('usePreferencesForm', () => {
         })
       );
 
-      // handleSubmit returns a function that should be called with an event
-      // Calling it directly will trigger form validation and submission
-      const submitEvent = { preventDefault: vi.fn() } as React.FormEvent<HTMLFormElement>;
-
       // Should not throw even when onSave rejects
       await act(async () => {
-        await result.current.handleSubmit(submitEvent);
+        await result.current.handleSubmit();
       });
 
       expect(mockOnSave).toHaveBeenCalled();

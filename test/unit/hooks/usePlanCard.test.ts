@@ -27,6 +27,23 @@ describe('usePlanCard', () => {
     vi.clearAllMocks();
   });
 
+  /**
+   * Helper to create a mock MouseEvent
+   */
+  const createMouseEvent = (): React.MouseEvent<HTMLElement> =>
+    ({
+      stopPropagation: vi.fn(),
+    }) as unknown as React.MouseEvent<HTMLElement>;
+
+  /**
+   * Helper to create a mock KeyboardEvent
+   */
+  const createKeyboardEvent = (key: string): React.KeyboardEvent<HTMLElement> =>
+    ({
+      key,
+      preventDefault: vi.fn(),
+    }) as unknown as React.KeyboardEvent<HTMLElement>;
+
   describe('initialization', () => {
     it('should initialize with status config', () => {
       const { result } = renderHook(() =>
@@ -153,9 +170,7 @@ describe('usePlanCard', () => {
         })
       );
 
-      const mockEvent = {
-        stopPropagation: vi.fn(),
-      } as React.MouseEvent<HTMLElement>;
+      const mockEvent = createMouseEvent();
 
       act(() => {
         result.current.handleDelete(mockEvent);
@@ -174,9 +189,7 @@ describe('usePlanCard', () => {
         })
       );
 
-      const mockEvent = {
-        stopPropagation: vi.fn(),
-      } as React.MouseEvent<HTMLElement>;
+      const mockEvent = createMouseEvent();
 
       act(() => {
         result.current.handleDelete(mockEvent);
@@ -195,9 +208,7 @@ describe('usePlanCard', () => {
         })
       );
 
-      const mockEvent = {
-        stopPropagation: vi.fn(),
-      } as React.MouseEvent<HTMLElement>;
+      const mockEvent = createMouseEvent();
 
       act(() => {
         result.current.handleDelete(mockEvent);
@@ -218,10 +229,7 @@ describe('usePlanCard', () => {
         })
       );
 
-      const mockEvent = {
-        key: 'Enter',
-        preventDefault: vi.fn(),
-      } as React.KeyboardEvent<HTMLElement>;
+      const mockEvent = createKeyboardEvent('Enter');
 
       act(() => {
         result.current.handleKeyDown(mockEvent);
@@ -241,10 +249,7 @@ describe('usePlanCard', () => {
         })
       );
 
-      const mockEvent = {
-        key: ' ',
-        preventDefault: vi.fn(),
-      } as React.KeyboardEvent<HTMLElement>;
+      const mockEvent = createKeyboardEvent(' ');
 
       act(() => {
         result.current.handleKeyDown(mockEvent);
@@ -264,10 +269,7 @@ describe('usePlanCard', () => {
         })
       );
 
-      const mockEvent = {
-        key: 'Escape',
-        preventDefault: vi.fn(),
-      } as React.KeyboardEvent<HTMLElement>;
+      const mockEvent = createKeyboardEvent('Escape');
 
       act(() => {
         result.current.handleKeyDown(mockEvent);
@@ -287,10 +289,7 @@ describe('usePlanCard', () => {
         })
       );
 
-      const mockEvent = {
-        key: 'Tab',
-        preventDefault: vi.fn(),
-      } as React.KeyboardEvent<HTMLElement>;
+      const mockEvent = createKeyboardEvent('Tab');
 
       act(() => {
         result.current.handleKeyDown(mockEvent);

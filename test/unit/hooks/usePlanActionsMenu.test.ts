@@ -1,26 +1,24 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { usePlanActionsMenu } from '@/hooks/usePlanActionsMenu';
 
 describe('usePlanActionsMenu', () => {
   let onArchive: ReturnType<typeof vi.fn>;
   let onDelete: ReturnType<typeof vi.fn>;
-  let originalLocation: Location;
 
   beforeEach(() => {
     onArchive = vi.fn().mockResolvedValue(undefined);
     onDelete = vi.fn().mockResolvedValue(undefined);
 
     // Mock window.location.href
-    originalLocation = window.location;
     delete (window as unknown as { location: unknown }).location;
-    window.location = { href: '' } as unknown as Location;
+    (window as unknown as { location: { href: string } }).location = { href: '' };
 
     vi.clearAllMocks();
   });
 
   afterEach(() => {
-    window.location = originalLocation;
+    vi.restoreAllMocks();
   });
 
   describe('initialization', () => {

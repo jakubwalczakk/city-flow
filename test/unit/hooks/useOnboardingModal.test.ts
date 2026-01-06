@@ -16,24 +16,40 @@ vi.mock('sonner', () => ({
 
 describe('useOnboardingModal', () => {
   let mockUpdateProfile: ReturnType<typeof vi.fn>;
+  let mockRefetch: ReturnType<typeof vi.fn>;
   let mockProfile: ProfileDto;
+
+  /**
+   * Helper to create a mock useProfile hook result
+   */
+  const createMockUseProfileResult = (overrides?: {
+    isLoading?: boolean;
+    isSaving?: boolean;
+    error?: string | null;
+    profile?: ProfileDto | null;
+  }) => ({
+    isLoading: false,
+    isSaving: false,
+    error: null,
+    profile: mockProfile,
+    updateProfile: mockUpdateProfile,
+    refetch: mockRefetch,
+    ...overrides,
+  });
 
   beforeEach(() => {
     mockUpdateProfile = vi.fn().mockResolvedValue(undefined);
+    mockRefetch = vi.fn().mockResolvedValue(undefined);
     mockProfile = {
       id: 'user-1',
       travel_pace: null,
       preferences: [],
       onboarding_completed: false,
       generations_remaining: 5,
-      created_at: '2024-01-01',
+      updated_at: '2024-01-01',
     };
 
-    vi.mocked(useProfile).mockReturnValue({
-      profile: mockProfile,
-      isLoading: false,
-      updateProfile: mockUpdateProfile,
-    });
+    vi.mocked(useProfile).mockReturnValue(createMockUseProfileResult());
 
     vi.clearAllMocks();
   });
@@ -65,11 +81,11 @@ describe('useOnboardingModal', () => {
     });
 
     it('should not open modal when onboarding is completed', async () => {
-      vi.mocked(useProfile).mockReturnValue({
-        profile: { ...mockProfile, onboarding_completed: true },
-        isLoading: false,
-        updateProfile: mockUpdateProfile,
-      });
+      vi.mocked(useProfile).mockReturnValue(
+        createMockUseProfileResult({
+          profile: { ...mockProfile, onboarding_completed: true },
+        })
+      );
 
       const { result } = renderHook(() => useOnboardingModal());
 
@@ -77,11 +93,12 @@ describe('useOnboardingModal', () => {
     });
 
     it('should not open modal when profile is still loading', async () => {
-      vi.mocked(useProfile).mockReturnValue({
-        profile: null,
-        isLoading: true,
-        updateProfile: mockUpdateProfile,
-      });
+      vi.mocked(useProfile).mockReturnValue(
+        createMockUseProfileResult({
+          isLoading: true,
+          profile: null,
+        })
+      );
 
       const { result } = renderHook(() => useOnboardingModal());
 
@@ -89,11 +106,11 @@ describe('useOnboardingModal', () => {
     });
 
     it('should not open modal when profile is null', async () => {
-      vi.mocked(useProfile).mockReturnValue({
-        profile: null,
-        isLoading: false,
-        updateProfile: mockUpdateProfile,
-      });
+      vi.mocked(useProfile).mockReturnValue(
+        createMockUseProfileResult({
+          profile: null,
+        })
+      );
 
       const { result } = renderHook(() => useOnboardingModal());
 
@@ -207,7 +224,7 @@ describe('useOnboardingModal', () => {
       const { result } = renderHook(() => useOnboardingModal());
 
       act(() => {
-        result.current.setPace('fast');
+        result.current.setPace('intensive');
         result.current.setPreferences(['history', 'culture']); // Exactly 2
       });
 
@@ -223,7 +240,7 @@ describe('useOnboardingModal', () => {
       const { result } = renderHook(() => useOnboardingModal());
 
       act(() => {
-        result.current.setPace('fast');
+        result.current.setPace('intensive');
         result.current.setPreferences(['history', 'culture', 'nature', 'food', 'sport']); // Exactly 5
       });
 

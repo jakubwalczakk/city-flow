@@ -115,8 +115,8 @@ describe('useFixedPointForm', () => {
       const mockPoint: FixedPointFormItem = {
         location: 'Museum',
         event_at: '2024-06-02T10:00:00.000Z',
-        event_duration: null,
-        description: null,
+        event_duration: undefined,
+        description: undefined,
       };
 
       act(() => {
@@ -127,8 +127,8 @@ describe('useFixedPointForm', () => {
 
       const formValues = result.current.form.getValues();
       expect(formValues.location).toBe('Museum');
-      expect(formValues.event_duration).toBeNull();
-      expect(formValues.description).toBeNull();
+      expect(formValues.event_duration).toBeUndefined();
+      expect(formValues.description).toBeUndefined();
     });
   });
 
@@ -410,8 +410,8 @@ describe('useFixedPointForm', () => {
       const mockPoint: FixedPointFormItem = {
         location: 'Point 1',
         event_at: '2024-06-02T10:00:00.000Z',
-        event_duration: null,
-        description: null,
+        event_duration: undefined,
+        description: undefined,
       };
 
       act(() => {
@@ -441,8 +441,8 @@ describe('useFixedPointForm', () => {
       const mockPoint: FixedPointFormItem = {
         location: 'Point 1',
         event_at: '2024-06-02T10:00:00.000Z',
-        event_duration: null,
-        description: null,
+        event_duration: undefined,
+        description: undefined,
       };
 
       act(() => {

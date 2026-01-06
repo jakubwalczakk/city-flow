@@ -3,6 +3,7 @@ import { renderHook, act } from '@testing-library/react';
 import { usePlansDashboard } from '@/hooks/usePlansDashboard';
 import * as usePlansModule from '@/hooks/usePlans';
 import type { PlanListItemDto } from '@/types';
+import type { UsePlansResult } from '@/hooks/usePlans';
 
 // Mock usePlans hook
 vi.mock('@/hooks/usePlans');
@@ -19,6 +20,8 @@ describe('usePlansDashboard', () => {
       id: 'plan-1',
       name: 'Paris Trip',
       destination: 'Paris',
+      start_date: '2024-03-15',
+      end_date: '2024-03-20',
       status: 'draft' as const,
       created_at: '2024-01-15',
     },
@@ -26,26 +29,34 @@ describe('usePlansDashboard', () => {
       id: 'plan-2',
       name: 'London Trip',
       destination: 'London',
+      start_date: '2024-04-10',
+      end_date: '2024-04-15',
       status: 'generated' as const,
       created_at: '2024-01-10',
     },
   ];
 
+  /**
+   * Helper to create a mock UsePlansResult with customizable options
+   */
+  const createMockUsePlansResult = (overrides?: Partial<UsePlansResult>): UsePlansResult => ({
+    data: {
+      data: mockPlans,
+      pagination: {
+        total: 25,
+        limit: 12,
+        offset: 0,
+      },
+    },
+    isLoading: false,
+    error: null,
+    refetch: vi.fn(),
+    ...overrides,
+  });
+
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(usePlansModule.usePlans).mockReturnValue({
-      data: {
-        data: mockPlans,
-        pagination: {
-          total: 25,
-          limit: 12,
-          offset: 0,
-        },
-      },
-      isLoading: false,
-      error: null,
-      refetch: vi.fn(),
-    } as ReturnType<typeof usePlansModule.usePlans>);
+    vi.mocked(usePlansModule.usePlans).mockReturnValue(createMockUsePlansResult());
   });
 
   afterEach(() => {
@@ -119,19 +130,18 @@ describe('usePlansDashboard', () => {
     });
 
     it('should not show pagination when total <= limit', () => {
-      vi.mocked(usePlansModule.usePlans).mockReturnValue({
-        data: {
-          data: mockPlans,
-          pagination: {
-            total: 10,
-            limit: 12,
-            offset: 0,
+      vi.mocked(usePlansModule.usePlans).mockReturnValue(
+        createMockUsePlansResult({
+          data: {
+            data: mockPlans,
+            pagination: {
+              total: 10,
+              limit: 12,
+              offset: 0,
+            },
           },
-        },
-        isLoading: false,
-        error: null,
-        refetch: vi.fn(),
-      } as ReturnType<typeof usePlansModule.usePlans>);
+        })
+      );
 
       const { result } = renderHook(() => usePlansDashboard());
 
@@ -180,19 +190,7 @@ describe('usePlansDashboard', () => {
 
     it('should close modal and reset state', () => {
       const mockRefetch = vi.fn();
-      vi.mocked(usePlansModule.usePlans).mockReturnValue({
-        data: {
-          data: mockPlans,
-          pagination: {
-            total: 25,
-            limit: 12,
-            offset: 0,
-          },
-        },
-        isLoading: false,
-        error: null,
-        refetch: mockRefetch,
-      } as ReturnType<typeof usePlansModule.usePlans>);
+      vi.mocked(usePlansModule.usePlans).mockReturnValue(createMockUsePlansResult({ refetch: mockRefetch }));
 
       const { result } = renderHook(() => usePlansDashboard());
 
@@ -218,19 +216,7 @@ describe('usePlansDashboard', () => {
       global.fetch = mockFetch;
 
       const mockRefetch = vi.fn();
-      vi.mocked(usePlansModule.usePlans).mockReturnValue({
-        data: {
-          data: mockPlans,
-          pagination: {
-            total: 25,
-            limit: 12,
-            offset: 0,
-          },
-        },
-        isLoading: false,
-        error: null,
-        refetch: mockRefetch,
-      } as ReturnType<typeof usePlansModule.usePlans>);
+      vi.mocked(usePlansModule.usePlans).mockReturnValue(createMockUsePlansResult({ refetch: mockRefetch }));
 
       const { result } = renderHook(() => usePlansDashboard());
 
@@ -247,19 +233,7 @@ describe('usePlansDashboard', () => {
       global.fetch = mockFetch;
 
       const mockRefetch = vi.fn();
-      vi.mocked(usePlansModule.usePlans).mockReturnValue({
-        data: {
-          data: mockPlans,
-          pagination: {
-            total: 25,
-            limit: 12,
-            offset: 0,
-          },
-        },
-        isLoading: false,
-        error: null,
-        refetch: mockRefetch,
-      } as ReturnType<typeof usePlansModule.usePlans>);
+      vi.mocked(usePlansModule.usePlans).mockReturnValue(createMockUsePlansResult({ refetch: mockRefetch }));
 
       const { result } = renderHook(() => usePlansDashboard());
 

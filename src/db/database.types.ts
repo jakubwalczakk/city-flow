@@ -74,7 +74,7 @@ export type Database = {
           created_at: string;
           description: string | null;
           event_at: string;
-          event_duration: number;
+          event_duration: number | null;
           id: string;
           location: string;
           plan_id: string;
@@ -84,7 +84,7 @@ export type Database = {
           created_at?: string;
           description?: string | null;
           event_at: string;
-          event_duration: number;
+          event_duration?: number | null;
           id?: string;
           location: string;
           plan_id: string;
@@ -94,7 +94,7 @@ export type Database = {
           created_at?: string;
           description?: string | null;
           event_at?: string;
-          event_duration?: number;
+          event_duration?: number | null;
           id?: string;
           location?: string;
           plan_id?: string;

@@ -105,6 +105,7 @@ export const fixedPointSchema = z.object({
     .number({ invalid_type_error: 'Czas trwania musi być liczbą.' })
     .int({ message: 'Czas trwania musi być liczbą całkowitą.' })
     .positive('Czas trwania musi być liczbą dodatnią.')
+    .nullable()
     .optional(),
   description: z.string().nullable().optional(),
 });

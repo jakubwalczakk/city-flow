@@ -110,7 +110,7 @@ export type FixedPointDto = {
   plan_id: string;
   location: string;
   event_at: string;
-  event_duration: number;
+  event_duration: number | null;
   description: string | null;
 };
 
@@ -187,7 +187,7 @@ export type UpdatePlanCommand = {
 export type CreateFixedPointCommand = {
   location: string;
   event_at: string;
-  event_duration?: number;
+  event_duration?: number | null;
   description?: string | null;
 };
 
@@ -198,7 +198,7 @@ export type CreateFixedPointCommand = {
 export type UpdateFixedPointCommand = {
   location?: string;
   event_at?: string;
-  event_duration?: number;
+  event_duration?: number | null;
   description?: string | null;
 };
 

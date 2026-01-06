@@ -10,9 +10,9 @@ describe('usePlanDetails - pure functions', () => {
         title: 'Visit Eiffel Tower',
         description: 'Iconic landmark',
         location: 'Champ de Mars',
-        duration: 120,
-        category: 'sightseeing',
-        estimated_price: 25,
+        estimated_duration: '120',
+        category: 'culture',
+        estimated_price: '25',
       };
 
       const result = formatActivityCommand(activity);
@@ -23,8 +23,8 @@ describe('usePlanDetails - pure functions', () => {
         description: 'Iconic landmark',
         location: 'Champ de Mars',
         duration: 120,
-        category: 'sightseeing',
-        estimated_cost: 25,
+        category: 'culture',
+        estimated_cost: '25',
       });
     });
 
@@ -70,12 +70,12 @@ describe('usePlanDetails - pure functions', () => {
     it('should map estimated_price to estimated_cost', () => {
       const activity: Partial<TimelineItem> = {
         title: 'Lunch',
-        estimated_price: 45,
+        estimated_price: '45',
       };
 
       const result = formatActivityCommand(activity);
 
-      expect(result.estimated_cost).toBe(45);
+      expect(result.estimated_cost).toBe('45');
     });
   });
 
@@ -86,9 +86,9 @@ describe('usePlanDetails - pure functions', () => {
         title: 'Louvre Museum',
         description: 'Art museum',
         location: 'Rue de Rivoli',
-        duration: 180,
+        estimated_duration: '180',
         category: 'culture',
-        estimated_price: 20,
+        estimated_price: '20',
       };
 
       const result = formatActivityUpdateCommand(activity);
@@ -100,7 +100,7 @@ describe('usePlanDetails - pure functions', () => {
         location: 'Rue de Rivoli',
         duration: 180,
         category: 'culture',
-        estimated_cost: 20,
+        estimated_cost: '20',
       });
     });
 
@@ -142,12 +142,12 @@ describe('usePlanDetails - pure functions', () => {
 
     it('should map estimated_price to estimated_cost', () => {
       const activity: Partial<TimelineItem> = {
-        estimated_price: 100,
+        estimated_price: '100',
       };
 
       const result = formatActivityUpdateCommand(activity);
 
-      expect(result.estimated_cost).toBe(100);
+      expect(result.estimated_cost).toBe('100');
     });
   });
 

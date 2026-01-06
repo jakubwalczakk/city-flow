@@ -337,15 +337,32 @@ describe('ProfileService', () => {
         generations_remaining: 5,
       };
 
-      // First call: findProfileByUserId
+      // Setup chained mocks for the two operations
+      const chainableWithSingle = {
+        select: mockSupabase.mocks.select,
+        update: mockSupabase.mocks.update,
+        eq: mockSupabase.mocks.eq,
+        single: mockSupabase.mocks.single,
+      };
+
+      const updateResult = {
+        data: null,
+        error: null,
+        then: function (resolve: (value: { data: null; error: null }) => void) {
+          resolve({ data: null, error: null });
+          return this;
+        },
+      };
+
+      // First call: .eq() in select chain returns chainable so .single() can be called
+      // Second call: .eq() in update chain returns thenable result
+      mockSupabase.mocks.eq
+        .mockReturnValueOnce(chainableWithSingle)
+        .mockReturnValueOnce(updateResult as unknown as ReturnType<typeof mockSupabase.mocks.eq>);
+
+      // Mock .single() for the first call
       mockSupabase.mocks.single.mockResolvedValueOnce({
         data: mockProfile,
-        error: null,
-      });
-
-      // Second call: update().eq() returns directly
-      mockSupabase.mocks.eq.mockResolvedValueOnce({
-        data: null,
         error: null,
       });
 
@@ -391,13 +408,28 @@ describe('ProfileService', () => {
         generations_remaining: 1,
       };
 
+      const chainableWithSingle = {
+        select: mockSupabase.mocks.select,
+        update: mockSupabase.mocks.update,
+        eq: mockSupabase.mocks.eq,
+        single: mockSupabase.mocks.single,
+      };
+
+      const updateResult = {
+        data: null,
+        error: null,
+        then: function (resolve: (value: { data: null; error: null }) => void) {
+          resolve({ data: null, error: null });
+          return this;
+        },
+      };
+
+      mockSupabase.mocks.eq
+        .mockReturnValueOnce(chainableWithSingle)
+        .mockReturnValueOnce(updateResult as unknown as ReturnType<typeof mockSupabase.mocks.eq>);
+
       mockSupabase.mocks.single.mockResolvedValueOnce({
         data: mockProfile,
-        error: null,
-      });
-
-      mockSupabase.mocks.eq.mockResolvedValueOnce({
-        data: null,
         error: null,
       });
 
@@ -417,28 +449,43 @@ describe('ProfileService', () => {
         generations_remaining: 5,
       };
 
+      const chainableWithSingle = {
+        select: mockSupabase.mocks.select,
+        update: mockSupabase.mocks.update,
+        eq: mockSupabase.mocks.eq,
+        single: mockSupabase.mocks.single,
+      };
+
+      const updateResult = {
+        data: null,
+        error: { code: '500', message: 'Database error' },
+        then: function (resolve: (value: { data: null; error: { code: string; message: string } }) => void) {
+          resolve({ data: null, error: { code: '500', message: 'Database error' } });
+          return this;
+        },
+      };
+
+      mockSupabase.mocks.eq
+        .mockReturnValueOnce(chainableWithSingle)
+        .mockReturnValueOnce(updateResult as unknown as ReturnType<typeof mockSupabase.mocks.eq>);
+
       mockSupabase.mocks.single.mockResolvedValueOnce({
         data: mockProfile,
         error: null,
-      });
-
-      mockSupabase.mocks.eq.mockResolvedValueOnce({
-        data: null,
-        error: { code: '500', message: 'Database error' },
       });
 
       await expect(service.decrementGenerations('user-123')).rejects.toThrow(DatabaseError);
 
       // Repeat mocks for second call
+      mockSupabase.mocks.eq
+        .mockReturnValueOnce(chainableWithSingle)
+        .mockReturnValueOnce(updateResult as unknown as ReturnType<typeof mockSupabase.mocks.eq>);
+
       mockSupabase.mocks.single.mockResolvedValueOnce({
         data: mockProfile,
         error: null,
       });
 
-      mockSupabase.mocks.eq.mockResolvedValueOnce({
-        data: null,
-        error: { code: '500', message: 'Database error' },
-      });
       await expect(service.decrementGenerations('user-123')).rejects.toThrow('Failed to update user credits.');
     });
 
@@ -451,13 +498,28 @@ describe('ProfileService', () => {
         generations_remaining: 5,
       };
 
+      const chainableWithSingle = {
+        select: mockSupabase.mocks.select,
+        update: mockSupabase.mocks.update,
+        eq: mockSupabase.mocks.eq,
+        single: mockSupabase.mocks.single,
+      };
+
+      const updateResult = {
+        data: null,
+        error: null,
+        then: function (resolve: (value: { data: null; error: null }) => void) {
+          resolve({ data: null, error: null });
+          return this;
+        },
+      };
+
+      mockSupabase.mocks.eq
+        .mockReturnValueOnce(chainableWithSingle)
+        .mockReturnValueOnce(updateResult as unknown as ReturnType<typeof mockSupabase.mocks.eq>);
+
       mockSupabase.mocks.single.mockResolvedValueOnce({
         data: mockProfile,
-        error: null,
-      });
-
-      mockSupabase.mocks.eq.mockResolvedValueOnce({
-        data: null,
         error: null,
       });
 
@@ -482,14 +544,29 @@ describe('ProfileService', () => {
         generations_remaining: 5,
       };
 
+      const chainableWithSingle = {
+        select: mockSupabase.mocks.select,
+        update: mockSupabase.mocks.update,
+        eq: mockSupabase.mocks.eq,
+        single: mockSupabase.mocks.single,
+      };
+
+      const updateResult = {
+        data: null,
+        error: { code: '500', message: 'Database error' },
+        then: function (resolve: (value: { data: null; error: { code: string; message: string } }) => void) {
+          resolve({ data: null, error: { code: '500', message: 'Database error' } });
+          return this;
+        },
+      };
+
+      mockSupabase.mocks.eq
+        .mockReturnValueOnce(chainableWithSingle)
+        .mockReturnValueOnce(updateResult as unknown as ReturnType<typeof mockSupabase.mocks.eq>);
+
       mockSupabase.mocks.single.mockResolvedValueOnce({
         data: mockProfile,
         error: null,
-      });
-
-      mockSupabase.mocks.eq.mockResolvedValueOnce({
-        data: null,
-        error: { code: '500', message: 'Database error' },
       });
 
       try {

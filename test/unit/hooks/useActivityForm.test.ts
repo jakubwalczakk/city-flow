@@ -110,13 +110,17 @@ describe('useActivityForm', () => {
     });
 
     it('should not reset form when dialog is closed', () => {
-      const { result, rerender } = renderHook((props) => useActivityForm(props), {
-        initialProps: {
-          isOpen: false,
-          onSubmit,
-          onClose,
-        },
-      });
+      const { result, rerender } = renderHook(
+        (props: Parameters<typeof useActivityForm>[0]) => useActivityForm(props),
+        {
+          initialProps: {
+            isOpen: false,
+            initialData: undefined as Parameters<typeof useActivityForm>[0]['initialData'],
+            onSubmit,
+            onClose,
+          },
+        }
+      );
 
       // Set some values
       act(() => {
@@ -138,13 +142,16 @@ describe('useActivityForm', () => {
     });
 
     it('should reset to defaults when opening without initial data', () => {
-      const { result, rerender } = renderHook((props) => useActivityForm(props), {
-        initialProps: {
-          isOpen: false,
-          onSubmit,
-          onClose,
-        },
-      });
+      const { result, rerender } = renderHook(
+        (props: Parameters<typeof useActivityForm>[0]) => useActivityForm(props),
+        {
+          initialProps: {
+            isOpen: false,
+            onSubmit,
+            onClose,
+          },
+        }
+      );
 
       // Set some values
       act(() => {
@@ -488,14 +495,17 @@ describe('useActivityForm', () => {
     });
 
     it('should reset when initialData changes', () => {
-      const { result, rerender } = renderHook((props) => useActivityForm(props), {
-        initialProps: {
-          isOpen: true,
-          initialData: { title: 'First Activity' },
-          onSubmit,
-          onClose,
-        },
-      });
+      const { result, rerender } = renderHook(
+        (props: Parameters<typeof useActivityForm>[0]) => useActivityForm(props),
+        {
+          initialProps: {
+            isOpen: true,
+            initialData: { title: 'First Activity' },
+            onSubmit,
+            onClose,
+          },
+        }
+      );
 
       expect(result.current.form.getValues().title).toBe('First Activity');
 

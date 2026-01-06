@@ -58,12 +58,12 @@ describe('useBasicInfoStep', () => {
       expect(result.current.isEndOpen).toBe(false);
     });
 
-    it('should handle null notes', () => {
-      const dataWithNullNotes = { ...mockFormData, notes: null };
+    it('should handle empty notes', () => {
+      const dataWithEmptyNotes = { ...mockFormData, notes: '' };
 
       const { result } = renderHook(() =>
         useBasicInfoStep({
-          formData: dataWithNullNotes,
+          formData: dataWithEmptyNotes,
           updateFormData,
           goToNextStep,
           onSave,
