@@ -1,8 +1,14 @@
 import { defineConfig, devices } from '@playwright/test';
 import dotenv from 'dotenv';
 import path from 'path';
+import fs from 'fs';
 
-dotenv.config({ path: path.resolve(process.cwd(), '.env.test') });
+// Load .env.test only if it exists (local development)
+// In CI, environment variables are provided directly by GitHub Actions
+const envTestPath = path.resolve(process.cwd(), '.env.test');
+if (fs.existsSync(envTestPath)) {
+  dotenv.config({ path: envTestPath });
+}
 
 /**
  * Extend Playwright test options with custom properties
@@ -84,6 +90,8 @@ export default defineConfig({
     command: 'npm run dev:e2e',
     url: 'http://localhost:4321/login',
     reuseExistingServer: !process.env.CI,
-    timeout: 120 * 1000,
+    timeout: 180 * 1000, // 3 minutes - increased for slower CI environments
+    stdout: 'pipe', // Show server output for debugging
+    stderr: 'pipe', // Show server errors for debugging
   },
 });
