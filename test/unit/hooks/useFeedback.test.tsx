@@ -150,8 +150,10 @@ describe('useFeedback', () => {
         wrapper: createWrapper(),
       });
 
+      // Wait for loading to complete AND state to be initialized
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
+        expect(result.current.selectedRating).toBe('thumbs_up');
       });
 
       expect(result.current.hasChanges).toBe(false);

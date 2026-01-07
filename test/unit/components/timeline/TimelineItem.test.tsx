@@ -100,20 +100,20 @@ describe('TimelineItem', () => {
       render(<TimelineItem item={baseItem} currency='EUR' />);
 
       expect(screen.getByTestId('badge')).toBeInTheDocument();
-      expect(screen.getByText('Label-sightseeing')).toBeInTheDocument();
+      expect(screen.getByText('Label-culture')).toBeInTheDocument();
     });
 
     it('should render category icon', () => {
       render(<TimelineItem item={baseItem} currency='EUR' />);
 
       expect(screen.getByText('CategoryIcon')).toBeInTheDocument();
-      expect(timelineCategories.getCategoryIcon).toHaveBeenCalledWith('sightseeing');
+      expect(timelineCategories.getCategoryIcon).toHaveBeenCalledWith('culture');
     });
 
     it('should call getCategoryLabel with correct category', () => {
       render(<TimelineItem item={baseItem} currency='EUR' />);
 
-      expect(timelineCategories.getCategoryLabel).toHaveBeenCalledWith('sightseeing');
+      expect(timelineCategories.getCategoryLabel).toHaveBeenCalledWith('culture');
     });
   });
 

@@ -17,7 +17,7 @@ vi.mock('@/components/GeneratedPlanView', () => ({
   default: () => <div data-testid='generated-plan-view'>GeneratedPlanView</div>,
 }));
 vi.mock('@/components/ActivityForm', () => ({
-  default: () => <div data-testid='activity-form'>ActivityForm</div>,
+  ActivityForm: () => <div data-testid='activity-form'>ActivityForm</div>,
 }));
 vi.mock('@/components/NewPlanForm', () => ({
   default: () => <div data-testid='new-plan-form'>NewPlanForm</div>,

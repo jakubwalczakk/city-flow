@@ -15,7 +15,7 @@ vi.mock('@/components/ui/label', () => ({
 
 vi.mock('@/components/ui/select', () => ({
   Select: ({ children, value, onValueChange }: any) => (
-    <div data-testid='select-wrapper' data-value={value}>
+    <div data-testid='select-wrapper' data-value={value === null || value === undefined ? '' : value}>
       <button onClick={() => onValueChange?.('moderate')}>Trigger</button>
       {children}
     </div>

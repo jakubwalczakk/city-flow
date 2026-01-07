@@ -68,49 +68,49 @@ describe('GenerationsCounter', () => {
     it('should calculate correct progress for 3 remaining generations', () => {
       render(<GenerationsCounter generationsRemaining={3} />);
 
-      const progressBar = screen.getByTestId('progress-bar');
+      const progressBar = screen.getByTestId('generations-progress');
       expect(progressBar).toHaveAttribute('data-value', '60'); // (3/5) * 100 = 60
     });
 
     it('should show 100% progress when all 5 generations remain', () => {
       render(<GenerationsCounter generationsRemaining={5} />);
 
-      const progressBar = screen.getByTestId('progress-bar');
+      const progressBar = screen.getByTestId('generations-progress');
       expect(progressBar).toHaveAttribute('data-value', '100');
     });
 
     it('should show 0% progress when no generations remain', () => {
       render(<GenerationsCounter generationsRemaining={0} />);
 
-      const progressBar = screen.getByTestId('progress-bar');
+      const progressBar = screen.getByTestId('generations-progress');
       expect(progressBar).toHaveAttribute('data-value', '0');
     });
 
     it('should show 20% progress for 1 remaining generation', () => {
       render(<GenerationsCounter generationsRemaining={1} />);
 
-      const progressBar = screen.getByTestId('progress-bar');
+      const progressBar = screen.getByTestId('generations-progress');
       expect(progressBar).toHaveAttribute('data-value', '20'); // (1/5) * 100 = 20
     });
 
     it('should show 40% progress for 2 remaining generations', () => {
       render(<GenerationsCounter generationsRemaining={2} />);
 
-      const progressBar = screen.getByTestId('progress-bar');
+      const progressBar = screen.getByTestId('generations-progress');
       expect(progressBar).toHaveAttribute('data-value', '40'); // (2/5) * 100 = 40
     });
 
     it('should show 80% progress for 4 remaining generations', () => {
       render(<GenerationsCounter generationsRemaining={4} />);
 
-      const progressBar = screen.getByTestId('progress-bar');
+      const progressBar = screen.getByTestId('generations-progress');
       expect(progressBar).toHaveAttribute('data-value', '80'); // (4/5) * 100 = 80
     });
 
     it('should have correct height class on progress bar', () => {
       render(<GenerationsCounter generationsRemaining={3} />);
 
-      const progressBar = screen.getByTestId('progress-bar');
+      const progressBar = screen.getByTestId('generations-progress');
       expect(progressBar).toHaveClass('h-2');
     });
   });
@@ -158,7 +158,7 @@ describe('GenerationsCounter', () => {
       render(<GenerationsCounter generationsRemaining={-1} />);
 
       expect(screen.getByText('Pozostało planów: -1/5')).toBeInTheDocument();
-      const progressBar = screen.getByTestId('progress-bar');
+      const progressBar = screen.getByTestId('generations-progress');
       expect(progressBar).toHaveAttribute('data-value', '-20'); // (-1/5) * 100 = -20
     });
 
@@ -166,7 +166,7 @@ describe('GenerationsCounter', () => {
       render(<GenerationsCounter generationsRemaining={10} />);
 
       expect(screen.getByText('Pozostało planów: 10/5')).toBeInTheDocument();
-      const progressBar = screen.getByTestId('progress-bar');
+      const progressBar = screen.getByTestId('generations-progress');
       expect(progressBar).toHaveAttribute('data-value', '200'); // (10/5) * 100 = 200
     });
 
@@ -174,7 +174,7 @@ describe('GenerationsCounter', () => {
       render(<GenerationsCounter generationsRemaining={2.5} />);
 
       expect(screen.getByText('Pozostało planów: 2.5/5')).toBeInTheDocument();
-      const progressBar = screen.getByTestId('progress-bar');
+      const progressBar = screen.getByTestId('generations-progress');
       expect(progressBar).toHaveAttribute('data-value', '50'); // (2.5/5) * 100 = 50
     });
   });
@@ -206,7 +206,7 @@ describe('GenerationsCounter', () => {
       expect(children[0]).toHaveTextContent('Pozostało planów');
 
       // Second child should be the progress bar
-      expect(children[1]).toHaveAttribute('data-testid', 'progress-bar');
+      expect(children[1]).toHaveAttribute('data-testid', 'generations-progress');
 
       // Third child should be the reset date
       expect(children[2]).toHaveAttribute('data-testid', 'generations-reset-date');
