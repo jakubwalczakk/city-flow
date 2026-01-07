@@ -52,6 +52,14 @@ supabase db reset   # Reset database with seed data
 npx supabase db push --linked  # Push migrations to remote
 ```
 
+### Custom Commands
+
+```bash
+# Fix E2E tests for a specific file (Test + Lint + Types)
+# Usage: /fix-e2e-tests <file_path>
+/fix-e2e-tests e2e/auth/login.spec.ts
+```
+
 ## Architecture
 
 ### Core Patterns
