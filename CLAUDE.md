@@ -52,6 +52,14 @@ supabase db reset   # Reset database with seed data
 npx supabase db push --linked  # Push migrations to remote
 ```
 
+### Custom Commands
+
+```bash
+# Fix E2E tests for a specific file (Test + Lint + Types)
+# Usage: /fix-e2e-tests <file_path>
+/fix-e2e-tests e2e/auth/login.spec.ts
+```
+
 ## Architecture
 
 ### Core Patterns
@@ -142,6 +150,8 @@ RLS is currently in **DEVELOPMENT MODE** with permissive policies. Before produc
 - Coverage thresholds: 80% lines, 80% functions, 75% branches
 - Focus on services, utilities, schemas, and React components
 - Excludes: Astro pages (E2E tested), shadcn/ui components
+- **CRITICAL: NEVER use `getByText`/`queryByText` - always use `getByTestId`/`queryByTestId`**
+- All testable elements must have `data-testid` attributes in components
 
 **E2E Tests (Playwright):**
 

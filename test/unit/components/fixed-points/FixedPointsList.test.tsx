@@ -55,9 +55,9 @@ describe('FixedPointsList', () => {
     it('should render all points', () => {
       render(<FixedPointsList points={mockPoints} onEdit={mockOnEdit} onRemove={mockOnRemove} editingIndex={null} />);
 
-      expect(screen.getByText('Wieża Eiffla')).toBeInTheDocument();
-      expect(screen.getByText('Luwr')).toBeInTheDocument();
-      expect(screen.getByText('Notre Dame')).toBeInTheDocument();
+      expect(screen.getByTestId('summary-fixed-point-0-location')).toHaveTextContent('Wieża Eiffla');
+      expect(screen.getByTestId('summary-fixed-point-1-location')).toHaveTextContent('Luwr');
+      expect(screen.getByTestId('summary-fixed-point-2-location')).toHaveTextContent('Notre Dame');
     });
 
     it('should render locations with correct test ids', () => {
@@ -159,33 +159,33 @@ describe('FixedPointsList', () => {
     it('should hide point being edited', () => {
       render(<FixedPointsList points={mockPoints} onEdit={mockOnEdit} onRemove={mockOnRemove} editingIndex={1} />);
 
-      expect(screen.getByText('Wieża Eiffla')).toBeInTheDocument();
-      expect(screen.queryByText('Luwr')).not.toBeInTheDocument();
-      expect(screen.getByText('Notre Dame')).toBeInTheDocument();
+      expect(screen.getByTestId('summary-fixed-point-0-location')).toBeInTheDocument();
+      expect(screen.queryByTestId('summary-fixed-point-1-location')).not.toBeInTheDocument();
+      expect(screen.getByTestId('summary-fixed-point-2-location')).toBeInTheDocument();
     });
 
     it('should show all points when editingIndex is null', () => {
       render(<FixedPointsList points={mockPoints} onEdit={mockOnEdit} onRemove={mockOnRemove} editingIndex={null} />);
 
-      expect(screen.getByText('Wieża Eiffla')).toBeInTheDocument();
-      expect(screen.getByText('Luwr')).toBeInTheDocument();
-      expect(screen.getByText('Notre Dame')).toBeInTheDocument();
+      expect(screen.getByTestId('summary-fixed-point-0-location')).toBeInTheDocument();
+      expect(screen.getByTestId('summary-fixed-point-1-location')).toBeInTheDocument();
+      expect(screen.getByTestId('summary-fixed-point-2-location')).toBeInTheDocument();
     });
 
     it('should hide first point when editingIndex is 0', () => {
       render(<FixedPointsList points={mockPoints} onEdit={mockOnEdit} onRemove={mockOnRemove} editingIndex={0} />);
 
-      expect(screen.queryByText('Wieża Eiffla')).not.toBeInTheDocument();
-      expect(screen.getByText('Luwr')).toBeInTheDocument();
-      expect(screen.getByText('Notre Dame')).toBeInTheDocument();
+      expect(screen.queryByTestId('summary-fixed-point-0-location')).not.toBeInTheDocument();
+      expect(screen.getByTestId('summary-fixed-point-1-location')).toBeInTheDocument();
+      expect(screen.getByTestId('summary-fixed-point-2-location')).toBeInTheDocument();
     });
 
     it('should hide last point when editingIndex is last index', () => {
       render(<FixedPointsList points={mockPoints} onEdit={mockOnEdit} onRemove={mockOnRemove} editingIndex={2} />);
 
-      expect(screen.getByText('Wieża Eiffla')).toBeInTheDocument();
-      expect(screen.getByText('Luwr')).toBeInTheDocument();
-      expect(screen.queryByText('Notre Dame')).not.toBeInTheDocument();
+      expect(screen.getByTestId('summary-fixed-point-0-location')).toBeInTheDocument();
+      expect(screen.getByTestId('summary-fixed-point-1-location')).toBeInTheDocument();
+      expect(screen.queryByTestId('summary-fixed-point-2-location')).not.toBeInTheDocument();
     });
   });
 
@@ -271,14 +271,14 @@ describe('FixedPointsList', () => {
         <FixedPointsList points={[mockPoints[0]]} onEdit={mockOnEdit} onRemove={mockOnRemove} editingIndex={null} />
       );
 
-      expect(screen.getByText('Wieża Eiffla')).toBeInTheDocument();
+      expect(screen.getByTestId('summary-fixed-point-0-location')).toHaveTextContent('Wieża Eiffla');
       expect(screen.getByTestId('delete-fixed-point-0')).toBeInTheDocument();
     });
 
     it('should hide single point when editing', () => {
       render(<FixedPointsList points={[mockPoints[0]]} onEdit={mockOnEdit} onRemove={mockOnRemove} editingIndex={0} />);
 
-      expect(screen.queryByText('Wieża Eiffla')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('summary-fixed-point-0-location')).not.toBeInTheDocument();
     });
   });
 
@@ -319,7 +319,7 @@ describe('FixedPointsList', () => {
 
       render(<FixedPointsList points={[longPoint]} onEdit={mockOnEdit} onRemove={mockOnRemove} editingIndex={null} />);
 
-      expect(screen.getByText('A'.repeat(200))).toBeInTheDocument();
+      expect(screen.getByTestId('summary-fixed-point-0-location')).toHaveTextContent('A'.repeat(200));
     });
 
     it('should handle point with 0 duration', () => {
@@ -350,8 +350,8 @@ describe('FixedPointsList', () => {
 
       render(<FixedPointsList points={manyPoints} onEdit={mockOnEdit} onRemove={mockOnRemove} editingIndex={null} />);
 
-      expect(screen.getByText('Location 0')).toBeInTheDocument();
-      expect(screen.getByText('Location 19')).toBeInTheDocument();
+      expect(screen.getByTestId('summary-fixed-point-0-location')).toHaveTextContent('Location 0');
+      expect(screen.getByTestId('summary-fixed-point-19-location')).toHaveTextContent('Location 19');
     });
   });
 

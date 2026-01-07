@@ -105,15 +105,17 @@ describe('DraftPlanView', () => {
     it('should render draft plan card', () => {
       render(<DraftPlanView plan={mockPlan} onGenerate={mockOnGenerate} onEdit={mockOnEdit} />);
 
-      expect(screen.getByText('Plan w wersji roboczej')).toBeInTheDocument();
+      expect(screen.getByTestId('draft-plan-title')).toHaveTextContent('Plan w wersji roboczej');
     });
 
     it('should display destination as read-only', () => {
       render(<DraftPlanView plan={mockPlan} onGenerate={mockOnGenerate} onEdit={mockOnEdit} />);
 
-      expect(screen.getByText('Miejsce docelowe')).toBeInTheDocument();
-      expect(screen.getByText('Paris')).toBeInTheDocument();
-      expect(screen.getByText('Miejsca docelowego nie można zmienić po utworzeniu planu.')).toBeInTheDocument();
+      expect(screen.getByTestId('draft-plan-destination-label')).toHaveTextContent('Miejsce docelowe');
+      expect(screen.getByTestId('draft-plan-destination')).toHaveTextContent('Paris');
+      expect(screen.getByTestId('draft-plan-destination-hint')).toHaveTextContent(
+        'Miejsca docelowego nie można zmienić po utworzeniu planu.'
+      );
     });
 
     it('should render notes section', () => {
@@ -137,7 +139,7 @@ describe('DraftPlanView', () => {
     it('should render save and generate buttons', () => {
       render(<DraftPlanView plan={mockPlan} onGenerate={mockOnGenerate} onEdit={mockOnEdit} />);
 
-      expect(screen.getByText('Zapisz zmiany')).toBeInTheDocument();
+      expect(screen.getByTestId('draft-plan-save-button')).toHaveTextContent('Zapisz zmiany');
       expect(screen.getByTestId('generate-plan-button')).toBeInTheDocument();
     });
   });
@@ -146,7 +148,7 @@ describe('DraftPlanView', () => {
     it('should disable save button when no changes', () => {
       render(<DraftPlanView plan={mockPlan} onGenerate={mockOnGenerate} onEdit={mockOnEdit} />);
 
-      const saveButton = screen.getByText('Zapisz zmiany');
+      const saveButton = screen.getByTestId('draft-plan-save-button');
       expect(saveButton).toBeDisabled();
     });
 
@@ -158,7 +160,7 @@ describe('DraftPlanView', () => {
 
       render(<DraftPlanView plan={mockPlan} onGenerate={mockOnGenerate} onEdit={mockOnEdit} />);
 
-      const saveButton = screen.getByText('Zapisz zmiany');
+      const saveButton = screen.getByTestId('draft-plan-save-button');
       expect(saveButton).not.toBeDisabled();
     });
 
@@ -174,7 +176,7 @@ describe('DraftPlanView', () => {
 
       render(<DraftPlanView plan={mockPlan} onGenerate={mockOnGenerate} onEdit={mockOnEdit} />);
 
-      const saveButton = screen.getByText('Zapisz zmiany');
+      const saveButton = screen.getByTestId('draft-plan-save-button');
       await user.click(saveButton);
 
       expect(mockHandleSave).toHaveBeenCalled();
@@ -188,7 +190,7 @@ describe('DraftPlanView', () => {
 
       render(<DraftPlanView plan={mockPlan} onGenerate={mockOnGenerate} onEdit={mockOnEdit} />);
 
-      expect(screen.getByText('Zapisywanie...')).toBeInTheDocument();
+      expect(screen.getByTestId('draft-plan-save-button')).toHaveTextContent('Zapisywanie...');
     });
 
     it('should disable save button when isSaving is true', () => {
@@ -200,7 +202,7 @@ describe('DraftPlanView', () => {
 
       render(<DraftPlanView plan={mockPlan} onGenerate={mockOnGenerate} onEdit={mockOnEdit} />);
 
-      const saveButton = screen.getByText('Zapisywanie...');
+      const saveButton = screen.getByTestId('draft-plan-save-button');
       expect(saveButton).toBeDisabled();
     });
   });
@@ -232,7 +234,7 @@ describe('DraftPlanView', () => {
 
       render(<DraftPlanView plan={mockPlan} onGenerate={mockOnGenerate} onEdit={mockOnEdit} />);
 
-      expect(screen.getByText('Generowanie...')).toBeInTheDocument();
+      expect(screen.getByTestId('generate-plan-button')).toHaveTextContent('Generowanie...');
     });
 
     it('should disable generate button when isGenerating is true', () => {
@@ -269,7 +271,7 @@ describe('DraftPlanView', () => {
 
       render(<DraftPlanView plan={mockPlan} onGenerate={mockOnGenerate} onEdit={mockOnEdit} />);
 
-      expect(screen.getByText('Zmiany zostały zapisane!')).toBeInTheDocument();
+      expect(screen.getByTestId('draft-plan-save-success')).toHaveTextContent('Zmiany zostały zapisane!');
     });
 
     it('should show error message when saveError is true', () => {
@@ -280,14 +282,16 @@ describe('DraftPlanView', () => {
 
       render(<DraftPlanView plan={mockPlan} onGenerate={mockOnGenerate} onEdit={mockOnEdit} />);
 
-      expect(screen.getByText('Nie udało się zapisać zmian. Spróbuj ponownie.')).toBeInTheDocument();
+      expect(screen.getByTestId('draft-plan-save-error')).toHaveTextContent(
+        'Nie udało się zapisać zmian. Spróbuj ponownie.'
+      );
     });
 
     it('should not show messages when both saveSuccess and saveError are false', () => {
       render(<DraftPlanView plan={mockPlan} onGenerate={mockOnGenerate} onEdit={mockOnEdit} />);
 
-      expect(screen.queryByText('Zmiany zostały zapisane!')).not.toBeInTheDocument();
-      expect(screen.queryByText('Nie udało się zapisać zmian. Spróbuj ponownie.')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('draft-plan-save-success')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('draft-plan-save-error')).not.toBeInTheDocument();
     });
   });
 
@@ -300,7 +304,7 @@ describe('DraftPlanView', () => {
 
       render(<DraftPlanView plan={mockPlan} onGenerate={mockOnGenerate} onEdit={mockOnEdit} />);
 
-      expect(screen.getByText('Loading...')).toBeInTheDocument();
+      expect(screen.getByTestId('fixed-points-section')).toHaveTextContent('Loading...');
     });
 
     it('should display fixed points count', () => {
@@ -312,7 +316,7 @@ describe('DraftPlanView', () => {
 
       render(<DraftPlanView plan={mockPlan} onGenerate={mockOnGenerate} onEdit={mockOnEdit} />);
 
-      expect(screen.getByText('2 fixed points')).toBeInTheDocument();
+      expect(screen.getByTestId('fixed-points-section')).toHaveTextContent('2 fixed points');
     });
   });
 

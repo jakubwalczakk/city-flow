@@ -57,23 +57,35 @@ function TimelineItemComponent({ item, currency, onEdit, onDelete }: TimelineIte
             </div>
 
             {/* Title */}
-            <h4 className='font-semibold text-base'>{item.title}</h4>
+            <h4 className='font-semibold text-base' data-testid='activity-title'>
+              {item.title}
+            </h4>
 
             {/* Location */}
             {item.location && (
-              <div className='flex items-start gap-1.5 text-sm text-muted-foreground'>
+              <div className='flex items-start gap-1.5 text-sm text-muted-foreground' data-testid='activity-location'>
                 <MapPin className='h-4 w-4 mt-0.5 flex-shrink-0' />
                 <span>{item.location}</span>
               </div>
             )}
 
             {/* Description */}
-            {item.description && <p className='text-sm text-muted-foreground leading-relaxed'>{item.description}</p>}
+            {item.description && (
+              <p className='text-sm text-muted-foreground leading-relaxed' data-testid='activity-description'>
+                {item.description}
+              </p>
+            )}
 
             {/* Notes */}
             {item.notes && (
-              <div className='mt-2 p-2 bg-muted/50 rounded text-xs text-muted-foreground border-l-2 border-primary/50'>
-                <span className='font-medium'>Notatka:</span> {item.notes}
+              <div
+                className='mt-2 p-2 bg-muted/50 rounded text-xs text-muted-foreground border-l-2 border-primary/50'
+                data-testid='activity-notes'
+              >
+                <span className='font-medium' data-testid='activity-notes-label'>
+                  Notatka:
+                </span>{' '}
+                {item.notes}
               </div>
             )}
           </div>
@@ -81,7 +93,7 @@ function TimelineItemComponent({ item, currency, onEdit, onDelete }: TimelineIte
           <div className='flex-shrink-0 flex items-start gap-2'>
             {/* Estimated cost */}
             {item.estimated_price && item.estimated_price !== '0' && (
-              <div className='rounded-md bg-muted px-3 py-1.5 text-sm font-medium'>
+              <div className='rounded-md bg-muted px-3 py-1.5 text-sm font-medium' data-testid='activity-price'>
                 {item.estimated_price} {currency}
               </div>
             )}
@@ -92,7 +104,9 @@ function TimelineItemComponent({ item, currency, onEdit, onDelete }: TimelineIte
                 <DropdownMenuTrigger asChild>
                   <Button variant='ghost' size='icon' className='h-8 w-8'>
                     <MoreVertical className='h-4 w-4' />
-                    <span className='sr-only'>Otwórz menu</span>
+                    <span className='sr-only' data-testid='menu-sr-label'>
+                      Otwórz menu
+                    </span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align='end'>

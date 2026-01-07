@@ -34,8 +34,10 @@ export function ProfileView() {
       <div className='container mx-auto py-8 px-4'>
         <div className='flex items-center justify-center min-h-[400px]'>
           <div className='flex flex-col items-center gap-4'>
-            <Loader2 className='h-8 w-8 animate-spin text-primary' />
-            <p className='text-muted-foreground'>Ładowanie profilu...</p>
+            <Loader2 className='h-8 w-8 animate-spin text-primary' data-testid='profile-loading-icon' />
+            <p className='text-muted-foreground' data-testid='profile-loading-text'>
+              Ładowanie profilu...
+            </p>
           </div>
         </div>
         <ToasterWrapper />
@@ -50,11 +52,15 @@ export function ProfileView() {
         <div className='flex items-center justify-center min-h-[400px]'>
           <Card className='max-w-md w-full'>
             <CardHeader>
-              <CardTitle className='text-destructive'>⚠️ Nie udało się załadować profilu</CardTitle>
+              <CardTitle className='text-destructive' data-testid='profile-error-title'>
+                ⚠️ Nie udało się załadować profilu
+              </CardTitle>
             </CardHeader>
             <CardContent className='space-y-4'>
-              <p className='text-muted-foreground'>{error}</p>
-              <Button onClick={refetch} className='w-full'>
+              <p className='text-muted-foreground' data-testid='profile-error-message'>
+                {error}
+              </p>
+              <Button onClick={refetch} className='w-full' data-testid='profile-retry-button'>
                 Spróbuj ponownie
               </Button>
             </CardContent>
@@ -85,7 +91,7 @@ export function ProfileView() {
         {/* Generations Counter Card */}
         <Card data-testid='profile-stats-card'>
           <CardHeader>
-            <CardTitle>Twoje statystyki</CardTitle>
+            <CardTitle data-testid='profile-stats-title'>Twoje statystyki</CardTitle>
           </CardHeader>
           <CardContent>
             <GenerationsCounter generationsRemaining={profile?.generations_remaining ?? 5} />
@@ -95,7 +101,7 @@ export function ProfileView() {
         {/* Preferences Form Card */}
         <Card data-testid='profile-preferences-card'>
           <CardHeader>
-            <CardTitle>Preferencje podróżnicze</CardTitle>
+            <CardTitle data-testid='profile-preferences-title'>Preferencje podróżnicze</CardTitle>
           </CardHeader>
           <CardContent>
             <PreferencesForm

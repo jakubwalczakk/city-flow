@@ -34,14 +34,14 @@ describe('GenerationsCounter', () => {
     it('should render title', () => {
       render(<GenerationsCounter generationsRemaining={3} />);
 
-      expect(screen.getByText('Limit generacji')).toBeInTheDocument();
+      expect(screen.getByTestId('generations-title')).toHaveTextContent('Limit generacji');
     });
 
     it('should render generations count', () => {
       render(<GenerationsCounter generationsRemaining={3} />);
 
       expect(screen.getByTestId('generations-count')).toBeInTheDocument();
-      expect(screen.getByText('Pozostało planów: 3/5')).toBeInTheDocument();
+      expect(screen.getByTestId('generations-count')).toHaveTextContent('Pozostało planów: 3/5');
     });
 
     it('should render progress bar', () => {
@@ -54,7 +54,7 @@ describe('GenerationsCounter', () => {
       render(<GenerationsCounter generationsRemaining={3} />);
 
       expect(screen.getByTestId('generations-reset-date')).toBeInTheDocument();
-      expect(screen.getByText('Limit odnowi się 1 lutego 2024')).toBeInTheDocument();
+      expect(screen.getByTestId('generations-reset-date')).toHaveTextContent('Limit odnowi się 1 lutego 2024');
     });
 
     it('should call getNextMonthResetDate', () => {
@@ -119,19 +119,19 @@ describe('GenerationsCounter', () => {
     it('should display 0/5 when no generations remain', () => {
       render(<GenerationsCounter generationsRemaining={0} />);
 
-      expect(screen.getByText('Pozostało planów: 0/5')).toBeInTheDocument();
+      expect(screen.getByTestId('generations-count')).toHaveTextContent('Pozostało planów: 0/5');
     });
 
     it('should display 1/5 for 1 remaining generation', () => {
       render(<GenerationsCounter generationsRemaining={1} />);
 
-      expect(screen.getByText('Pozostało planów: 1/5')).toBeInTheDocument();
+      expect(screen.getByTestId('generations-count')).toHaveTextContent('Pozostało planów: 1/5');
     });
 
     it('should display 5/5 when all generations remain', () => {
       render(<GenerationsCounter generationsRemaining={5} />);
 
-      expect(screen.getByText('Pozostało planów: 5/5')).toBeInTheDocument();
+      expect(screen.getByTestId('generations-count')).toHaveTextContent('Pozostało planów: 5/5');
     });
   });
 
@@ -141,7 +141,7 @@ describe('GenerationsCounter', () => {
 
       render(<GenerationsCounter generationsRemaining={3} />);
 
-      expect(screen.getByText('Limit odnowi się 15 marca 2024')).toBeInTheDocument();
+      expect(screen.getByTestId('generations-reset-date')).toHaveTextContent('Limit odnowi się 15 marca 2024');
     });
 
     it('should handle different date formats', () => {
@@ -149,7 +149,7 @@ describe('GenerationsCounter', () => {
 
       render(<GenerationsCounter generationsRemaining={2} />);
 
-      expect(screen.getByText('Limit odnowi się 1 stycznia 2025')).toBeInTheDocument();
+      expect(screen.getByTestId('generations-reset-date')).toHaveTextContent('Limit odnowi się 1 stycznia 2025');
     });
   });
 
@@ -157,7 +157,7 @@ describe('GenerationsCounter', () => {
     it('should handle negative generations gracefully', () => {
       render(<GenerationsCounter generationsRemaining={-1} />);
 
-      expect(screen.getByText('Pozostało planów: -1/5')).toBeInTheDocument();
+      expect(screen.getByTestId('generations-count')).toHaveTextContent('Pozostało planów: -1/5');
       const progressBar = screen.getByTestId('generations-progress');
       expect(progressBar).toHaveAttribute('data-value', '-20'); // (-1/5) * 100 = -20
     });
@@ -165,7 +165,7 @@ describe('GenerationsCounter', () => {
     it('should handle generations over maximum', () => {
       render(<GenerationsCounter generationsRemaining={10} />);
 
-      expect(screen.getByText('Pozostało planów: 10/5')).toBeInTheDocument();
+      expect(screen.getByTestId('generations-count')).toHaveTextContent('Pozostało planów: 10/5');
       const progressBar = screen.getByTestId('generations-progress');
       expect(progressBar).toHaveAttribute('data-value', '200'); // (10/5) * 100 = 200
     });
@@ -173,7 +173,7 @@ describe('GenerationsCounter', () => {
     it('should handle decimal generations', () => {
       render(<GenerationsCounter generationsRemaining={2.5} />);
 
-      expect(screen.getByText('Pozostało planów: 2.5/5')).toBeInTheDocument();
+      expect(screen.getByTestId('generations-count')).toHaveTextContent('Pozostało planów: 2.5/5');
       const progressBar = screen.getByTestId('generations-progress');
       expect(progressBar).toHaveAttribute('data-value', '50'); // (2.5/5) * 100 = 50
     });

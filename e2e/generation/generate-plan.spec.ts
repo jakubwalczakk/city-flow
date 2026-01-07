@@ -1,27 +1,21 @@
-import {
-  authTest as test,
-  expect,
-  createTestPlan,
-  verifyPlanGenerated,
-  setGenerationLimit,
-  getGenerationCount,
-} from '../fixtures';
+import { createTestPlan, verifyPlanGenerated, setGenerationLimit, getGenerationCount } from '../fixtures';
+import { exportTest as test, expect } from '../shared-user-fixtures';
 import { mockOpenRouterAPI } from '../test-setup';
 import { PlanDetailsPage } from '../page-objects/PlanDetailsPage';
 import { GenerationLoadingPage } from '../page-objects/GenerationLoadingPage';
 
 test.describe('Plan Generation', () => {
-  test('should successfully generate a plan from draft', async ({ page, supabase, testUser }) => {
+  test('should successfully generate a plan from draft', async ({ page, supabase, sharedUser }) => {
     // Local initialization (not global)
     const planDetailsPage = new PlanDetailsPage(page);
     // Mock OpenRouter API
     await mockOpenRouterAPI(page);
 
-    // Set generation limit
-    await setGenerationLimit(supabase, testUser.id, 0);
+    // Set generation limit (ensure user has generations remaining)
+    await setGenerationLimit(supabase, sharedUser.id, 5);
 
     // Arrange
-    const { planId } = await createTestPlan(supabase, testUser.id, {
+    const { planId } = await createTestPlan(supabase, sharedUser.id, {
       name: 'Rzym - City Break',
       destination: 'Rzym',
       status: 'draft',
@@ -33,6 +27,10 @@ test.describe('Plan Generation', () => {
     // Act
     await planDetailsPage.goto(planId);
     await planDetailsPage.waitForPageLoad();
+
+    // Close any open dialogs/modals that might be blocking interactions
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(500);
 
     // Verify we're in draft mode
     expect(await planDetailsPage.isDraft()).toBe(true);
@@ -54,20 +52,20 @@ test.describe('Plan Generation', () => {
     expect(await planDetailsPage.isGenerated()).toBe(true);
 
     // 4. Verify generation counter decreased
-    const generationsUsed = await getGenerationCount(supabase, testUser.id);
-    expect(generationsUsed).toBe(1);
+    const generationsRemaining = await getGenerationCount(supabase, sharedUser.id);
+    expect(generationsRemaining).toBe(4); // Started with 5, used 1
 
     // 5. Verify success toast/message (if visible)
     const successToast = page.locator('[data-testid="toast"]').filter({ hasText: /wygenerowany|generated/i });
     await expect(successToast).toBeVisible({ timeout: 5000 });
   });
 
-  test('should generate plan with fixed point', async ({ page, supabase, testUser }) => {
+  test('should generate plan with fixed point', async ({ page, supabase, sharedUser }) => {
     // Local initialization (not global)
     const planDetailsPage = new PlanDetailsPage(page);
 
     // Arrange
-    const { planId } = await createTestPlan(supabase, testUser.id, {
+    const { planId } = await createTestPlan(supabase, sharedUser.id, {
       name: 'Rzym z Koloseum',
       destination: 'Rzym',
       status: 'draft',
@@ -88,6 +86,11 @@ test.describe('Plan Generation', () => {
     // Act
     await planDetailsPage.goto(planId);
     await planDetailsPage.waitForPageLoad();
+
+    // Close any open dialogs/modals that might be blocking interactions
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(500);
+
     await planDetailsPage.generatePlan();
 
     // Assert
@@ -100,18 +103,22 @@ test.describe('Plan Generation', () => {
     expect(hasColosseum).toBe(true);
   });
 
-  test('should show loader during generation', async ({ page, supabase, testUser }) => {
+  test('should show loader during generation', async ({ page, supabase, sharedUser }) => {
     // Local initialization (not global)
     const planDetailsPage = new PlanDetailsPage(page);
     const generationLoadingPage = new GenerationLoadingPage(page);
 
     // Arrange
-    const { planId } = await createTestPlan(supabase, testUser.id, {
+    const { planId } = await createTestPlan(supabase, sharedUser.id, {
       status: 'draft',
     });
 
     await planDetailsPage.goto(planId);
     await planDetailsPage.waitForPageLoad();
+
+    // Close any open dialogs/modals that might be blocking interactions
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(500);
 
     // Act
     await expect(planDetailsPage.generateButton).toBeVisible();
@@ -133,12 +140,12 @@ test.describe('Plan Generation', () => {
     expect(await generationLoadingPage.isLoaderVisible()).toBe(false);
   });
 
-  test('should handle regeneration of existing plan', async ({ page, supabase, testUser }) => {
+  test('should handle regeneration of existing plan', async ({ page, supabase, sharedUser }) => {
     // Local initialization (not global)
     const planDetailsPage = new PlanDetailsPage(page);
 
     // Arrange - Create already generated plan
-    const { planId } = await createTestPlan(supabase, testUser.id, {
+    const { planId } = await createTestPlan(supabase, sharedUser.id, {
       name: 'Existing Plan',
       status: 'generated',
       withActivities: true,
@@ -164,25 +171,29 @@ test.describe('Plan Generation', () => {
       // Note: We can't reliably check if activities changed without checking IDs,
       // but we verify that there are still activities
 
-      // 3. Generation counter should increase by 1
-      const generationsUsed = await getGenerationCount(supabase, testUser.id);
-      expect(generationsUsed).toBe(2); // One for initial, one for regeneration
+      // 3. Generation counter should decrease by 1 more (total 2 generations used)
+      const generationsRemaining = await getGenerationCount(supabase, sharedUser.id);
+      expect(generationsRemaining).toBe(3); // Started with 5, used 2 (initial + regeneration)
     }
     // Note: If regenerate button doesn't exist, test will pass without regeneration check
   });
 
-  test('should respect generation timeout', async ({ page, supabase, testUser }) => {
+  test('should respect generation timeout', async ({ page, supabase, sharedUser }) => {
     // Local initialization (not global)
     const planDetailsPage = new PlanDetailsPage(page);
     const generationLoadingPage = new GenerationLoadingPage(page);
 
     // Arrange
-    const { planId } = await createTestPlan(supabase, testUser.id, {
+    const { planId } = await createTestPlan(supabase, sharedUser.id, {
       status: 'draft',
     });
 
     await planDetailsPage.goto(planId);
     await planDetailsPage.waitForPageLoad();
+
+    // Close any open dialogs/modals that might be blocking interactions
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(500);
 
     // Act
     await planDetailsPage.generateButton.click();

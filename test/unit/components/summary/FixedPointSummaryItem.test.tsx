@@ -24,15 +24,15 @@ describe('FixedPointSummaryItem', () => {
 
   describe('rendering', () => {
     it('should render location', () => {
-      render(<FixedPointSummaryItem point={mockPoint} />);
+      render(<FixedPointSummaryItem point={mockPoint} data-testid='test' />);
 
-      expect(screen.getByText('Wieża Eiffla')).toBeInTheDocument();
+      expect(screen.getByTestId('test-location')).toHaveTextContent('Wieża Eiffla');
     });
 
     it('should render description when provided', () => {
-      render(<FixedPointSummaryItem point={mockPoint} />);
+      render(<FixedPointSummaryItem point={mockPoint} data-testid='test' />);
 
-      expect(screen.getByText('Wizyta na szczycie wieży')).toBeInTheDocument();
+      expect(screen.getByTestId('test-description')).toHaveTextContent('Wizyta na szczycie wieży');
     });
 
     it('should not render description when null', () => {
@@ -57,22 +57,22 @@ describe('FixedPointSummaryItem', () => {
     });
 
     it('should render formatted datetime', () => {
-      render(<FixedPointSummaryItem point={mockPoint} />);
+      render(<FixedPointSummaryItem point={mockPoint} data-testid='test' />);
 
-      expect(screen.getByText('1 lutego 2024, 14:00')).toBeInTheDocument();
+      expect(screen.getByTestId('test-datetime')).toHaveTextContent('1 lutego 2024, 14:00');
       expect(dateFormatters.formatDateTime).toHaveBeenCalledWith(mockPoint.event_at);
     });
 
     it('should render duration when provided', () => {
-      render(<FixedPointSummaryItem point={mockPoint} />);
+      render(<FixedPointSummaryItem point={mockPoint} data-testid='test' />);
 
-      expect(screen.getByText('120 min')).toBeInTheDocument();
+      expect(screen.getByTestId('test-duration')).toHaveTextContent('120 min');
     });
 
     it('should render bullet separator when duration is provided', () => {
-      render(<FixedPointSummaryItem point={mockPoint} />);
+      const { container } = render(<FixedPointSummaryItem point={mockPoint} />);
 
-      expect(screen.getByText('•')).toBeInTheDocument();
+      expect(container.textContent).toContain('•');
     });
 
     it('should not render duration when not provided', () => {
@@ -84,9 +84,9 @@ describe('FixedPointSummaryItem', () => {
 
     it('should not render bullet when duration is not provided', () => {
       const pointWithoutDuration = { ...mockPoint, event_duration: undefined };
-      render(<FixedPointSummaryItem point={pointWithoutDuration} />);
+      const { container } = render(<FixedPointSummaryItem point={pointWithoutDuration} />);
 
-      expect(screen.queryByText('•')).not.toBeInTheDocument();
+      expect(container.textContent).not.toContain('•');
     });
 
     it('should render MapPin icon', () => {
@@ -166,16 +166,16 @@ describe('FixedPointSummaryItem', () => {
     });
 
     it('should style location as font-medium', () => {
-      render(<FixedPointSummaryItem point={mockPoint} />);
+      render(<FixedPointSummaryItem point={mockPoint} data-testid='test' />);
 
-      const location = screen.getByText('Wieża Eiffla');
+      const location = screen.getByTestId('test-location');
       expect(location).toHaveClass('font-medium');
     });
 
     it('should style description with muted foreground', () => {
-      render(<FixedPointSummaryItem point={mockPoint} />);
+      render(<FixedPointSummaryItem point={mockPoint} data-testid='test' />);
 
-      const description = screen.getByText('Wizyta na szczycie wieży');
+      const description = screen.getByTestId('test-description');
       expect(description).toHaveClass('text-sm', 'text-muted-foreground');
     });
 
@@ -187,9 +187,9 @@ describe('FixedPointSummaryItem', () => {
     });
 
     it('should style datetime info with muted foreground', () => {
-      render(<FixedPointSummaryItem point={mockPoint} />);
+      render(<FixedPointSummaryItem point={mockPoint} data-testid='test' />);
 
-      const datetimeContainer = screen.getByText('1 lutego 2024, 14:00').parentElement;
+      const datetimeContainer = screen.getByTestId('test-datetime').parentElement;
       expect(datetimeContainer).toHaveClass('text-sm', 'text-muted-foreground');
     });
   });
@@ -230,27 +230,27 @@ describe('FixedPointSummaryItem', () => {
       const longLocation = 'A'.repeat(200);
       const pointWithLongName = { ...mockPoint, location: longLocation };
 
-      render(<FixedPointSummaryItem point={pointWithLongName} />);
+      render(<FixedPointSummaryItem point={pointWithLongName} data-testid='test' />);
 
-      expect(screen.getByText(longLocation)).toBeInTheDocument();
+      expect(screen.getByTestId('test-location')).toHaveTextContent(longLocation);
     });
 
     it('should handle very long description', () => {
       const longDescription = 'B'.repeat(500);
       const pointWithLongDescription = { ...mockPoint, description: longDescription };
 
-      render(<FixedPointSummaryItem point={pointWithLongDescription} />);
+      render(<FixedPointSummaryItem point={pointWithLongDescription} data-testid='test' />);
 
-      expect(screen.getByText(longDescription)).toBeInTheDocument();
+      expect(screen.getByTestId('test-description')).toHaveTextContent(longDescription);
     });
 
     it('should handle special characters in location', () => {
       const specialLocation = 'Łódź & "Special" \'Location\'';
       const pointWithSpecialChars = { ...mockPoint, location: specialLocation };
 
-      render(<FixedPointSummaryItem point={pointWithSpecialChars} />);
+      render(<FixedPointSummaryItem point={pointWithSpecialChars} data-testid='test' />);
 
-      expect(screen.getByText(specialLocation)).toBeInTheDocument();
+      expect(screen.getByTestId('test-location')).toHaveTextContent(specialLocation);
     });
 
     it('should handle zero duration', () => {
@@ -263,9 +263,9 @@ describe('FixedPointSummaryItem', () => {
 
     it('should handle large duration values', () => {
       const pointWithLargeDuration = { ...mockPoint, event_duration: 9999 };
-      render(<FixedPointSummaryItem point={pointWithLargeDuration} />);
+      render(<FixedPointSummaryItem point={pointWithLargeDuration} data-testid='test' />);
 
-      expect(screen.getByText('9999 min')).toBeInTheDocument();
+      expect(screen.getByTestId('test-duration')).toHaveTextContent('9999 min');
     });
 
     it('should handle different date formats', () => {
@@ -274,35 +274,35 @@ describe('FixedPointSummaryItem', () => {
 
       vi.mocked(dateFormatters.formatDateTime).mockReturnValue('31 grudnia 2024, 23:59');
 
-      render(<FixedPointSummaryItem point={pointWithDifferentDate} />);
+      render(<FixedPointSummaryItem point={pointWithDifferentDate} data-testid='test' />);
 
-      expect(screen.getByText('31 grudnia 2024, 23:59')).toBeInTheDocument();
+      expect(screen.getByTestId('test-datetime')).toHaveTextContent('31 grudnia 2024, 23:59');
       expect(dateFormatters.formatDateTime).toHaveBeenCalledWith(differentDate);
     });
   });
 
   describe('memoization', () => {
     it('should be a memoized component', () => {
-      const { rerender } = render(<FixedPointSummaryItem point={mockPoint} />);
+      const { rerender } = render(<FixedPointSummaryItem point={mockPoint} data-testid='test' />);
 
-      expect(screen.getByText('Wieża Eiffla')).toBeInTheDocument();
+      expect(screen.getByTestId('test-location')).toHaveTextContent('Wieża Eiffla');
 
       // Rerender with same props
-      rerender(<FixedPointSummaryItem point={mockPoint} />);
+      rerender(<FixedPointSummaryItem point={mockPoint} data-testid='test' />);
 
-      expect(screen.getByText('Wieża Eiffla')).toBeInTheDocument();
+      expect(screen.getByTestId('test-location')).toHaveTextContent('Wieża Eiffla');
     });
 
     it('should update when point changes', () => {
-      const { rerender } = render(<FixedPointSummaryItem point={mockPoint} />);
+      const { rerender } = render(<FixedPointSummaryItem point={mockPoint} data-testid='test' />);
 
-      expect(screen.getByText('Wieża Eiffla')).toBeInTheDocument();
+      expect(screen.getByTestId('test-location')).toHaveTextContent('Wieża Eiffla');
 
       const newPoint = { ...mockPoint, location: 'Luwr' };
-      rerender(<FixedPointSummaryItem point={newPoint} />);
+      rerender(<FixedPointSummaryItem point={newPoint} data-testid='test' />);
 
-      expect(screen.getByText('Luwr')).toBeInTheDocument();
-      expect(screen.queryByText('Wieża Eiffla')).not.toBeInTheDocument();
+      expect(screen.getByTestId('test-location')).toHaveTextContent('Luwr');
+      expect(screen.getByTestId('test-location').textContent).not.toContain('Wieża Eiffla');
     });
   });
 });

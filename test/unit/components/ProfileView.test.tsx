@@ -102,8 +102,8 @@ describe('ProfileView', () => {
 
       render(<ProfileView />);
 
-      expect(screen.getByText('Loading Icon')).toBeInTheDocument();
-      expect(screen.getByText('Ładowanie profilu...')).toBeInTheDocument();
+      expect(screen.getByTestId('profile-loading-icon')).toHaveTextContent('Loading Icon');
+      expect(screen.getByTestId('profile-loading-text')).toHaveTextContent('Ładowanie profilu...');
     });
 
     it('should show toaster wrapper in loading state', () => {
@@ -141,8 +141,8 @@ describe('ProfileView', () => {
 
       render(<ProfileView />);
 
-      expect(screen.getByText('⚠️ Nie udało się załadować profilu')).toBeInTheDocument();
-      expect(screen.getByText('Failed to load profile')).toBeInTheDocument();
+      expect(screen.getByTestId('profile-error-title')).toHaveTextContent('⚠️ Nie udało się załadować profilu');
+      expect(screen.getByTestId('profile-error-message')).toHaveTextContent('Failed to load profile');
     });
 
     it('should show retry button in error state', () => {
@@ -154,7 +154,7 @@ describe('ProfileView', () => {
 
       render(<ProfileView />);
 
-      expect(screen.getByText('Spróbuj ponownie')).toBeInTheDocument();
+      expect(screen.getByTestId('profile-retry-button')).toHaveTextContent('Spróbuj ponownie');
     });
 
     it('should call refetch when retry button is clicked', async () => {
@@ -170,7 +170,7 @@ describe('ProfileView', () => {
 
       render(<ProfileView />);
 
-      const retryButton = screen.getByText('Spróbuj ponownie');
+      const retryButton = screen.getByTestId('profile-retry-button');
       await user.click(retryButton);
 
       expect(mockRefetch).toHaveBeenCalled();
@@ -200,7 +200,9 @@ describe('ProfileView', () => {
       render(<ProfileView />);
 
       expect(screen.getByTestId('profile-welcome-message')).toBeInTheDocument();
-      expect(screen.getByText('Witaj! Uzupełnij swój profil, aby AI mogło tworzyć lepsze plany.')).toBeInTheDocument();
+      expect(screen.getByTestId('profile-welcome-message')).toHaveTextContent(
+        'Witaj! Uzupełnij swój profil, aby AI mogło tworzyć lepsze plany.'
+      );
     });
 
     it('should use default generations count for new user', () => {
@@ -212,7 +214,7 @@ describe('ProfileView', () => {
 
       render(<ProfileView />);
 
-      expect(screen.getByText('Remaining: 5')).toBeInTheDocument();
+      expect(screen.getByTestId('generations-counter')).toHaveTextContent('Remaining: 5');
     });
 
     it('should pass null preferences to form for new user', () => {
@@ -251,21 +253,21 @@ describe('ProfileView', () => {
       render(<ProfileView />);
 
       expect(screen.getByTestId('profile-stats-card')).toBeInTheDocument();
-      expect(screen.getByText('Twoje statystyki')).toBeInTheDocument();
+      expect(screen.getByTestId('profile-stats-title')).toHaveTextContent('Twoje statystyki');
     });
 
     it('should render generations counter with correct count', () => {
       render(<ProfileView />);
 
       expect(screen.getByTestId('generations-counter')).toBeInTheDocument();
-      expect(screen.getByText('Remaining: 3')).toBeInTheDocument();
+      expect(screen.getByTestId('generations-counter')).toHaveTextContent('Remaining: 3');
     });
 
     it('should render preferences card', () => {
       render(<ProfileView />);
 
       expect(screen.getByTestId('profile-preferences-card')).toBeInTheDocument();
-      expect(screen.getByText('Preferencje podróżnicze')).toBeInTheDocument();
+      expect(screen.getByTestId('profile-preferences-title')).toHaveTextContent('Preferencje podróżnicze');
     });
 
     it('should render preferences form', () => {
@@ -293,7 +295,7 @@ describe('ProfileView', () => {
 
       render(<ProfileView />);
 
-      const saveButton = screen.getByText('Save');
+      const saveButton = screen.getByRole('button', { name: 'Save' });
       await user.click(saveButton);
 
       expect(mockUpdateProfile).toHaveBeenCalledWith({
@@ -313,7 +315,7 @@ describe('ProfileView', () => {
 
       render(<ProfileView />);
 
-      const saveButton = screen.getByText('Save');
+      const saveButton = screen.getByRole('button', { name: 'Save' });
       await user.click(saveButton);
 
       await vi.waitFor(() => {
@@ -332,7 +334,7 @@ describe('ProfileView', () => {
 
       render(<ProfileView />);
 
-      const saveButton = screen.getByText('Save');
+      const saveButton = screen.getByRole('button', { name: 'Save' });
       await user.click(saveButton);
 
       await vi.waitFor(() => {
@@ -351,7 +353,7 @@ describe('ProfileView', () => {
 
       render(<ProfileView />);
 
-      const saveButton = screen.getByText('Save');
+      const saveButton = screen.getByRole('button', { name: 'Save' });
       await user.click(saveButton);
 
       await vi.waitFor(() => {
@@ -367,7 +369,7 @@ describe('ProfileView', () => {
 
       render(<ProfileView />);
 
-      expect(screen.getByText('Saving...')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Saving...' })).toBeInTheDocument();
     });
   });
 
@@ -380,7 +382,7 @@ describe('ProfileView', () => {
 
       render(<ProfileView />);
 
-      expect(screen.getByText('Remaining: 2')).toBeInTheDocument();
+      expect(screen.getByTestId('generations-counter')).toHaveTextContent('Remaining: 2');
     });
 
     it('should handle zero generations remaining', () => {
@@ -391,7 +393,7 @@ describe('ProfileView', () => {
 
       render(<ProfileView />);
 
-      expect(screen.getByText('Remaining: 0')).toBeInTheDocument();
+      expect(screen.getByTestId('generations-counter')).toHaveTextContent('Remaining: 0');
     });
   });
 });

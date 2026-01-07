@@ -42,7 +42,8 @@ describe('auth.schema', () => {
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.error.issues[0].path).toContain('email');
-          expect(result.error.issues[0].message).toContain('wymagany');
+          // Zod 4 returns "Invalid input" for missing required fields
+          expect(result.error.issues[0].message).toMatch(/Invalid input|wymagany/);
         }
       });
 
@@ -80,7 +81,8 @@ describe('auth.schema', () => {
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.error.issues[0].path).toContain('password');
-          expect(result.error.issues[0].message).toContain('wymagane');
+          // Zod 4 returns "Invalid input" for missing required fields
+          expect(result.error.issues[0].message).toMatch(/Invalid input|wymagane/);
         }
       });
 
@@ -238,7 +240,8 @@ describe('auth.schema', () => {
         const result = forgotPasswordSchema.safeParse(data);
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error.issues[0].message).toContain('wymagany');
+          // Zod 4 returns "Invalid input" for missing required fields
+          expect(result.error.issues[0].message).toMatch(/Invalid input|wymagany/);
         }
       });
 

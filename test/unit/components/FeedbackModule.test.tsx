@@ -75,7 +75,7 @@ describe('FeedbackModule', () => {
 
       render(<FeedbackModule planId='plan-1' />);
 
-      expect(screen.getByText('Ładowanie opinii...')).toBeInTheDocument();
+      expect(screen.getByTestId('feedback-loading')).toHaveTextContent('Ładowanie opinii...');
     });
 
     it('should not show main content when loading', () => {
@@ -86,7 +86,7 @@ describe('FeedbackModule', () => {
 
       render(<FeedbackModule planId='plan-1' />);
 
-      expect(screen.queryByText('Jak oceniasz ten plan?')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('feedback-title')).not.toBeInTheDocument();
     });
   });
 
@@ -94,8 +94,10 @@ describe('FeedbackModule', () => {
     it('should render feedback form', () => {
       render(<FeedbackModule planId='plan-1' />);
 
-      expect(screen.getByText('Jak oceniasz ten plan?')).toBeInTheDocument();
-      expect(screen.getByText('Twoja opinia pomaga nam udoskonalać przyszłe rekomendacje podróży')).toBeInTheDocument();
+      expect(screen.getByTestId('feedback-title')).toHaveTextContent('Jak oceniasz ten plan?');
+      expect(screen.getByTestId('feedback-description')).toHaveTextContent(
+        'Twoja opinia pomaga nam udoskonalać przyszłe rekomendacje podróży'
+      );
     });
 
     it('should render rating buttons', () => {
@@ -103,14 +105,14 @@ describe('FeedbackModule', () => {
 
       expect(screen.getByTestId('feedback-rate-positive')).toBeInTheDocument();
       expect(screen.getByTestId('feedback-rate-negative')).toBeInTheDocument();
-      expect(screen.getByText('Oceń ten plan:')).toBeInTheDocument();
+      expect(screen.getByTestId('feedback-rating-label')).toHaveTextContent('Oceń ten plan:');
     });
 
     it('should render comment textarea', () => {
       render(<FeedbackModule planId='plan-1' />);
 
       expect(screen.getByTestId('feedback-comment-textarea')).toBeInTheDocument();
-      expect(screen.getByText('Dodatkowe uwagi (opcjonalnie)')).toBeInTheDocument();
+      expect(screen.getByTestId('feedback-comment-label')).toHaveTextContent('Dodatkowe uwagi (opcjonalnie)');
     });
 
     it('should render submit button', () => {
@@ -163,7 +165,7 @@ describe('FeedbackModule', () => {
 
       render(<FeedbackModule planId='plan-1' />);
 
-      expect(screen.getByText(/👍.*\(selected\)/)).toBeInTheDocument();
+      expect(screen.getByTestId('feedback-rate-positive')).toHaveTextContent(/👍.*\(selected\)/);
     });
 
     it('should show thumbs down as selected', () => {
@@ -174,7 +176,7 @@ describe('FeedbackModule', () => {
 
       render(<FeedbackModule planId='plan-1' />);
 
-      expect(screen.getByText(/👎.*\(selected\)/)).toBeInTheDocument();
+      expect(screen.getByTestId('feedback-rate-negative')).toHaveTextContent(/👎.*\(selected\)/);
     });
 
     it('should disable rating buttons when isSubmitting is true', () => {
@@ -311,7 +313,7 @@ describe('FeedbackModule', () => {
 
       render(<FeedbackModule planId='plan-1' />);
 
-      expect(screen.getByText('Wysyłanie...')).toBeInTheDocument();
+      expect(screen.getByTestId('feedback-submit-btn')).toHaveTextContent('Wysyłanie...');
     });
 
     it('should show "Wyślij opinię" text when no existing feedback', () => {
@@ -322,7 +324,7 @@ describe('FeedbackModule', () => {
 
       render(<FeedbackModule planId='plan-1' />);
 
-      expect(screen.getByText('Wyślij opinię')).toBeInTheDocument();
+      expect(screen.getByTestId('feedback-submit-btn')).toHaveTextContent('Wyślij opinię');
     });
 
     it('should show "Zaktualizuj opinię" text when feedback exists', () => {
@@ -337,7 +339,7 @@ describe('FeedbackModule', () => {
 
       render(<FeedbackModule planId='plan-1' />);
 
-      expect(screen.getByText('Zaktualizuj opinię')).toBeInTheDocument();
+      expect(screen.getByTestId('feedback-submit-btn')).toHaveTextContent('Zaktualizuj opinię');
     });
   });
 
@@ -354,7 +356,7 @@ describe('FeedbackModule', () => {
       render(<FeedbackModule planId='plan-1' />);
 
       expect(screen.getByTestId('feedback-message-success')).toBeInTheDocument();
-      expect(screen.getByText('Feedback submitted successfully')).toBeInTheDocument();
+      expect(screen.getByTestId('feedback-message-success')).toHaveTextContent('Feedback submitted successfully');
     });
 
     it('should show error message when submitMessage is error', () => {
@@ -369,7 +371,7 @@ describe('FeedbackModule', () => {
       render(<FeedbackModule planId='plan-1' />);
 
       expect(screen.getByTestId('feedback-message-error')).toBeInTheDocument();
-      expect(screen.getByText('Failed to submit feedback')).toBeInTheDocument();
+      expect(screen.getByTestId('feedback-message-error')).toHaveTextContent('Failed to submit feedback');
     });
 
     it('should not show message when submitMessage is null', () => {
@@ -408,7 +410,7 @@ describe('FeedbackModule', () => {
 
       render(<FeedbackModule planId='plan-1' />);
 
-      expect(screen.getByText(/Ostatnia aktualizacja:/)).toBeInTheDocument();
+      expect(screen.getByTestId('feedback-updated-at')).toHaveTextContent(/Ostatnia aktualizacja:/);
       expect(dateFormatters.formatUpdatedAt).toHaveBeenCalledWith('2024-01-05T10:30:00Z');
     });
 
@@ -420,7 +422,7 @@ describe('FeedbackModule', () => {
 
       render(<FeedbackModule planId='plan-1' />);
 
-      expect(screen.queryByText(/Ostatnia aktualizacja:/)).not.toBeInTheDocument();
+      expect(screen.queryByTestId('feedback-updated-at')).not.toBeInTheDocument();
     });
   });
 

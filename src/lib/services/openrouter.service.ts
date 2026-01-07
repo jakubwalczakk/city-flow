@@ -227,8 +227,20 @@ export class OpenRouterService {
           errors: error.errors,
           formattedErrors: error.format(),
         });
+
+        // Safely construct error message
+        const errorMessages =
+          error.errors && Array.isArray(error.errors)
+            ? error.errors
+                .map((e) => {
+                  const pathStr = Array.isArray(e.path) ? e.path.join('.') : String(e.path);
+                  return `${pathStr}: ${e.message}`;
+                })
+                .join('; ')
+            : error.message;
+
         throw new ValidationError(
-          `The response from OpenRouter does not match the expected format: ${error.errors.map((e) => `${e.path.join('.')}: ${e.message}`).join('; ')}`,
+          `The response from OpenRouter does not match the expected format: ${errorMessages}`,
           error.errors
         );
       }

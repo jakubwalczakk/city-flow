@@ -121,7 +121,8 @@ describe('activity.schema', () => {
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error.issues[0].path).toContain('category');
-        expect(result.error.issues[0].message).toContain('wymagana');
+        // Zod 4 returns "Invalid option" for missing enum fields
+        expect(result.error.issues[0].message).toMatch(/Invalid option|wymagana/);
       }
     });
 

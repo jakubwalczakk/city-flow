@@ -45,15 +45,15 @@ describe('FixedPointsSection', () => {
     it('should render card title', () => {
       render(<FixedPointsSection fixedPoints={[]} isLoading={false} onEdit={mockOnEdit} />);
 
-      expect(screen.getByText('Stałe punkty')).toBeInTheDocument();
+      expect(screen.getByTestId('fixed-points-title')).toHaveTextContent('Stałe punkty');
     });
 
     it('should render card description', () => {
       render(<FixedPointsSection fixedPoints={[]} isLoading={false} onEdit={mockOnEdit} />);
 
-      expect(
-        screen.getByText(/Zablokowane zobowiązania w twoim planie, takie jak loty, rezerwacje hotelowe/)
-      ).toBeInTheDocument();
+      expect(screen.getByTestId('fixed-points-description')).toHaveTextContent(
+        /Zablokowane zobowiązania w twoim planie, takie jak loty, rezerwacje hotelowe/
+      );
     });
 
     it('should render edit button', () => {
@@ -65,26 +65,28 @@ describe('FixedPointsSection', () => {
     it('should display loading state', () => {
       render(<FixedPointsSection fixedPoints={[]} isLoading={true} onEdit={mockOnEdit} />);
 
-      expect(screen.getByText('Ładowanie stałych punktów...')).toBeInTheDocument();
+      expect(screen.getByTestId('fixed-points-loading')).toHaveTextContent('Ładowanie stałych punktów...');
     });
 
     it('should display empty state when no fixed points', () => {
       render(<FixedPointsSection fixedPoints={[]} isLoading={false} onEdit={mockOnEdit} />);
 
-      expect(screen.getByText(/Nie dodano stałych punktów. Możesz edytować plan, aby je dodać./)).toBeInTheDocument();
+      expect(screen.getByTestId('fixed-points-empty')).toHaveTextContent(
+        /Nie dodano stałych punktów. Możesz edytować plan, aby je dodać./
+      );
     });
 
     it('should render fixed points list', () => {
       render(<FixedPointsSection fixedPoints={mockFixedPoints} isLoading={false} onEdit={mockOnEdit} />);
 
-      expect(screen.getByText('Wieża Eiffla')).toBeInTheDocument();
-      expect(screen.getByText('Luwr')).toBeInTheDocument();
+      expect(screen.getByTestId('fixed-point-0-location')).toHaveTextContent('Wieża Eiffla');
+      expect(screen.getByTestId('fixed-point-1-location')).toHaveTextContent('Luwr');
     });
 
     it('should render fixed point descriptions when available', () => {
       render(<FixedPointsSection fixedPoints={mockFixedPoints} isLoading={false} onEdit={mockOnEdit} />);
 
-      expect(screen.getByText('Wizyta na szczycie wieży')).toBeInTheDocument();
+      expect(screen.getByTestId('fixed-point-0-description')).toHaveTextContent('Wizyta na szczycie wieży');
     });
 
     it('should not render description when null', () => {
@@ -97,14 +99,14 @@ describe('FixedPointsSection', () => {
     it('should render formatted event times', () => {
       render(<FixedPointsSection fixedPoints={mockFixedPoints} isLoading={false} onEdit={mockOnEdit} />);
 
-      expect(screen.getByText('1 lutego 2024, 14:00')).toBeInTheDocument();
-      expect(screen.getByText('2 lutego 2024, 10:00')).toBeInTheDocument();
+      expect(screen.getByTestId('fixed-point-0-datetime')).toHaveTextContent('1 lutego 2024, 14:00');
+      expect(screen.getByTestId('fixed-point-1-datetime')).toHaveTextContent('2 lutego 2024, 10:00');
     });
 
     it('should render event duration when greater than 0', () => {
       render(<FixedPointsSection fixedPoints={mockFixedPoints} isLoading={false} onEdit={mockOnEdit} />);
 
-      expect(screen.getByText('120 min')).toBeInTheDocument();
+      expect(screen.getByTestId('fixed-point-0-duration')).toHaveTextContent('120 min');
     });
 
     it('should not render duration when 0', () => {
@@ -181,16 +183,15 @@ describe('FixedPointsSection', () => {
 
       render(<FixedPointsSection fixedPoints={[pointWithoutDuration]} isLoading={false} onEdit={mockOnEdit} />);
 
-      expect(screen.getByText('Notre Dame')).toBeInTheDocument();
-      const pointElement = screen.getByText('Notre Dame').parentElement;
-      expect(pointElement?.textContent).not.toContain('min');
+      expect(screen.getByTestId('fixed-point-0-location')).toHaveTextContent('Notre Dame');
+      expect(screen.queryByTestId('fixed-point-0-duration')).not.toBeInTheDocument();
     });
 
     it('should handle single fixed point', () => {
       render(<FixedPointsSection fixedPoints={[mockFixedPoints[0]]} isLoading={false} onEdit={mockOnEdit} />);
 
-      expect(screen.getByText('Wieża Eiffla')).toBeInTheDocument();
-      expect(screen.queryByText('Luwr')).not.toBeInTheDocument();
+      expect(screen.getByTestId('fixed-point-0-location')).toHaveTextContent('Wieża Eiffla');
+      expect(screen.queryByTestId('fixed-point-1-location')).not.toBeInTheDocument();
     });
 
     it('should handle many fixed points', () => {
@@ -207,27 +208,27 @@ describe('FixedPointsSection', () => {
 
       render(<FixedPointsSection fixedPoints={manyPoints} isLoading={false} onEdit={mockOnEdit} />);
 
-      expect(screen.getByText('Location 0')).toBeInTheDocument();
-      expect(screen.getByText('Location 9')).toBeInTheDocument();
+      expect(screen.getByTestId('fixed-point-0-location')).toHaveTextContent('Location 0');
+      expect(screen.getByTestId('fixed-point-9-location')).toHaveTextContent('Location 9');
     });
 
     it('should not show loading state when not loading', () => {
       render(<FixedPointsSection fixedPoints={mockFixedPoints} isLoading={false} onEdit={mockOnEdit} />);
 
-      expect(screen.queryByText('Ładowanie stałych punktów...')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('fixed-points-loading')).not.toBeInTheDocument();
     });
 
     it('should not show empty state when there are fixed points', () => {
       render(<FixedPointsSection fixedPoints={mockFixedPoints} isLoading={false} onEdit={mockOnEdit} />);
 
-      expect(screen.queryByText(/Nie dodano stałych punktów/)).not.toBeInTheDocument();
+      expect(screen.queryByTestId('fixed-points-empty')).not.toBeInTheDocument();
     });
 
     it('should prioritize loading state over content', () => {
       render(<FixedPointsSection fixedPoints={mockFixedPoints} isLoading={true} onEdit={mockOnEdit} />);
 
-      expect(screen.getByText('Ładowanie stałych punktów...')).toBeInTheDocument();
-      expect(screen.queryByText('Wieża Eiffla')).not.toBeInTheDocument();
+      expect(screen.getByTestId('fixed-points-loading')).toHaveTextContent('Ładowanie stałych punktów...');
+      expect(screen.queryByTestId('fixed-point-0-location')).not.toBeInTheDocument();
     });
   });
 });

@@ -3,8 +3,12 @@ import { test as base, expect, type BrowserContext } from '@playwright/test';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '../src/db/database.types';
 import * as path from 'path';
+import { fileURLToPath } from 'url';
 import { setupCommonMocks } from './test-setup';
 import { cleanDatabase } from './fixtures';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Re-export expect for convenience
 export { expect };

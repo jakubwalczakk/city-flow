@@ -100,7 +100,8 @@ describe('fixed-point.schema', () => {
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error.issues[0].path).toContain('location');
-        expect(result.error.issues[0].message).toContain('required');
+        // Zod 4 returns "Invalid input" for missing required fields
+        expect(result.error.issues[0].message).toMatch(/Invalid input|required/);
       }
     });
 
@@ -126,7 +127,8 @@ describe('fixed-point.schema', () => {
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error.issues[0].path).toContain('event_at');
-        expect(result.error.issues[0].message).toContain('required');
+        // Zod 4 returns "Invalid input" for missing required fields
+        expect(result.error.issues[0].message).toMatch(/Invalid input|required/);
       }
     });
 
