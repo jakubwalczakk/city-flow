@@ -18,7 +18,9 @@ export function GenerationsCounter({ generationsRemaining }: GenerationsCounterP
   return (
     <div className='space-y-4' data-testid='generations-counter'>
       <div>
-        <h3 className='text-lg font-semibold'>Limit generacji</h3>
+        <h3 className='text-lg font-semibold' data-testid='generations-title'>
+          Limit generacji
+        </h3>
         <p className='text-sm text-muted-foreground mt-1' data-testid='generations-count'>
           Pozostało planów: {generationsRemaining}/{MAX_GENERATIONS}
         </p>

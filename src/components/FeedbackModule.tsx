@@ -32,7 +32,9 @@ export default function FeedbackModule({ planId }: FeedbackModuleProps) {
     return (
       <Card>
         <CardContent className='pt-6'>
-          <div className='text-center text-muted-foreground'>Ładowanie opinii...</div>
+          <div className='text-center text-muted-foreground' data-testid='feedback-loading'>
+            Ładowanie opinii...
+          </div>
         </CardContent>
       </Card>
     );
@@ -40,14 +42,18 @@ export default function FeedbackModule({ planId }: FeedbackModuleProps) {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Jak oceniasz ten plan?</CardTitle>
-        <CardDescription>Twoja opinia pomaga nam udoskonalać przyszłe rekomendacje podróży</CardDescription>
+      <CardHeader data-testid='feedback-header'>
+        <CardTitle data-testid='feedback-title'>Jak oceniasz ten plan?</CardTitle>
+        <CardDescription data-testid='feedback-description'>
+          Twoja opinia pomaga nam udoskonalać przyszłe rekomendacje podróży
+        </CardDescription>
       </CardHeader>
       <CardContent className='space-y-6'>
         {/* Rating buttons */}
         <div className='flex items-center gap-4'>
-          <span className='text-sm font-medium'>Oceń ten plan:</span>
+          <span className='text-sm font-medium' data-testid='feedback-rating-label'>
+            Oceń ten plan:
+          </span>
           <div className='flex gap-2'>
             <RatingButton
               type='thumbs_up'
@@ -68,7 +74,7 @@ export default function FeedbackModule({ planId }: FeedbackModuleProps) {
 
         {/* Comment textarea */}
         <div className='space-y-2'>
-          <label htmlFor='feedback-comment' className='text-sm font-medium'>
+          <label htmlFor='feedback-comment' className='text-sm font-medium' data-testid='feedback-comment-label'>
             Dodatkowe uwagi (opcjonalnie)
           </label>
           <Textarea
@@ -111,7 +117,7 @@ export default function FeedbackModule({ planId }: FeedbackModuleProps) {
 
         {/* Last updated timestamp */}
         {feedback && (
-          <p className='text-xs text-muted-foreground text-center'>
+          <p className='text-xs text-muted-foreground text-center' data-testid='feedback-updated-at'>
             Ostatnia aktualizacja: {formatUpdatedAt(feedback.updated_at)}
           </p>
         )}

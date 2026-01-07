@@ -150,6 +150,8 @@ RLS is currently in **DEVELOPMENT MODE** with permissive policies. Before produc
 - Coverage thresholds: 80% lines, 80% functions, 75% branches
 - Focus on services, utilities, schemas, and React components
 - Excludes: Astro pages (E2E tested), shadcn/ui components
+- **CRITICAL: NEVER use `getByText`/`queryByText` - always use `getByTestId`/`queryByTestId`**
+- All testable elements must have `data-testid` attributes in components
 
 **E2E Tests (Playwright):**
 

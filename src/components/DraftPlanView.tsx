@@ -49,7 +49,7 @@ export default function DraftPlanView({ plan, onGenerate, onEdit }: DraftPlanVie
     <div className='space-y-6'>
       <Card>
         <CardHeader>
-          <CardTitle>Plan w wersji roboczej</CardTitle>
+          <CardTitle data-testid='draft-plan-title'>Plan w wersji roboczej</CardTitle>
           <CardDescription>
             Ten plan jest w statusie roboczym. Dodaj swoje notatki i preferencje, a następnie wygeneruj spersonalizowany
             plan podróży.
@@ -59,12 +59,18 @@ export default function DraftPlanView({ plan, onGenerate, onEdit }: DraftPlanVie
           {/* Destination (read-only) */}
           <div className='space-y-2'>
             <div className='flex items-center justify-between'>
-              <Label className='text-base font-medium'>Miejsce docelowe</Label>
+              <Label className='text-base font-medium' data-testid='draft-plan-destination-label'>
+                Miejsce docelowe
+              </Label>
             </div>
             <div className='rounded-md bg-muted p-3'>
-              <p className='text-sm'>{plan.destination}</p>
+              <p className='text-sm' data-testid='draft-plan-destination'>
+                {plan.destination}
+              </p>
             </div>
-            <p className='text-xs text-muted-foreground'>Miejsca docelowego nie można zmienić po utworzeniu planu.</p>
+            <p className='text-xs text-muted-foreground' data-testid='draft-plan-destination-hint'>
+              Miejsca docelowego nie można zmienić po utworzeniu planu.
+            </p>
           </div>
 
           {/* Notes section */}
@@ -72,20 +78,31 @@ export default function DraftPlanView({ plan, onGenerate, onEdit }: DraftPlanVie
 
           {/* Save/Generate messages */}
           {saveSuccess && (
-            <div className='rounded-md p-3 text-sm bg-green-50 text-green-800 border border-green-200'>
+            <div
+              className='rounded-md p-3 text-sm bg-green-50 text-green-800 border border-green-200'
+              data-testid='draft-plan-save-success'
+            >
               Zmiany zostały zapisane!
             </div>
           )}
 
           {saveError && (
-            <div className='rounded-md p-3 text-sm bg-red-50 text-red-800 border border-red-200'>
+            <div
+              className='rounded-md p-3 text-sm bg-red-50 text-red-800 border border-red-200'
+              data-testid='draft-plan-save-error'
+            >
               Nie udało się zapisać zmian. Spróbuj ponownie.
             </div>
           )}
 
           {/* Action buttons */}
           <div className='flex items-center justify-between pt-4'>
-            <Button onClick={handleSave} disabled={!hasChanges || isSaving} variant='outline'>
+            <Button
+              onClick={handleSave}
+              disabled={!hasChanges || isSaving}
+              variant='outline'
+              data-testid='draft-plan-save-button'
+            >
               {isSaving ? 'Zapisywanie...' : 'Zapisz zmiany'}
             </Button>
 

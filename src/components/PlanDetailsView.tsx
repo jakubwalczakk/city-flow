@@ -3,7 +3,7 @@ import { useActivityFormState } from '@/hooks/useActivityFormState';
 import PlanHeader from '@/components/PlanHeader';
 import GeneratedPlanView from '@/components/GeneratedPlanView';
 import { ActivityForm } from '@/components/ActivityForm';
-import NewPlanForm from '@/components/NewPlanForm';
+import DraftPlanView from '@/components/DraftPlanView';
 import { LoadingView, ErrorView, NotFoundView, BackLink, ArchivedBanner } from '@/components/ui/state-views';
 import { QueryProvider } from '@/components/providers/QueryProvider';
 
@@ -60,17 +60,16 @@ function PlanDetailsViewContent({ planId }: PlanDetailsViewProps) {
 
       {plan.status === 'draft' && (
         <div className='mt-6' data-testid='plan-draft-section'>
-          <NewPlanForm
-            editingPlan={{
-              id: plan.id,
-              name: plan.name,
-              destination: plan.destination,
-              start_date: plan.start_date,
-              end_date: plan.end_date,
-              status: plan.status,
-              created_at: plan.created_at,
+          <DraftPlanView
+            plan={plan}
+            onGenerate={() => {
+              window.location.reload();
+              return Promise.resolve();
             }}
-            onFinished={() => window.location.reload()}
+            onEdit={() => {
+              // Navigate to edit mode if needed
+              window.location.reload();
+            }}
           />
         </div>
       )}

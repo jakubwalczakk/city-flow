@@ -30,6 +30,36 @@ alwaysApply: false
 
 - Structure tests for maintainability - Group related tests with descriptive `describe` blocks, use explicit assertion messages, and follow the Arrange-Act-Assert pattern to make tests self-documenting.
 
+#### CRITICAL: Use Test IDs Instead of Text Queries
+
+**NEVER use `getByText`, `queryByText`, `findByText`, or any text-based queries in tests.** Always use `getByTestId`, `queryByTestId`, or `findByTestId` instead.
+
+**Why:**
+- Test IDs make tests stable and not dependent on text/translation changes
+- Text content can change without breaking functionality
+- Test IDs create explicit contracts between components and tests
+
+**Bad (FORBIDDEN):**
+```tsx
+// ❌ DO NOT USE
+expect(screen.getByText('Submit')).toBeInTheDocument();
+expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
+await screen.findByText('Success');
+```
+
+**Good (REQUIRED):**
+```tsx
+// ✅ ALWAYS USE TEST IDs
+expect(screen.getByTestId('submit-button')).toBeInTheDocument();
+expect(screen.queryByTestId('loading-indicator')).not.toBeInTheDocument();
+await screen.findByTestId('success-message');
+```
+
+**Component Requirements:**
+- All testable elements MUST have `data-testid` attributes
+- Use semantic, descriptive test ID names (e.g., `activity-title`, `submit-button`, `error-message`)
+- Test IDs should be kebab-case and descriptive of the element's purpose
+
 - Leverage TypeScript type checking in tests - Enable strict typing in your tests to catch type errors early, use `expectTypeOf()` for type-level assertions, and ensure mocks preserve the original type signatures.
 
 - Follow 'Arrange', 'Act', 'Assert' approach to test structure for simplicity and readability.

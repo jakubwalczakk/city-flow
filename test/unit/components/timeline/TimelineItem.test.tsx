@@ -86,27 +86,27 @@ describe('TimelineItem', () => {
     it('should render activity title', () => {
       render(<TimelineItem item={baseItem} currency='EUR' />);
 
-      expect(screen.getByText('Visit Eiffel Tower')).toBeInTheDocument();
+      expect(screen.getByTestId('activity-title')).toHaveTextContent('Visit Eiffel Tower');
     });
 
     it('should render activity time', () => {
       render(<TimelineItem item={baseItem} currency='EUR' />);
 
       expect(screen.getByTestId('activity-time')).toBeInTheDocument();
-      expect(screen.getByText('09:00')).toBeInTheDocument();
+      expect(screen.getByTestId('activity-time')).toHaveTextContent('09:00');
     });
 
     it('should render category badge', () => {
       render(<TimelineItem item={baseItem} currency='EUR' />);
 
       expect(screen.getByTestId('badge')).toBeInTheDocument();
-      expect(screen.getByText('Label-culture')).toBeInTheDocument();
+      expect(screen.getByTestId('badge')).toHaveTextContent('Label-culture');
     });
 
     it('should render category icon', () => {
       render(<TimelineItem item={baseItem} currency='EUR' />);
 
-      expect(screen.getByText('CategoryIcon')).toBeInTheDocument();
+      expect(screen.getByTestId('badge')).toHaveTextContent('CategoryIcon');
       expect(timelineCategories.getCategoryIcon).toHaveBeenCalledWith('culture');
     });
 
@@ -121,42 +121,42 @@ describe('TimelineItem', () => {
     it('should render location when provided', () => {
       render(<TimelineItem item={baseItem} currency='EUR' />);
 
-      expect(screen.getByText('Champ de Mars, Paris')).toBeInTheDocument();
-      expect(screen.getByText('MapPin')).toBeInTheDocument();
+      expect(screen.getByTestId('activity-location')).toHaveTextContent('Champ de Mars, Paris');
+      expect(screen.getByTestId('activity-location')).toHaveTextContent('MapPin');
     });
 
     it('should not render location when not provided', () => {
       const itemWithoutLocation = { ...baseItem, location: undefined };
       render(<TimelineItem item={itemWithoutLocation} currency='EUR' />);
 
-      expect(screen.queryByText('MapPin')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('activity-location')).not.toBeInTheDocument();
     });
 
     it('should render description when provided', () => {
       render(<TimelineItem item={baseItem} currency='EUR' />);
 
-      expect(screen.getByText('Visit the famous landmark')).toBeInTheDocument();
+      expect(screen.getByTestId('activity-description')).toHaveTextContent('Visit the famous landmark');
     });
 
     it('should not render description when not provided', () => {
       const itemWithoutDescription = { ...baseItem, description: undefined };
       render(<TimelineItem item={itemWithoutDescription} currency='EUR' />);
 
-      expect(screen.queryByText('Visit the famous landmark')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('activity-description')).not.toBeInTheDocument();
     });
 
     it('should render notes when provided', () => {
       const itemWithNotes = { ...baseItem, notes: 'Bring camera' };
       render(<TimelineItem item={itemWithNotes} currency='EUR' />);
 
-      expect(screen.getByText('Notatka:')).toBeInTheDocument();
-      expect(screen.getByText(/Bring camera/)).toBeInTheDocument();
+      expect(screen.getByTestId('activity-notes-label')).toHaveTextContent('Notatka:');
+      expect(screen.getByTestId('activity-notes')).toHaveTextContent('Bring camera');
     });
 
     it('should not render notes when not provided', () => {
       render(<TimelineItem item={baseItem} currency='EUR' />);
 
-      expect(screen.queryByText('Notatka:')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('activity-notes')).not.toBeInTheDocument();
     });
 
     it('should render time badge when time is provided', () => {
@@ -178,27 +178,27 @@ describe('TimelineItem', () => {
       const itemWithPrice = { ...baseItem, estimated_price: '25' };
       render(<TimelineItem item={itemWithPrice} currency='EUR' />);
 
-      expect(screen.getByText('25 EUR')).toBeInTheDocument();
+      expect(screen.getByTestId('activity-price')).toHaveTextContent('25 EUR');
     });
 
     it('should use provided currency for price', () => {
       const itemWithPrice = { ...baseItem, estimated_price: '25' };
       render(<TimelineItem item={itemWithPrice} currency='USD' />);
 
-      expect(screen.getByText('25 USD')).toBeInTheDocument();
+      expect(screen.getByTestId('activity-price')).toHaveTextContent('25 USD');
     });
 
     it('should not render price when zero', () => {
       const itemWithZeroPrice = { ...baseItem, estimated_price: '0' };
       render(<TimelineItem item={itemWithZeroPrice} currency='EUR' />);
 
-      expect(screen.queryByText(/EUR/)).not.toBeInTheDocument();
+      expect(screen.queryByTestId('activity-price')).not.toBeInTheDocument();
     });
 
     it('should not render price when not provided', () => {
       render(<TimelineItem item={baseItem} currency='EUR' />);
 
-      expect(screen.queryByText(/EUR/)).not.toBeInTheDocument();
+      expect(screen.queryByTestId('activity-price')).not.toBeInTheDocument();
     });
   });
 
@@ -219,7 +219,7 @@ describe('TimelineItem', () => {
       render(<TimelineItem item={baseItem} currency='EUR' onEdit={mockOnEdit} />);
 
       expect(screen.getByTestId('edit-activity')).toBeInTheDocument();
-      expect(screen.getByText('Edytuj')).toBeInTheDocument();
+      expect(screen.getByTestId('edit-activity')).toHaveTextContent('Edytuj');
     });
 
     it('should call onEdit with item when edit is clicked', async () => {
@@ -236,7 +236,7 @@ describe('TimelineItem', () => {
       render(<TimelineItem item={baseItem} currency='EUR' onDelete={mockOnDelete} />);
 
       expect(screen.getByTestId('delete-activity')).toBeInTheDocument();
-      expect(screen.getByText('Usuń')).toBeInTheDocument();
+      expect(screen.getByTestId('delete-activity')).toHaveTextContent('Usuń');
     });
 
     it('should call onDelete with item id when delete is clicked', async () => {
@@ -273,7 +273,7 @@ describe('TimelineItem', () => {
     it('should have screen reader text for menu button', () => {
       render(<TimelineItem item={baseItem} currency='EUR' onEdit={mockOnEdit} />);
 
-      expect(screen.getByText('Otwórz menu')).toBeInTheDocument();
+      expect(screen.getByTestId('menu-sr-label')).toHaveTextContent('Otwórz menu');
     });
   });
 
@@ -314,12 +314,12 @@ describe('TimelineItem', () => {
 
       render(<TimelineItem item={completeItem} currency='EUR' onEdit={mockOnEdit} onDelete={mockOnDelete} />);
 
-      expect(screen.getByText('Visit Eiffel Tower')).toBeInTheDocument();
-      expect(screen.getByText('09:00')).toBeInTheDocument();
-      expect(screen.getByText('Champ de Mars, Paris')).toBeInTheDocument();
-      expect(screen.getByText('Visit the famous landmark')).toBeInTheDocument();
-      expect(screen.getByText(/Book tickets in advance/)).toBeInTheDocument();
-      expect(screen.getByText('50 EUR')).toBeInTheDocument();
+      expect(screen.getByTestId('activity-title')).toHaveTextContent('Visit Eiffel Tower');
+      expect(screen.getByTestId('activity-time')).toHaveTextContent('09:00');
+      expect(screen.getByTestId('activity-location')).toHaveTextContent('Champ de Mars, Paris');
+      expect(screen.getByTestId('activity-description')).toHaveTextContent('Visit the famous landmark');
+      expect(screen.getByTestId('activity-notes')).toHaveTextContent('Book tickets in advance');
+      expect(screen.getByTestId('activity-price')).toHaveTextContent('50 EUR');
       expect(screen.getByTestId('edit-activity')).toBeInTheDocument();
       expect(screen.getByTestId('delete-activity')).toBeInTheDocument();
     });
