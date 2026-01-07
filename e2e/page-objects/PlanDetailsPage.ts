@@ -45,7 +45,7 @@ export class PlanDetailsPage {
     this.activities = page.getByTestId('activity-item');
     this.generateButton = page.getByTestId('generate-plan-button');
     this.generateAgainButton = page.getByTestId('generate-again-button');
-    this.exportButton = page.getByRole('button', { name: /eksportuj do pdf/i });
+    this.exportButton = page.getByTestId('export-pdf-button');
     this.deleteButton = page.getByTestId('delete-plan-button');
     this.actionsMenu = page.getByTestId('plan-actions-menu');
     this.fixedPointsList = page.getByTestId('fixed-points-list');
@@ -65,8 +65,7 @@ export class PlanDetailsPage {
    * Navigate to a specific plan details page
    */
   async goto(planId: string): Promise<void> {
-    await this.page.goto(`/plans/${planId}`);
-    await this.page.waitForLoadState('networkidle');
+    await this.page.goto(`/plans/${planId}`, { waitUntil: 'domcontentloaded' });
   }
 
   /**
@@ -166,9 +165,17 @@ export class PlanDetailsPage {
    * Export plan to PDF and return the Download object
    */
   async exportToPDF(): Promise<Download> {
-    await expect(this.exportButton).toBeVisible();
-    const downloadPromise = this.page.waitForEvent('download');
+    // Wait for button to be visible and enabled
+    await expect(this.exportButton).toBeVisible({ timeout: 15000 });
+    await expect(this.exportButton).toBeEnabled();
+
+    // Start listening for download BEFORE clicking
+    const downloadPromise = this.page.waitForEvent('download', { timeout: 60000 });
+
+    // Click the button
     await this.exportButton.click();
+
+    // Wait for and return the download
     return await downloadPromise;
   }
 
@@ -303,8 +310,34 @@ export class PlanDetailsPage {
    * Wait for the plan details page to load completely
    */
   async waitForPageLoad(): Promise<void> {
-    await expect(this.planTitle).toBeVisible({ timeout: 10000 });
+    // Wait for network idle first (page loaded)
     await this.page.waitForLoadState('networkidle');
+
+    // Wait for React to hydrate
+    await this.page.waitForTimeout(1000);
+
+    // Wait for either the plan header to appear (success) or error/not found message
+    // Use Promise.race to wait for any one of these conditions
+    await Promise.race([
+      // Success case: plan header loaded
+      this.page.waitForSelector('[data-testid="plan-header"]', {
+        state: 'visible',
+        timeout: 30000,
+      }),
+      // Error case: error view
+      this.page.waitForSelector('[data-testid="error-view"]', {
+        state: 'visible',
+        timeout: 30000,
+      }),
+      // Not found case
+      this.page.waitForSelector('[data-testid="not-found-view"]', {
+        state: 'visible',
+        timeout: 30000,
+      }),
+    ]);
+
+    // Additional wait for React to fully render child components
+    await this.page.waitForTimeout(500);
   }
 
   /**

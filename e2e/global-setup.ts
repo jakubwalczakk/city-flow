@@ -76,7 +76,7 @@ async function globalSetup(_config: FullConfig) {
           .from('profiles')
           .update({
             onboarding_completed: true,
-            generations_used: 0,
+            generations_remaining: 5,
           })
           .eq('id', signInData.user.id);
 
@@ -109,7 +109,7 @@ async function globalSetup(_config: FullConfig) {
             onboarding_completed: true,
             travel_pace: 'moderate',
             preferences: ['culture', 'food', 'sightseeing'],
-            generations_used: 0,
+            generations_remaining: 5,
           })
           .eq('id', signUpData.user.id);
 
@@ -190,6 +190,12 @@ async function createStorageState(email: string, password: string, userKey: stri
       await skipButton.click();
       await page.waitForTimeout(500);
     }
+
+    // Wait for network idle to ensure cookies are set
+    await page.waitForLoadState('networkidle');
+
+    // Additional wait to ensure Supabase cookies are persisted
+    await page.waitForTimeout(2000);
 
     // Save storage state
     const storagePath = path.join(storageDir, `${userKey}.json`);

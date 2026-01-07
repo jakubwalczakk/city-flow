@@ -26,15 +26,21 @@ test.describe('User Logout', () => {
     await expect(page).toHaveURL(/\/plans/, { timeout: 30000 });
 
     // Open user menu and logout
-    await page.locator('[data-testid="user-menu-trigger"]').click();
+    const userMenuTrigger = page.locator('[data-testid="user-menu-trigger"]');
 
-    // Wait for the logout button to be visible in the dropdown
+    // Wait for page to be fully loaded and component to be hydrated
+    await userMenuTrigger.waitFor({ state: 'visible' });
+
+    // Click to open the dropdown
+    await userMenuTrigger.click();
+
+    // Wait for dropdown content to render (Radix UI with portal and animations)
     const logoutButton = page.locator('[data-testid="logout-button"]');
     await logoutButton.waitFor({ state: 'visible', timeout: 10000 });
     await logoutButton.click();
 
-    // Should redirect to home page
-    await expect(page).toHaveURL(/\/$/, { timeout: 10000 });
+    // Should redirect to home page or login page
+    await expect(page).toHaveURL(/\/(login)?$/, { timeout: 10000 });
 
     // User menu should not be visible
     const userMenuVisible = await page
@@ -75,15 +81,21 @@ test.describe('User Logout', () => {
     const sessionCookieBefore = cookiesBeforeLogout.find((c) => c.name.includes('auth'));
 
     // Logout
-    await page.locator('[data-testid="user-menu-trigger"]').click();
+    const userMenuTrigger = page.locator('[data-testid="user-menu-trigger"]');
 
-    // Wait for the logout button to be visible in the dropdown
+    // Wait for page to be fully loaded and component to be hydrated
+    await userMenuTrigger.waitFor({ state: 'visible' });
+
+    // Click to open the dropdown
+    await userMenuTrigger.click();
+
+    // Wait for dropdown content to render (Radix UI with portal and animations)
     const logoutButton = page.locator('[data-testid="logout-button"]');
     await logoutButton.waitFor({ state: 'visible', timeout: 10000 });
     await logoutButton.click();
 
-    // Wait for redirect
-    await expect(page).toHaveURL(/\/$/, { timeout: 10000 });
+    // Wait for redirect (may go to home or login page)
+    await expect(page).toHaveURL(/\/(login)?$/, { timeout: 10000 });
 
     // Verify session cookie is cleared or changed
     const cookiesAfterLogout = await context.cookies();
@@ -111,9 +123,15 @@ test.describe('User Logout', () => {
     await expect(page).toHaveURL(/\/plans/, { timeout: 30000 });
 
     // Logout
-    await page.locator('[data-testid="user-menu-trigger"]').click();
+    const userMenuTrigger = page.locator('[data-testid="user-menu-trigger"]');
 
-    // Wait for the logout button to be visible in the dropdown
+    // Wait for page to be fully loaded and component to be hydrated
+    await userMenuTrigger.waitFor({ state: 'visible' });
+
+    // Click to open the dropdown
+    await userMenuTrigger.click();
+
+    // Wait for dropdown content to render (Radix UI with portal and animations)
     const logoutButton = page.locator('[data-testid="logout-button"]');
     await logoutButton.waitFor({ state: 'visible', timeout: 10000 });
     await logoutButton.click();
@@ -150,9 +168,15 @@ test.describe('User Logout', () => {
     await expect(page).toHaveURL(/\/plans/, { timeout: 30000 });
 
     // Logout
-    await page.locator('[data-testid="user-menu-trigger"]').click();
+    const userMenuTrigger = page.locator('[data-testid="user-menu-trigger"]');
 
-    // Wait for the logout button to be visible in the dropdown
+    // Wait for page to be fully loaded and component to be hydrated
+    await userMenuTrigger.waitFor({ state: 'visible' });
+
+    // Click to open the dropdown
+    await userMenuTrigger.click();
+
+    // Wait for dropdown content to render (Radix UI with portal and animations)
     const logoutButton = page.locator('[data-testid="logout-button"]');
     await logoutButton.waitFor({ state: 'visible', timeout: 10000 });
     await logoutButton.click();

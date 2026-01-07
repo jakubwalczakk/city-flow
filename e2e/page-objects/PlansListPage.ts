@@ -11,6 +11,8 @@ export class PlansListPage {
   readonly planCards: Locator;
   readonly emptyState: Locator;
   readonly filterDropdown: Locator;
+  readonly loadingState: Locator;
+  readonly plansContainer: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -18,6 +20,8 @@ export class PlansListPage {
     this.planCards = page.getByTestId('plan-card');
     this.emptyState = page.getByTestId('empty-state');
     this.filterDropdown = page.getByTestId('filter-dropdown');
+    this.loadingState = page.getByTestId('plans-list-loading');
+    this.plansContainer = page.getByTestId('plans-list-container');
   }
 
   /**
@@ -159,20 +163,19 @@ export class PlansListPage {
   }
 
   /**
-   * Wait for plans to load
+   * Wait for plans to load by waiting for loading state to disappear
+   * and then either empty state or plans container to appear
    */
   async waitForPlansToLoad(): Promise<void> {
-    // Wait for either empty state or plan cards to appear
-    await Promise.race([
-      this.emptyState.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {
-        /* Empty state not visible */
-      }),
-      this.planCards
-        .first()
-        .waitFor({ state: 'visible', timeout: 5000 })
-        .catch(() => {
-          /* Plan cards not visible */
-        }),
-    ]);
+    // First, wait for any initial loading to complete
+    // The loading state might not appear if data is cached, so we wait with a short timeout
+    await this.loadingState.waitFor({ state: 'hidden', timeout: 10000 }).catch(() => {
+      // Loading state was never visible or already hidden
+    });
+
+    // Now wait for either empty state or plans container to be visible
+    await expect(this.page.locator('[data-testid="empty-state"], [data-testid="plans-list-container"]')).toBeVisible({
+      timeout: 10000,
+    });
   }
 }
