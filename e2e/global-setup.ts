@@ -23,22 +23,17 @@ const SHARED_TEST_USERS = {
   PLAN_EDITOR: 'e2e-plan-editor@test.com',
 } as const;
 
-type ConfigUse = {
-  supabaseUrl?: string;
-  supabaseKey?: string;
-};
-
 /**
  * Global setup that runs once before all tests.
  * Creates shared test users and saves their authentication state.
  */
-async function globalSetup(config: FullConfig) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+async function globalSetup(_config: FullConfig) {
   console.log('🚀 Global Setup: Creating shared test users...');
 
-  // Get from config.use (passed from playwright.config.ts)
-  const configUse = config.use as ConfigUse;
-  const supabaseUrl = configUse?.supabaseUrl || process.env.SUPABASE_URL;
-  const supabaseKey = configUse?.supabaseKey || process.env.SUPABASE_KEY;
+  // Get from environment variables (playwright.config.ts sets these)
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseKey = process.env.SUPABASE_KEY;
 
   if (!supabaseUrl || !supabaseKey) {
     console.error('  ❌ Missing SUPABASE_URL or SUPABASE_KEY');
@@ -152,16 +147,9 @@ async function cleanUserData(supabase: SupabaseClient<Database>, userId: string)
   const planIds = plans?.map((p) => p.id) ?? [];
 
   if (planIds.length > 0) {
-    // Delete generated plan days and activities
-    const { data: days } = await supabase.from('generated_plan_days').select('id').in('plan_id', planIds);
-    const dayIds = days?.map((d) => d.id) ?? [];
-
-    if (dayIds.length > 0) {
-      await supabase.from('plan_activities').delete().in('plan_day_id', dayIds);
-    }
-
-    await supabase.from('generated_plan_days').delete().in('plan_id', planIds);
+    // Delete related data
     await supabase.from('fixed_points').delete().in('plan_id', planIds);
+    await supabase.from('feedback').delete().in('plan_id', planIds);
   }
 
   // Delete plans
@@ -179,15 +167,19 @@ async function createStorageState(email: string, password: string, userKey: stri
   try {
     // Navigate to login page
     const baseURL = process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:4321';
-    await page.goto(`${baseURL}/login`);
+    await page.goto(`${baseURL}/login`, { waitUntil: 'networkidle' });
+
+    // Wait for the form to be ready (React hydration)
+    await page.waitForSelector('[data-testid="auth-email-input"]', { state: 'visible', timeout: 30000 });
+    await page.waitForSelector('[data-testid="auth-password-input"]', { state: 'visible', timeout: 30000 });
 
     // Fill login form
-    await page.fill('[name="email"]', email);
-    await page.fill('[name="password"]', password);
-    await page.click('button[type="submit"]');
+    await page.fill('[data-testid="auth-email-input"]', email);
+    await page.fill('[data-testid="auth-password-input"]', password);
+    await page.click('[data-testid="auth-submit-btn"]');
 
     // Wait for navigation after login
-    await page.waitForURL(/\/plans|\//, { timeout: 10000 });
+    await page.waitForURL(/\/plans|\//, { timeout: 15000 });
 
     // Handle onboarding modal if it appears
     const onboardingModal = page.locator('[data-testid="onboarding-modal"]');

@@ -27,8 +27,11 @@ test.describe('User Logout', () => {
 
     // Open user menu and logout
     await page.locator('[data-testid="user-menu-trigger"]').click();
-    await page.waitForTimeout(500);
-    await page.locator('[data-testid="logout-button"]').click();
+
+    // Wait for the logout button to be visible in the dropdown
+    const logoutButton = page.locator('[data-testid="logout-button"]');
+    await logoutButton.waitFor({ state: 'visible', timeout: 10000 });
+    await logoutButton.click();
 
     // Should redirect to home page
     await expect(page).toHaveURL(/\/$/, { timeout: 10000 });
@@ -73,8 +76,11 @@ test.describe('User Logout', () => {
 
     // Logout
     await page.locator('[data-testid="user-menu-trigger"]').click();
-    await page.waitForTimeout(500);
-    await page.locator('[data-testid="logout-button"]').click();
+
+    // Wait for the logout button to be visible in the dropdown
+    const logoutButton = page.locator('[data-testid="logout-button"]');
+    await logoutButton.waitFor({ state: 'visible', timeout: 10000 });
+    await logoutButton.click();
 
     // Wait for redirect
     await expect(page).toHaveURL(/\/$/, { timeout: 10000 });
@@ -106,8 +112,11 @@ test.describe('User Logout', () => {
 
     // Logout
     await page.locator('[data-testid="user-menu-trigger"]').click();
-    await page.waitForTimeout(500);
-    await page.locator('[data-testid="logout-button"]').click();
+
+    // Wait for the logout button to be visible in the dropdown
+    const logoutButton = page.locator('[data-testid="logout-button"]');
+    await logoutButton.waitFor({ state: 'visible', timeout: 10000 });
+    await logoutButton.click();
     await expect(page).toHaveURL(/\/$/, { timeout: 10000 });
 
     // Try to access protected routes
@@ -142,8 +151,11 @@ test.describe('User Logout', () => {
 
     // Logout
     await page.locator('[data-testid="user-menu-trigger"]').click();
-    await page.waitForTimeout(500);
-    await page.locator('[data-testid="logout-button"]').click();
+
+    // Wait for the logout button to be visible in the dropdown
+    const logoutButton = page.locator('[data-testid="logout-button"]');
+    await logoutButton.waitFor({ state: 'visible', timeout: 10000 });
+    await logoutButton.click();
     await expect(page).toHaveURL(/\/$/, { timeout: 10000 });
 
     // Login again

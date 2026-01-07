@@ -45,6 +45,9 @@ test.describe('Generation Error Handling', () => {
   });
 
   test('should handle 500 Internal Server Error', async ({ page, supabase, testUser }) => {
+    // Local initialization (not global)
+    const planDetailsPage = new PlanDetailsPage(page);
+
     // Arrange
     const { planId } = await createTestPlan(supabase, testUser.id, {
       status: 'draft',
@@ -81,6 +84,9 @@ test.describe('Generation Error Handling', () => {
   });
 
   test('should handle unrealistic plan with warning', async ({ page, supabase, testUser }) => {
+    // Local initialization (not global)
+    const planDetailsPage = new PlanDetailsPage(page);
+
     // Arrange
     const { planId } = await createTestPlan(supabase, testUser.id, {
       name: 'Ambitious Plan',
@@ -96,8 +102,8 @@ test.describe('Generation Error Handling', () => {
       fixedPoints.push({
         plan_id: planId,
         location: `Location ${i + 1}`,
-        date: '2026-06-15',
-        time: `${8 + i}:00`,
+        event_at: `2026-06-15T${8 + i}:00:00Z`,
+        event_duration: 60,
         description: `Fixed point ${i + 1}`,
       });
     }
@@ -129,6 +135,9 @@ test.describe('Generation Error Handling', () => {
   });
 
   test('should handle validation error - missing destination', async ({ page, supabase, testUser }) => {
+    // Local initialization (not global)
+    const planDetailsPage = new PlanDetailsPage(page);
+
     // Arrange - Create plan without destination (should be prevented by UI/validation)
     const { planId } = await createTestPlan(supabase, testUser.id, {
       name: 'Plan without destination',
@@ -175,6 +184,9 @@ test.describe('Generation Error Handling', () => {
   });
 
   test('should allow retry after error', async ({ page, supabase, testUser }) => {
+    // Local initialization (not global)
+    const planDetailsPage = new PlanDetailsPage(page);
+
     // Arrange
     const { planId } = await createTestPlan(supabase, testUser.id, {
       status: 'draft',

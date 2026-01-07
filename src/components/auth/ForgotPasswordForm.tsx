@@ -20,7 +20,7 @@ export function ForgotPasswordForm() {
           <CheckCircle2 className='h-4 w-4' />
           <AlertDescription>
             <p className='font-medium'>Email został wysłany!</p>
-            <p className='mt-2 text-sm'>
+            <p className='mt-2 text-sm' data-testid='success-instructions'>
               Sprawdź swoją skrzynkę odbiorczą i kliknij w link, aby zresetować hasło. Link jest ważny przez 1 godzinę.
             </p>
           </AlertDescription>
@@ -29,11 +29,15 @@ export function ForgotPasswordForm() {
         <div className='text-center space-y-4'>
           <p className='text-sm text-muted-foreground'>
             Nie otrzymałeś emaila?{' '}
-            <button onClick={resetSuccess} className='text-primary hover:underline'>
+            <button onClick={resetSuccess} className='text-primary hover:underline' data-testid='try-again-button'>
               Spróbuj ponownie
             </button>
           </p>
-          <a href='/login' className='inline-block text-sm text-primary hover:underline'>
+          <a
+            href='/login'
+            className='inline-block text-sm text-primary hover:underline'
+            data-testid='back-to-login-link'
+          >
             ← Powrót do logowania
           </a>
         </div>
@@ -84,7 +88,7 @@ export function ForgotPasswordForm() {
       </Form>
 
       <div className='text-center space-y-2'>
-        <p className='text-sm text-muted-foreground'>
+        <p className='text-sm text-muted-foreground' data-testid='instructions-text'>
           Pamiętasz hasło?{' '}
           <a href='/login' className='text-primary hover:underline' data-testid='login-link'>
             Zaloguj się

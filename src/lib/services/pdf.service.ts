@@ -213,7 +213,7 @@ export const generatePlanPdf = async (plan: PlanDetailsDto): Promise<Buffer> => 
  * Helper function to get text label for activity category
  * Note: Standard PDF fonts don't support emoji, so we use text labels
  */
-function getCategoryLabel(category: string): string {
+export function getCategoryLabel(category: string): string {
   const labelMap: Record<string, string> = {
     history: '[History]',
     food: '[Food]',
@@ -230,7 +230,7 @@ function getCategoryLabel(category: string): string {
 /**
  * Helper function to split long text into lines
  */
-function splitTextIntoLines(text: string, maxLength: number): string[] {
+export function splitTextIntoLines(text: string, maxLength: number): string[] {
   const words = text.split(' ');
   const lines: string[] = [];
   let currentLine = '';

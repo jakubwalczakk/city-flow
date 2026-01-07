@@ -17,7 +17,7 @@ export function GoogleAuthButton({ mode = 'login' }: GoogleAuthButtonProps) {
   return (
     <div className='space-y-4'>
       {error && (
-        <Alert variant='destructive'>
+        <Alert variant='destructive' data-testid='google-auth-error'>
           <AlertCircle className='h-4 w-4' />
           <AlertDescription>{error}</AlertDescription>
         </Alert>

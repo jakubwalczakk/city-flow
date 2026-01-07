@@ -1,4 +1,5 @@
-import { authTest as test, expect, createPlanWithActivities, createFeedback, getFeedback } from '../fixtures';
+import { feedbackTest as test, expect } from '../shared-user-fixtures';
+import { createPlanWithActivities, createFeedback, getFeedback, createTestUser, deleteTestUser } from '../fixtures';
 import { PlanDetailsPage } from '../page-objects/PlanDetailsPage';
 import { PlansListPage } from '../page-objects/PlansListPage';
 
@@ -8,9 +9,9 @@ import { PlansListPage } from '../page-objects/PlansListPage';
  */
 
 test.describe('Feedback Persistence', () => {
-  test('should preserve feedback after page refresh', async ({ page, supabase, testUser }) => {
+  test('should preserve feedback after page refresh', async ({ page, supabase, sharedUser }) => {
     // Create a generated plan
-    const planId = await createPlanWithActivities(supabase, testUser.id, {
+    const planId = await createPlanWithActivities(supabase, sharedUser.id, {
       name: 'Paris Weekend',
       destination: 'Paris',
       startDate: '2026-06-15',
@@ -49,14 +50,14 @@ test.describe('Feedback Persistence', () => {
     expect(await planDetailsPage.feedbackModule.getComment()).toBe(commentText);
 
     // Verify in database
-    const feedback = await getFeedback(supabase, testUser.id, planId);
-    expect(feedback?.rating).toBe('positive');
+    const feedback = await getFeedback(supabase, sharedUser.id, planId);
+    expect(feedback?.rating).toBe('thumbs_up');
     expect(feedback?.comment).toBe(commentText);
   });
 
-  test('should preserve feedback when navigating away and back', async ({ page, supabase, testUser }) => {
+  test('should preserve feedback when navigating away and back', async ({ page, supabase, sharedUser }) => {
     // Create a generated plan
-    const planId = await createPlanWithActivities(supabase, testUser.id, {
+    const planId = await createPlanWithActivities(supabase, sharedUser.id, {
       name: 'Rome Adventure',
       destination: 'Rome',
       startDate: '2026-07-01',
@@ -98,9 +99,9 @@ test.describe('Feedback Persistence', () => {
     expect(await planDetailsPage.feedbackModule.getComment()).toBe(commentText);
   });
 
-  test('should allow each user to have separate feedback for same plan', async ({ page, supabase, testUser }) => {
+  test('should allow each user to have separate feedback for same plan', async ({ page, supabase, sharedUser }) => {
     // Create a generated plan
-    const planId = await createPlanWithActivities(supabase, testUser.id, {
+    const planId = await createPlanWithActivities(supabase, sharedUser.id, {
       name: 'Barcelona Trip',
       destination: 'Barcelona',
       startDate: '2026-08-01',
@@ -130,8 +131,8 @@ test.describe('Feedback Persistence', () => {
     await planDetailsPage.feedbackModule.submitFeedback();
 
     // Verify User 1 feedback
-    const user1Feedback = await getFeedback(supabase, testUser.id, planId);
-    expect(user1Feedback?.rating).toBe('positive');
+    const user1Feedback = await getFeedback(supabase, sharedUser.id, planId);
+    expect(user1Feedback?.rating).toBe('thumbs_up');
     expect(user1Feedback?.comment).toBe(user1Comment);
 
     // Create second user and give them access to the plan (if needed)
@@ -144,15 +145,15 @@ test.describe('Feedback Persistence', () => {
 
     try {
       // Create User 2 feedback for the same plan (simulating separate access)
-      await createFeedback(supabase, user2.user.id, planId, 'negative', 'User 2 dislikes this plan');
+      await createFeedback(supabase, user2.user.id, planId, 'thumbs_down', 'User 2 dislikes this plan');
 
       // Verify both feedbacks exist
-      const user1FeedbackCheck = await getFeedback(supabase, testUser.id, planId);
+      const user1FeedbackCheck = await getFeedback(supabase, sharedUser.id, planId);
       const user2FeedbackCheck = await getFeedback(supabase, user2.user.id, planId);
 
-      expect(user1FeedbackCheck?.rating).toBe('positive');
+      expect(user1FeedbackCheck?.rating).toBe('thumbs_up');
       expect(user1FeedbackCheck?.comment).toBe(user1Comment);
-      expect(user2FeedbackCheck?.rating).toBe('negative');
+      expect(user2FeedbackCheck?.rating).toBe('thumbs_down');
       expect(user2FeedbackCheck?.comment).toBe('User 2 dislikes this plan');
 
       // Verify they have different IDs
@@ -163,9 +164,9 @@ test.describe('Feedback Persistence', () => {
     }
   });
 
-  test('should not show other users feedback', async ({ page, supabase, testUser }) => {
+  test('should not show other users feedback', async ({ page, supabase, sharedUser }) => {
     // Create a generated plan
-    const planId = await createPlanWithActivities(supabase, testUser.id, {
+    const planId = await createPlanWithActivities(supabase, sharedUser.id, {
       name: 'Amsterdam Weekend',
       destination: 'Amsterdam',
       startDate: '2026-09-01',
@@ -202,7 +203,7 @@ test.describe('Feedback Persistence', () => {
 
     try {
       // User 2 creates feedback
-      await createFeedback(supabase, user2.user.id, planId, 'negative', 'User 2 comment');
+      await createFeedback(supabase, user2.user.id, planId, 'thumbs_down', 'User 2 comment');
 
       // Refresh page as User 1
       await page.reload();
@@ -219,9 +220,9 @@ test.describe('Feedback Persistence', () => {
     }
   });
 
-  test('should load existing feedback on page load', async ({ page, supabase, testUser }) => {
+  test('should load existing feedback on page load', async ({ page, supabase, sharedUser }) => {
     // Create a generated plan
-    const planId = await createPlanWithActivities(supabase, testUser.id, {
+    const planId = await createPlanWithActivities(supabase, sharedUser.id, {
       name: 'Prague Visit',
       destination: 'Prague',
       startDate: '2026-11-01',
@@ -241,7 +242,7 @@ test.describe('Feedback Persistence', () => {
     });
 
     // Create feedback directly in database
-    await createFeedback(supabase, testUser.id, planId, 'positive', 'Pre-existing feedback');
+    await createFeedback(supabase, sharedUser.id, planId, 'thumbs_up', 'Pre-existing feedback');
 
     // Visit plan page
     const planDetailsPage = new PlanDetailsPage(page);
@@ -253,9 +254,9 @@ test.describe('Feedback Persistence', () => {
     expect(await planDetailsPage.feedbackModule.getComment()).toBe('Pre-existing feedback');
   });
 
-  test('should update existing feedback when resubmitting', async ({ page, supabase, testUser }) => {
+  test('should update existing feedback when resubmitting', async ({ page, supabase, sharedUser }) => {
     // Create a generated plan
-    const planId = await createPlanWithActivities(supabase, testUser.id, {
+    const planId = await createPlanWithActivities(supabase, sharedUser.id, {
       name: 'Vienna Trip',
       destination: 'Vienna',
       startDate: '2026-12-01',
@@ -283,7 +284,7 @@ test.describe('Feedback Persistence', () => {
     await planDetailsPage.feedbackModule.writeComment('Initial comment');
     await planDetailsPage.feedbackModule.submitFeedback();
 
-    const initialFeedback = await getFeedback(supabase, testUser.id, planId);
+    const initialFeedback = await getFeedback(supabase, sharedUser.id, planId);
     const initialFeedbackId = initialFeedback?.id;
 
     // Reload page
@@ -297,15 +298,15 @@ test.describe('Feedback Persistence', () => {
     await planDetailsPage.feedbackModule.submitFeedback();
 
     // Verify it's an UPDATE not INSERT
-    const updatedFeedback = await getFeedback(supabase, testUser.id, planId);
+    const updatedFeedback = await getFeedback(supabase, sharedUser.id, planId);
     expect(updatedFeedback?.id).toBe(initialFeedbackId);
-    expect(updatedFeedback?.rating).toBe('negative');
+    expect(updatedFeedback?.rating).toBe('thumbs_down');
     expect(updatedFeedback?.comment).toBe('Updated comment');
   });
 
-  test('should maintain feedback integrity across multiple page visits', async ({ page, supabase, testUser }) => {
+  test('should maintain feedback integrity across multiple page visits', async ({ page, supabase, sharedUser }) => {
     // Create a generated plan
-    const planId = await createPlanWithActivities(supabase, testUser.id, {
+    const planId = await createPlanWithActivities(supabase, sharedUser.id, {
       name: 'Berlin Weekend',
       destination: 'Berlin',
       startDate: '2027-01-15',
@@ -355,8 +356,8 @@ test.describe('Feedback Persistence', () => {
     expect(await planDetailsPage.feedbackModule.getComment()).toBe('Visit 2');
 
     // Final database check
-    const finalFeedback = await getFeedback(supabase, testUser.id, planId);
-    expect(finalFeedback?.rating).toBe('negative');
+    const finalFeedback = await getFeedback(supabase, sharedUser.id, planId);
+    expect(finalFeedback?.rating).toBe('thumbs_down');
     expect(finalFeedback?.comment).toBe('Visit 2');
   });
 });

@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/rules-of-hooks */
-import { test as base, type Page } from '@playwright/test';
+import { test as base, type Page, type Download } from '@playwright/test';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '../src/db/database.types';
 import fs from 'fs';
@@ -458,9 +458,9 @@ export async function verifyPlanNotAccessible(supabase: SupabaseClient<Database>
 export async function setGenerationLimit(
   supabase: SupabaseClient<Database>,
   userId: string,
-  used: number
+  remaining: number
 ): Promise<void> {
-  const { error } = await supabase.from('profiles').update({ generations_used: used }).eq('id', userId);
+  const { error } = await supabase.from('profiles').update({ generations_remaining: remaining }).eq('id', userId);
 
   if (error) {
     throw new Error(`Failed to set generation limit: ${error.message}`);
@@ -471,20 +471,20 @@ export async function setGenerationLimit(
  * Get the current generation count for a user.
  * @param supabase Supabase client
  * @param userId User ID
- * @returns Number of generations used
+ * @returns Number of generations remaining
  */
 export async function getGenerationCount(supabase: SupabaseClient<Database>, userId: string): Promise<number> {
-  const { data, error } = await supabase.from('profiles').select('generations_used').eq('id', userId).single();
+  const { data, error } = await supabase.from('profiles').select('generations_remaining').eq('id', userId).single();
 
   if (error) {
     throw new Error(`Failed to get generation count: ${error.message}`);
   }
 
-  return data?.generations_used || 0;
+  return data?.generations_remaining || 0;
 }
 
 /**
- * Verify that a plan has generated days and activities.
+ * Verify that a plan has generated content with days and activities.
  * @param supabase Supabase client
  * @param planId Plan ID
  * @returns Object with days count and activities count
@@ -493,28 +493,27 @@ export async function verifyPlanGenerated(
   supabase: SupabaseClient<Database>,
   planId: string
 ): Promise<{ daysCount: number; activitiesCount: number }> {
-  // Check generated_plan_days
-  const { data: days } = await supabase.from('generated_plan_days').select('id').eq('plan_id', planId);
+  // Check generated_content in the plans table
+  const { data: plan } = await supabase.from('plans').select('generated_content').eq('id', planId).single();
 
-  const daysCount = days?.length || 0;
+  if (!plan || !plan.generated_content) {
+    return { daysCount: 0, activitiesCount: 0 };
+  }
 
-  // Check plan_activities
-  const { data: daysWithIds } = await supabase.from('generated_plan_days').select('id').eq('plan_id', planId);
-
-  const dayIds = daysWithIds?.map((d) => d.id) || [];
+  const content = plan.generated_content as { days?: { items?: unknown[] }[] };
+  const days = content.days || [];
+  const daysCount = days.length;
 
   let activitiesCount = 0;
-  if (dayIds.length > 0) {
-    const { data: activities } = await supabase.from('plan_activities').select('id').in('plan_day_id', dayIds);
-
-    activitiesCount = activities?.length || 0;
+  for (const day of days) {
+    activitiesCount += day.items?.length || 0;
   }
 
   return { daysCount, activitiesCount };
 }
 
 /**
- * Verify that a fixed point exists in the generated plan activities.
+ * Verify that a fixed point exists in the generated plan content.
  * @param supabase Supabase client
  * @param planId Plan ID
  * @param fixedPointLocation Location of the fixed point to search for
@@ -525,47 +524,41 @@ export async function verifyFixedPointInPlan(
   planId: string,
   fixedPointLocation: string
 ): Promise<boolean> {
-  // Get all days for this plan
-  const { data: days } = await supabase.from('generated_plan_days').select('id').eq('plan_id', planId);
+  // Get generated_content for this plan
+  const { data: plan } = await supabase.from('plans').select('generated_content').eq('id', planId).single();
 
-  if (!days || days.length === 0) return false;
+  if (!plan || !plan.generated_content) return false;
 
-  const dayIds = days.map((d) => d.id);
+  const content = plan.generated_content as {
+    days?: {
+      items?: { title?: string; location?: string }[];
+    }[];
+  };
+  const days = content.days || [];
 
   // Check if any activity has the fixed point location
-  const { data: activities } = await supabase
-    .from('plan_activities')
-    .select('title, location')
-    .in('plan_day_id', dayIds);
+  for (const day of days) {
+    const items = day.items || [];
+    const found = items.some(
+      (item) =>
+        item.title?.toLowerCase().includes(fixedPointLocation.toLowerCase()) ||
+        item.location?.toLowerCase().includes(fixedPointLocation.toLowerCase())
+    );
+    if (found) return true;
+  }
 
-  if (!activities) return false;
-
-  return activities.some(
-    (activity) =>
-      activity.title?.toLowerCase().includes(fixedPointLocation.toLowerCase()) ||
-      activity.location?.toLowerCase().includes(fixedPointLocation.toLowerCase())
-  );
+  return false;
 }
 
 /**
- * Clean all generated plan data (days and activities) for a plan.
+ * Clean all generated plan content for a plan.
  * Useful for testing regeneration.
  * @param supabase Supabase client
  * @param planId Plan ID
  */
 export async function cleanGeneratedPlanData(supabase: SupabaseClient<Database>, planId: string): Promise<void> {
-  // Get all days
-  const { data: days } = await supabase.from('generated_plan_days').select('id').eq('plan_id', planId);
-
-  if (days && days.length > 0) {
-    const dayIds = days.map((d) => d.id);
-
-    // Delete activities (cascade should handle this, but being explicit)
-    await supabase.from('plan_activities').delete().in('plan_day_id', dayIds);
-  }
-
-  // Delete days
-  await supabase.from('generated_plan_days').delete().eq('plan_id', planId);
+  // Clear the generated_content field and set status back to draft
+  await supabase.from('plans').update({ generated_content: null, status: 'draft' }).eq('id', planId);
 }
 
 /**
@@ -658,30 +651,32 @@ export async function createArchivedPlan(
 
   // Add activities if requested
   if (withActivities) {
-    const { data: day } = await supabase
-      .from('generated_plan_days')
-      .insert({
-        plan_id: plan.id,
-        day_number: 1,
-        date: startDate,
-        title: 'Day 1',
-      })
-      .select()
-      .single();
-
-    if (day) {
-      await supabase.from('plan_activities').insert([
+    const generatedContent = {
+      summary: 'Test archived plan with activities',
+      currency: 'EUR',
+      days: [
         {
-          plan_day_id: day.id,
-          title: 'Morning Activity',
-          start_time: '09:00',
-          duration_minutes: 120,
-          category: 'sightseeing',
-          description: 'Test activity',
-          location: 'Test Location',
+          date: startDate,
+          items: [
+            {
+              id: crypto.randomUUID(),
+              type: 'activity',
+              title: 'Morning Activity',
+              time: '09:00',
+              category: 'sightseeing',
+              description: 'Test activity',
+              location: 'Test Location',
+              estimated_duration: '2 hours',
+            },
+          ],
         },
-      ]);
-    }
+      ],
+    };
+
+    await supabase
+      .from('plans')
+      .update({ generated_content: generatedContent as never })
+      .eq('id', plan.id);
   }
 
   return plan.id;
@@ -793,7 +788,7 @@ export async function getArchivedPlanCount(supabase: SupabaseClient<Database>, u
  * @param supabase Supabase client
  * @param userId User ID
  * @param planId Plan ID
- * @param rating Rating ('positive', 'negative', or null)
+ * @param rating Rating ('thumbs_up', 'thumbs_down', or null)
  * @param comment Optional comment text
  * @returns Created feedback record
  */
@@ -801,7 +796,7 @@ export async function createFeedback(
   supabase: SupabaseClient<Database>,
   userId: string,
   planId: string,
-  rating: 'positive' | 'negative' | null,
+  rating: 'thumbs_up' | 'thumbs_down',
   comment?: string
 ) {
   const { data, error } = await supabase
@@ -851,7 +846,7 @@ export async function updateFeedback(
   supabase: SupabaseClient<Database>,
   feedbackId: string,
   updates: {
-    rating?: 'positive' | 'negative' | null;
+    rating?: 'thumbs_up' | 'thumbs_down';
     comment?: string;
   }
 ) {
@@ -1005,16 +1000,8 @@ export async function cleanupUserData(
   const { data: plans } = await supabase.from('plans').select('id').eq('user_id', userId);
   const planIds = plans?.map((p) => p.id) ?? [];
 
-  // Delete generated plan days and activities
+  // Delete fixed points and plans (generated_content is in the plans table)
   if (planIds.length > 0) {
-    const { data: days } = await supabase.from('generated_plan_days').select('id').in('plan_id', planIds);
-    const dayIds = days?.map((d) => d.id) ?? [];
-
-    if (dayIds.length > 0) {
-      await supabase.from('plan_activities').delete().in('plan_day_id', dayIds);
-    }
-
-    await supabase.from('generated_plan_days').delete().in('plan_id', planIds);
     await supabase.from('fixed_points').delete().in('plan_id', planIds);
   }
 
@@ -1026,7 +1013,7 @@ export async function cleanupUserData(
     .from('profiles')
     .update({
       onboarding_completed: true,
-      generations_used: 0,
+      generations_remaining: 5,
     })
     .eq('id', userId);
 

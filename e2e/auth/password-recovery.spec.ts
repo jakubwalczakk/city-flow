@@ -1,12 +1,13 @@
 import { cleanTest as test, expect, generateTestEmail, createTestUser } from '../fixtures';
 import { ForgotPasswordPage } from '../page-objects/ForgotPasswordPage';
+import { UpdatePasswordPage } from '../page-objects/UpdatePasswordPage';
 
 /**
  * E2E Tests for Password Recovery
  * Tests cover: requesting password reset, updating password with token
  */
 test.describe('Password Recovery', () => {
-  test('should display success message when requesting password reset', async ({ supabase }) => {
+  test('should display success message when requesting password reset', async ({ page, supabase }) => {
     const testEmail = generateTestEmail('forgot-password');
     const testPassword = 'OldPassword123!';
     const forgotPasswordPage = new ForgotPasswordPage(page);
@@ -46,6 +47,9 @@ test.describe('Password Recovery', () => {
   });
 
   test('should allow trying again after requesting reset', async ({ page }) => {
+    const testEmail = generateTestEmail('try-again');
+    const forgotPasswordPage = new ForgotPasswordPage(page);
+
     await forgotPasswordPage.goto();
     await forgotPasswordPage.requestReset(testEmail);
 
@@ -70,6 +74,8 @@ test.describe('Password Recovery', () => {
   });
 
   test('should navigate to login from forgot password page', async ({ page }) => {
+    const forgotPasswordPage = new ForgotPasswordPage(page);
+
     await forgotPasswordPage.goto();
 
     await forgotPasswordPage.loginLink.click();
@@ -77,9 +83,11 @@ test.describe('Password Recovery', () => {
     await expect(page).toHaveURL(/\/login/, { timeout: 5000 });
   });
 
-  test('should show update password form when accessing with valid token', async () => {
+  test('should show update password form when accessing with valid token', async ({ page }) => {
     // Note: In real scenario, token would come from email link
     // For E2E, we're testing the UI flow
+    const updatePasswordPage = new UpdatePasswordPage(page);
+
     await updatePasswordPage.goto();
 
     // Password form should be visible
@@ -90,6 +98,8 @@ test.describe('Password Recovery', () => {
   });
 
   test('should validate password confirmation match', async ({ page }) => {
+    const updatePasswordPage = new UpdatePasswordPage(page);
+
     await updatePasswordPage.goto();
 
     // Fill with non-matching passwords
@@ -107,6 +117,8 @@ test.describe('Password Recovery', () => {
   });
 
   test('should show error for password too short', async ({ page }) => {
+    const updatePasswordPage = new UpdatePasswordPage(page);
+
     await updatePasswordPage.goto();
 
     // Fill with short password
@@ -123,18 +135,22 @@ test.describe('Password Recovery', () => {
     expect(page.url()).toContain('update-password');
   });
 
-  test('should be able to login with new password after reset', async () => {
+  test('should be able to login with new password after reset', async ({ page }) => {
     // Note: This test verifies the UI flow
     // Actual password update would require email verification token
     // For E2E, we're testing that the update password form is accessible and validates correctly
 
     // Verify update password page is accessible
+    const updatePasswordPage = new UpdatePasswordPage(page);
+
     await updatePasswordPage.goto();
     const isPasswordInputVisible = await updatePasswordPage.passwordInput.isVisible();
     expect(isPasswordInputVisible).toBe(true);
   });
 
   test('should validate password strength on update form', async ({ page }) => {
+    const updatePasswordPage = new UpdatePasswordPage(page);
+
     await updatePasswordPage.goto();
 
     // Test with weak password

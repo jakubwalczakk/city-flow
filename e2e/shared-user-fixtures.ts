@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/rules-of-hooks */
-import { test as base, expect } from '@playwright/test';
+import { test as base, expect, type BrowserContext } from '@playwright/test';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '../src/db/database.types';
 import * as path from 'path';
@@ -29,6 +29,7 @@ type SharedUserFixtures = {
     email: string;
     id: string;
   };
+  context: BrowserContext;
 };
 
 /**
@@ -75,19 +76,33 @@ export function createSharedUserTest(userKey: SharedUserKey) {
       });
     },
 
+    // Context with storage state
+    context: async ({ browser }, use) => {
+      const storageStatePath = getStorageStatePath(userKey);
+      const context = await browser.newContext({
+        storageState: storageStatePath,
+      });
+      await use(context);
+      await context.close();
+    },
+
     // Page with storage state and cleanup
-    page: async ({ page, supabase, sharedUser }, use) => {
+    page: async ({ context, supabase, sharedUser }, use) => {
+      const page = await context.newPage();
+
       // Clean database before test
       await cleanDatabase(supabase, sharedUser.id);
 
       // Setup mocks
       await setupCommonMocks(page);
 
-      // Use the page (already authenticated via storage state)
+      // Use the page (authenticated via storage state)
       await use(page);
 
       // Clean database after test
       await cleanDatabase(supabase, sharedUser.id);
+
+      await page.close();
     },
   });
 }

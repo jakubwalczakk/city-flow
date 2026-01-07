@@ -79,6 +79,56 @@ export class PlansListPage {
   }
 
   /**
+   * Move a plan to history (archive it)
+   */
+  async moveToHistory(planName: string): Promise<void> {
+    const planCard = this.getPlanByName(planName);
+    await expect(planCard).toBeVisible();
+
+    // Click the menu button
+    const menuButton = planCard.getByTestId('plan-menu');
+    await menuButton.click();
+
+    // Click move to history action
+    const moveToHistoryAction = this.page.getByTestId('move-to-history-action');
+    await expect(moveToHistoryAction).toBeVisible();
+    await moveToHistoryAction.click();
+
+    // Confirm in modal
+    const confirmButton = this.page.getByTestId('confirm-archive');
+    await expect(confirmButton).toBeVisible();
+    await confirmButton.click();
+
+    // Wait for the modal to close and the plan to be moved
+    await this.page.waitForTimeout(500);
+  }
+
+  /**
+   * Start moving a plan to history but cancel the action
+   */
+  async cancelMoveToHistory(planName: string): Promise<void> {
+    const planCard = this.getPlanByName(planName);
+    await expect(planCard).toBeVisible();
+
+    // Click the menu button
+    const menuButton = planCard.getByTestId('plan-menu');
+    await menuButton.click();
+
+    // Click move to history action
+    const moveToHistoryAction = this.page.getByTestId('move-to-history-action');
+    await expect(moveToHistoryAction).toBeVisible();
+    await moveToHistoryAction.click();
+
+    // Cancel in modal
+    const cancelButton = this.page.getByTestId('cancel-archive');
+    await expect(cancelButton).toBeVisible();
+    await cancelButton.click();
+
+    // Wait for the modal to close
+    await this.page.waitForTimeout(300);
+  }
+
+  /**
    * Check if the empty state is visible (no plans)
    */
   async isEmptyStateVisible(): Promise<boolean> {

@@ -1,4 +1,5 @@
-import { authTest as test, expect, createPlanWithActivities, getFeedback } from '../fixtures';
+import { feedbackTest as test, expect } from '../shared-user-fixtures';
+import { createPlanWithActivities, getFeedback } from '../fixtures';
 import { PlanDetailsPage } from '../page-objects/PlanDetailsPage';
 
 /**
@@ -7,9 +8,9 @@ import { PlanDetailsPage } from '../page-objects/PlanDetailsPage';
  */
 
 test.describe('Feedback Comments', () => {
-  test('should allow adding comment without rating', async ({ page, supabase, testUser }) => {
+  test('should allow adding comment without rating', async ({ page, supabase, sharedUser }) => {
     // Create a generated plan
-    const planId = await createPlanWithActivities(supabase, testUser.id, {
+    const planId = await createPlanWithActivities(supabase, sharedUser.id, {
       name: 'Paris Weekend',
       destination: 'Paris',
       startDate: '2026-06-15',
@@ -38,15 +39,15 @@ test.describe('Feedback Comments', () => {
     await planDetailsPage.feedbackModule.submitFeedback();
 
     // Verify feedback saved in database
-    const feedback = await getFeedback(supabase, testUser.id, planId);
+    const feedback = await getFeedback(supabase, sharedUser.id, planId);
     expect(feedback).not.toBeNull();
     expect(feedback?.comment).toBe(commentText);
     expect(feedback?.rating).toBeNull();
   });
 
-  test('should allow adding comment with positive rating', async ({ page, supabase, testUser }) => {
+  test('should allow adding comment with positive rating', async ({ page, supabase, sharedUser }) => {
     // Create a generated plan
-    const planId = await createPlanWithActivities(supabase, testUser.id, {
+    const planId = await createPlanWithActivities(supabase, sharedUser.id, {
       name: 'Rome Adventure',
       destination: 'Rome',
       startDate: '2026-07-01',
@@ -76,15 +77,15 @@ test.describe('Feedback Comments', () => {
     await planDetailsPage.feedbackModule.submitFeedback();
 
     // Verify feedback saved with both rating and comment
-    const feedback = await getFeedback(supabase, testUser.id, planId);
+    const feedback = await getFeedback(supabase, sharedUser.id, planId);
     expect(feedback).not.toBeNull();
     expect(feedback?.rating).toBe('positive');
     expect(feedback?.comment).toBe(commentText);
   });
 
-  test('should allow adding comment with negative rating', async ({ page, supabase, testUser }) => {
+  test('should allow adding comment with negative rating', async ({ page, supabase, sharedUser }) => {
     // Create a generated plan
-    const planId = await createPlanWithActivities(supabase, testUser.id, {
+    const planId = await createPlanWithActivities(supabase, sharedUser.id, {
       name: 'Barcelona Trip',
       destination: 'Barcelona',
       startDate: '2026-08-01',
@@ -114,15 +115,15 @@ test.describe('Feedback Comments', () => {
     await planDetailsPage.feedbackModule.submitFeedback();
 
     // Verify feedback saved
-    const feedback = await getFeedback(supabase, testUser.id, planId);
+    const feedback = await getFeedback(supabase, sharedUser.id, planId);
     expect(feedback).not.toBeNull();
     expect(feedback?.rating).toBe('negative');
     expect(feedback?.comment).toBe(commentText);
   });
 
-  test('should allow updating existing comment', async ({ page, supabase, testUser }) => {
+  test('should allow updating existing comment', async ({ page, supabase, sharedUser }) => {
     // Create a generated plan
-    const planId = await createPlanWithActivities(supabase, testUser.id, {
+    const planId = await createPlanWithActivities(supabase, sharedUser.id, {
       name: 'Amsterdam Weekend',
       destination: 'Amsterdam',
       startDate: '2026-09-01',
@@ -151,7 +152,7 @@ test.describe('Feedback Comments', () => {
     await planDetailsPage.feedbackModule.submitFeedback();
 
     // Get initial feedback ID
-    const initialFeedback = await getFeedback(supabase, testUser.id, planId);
+    const initialFeedback = await getFeedback(supabase, sharedUser.id, planId);
     const initialFeedbackId = initialFeedback?.id;
     expect(initialFeedback?.comment).toBe(initialComment);
 
@@ -161,14 +162,14 @@ test.describe('Feedback Comments', () => {
     await planDetailsPage.feedbackModule.submitFeedback();
 
     // Verify feedback updated (not created new)
-    const updatedFeedback = await getFeedback(supabase, testUser.id, planId);
+    const updatedFeedback = await getFeedback(supabase, sharedUser.id, planId);
     expect(updatedFeedback?.id).toBe(initialFeedbackId); // Same ID = UPDATE
     expect(updatedFeedback?.comment).toBe(updatedComment);
   });
 
-  test('should handle empty comment submission', async ({ page, supabase, testUser }) => {
+  test('should handle empty comment submission', async ({ page, supabase, sharedUser }) => {
     // Create a generated plan
-    const planId = await createPlanWithActivities(supabase, testUser.id, {
+    const planId = await createPlanWithActivities(supabase, sharedUser.id, {
       name: 'Prague Visit',
       destination: 'Prague',
       startDate: '2026-11-01',
@@ -196,15 +197,15 @@ test.describe('Feedback Comments', () => {
     await planDetailsPage.feedbackModule.submitFeedback();
 
     // Verify feedback saved with rating but without comment
-    const feedback = await getFeedback(supabase, testUser.id, planId);
+    const feedback = await getFeedback(supabase, sharedUser.id, planId);
     expect(feedback).not.toBeNull();
     expect(feedback?.rating).toBe('positive');
     expect(feedback?.comment).toBeNull();
   });
 
-  test('should validate maximum comment length', async ({ page, supabase, testUser }) => {
+  test('should validate maximum comment length', async ({ page, supabase, sharedUser }) => {
     // Create a generated plan
-    const planId = await createPlanWithActivities(supabase, testUser.id, {
+    const planId = await createPlanWithActivities(supabase, sharedUser.id, {
       name: 'Vienna Trip',
       destination: 'Vienna',
       startDate: '2026-12-01',
@@ -246,7 +247,7 @@ test.describe('Feedback Comments', () => {
       const hasError = await planDetailsPage.feedbackModule.hasErrorMessage();
       if (!hasError) {
         // If no UI error, verify database enforced constraint
-        const feedback = await getFeedback(supabase, testUser.id, planId);
+        const feedback = await getFeedback(supabase, sharedUser.id, planId);
         if (feedback?.comment) {
           expect(feedback.comment.length).toBeLessThanOrEqual(1000);
         }
@@ -254,9 +255,9 @@ test.describe('Feedback Comments', () => {
     }
   });
 
-  test('should allow submitting comment after changing rating', async ({ page, supabase, testUser }) => {
+  test('should allow submitting comment after changing rating', async ({ page, supabase, sharedUser }) => {
     // Create a generated plan
-    const planId = await createPlanWithActivities(supabase, testUser.id, {
+    const planId = await createPlanWithActivities(supabase, sharedUser.id, {
       name: 'Berlin Weekend',
       destination: 'Berlin',
       startDate: '2027-01-15',
@@ -296,14 +297,14 @@ test.describe('Feedback Comments', () => {
     await planDetailsPage.feedbackModule.submitFeedback();
 
     // Verify both rating and comment updated
-    const feedback = await getFeedback(supabase, testUser.id, planId);
+    const feedback = await getFeedback(supabase, sharedUser.id, planId);
     expect(feedback?.rating).toBe('negative');
     expect(feedback?.comment).toBe(updatedComment);
   });
 
-  test('should preserve comment when changing rating', async ({ page, supabase, testUser }) => {
+  test('should preserve comment when changing rating', async ({ page, supabase, sharedUser }) => {
     // Create a generated plan
-    const planId = await createPlanWithActivities(supabase, testUser.id, {
+    const planId = await createPlanWithActivities(supabase, sharedUser.id, {
       name: 'Brussels Trip',
       destination: 'Brussels',
       startDate: '2027-02-01',

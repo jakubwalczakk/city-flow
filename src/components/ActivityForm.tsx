@@ -25,7 +25,7 @@ type ActivityFormProps = {
  * A form component for adding or editing activities in a plan.
  * Displays in a modal dialog and handles validation with React Hook Form.
  */
-export default function ActivityForm({ isOpen, onClose, onSubmit, initialData, mode }: ActivityFormProps) {
+export function ActivityForm({ isOpen, onClose, onSubmit, initialData, mode }: ActivityFormProps) {
   const { form, submitHandler, isSubmitting } = useActivityForm({
     isOpen,
     initialData,

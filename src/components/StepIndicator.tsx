@@ -43,6 +43,7 @@ export function StepIndicator({ currentStep, steps, onStepClick }: StepIndicator
                     isCurrent && 'text-foreground',
                     (isCompleted || isUpcoming) && 'text-muted-foreground'
                   )}
+                  data-testid={`step-label-${stepNumber}`}
                 >
                   {step}
                 </span>

@@ -1,8 +1,25 @@
 import { defineConfig, devices } from '@playwright/test';
 import dotenv from 'dotenv';
 import path from 'path';
+import fs from 'fs';
 
-dotenv.config({ path: path.resolve(process.cwd(), '.env.test') });
+// Load .env.test only if it exists (local development)
+// In CI, environment variables are provided directly by GitHub Actions
+const envTestPath = path.resolve(process.cwd(), '.env.test');
+if (fs.existsSync(envTestPath)) {
+  dotenv.config({ path: envTestPath });
+}
+
+/**
+ * Extend Playwright test options with custom properties
+ */
+declare module '@playwright/test' {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+  interface PlaywrightTestOptions {
+    supabaseUrl: string | undefined;
+    supabaseKey: string | undefined;
+  }
+}
 
 /**
  * Read environment variables from file.
@@ -35,7 +52,7 @@ export default defineConfig({
     supabaseUrl: process.env.SUPABASE_URL,
     supabaseKey: process.env.SUPABASE_KEY,
     /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: 'http://localhost:3000',
+    baseURL: 'http://localhost:4321',
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
@@ -71,8 +88,10 @@ export default defineConfig({
   /* Run your local dev server before starting the tests */
   webServer: {
     command: 'npm run dev:e2e',
-    url: 'http://localhost:3000/login',
+    url: 'http://localhost:4321/login',
     reuseExistingServer: !process.env.CI,
-    timeout: 120 * 1000,
+    timeout: 180 * 1000, // 3 minutes - increased for slower CI environments
+    stdout: 'pipe', // Show server output for debugging
+    stderr: 'pipe', // Show server errors for debugging
   },
 });

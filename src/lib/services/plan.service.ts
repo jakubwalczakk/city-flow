@@ -18,8 +18,9 @@ import { v4 as uuidv4 } from 'uuid';
 /**
  * Converts a time string to 24-hour format for proper sorting.
  * Handles formats like "2:30 PM", "14:30", "2:30PM", etc.
+ * Pure function - easily testable!
  */
-function convertTo24Hour(timeStr: string): string {
+export function convertTo24Hour(timeStr: string): string {
   const time = timeStr.trim();
 
   // If already in 24-hour format (no AM/PM), return as is

@@ -9,6 +9,12 @@ const clientUrl = import.meta.env.SUPABASE_URL;
 const clientKey = import.meta.env.SUPABASE_KEY;
 
 /**
+ * Default user ID for development mode
+ * Must match the user ID in supabase/seed.sql
+ */
+export const DEFAULT_USER_ID = '17555d06-2387-4f0b-b4f8-0887177cadc1';
+
+/**
  * Client-side Supabase client for use in React components
  * Uses createBrowserClient from @supabase/ssr for proper cookie handling
  * This ensures SSR compatibility and secure session management

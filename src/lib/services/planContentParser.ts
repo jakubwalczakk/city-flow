@@ -57,13 +57,40 @@ export function parseGeneratedContent(content: unknown): GeneratedContentViewMod
           throw new Error(`Item object at index ${itemIndex} in day ${dayIndex} is missing required fields.`);
         }
 
+        // Validate and set type
+        const itemType = itemObj.type as string;
+        const validType: 'activity' | 'meal' | 'transport' =
+          itemType === 'activity' || itemType === 'meal' || itemType === 'transport' ? itemType : 'activity';
+
+        // Validate and set category
+        const categoryValue = (itemObj.category as string) || 'other';
+        const validCategories = [
+          'history',
+          'food',
+          'sport',
+          'nature',
+          'culture',
+          'transport',
+          'accommodation',
+          'other',
+        ];
+        const validCategory = validCategories.includes(categoryValue) ? categoryValue : 'other';
+
         // For backward compatibility, provide defaults if missing
         return {
           ...itemObj,
           id: itemObj.id as string,
           title: itemObj.title as string,
-          category: (itemObj.category as string) || 'other',
-          type: (itemObj.type as string) || 'activity', // Required by database schema
+          category: validCategory as
+            | 'history'
+            | 'food'
+            | 'sport'
+            | 'nature'
+            | 'culture'
+            | 'transport'
+            | 'accommodation'
+            | 'other',
+          type: validType, // Required by database schema
         };
       });
 

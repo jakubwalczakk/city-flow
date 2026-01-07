@@ -13,7 +13,7 @@ export const createFixedPointSchema = z.object({
   }),
   event_duration: z
     .preprocess(
-      // transform "" to null, otherwise keep value
+      // transform "" or 0 to null, otherwise keep value
       (val) => (val === '' || val === 0 ? null : val),
       z
         .number({
@@ -41,7 +41,7 @@ export const updateFixedPointSchema = z.object({
     .optional(),
   event_duration: z
     .preprocess(
-      // transform "" to null, otherwise keep value
+      // transform "" or 0 to null, otherwise keep value
       (val) => (val === '' || val === 0 ? null : val),
       z
         .number({

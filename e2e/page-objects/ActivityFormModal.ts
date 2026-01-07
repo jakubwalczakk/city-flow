@@ -118,6 +118,13 @@ export class ActivityFormModal {
   }
 
   /**
+   * Closes the modal
+   */
+  async close() {
+    await this.cancel();
+  }
+
+  /**
    * Closes the form by pressing Escape
    */
   async closeWithEscape() {

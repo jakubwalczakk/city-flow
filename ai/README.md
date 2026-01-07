@@ -135,6 +135,7 @@ Ten folder zawiera wszystkie plany implementacji testów E2E dla projektu CityFl
    - Zaznaczaj ukończone zadania
 
 4. **Sprawdź Przykłady** 💡
+
    ```bash
    open ai/e2e-refactoring-examples.md
    ```

@@ -38,16 +38,25 @@ export class FixedPointService {
       userId,
     });
 
+    const insertData: {
+      id: string;
+      plan_id: string;
+      location: string;
+      event_at: string;
+      event_duration: number | null;
+      description?: string | null;
+    } = {
+      id: uuidv4(),
+      plan_id: planId,
+      location: command.location,
+      event_at: command.event_at,
+      event_duration: command.event_duration ?? null,
+      description: command.description,
+    };
+
     const { data, error } = await this.supabase
       .from('fixed_points')
-      .insert({
-        id: uuidv4(),
-        plan_id: planId,
-        location: command.location,
-        event_at: command.event_at,
-        event_duration: command.event_duration ?? null, // Keep as null if not provided
-        description: command.description,
-      })
+      .insert(insertData as never) // Type assertion needed due to generated types issue
       .select()
       .single();
 
@@ -124,7 +133,7 @@ export class FixedPointService {
     } = {};
     if (command.location !== undefined) updates.location = command.location;
     if (command.event_at !== undefined) updates.event_at = command.event_at;
-    if (command.event_duration !== undefined) updates.event_duration = command.event_duration ?? null;
+    if ('event_duration' in command) updates.event_duration = command.event_duration ?? null;
     if (command.description !== undefined) updates.description = command.description;
     updates.updated_at = new Date().toISOString();
 

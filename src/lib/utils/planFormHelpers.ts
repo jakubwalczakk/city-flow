@@ -26,18 +26,18 @@ export function getDefaultEndDate(): Date {
 
 /**
  * Determines the starting step based on what's already filled in the plan
- * @returns Step number (1 or 2)
+ * @returns Step number (0 or 1, 0-indexed)
  */
 export function determineStartingStep(plan: PlanDetailsDto): number {
-  // Check if basic info (step 1) is complete
+  // Check if basic info (step 0) is complete
   const hasBasicInfo = plan.name && plan.destination && plan.start_date && plan.end_date;
 
   if (!hasBasicInfo) {
-    return 1; // Start from the beginning
+    return 0; // Start from the beginning
   }
 
-  // If basic info is complete, start from step 2 (fixed points)
-  return 2;
+  // If basic info is complete, start from step 1 (fixed points)
+  return 1;
 }
 
 /**

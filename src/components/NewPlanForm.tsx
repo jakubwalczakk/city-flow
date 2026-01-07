@@ -44,7 +44,7 @@ export default function NewPlanForm({
 
           <Card>
             <CardContent className='pt-6'>
-              {currentStep === 1 && (
+              {currentStep === 0 && (
                 <BasicInfoStep
                   formData={formData.basicInfo}
                   updateFormData={updateBasicInfo}
@@ -56,7 +56,7 @@ export default function NewPlanForm({
                 />
               )}
 
-              {currentStep === 2 && (
+              {currentStep === 1 && (
                 <FixedPointsStep
                   fixedPoints={formData.fixedPoints}
                   addFixedPoint={addFixedPoint}
@@ -71,7 +71,7 @@ export default function NewPlanForm({
                 />
               )}
 
-              {currentStep === 3 && (
+              {currentStep === 2 && (
                 <SummaryStep
                   formData={formData}
                   goToPrevStep={prevStep}

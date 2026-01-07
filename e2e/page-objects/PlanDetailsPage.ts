@@ -26,6 +26,11 @@ export class PlanDetailsPage {
   readonly generationsCounter: Locator;
   readonly generationWarning: Locator;
   readonly generationLoader: Locator;
+  readonly moveToHistoryButton: Locator;
+  readonly readOnlyBadge: Locator;
+  readonly addActivityButton: Locator;
+  readonly editActivityButton: Locator;
+  readonly deleteActivityButton: Locator;
   readonly feedbackModule: FeedbackModule;
 
   constructor(page: Page) {

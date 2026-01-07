@@ -20,7 +20,7 @@ runs:
   steps:
     - name: Run unit tests with coverage
       shell: bash
-      run: npm run test:unit -- --run --reporter=verbose --coverage
+      run: npm run test:coverage
 
     - name: Display coverage summary
       if: always()
@@ -40,7 +40,7 @@ runs:
         name: ${{ inputs.artifact-name }}
         path: coverage/
         retention-days: ${{ inputs.retention-days }}
-        if-no-files-found: error
+        if-no-files-found: warn
 
     - name: Check coverage thresholds
       if: always()

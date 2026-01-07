@@ -25,6 +25,56 @@ export type UsePlanDetailsResult = {
 };
 
 /**
+ * Converts a TimelineItem to AddActivityCommand format.
+ * Pure function - easily testable!
+ *
+ * @param activity - The partial timeline item to convert
+ * @returns The formatted AddActivityCommand
+ */
+export function formatActivityCommand(activity: Partial<TimelineItem>): AddActivityCommand {
+  return {
+    time: activity.time,
+    title: activity.title || '',
+    description: activity.description,
+    location: activity.location,
+    duration: activity.estimated_duration ? parseInt(activity.estimated_duration, 10) : undefined,
+    category: activity.category || 'other',
+    estimated_cost: activity.estimated_price,
+  };
+}
+
+/**
+ * Converts a TimelineItem to UpdateActivityCommand format.
+ * Pure function - easily testable!
+ *
+ * @param activity - The partial timeline item to convert
+ * @returns The formatted UpdateActivityCommand
+ */
+export function formatActivityUpdateCommand(activity: Partial<TimelineItem>): UpdateActivityCommand {
+  return {
+    time: activity.time,
+    title: activity.title,
+    description: activity.description,
+    location: activity.location,
+    duration: activity.estimated_duration ? parseInt(activity.estimated_duration, 10) : undefined,
+    category: activity.category,
+    estimated_cost: activity.estimated_price,
+  };
+}
+
+/**
+ * Formats an error message from a caught error.
+ * Pure function - easily testable!
+ *
+ * @param err - The caught error
+ * @param fallbackMessage - The fallback message if error is not an Error instance
+ * @returns The formatted error message
+ */
+export function formatErrorMessage(err: unknown, fallbackMessage: string): string {
+  return err instanceof Error ? err.message : fallbackMessage;
+}
+
+/**
  * Custom hook for managing a single plan's details.
  * Automatically fetches plan data on mount and provides methods for updates and deletion.
  *
@@ -53,7 +103,7 @@ export const usePlanDetails = (planId: string): UsePlanDetailsResult => {
       const result: PlanDetailsDto = await response.json();
       setPlan(result);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred while fetching plan.';
+      const errorMessage = formatErrorMessage(err, 'An unknown error occurred while fetching plan.');
       setError(errorMessage);
       setPlan(null);
     } finally {
@@ -141,15 +191,7 @@ export const usePlanDetails = (planId: string): UsePlanDetailsResult => {
   const addActivity = useCallback(
     async (date: string, activity: Partial<TimelineItem>): Promise<void> => {
       // Convert TimelineItem to AddActivityCommand format
-      const command: AddActivityCommand = {
-        time: activity.time,
-        title: activity.title || '',
-        description: activity.description,
-        location: activity.location,
-        duration: activity.duration,
-        category: activity.category || 'other',
-        estimated_cost: activity.estimated_price,
-      };
+      const command = formatActivityCommand(activity);
 
       const response = await fetch(`/api/plans/${planId}/days/${date}/items`, {
         method: 'POST',
@@ -181,15 +223,7 @@ export const usePlanDetails = (planId: string): UsePlanDetailsResult => {
   const updateActivity = useCallback(
     async (date: string, itemId: string, activity: Partial<TimelineItem>): Promise<void> => {
       // Convert TimelineItem to UpdateActivityCommand format
-      const command: UpdateActivityCommand = {
-        time: activity.time,
-        title: activity.title,
-        description: activity.description,
-        location: activity.location,
-        duration: activity.duration,
-        category: activity.category,
-        estimated_cost: activity.estimated_price,
-      };
+      const command = formatActivityUpdateCommand(activity);
 
       const response = await fetch(`/api/plans/${planId}/days/${date}/items/${itemId}`, {
         method: 'PATCH',

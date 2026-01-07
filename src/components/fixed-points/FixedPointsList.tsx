@@ -15,12 +15,8 @@ type FixedPointsListProps = {
  * Displays a list of fixed points with edit/delete actions
  */
 export function FixedPointsList({ points, onEdit, onRemove, editingIndex }: FixedPointsListProps) {
-  if (points.length === 0) {
-    return null;
-  }
-
   return (
-    <div className='space-y-3'>
+    <div className='space-y-3' data-testid='fixed-points-list'>
       {points.map((point, index) => {
         // Skip rendering if this item is being edited (form will be shown instead)
         if (editingIndex === index) {

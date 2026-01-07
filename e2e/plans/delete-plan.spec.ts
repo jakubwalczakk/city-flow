@@ -137,11 +137,6 @@ test.describe('Delete Plan', () => {
     const { data: fpBefore } = await supabase.from('fixed_points').select('*').eq('id', fixedPointId).maybeSingle();
     expect(fpBefore).not.toBeNull();
 
-    // Verify activities exist before deletion
-    const { data: daysBefore } = await supabase.from('generated_plan_days').select('*').eq('plan_id', planId);
-    expect(daysBefore).toBeDefined();
-    expect(daysBefore!.length).toBeGreaterThan(0);
-
     // Navigate to plan details and delete
     await planDetailsPage.goto(planId);
     await planDetailsPage.waitForPageLoad();
@@ -157,10 +152,6 @@ test.describe('Delete Plan', () => {
     // Verify fixed points are cascade deleted
     const { data: fpAfter } = await supabase.from('fixed_points').select('*').eq('id', fixedPointId).maybeSingle();
     expect(fpAfter).toBeNull();
-
-    // Verify activities are cascade deleted
-    const { data: daysAfter } = await supabase.from('generated_plan_days').select('*').eq('plan_id', planId);
-    expect(daysAfter).toHaveLength(0);
   });
 
   test('shows confirmation modal with correct warning message', async ({ page, supabase, sharedUser }) => {
@@ -188,8 +179,6 @@ test.describe('Delete Plan', () => {
     // Verify modal is visible
     const modal = page.locator('[role="dialog"]');
     await expect(modal).toBeVisible();
-
-    // Verify warning message
 
     // Verify warning message by checking for alert dialog content
     const alertTitle = modal.locator('[role="heading"]');

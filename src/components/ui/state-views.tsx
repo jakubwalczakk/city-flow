@@ -31,7 +31,9 @@ export function LoadingView({ message = 'Ładowanie...', className = '' }: Loadi
     <div className={`flex items-center justify-center min-h-[400px] ${className}`}>
       <div className='text-center'>
         <Loader2 className='h-8 w-8 animate-spin mx-auto text-primary' />
-        <p className='mt-4 text-muted-foreground'>{message}</p>
+        <p className='mt-4 text-muted-foreground' data-testid='loading-message'>
+          {message}
+        </p>
       </div>
     </div>
   );
@@ -53,8 +55,12 @@ export function ErrorView({
         <div className='mb-4'>
           <AlertTriangle className='mx-auto h-12 w-12 text-destructive' aria-hidden='true' />
         </div>
-        <h2 className='text-xl font-semibold mb-2'>{title}</h2>
-        <p className='text-muted-foreground mb-6'>{message}</p>
+        <h2 className='text-xl font-semibold mb-2' data-testid='error-title'>
+          {title}
+        </h2>
+        <p className='text-muted-foreground mb-6' data-testid='error-message'>
+          {message}
+        </p>
         <Button asChild>
           <a href={backHref}>{backLabel}</a>
         </Button>
@@ -79,8 +85,12 @@ export function NotFoundView({
         <div className='mb-4'>
           <FileQuestion className='mx-auto h-12 w-12 text-muted-foreground' aria-hidden='true' />
         </div>
-        <h2 className='text-xl font-semibold mb-2'>{title}</h2>
-        <p className='text-muted-foreground mb-6'>{message}</p>
+        <h2 className='text-xl font-semibold mb-2' data-testid='notfound-title'>
+          {title}
+        </h2>
+        <p className='text-muted-foreground mb-6' data-testid='notfound-message'>
+          {message}
+        </p>
         <Button asChild>
           <a href={backHref}>{backLabel}</a>
         </Button>
@@ -116,7 +126,9 @@ export function ArchivedBanner() {
   return (
     <div className='bg-muted/50 border border-muted rounded-lg p-4 mb-6 flex items-center gap-3 text-muted-foreground'>
       <Archive className='h-5 w-5' aria-hidden='true' />
-      <p className='text-sm font-medium'>To jest plan archiwalny. Edycja jest zablokowana.</p>
+      <p className='text-sm font-medium' data-testid='archived-message'>
+        To jest plan archiwalny. Edycja jest zablokowana.
+      </p>
     </div>
   );
 }

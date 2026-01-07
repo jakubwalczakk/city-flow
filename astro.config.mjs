@@ -11,9 +11,9 @@ import istanbul from 'vite-plugin-istanbul';
 export default defineConfig({
   output: 'server',
   // eslint-disable-next-line no-undef
-  site: process.env.PUBLIC_SITE_URL || 'http://localhost:3000',
+  site: process.env.PUBLIC_SITE_URL || 'http://localhost:4321',
   integrations: [react(), sitemap()],
-  server: { port: 3000 },
+  server: { port: 4321 },
   vite: {
     // Allow SUPABASE_ prefix to be exposed to the client
     envPrefix: ['PUBLIC_', 'SUPABASE_'],

@@ -8,10 +8,6 @@ const TEST_USER_PASSWORD = 'TestPassword123!';
 
 test.describe('Plan Row Level Security (RLS)', () => {
   test('should only show own plans in list view', async ({ page, supabase }) => {
-    // Local initialization (not global)
-    const loginPage = new LoginPage(page);
-    const plansListPage = new PlansListPage(page);
-
     // Create User A with a plan
     const userA = await createTestUser(supabase, {
       password: TEST_USER_PASSWORD,
@@ -145,8 +141,6 @@ test.describe('Plan Row Level Security (RLS)', () => {
   });
 
   test('should deny editing another user plan name via API', async ({ page, supabase }) => {
-    // Local initialization (not global)
-
     // Create User A with a plan
     const userA = await createTestUser(supabase, {
       password: TEST_USER_PASSWORD,
@@ -195,8 +189,6 @@ test.describe('Plan Row Level Security (RLS)', () => {
   });
 
   test('should deny deleting another user plan via API', async ({ page, supabase }) => {
-    // Local initialization (not global)
-
     // Create User A with a plan
     const userA = await createTestUser(supabase, {
       password: TEST_USER_PASSWORD,
@@ -242,8 +234,6 @@ test.describe('Plan Row Level Security (RLS)', () => {
   });
 
   test('should deny accessing fixed points of another user plan', async ({ page, supabase }) => {
-    // Local initialization (not global)
-
     // Create User A with a plan and fixed points
     const userA = await createTestUser(supabase, {
       password: TEST_USER_PASSWORD,
@@ -284,8 +274,6 @@ test.describe('Plan Row Level Security (RLS)', () => {
   });
 
   test('should deny generating plan for another user', async ({ page, supabase }) => {
-    // Local initialization (not global)
-
     // Create User A with a draft plan
     const userA = await createTestUser(supabase, {
       password: TEST_USER_PASSWORD,
@@ -457,8 +445,6 @@ test.describe('Plan Row Level Security (RLS)', () => {
   });
 
   test('should deny access to activities of another user plan', async ({ page, supabase }) => {
-    // Local initialization (not global)
-
     // Create User A with a generated plan
     const userA = await createTestUser(supabase, {
       password: TEST_USER_PASSWORD,
@@ -471,9 +457,6 @@ test.describe('Plan Row Level Security (RLS)', () => {
       status: 'generated',
       withActivities: true,
     });
-
-    // Get activity IDs
-    const { data: days } = await supabase.from('generated_plan_days').select('id').eq('plan_id', planIdA);
 
     // Create User B
     const userB = await createTestUser(supabase, {
