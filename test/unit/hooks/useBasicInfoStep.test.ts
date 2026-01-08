@@ -5,9 +5,9 @@ import type { NewPlanViewModel } from '@/types';
 
 describe('useBasicInfoStep', () => {
   let mockFormData: NewPlanViewModel['basicInfo'];
-  let updateFormData: ReturnType<typeof vi.fn>;
-  let goToNextStep: ReturnType<typeof vi.fn>;
-  let onSave: ReturnType<typeof vi.fn>;
+  let updateFormData: ReturnType<typeof vi.fn<(data: Partial<NewPlanViewModel['basicInfo']>) => void>>;
+  let goToNextStep: ReturnType<typeof vi.fn<() => void>>;
+  let onSave: ReturnType<typeof vi.fn<() => Promise<void>>>;
 
   beforeEach(() => {
     mockFormData = {
@@ -18,9 +18,9 @@ describe('useBasicInfoStep', () => {
       notes: 'Some notes',
     };
 
-    updateFormData = vi.fn();
-    goToNextStep = vi.fn();
-    onSave = vi.fn().mockResolvedValue(undefined);
+    updateFormData = vi.fn<(data: Partial<NewPlanViewModel['basicInfo']>) => void>();
+    goToNextStep = vi.fn<() => void>();
+    onSave = vi.fn<() => Promise<void>>().mockResolvedValue(undefined);
 
     vi.clearAllMocks();
   });

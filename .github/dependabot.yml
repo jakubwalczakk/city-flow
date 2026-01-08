@@ -1,91 +1,65 @@
+# Dependabot configuration for automated dependency updates
+# This helps prevent breaking changes by catching them early
+
 version: 2
-
 updates:
-  # ==========================================================================
-  # GitHub Actions updates
-  # ==========================================================================
-  - package-ecosystem: 'github-actions'
-    directory: '/'
+  # Enable npm dependency updates
+  - package-ecosystem: "npm"
+    directory: "/"
     schedule:
-      interval: 'weekly'
-      day: 'monday'
-      time: '09:00'
-      timezone: 'Europe/Warsaw'
-
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
     open-pull-requests-limit: 5
-    pull-request-branch-name:
-      separator: '/'
-
+    # Group updates to reduce PR noise
+    groups:
+      # Group TypeScript and related tools
+      typescript-ecosystem:
+        patterns:
+          - "typescript"
+          - "@types/*"
+          - "vitest"
+          - "@vitest/*"
+      # Group testing libraries
+      testing-libraries:
+        patterns:
+          - "@testing-library/*"
+          - "playwright"
+          - "@playwright/*"
+      # Group React ecosystem
+      react-ecosystem:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "@types/react"
+          - "@types/react-dom"
+      # Group Astro ecosystem
+      astro-ecosystem:
+        patterns:
+          - "astro"
+          - "@astrojs/*"
+      # Group build tools
+      build-tools:
+        patterns:
+          - "vite"
+          - "@vitejs/*"
+          - "esbuild"
+    # Auto-merge minor and patch updates (be cautious with this)
+    # Uncomment if you want auto-merge with passing tests
+    # versioning-strategy: increase
+    # target-branch: "master"
     labels:
-      - 'dependencies'
-      - 'github-actions'
-      - 'ci-cd'
-
-    reviewers:
-      - 'jakubwalczak'
-
+      - "dependencies"
+      - "automated"
     commit-message:
-      prefix: 'ci'
-      prefix-development: 'ci'
-      include: 'scope'
+      prefix: "chore"
+      include: "scope"
 
-    allow:
-      - dependency-type: 'all'
-
-  # ==========================================================================
-  # NPM dependencies updates
-  # ==========================================================================
-  - package-ecosystem: 'npm'
-    directory: '/'
+  # GitHub Actions updates
+  - package-ecosystem: "github-actions"
+    directory: "/"
     schedule:
-      interval: 'weekly'
-      day: 'monday'
-      time: '09:00'
-      timezone: 'Europe/Warsaw'
-
-    open-pull-requests-limit: 10
-    pull-request-branch-name:
-      separator: '/'
-
+      interval: "weekly"
     labels:
-      - 'dependencies'
-      - 'npm'
-
-    reviewers:
-      - 'jakubwalczak'
-
-    commit-message:
-      prefix: 'deps'
-      prefix-development: 'deps-dev'
-      include: 'scope'
-
-    versioning-strategy: increase
-
-    ignore:
-      # Major version updates for critical frameworks
-      - dependency-name: 'react'
-        update-types: ['version-update:semver-major']
-
-      - dependency-name: 'react-dom'
-        update-types: ['version-update:semver-major']
-
-      - dependency-name: 'astro'
-        update-types: ['version-update:semver-major']
-
-      - dependency-name: 'tailwindcss'
-        update-types: ['version-update:semver-major']
-
-      - dependency-name: '@tailwindcss/vite'
-        update-types: ['version-update:semver-major']
-
-      - dependency-name: 'typescript'
-        update-types: ['version-update:semver-major']
-
-      - dependency-name: 'vitest'
-        update-types: ['version-update:semver-major']
-
-      - dependency-name: '@playwright/test'
-        update-types: ['version-update:semver-major']
-
-      - dependency-name: 'vite'
-        update-types: ['version-update:semver-major']
+      - "github-actions"
+      - "dependencies"

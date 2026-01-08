@@ -102,8 +102,8 @@ export const PATCH: APIRoute = async ({ request, locals }) => {
       validatedData = updateProfileSchema.parse(body);
     } catch (error) {
       if (error instanceof ZodError) {
-        logger.debug('Validation failed', { userId, errors: error.errors });
-        throw new ValidationError('Validation failed.', error.errors);
+        logger.debug('Validation failed', { userId, issues: error.issues });
+        throw new ValidationError('Validation failed.', error.issues);
       }
       throw error;
     }

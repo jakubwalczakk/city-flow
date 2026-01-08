@@ -4,17 +4,17 @@ import { z } from 'zod';
  * Base schema for a plan. This is the source of truth for the plan's shape.
  */
 export const planSchema = z.object({
-  name: z.string({ required_error: 'Nazwa jest wymagana.' }).min(1, {
+  name: z.string({ message: 'Nazwa jest wymagana.' }).min(1, {
     message: 'Nazwa nie może być pusta.',
   }),
   destination: z
-    .string({ required_error: 'Miejsce docelowe jest wymagane.' })
+    .string({ message: 'Miejsce docelowe jest wymagane.' })
     .min(1, { message: 'Miejsce docelowe nie może być puste.' }),
   start_date: z
-    .string({ required_error: 'Data rozpoczęcia jest wymagana.' })
+    .string({ message: 'Data rozpoczęcia jest wymagana.' })
     .datetime({ message: 'Data rozpoczęcia musi być prawidłową datą.' }),
   end_date: z
-    .string({ required_error: 'Data zakończenia jest wymagana.' })
+    .string({ message: 'Data zakończenia jest wymagana.' })
     .datetime({ message: 'Data zakończenia musi być prawidłową datą.' }),
   notes: z.string().optional().nullable(),
 });
@@ -81,8 +81,8 @@ export const basicInfoSchema = z
   .object({
     name: z.string().min(1, 'Nazwa planu jest wymagana'),
     destination: z.string().min(1, 'Miejsce docelowe jest wymagane'),
-    start_date: z.date({ required_error: 'Data rozpoczęcia jest wymagana' }),
-    end_date: z.date({ required_error: 'Data zakończenia jest wymagana' }),
+    start_date: z.date({ message: 'Data rozpoczęcia jest wymagana' }),
+    end_date: z.date({ message: 'Data zakończenia jest wymagana' }),
     notes: z.string().optional().nullable(),
   })
   .refine(
@@ -102,7 +102,7 @@ export const fixedPointSchema = z.object({
   location: z.string().min(1, 'Lokalizacja jest wymagana'),
   event_at: z.string().datetime({ message: 'Nieprawidłowy format daty' }),
   event_duration: z
-    .number({ invalid_type_error: 'Czas trwania musi być liczbą.' })
+    .number({ message: 'Czas trwania musi być liczbą.' })
     .int({ message: 'Czas trwania musi być liczbą całkowitą.' })
     .positive('Czas trwania musi być liczbą dodatnią.')
     .nullable()

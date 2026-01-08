@@ -5,7 +5,7 @@ import { z } from 'zod';
  */
 export const submitFeedbackSchema = z.object({
   rating: z.enum(['thumbs_up', 'thumbs_down'], {
-    required_error: 'Rating is required.',
+    message: 'Rating is required.',
   }),
   comment: z.string().optional().nullable(),
 });

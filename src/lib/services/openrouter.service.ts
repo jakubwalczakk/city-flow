@@ -224,14 +224,14 @@ export class OpenRouterService {
       if (error instanceof z.ZodError) {
         // Log detailed Zod errors for debugging
         logger.error('Zod validation errors:', {
-          errors: error.errors,
+          issues: error.issues,
           formattedErrors: error.format(),
         });
 
         // Safely construct error message
         const errorMessages =
-          error.errors && Array.isArray(error.errors)
-            ? error.errors
+          error.issues && Array.isArray(error.issues)
+            ? error.issues
                 .map((e) => {
                   const pathStr = Array.isArray(e.path) ? e.path.join('.') : String(e.path);
                   return `${pathStr}: ${e.message}`;
@@ -241,7 +241,7 @@ export class OpenRouterService {
 
         throw new ValidationError(
           `The response from OpenRouter does not match the expected format: ${errorMessages}`,
-          error.errors
+          error.issues
         );
       }
 

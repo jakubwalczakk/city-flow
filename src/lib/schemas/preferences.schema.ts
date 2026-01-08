@@ -12,7 +12,7 @@ export const preferencesSchema = z.object({
     .min(2, 'Wybierz co najmniej 2 preferencje')
     .max(5, 'Możesz wybrać maksymalnie 5 preferencji'),
   travel_pace: z.enum(['slow', 'moderate', 'intensive'], {
-    required_error: 'Wybierz tempo zwiedzania',
+    message: 'Wybierz tempo zwiedzania',
   }),
 });
 

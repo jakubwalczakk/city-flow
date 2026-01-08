@@ -3,12 +3,12 @@ import { renderHook, act } from '@testing-library/react';
 import { usePlanActionsMenu } from '@/hooks/usePlanActionsMenu';
 
 describe('usePlanActionsMenu', () => {
-  let onArchive: ReturnType<typeof vi.fn>;
-  let onDelete: ReturnType<typeof vi.fn>;
+  let onArchive: ReturnType<typeof vi.fn<() => Promise<void>>>;
+  let onDelete: ReturnType<typeof vi.fn<() => Promise<void>>>;
 
   beforeEach(() => {
-    onArchive = vi.fn().mockResolvedValue(undefined);
-    onDelete = vi.fn().mockResolvedValue(undefined);
+    onArchive = vi.fn<() => Promise<void>>().mockResolvedValue(undefined);
+    onDelete = vi.fn<() => Promise<void>>().mockResolvedValue(undefined);
 
     // Mock window.location.href
     delete (window as unknown as { location: unknown }).location;

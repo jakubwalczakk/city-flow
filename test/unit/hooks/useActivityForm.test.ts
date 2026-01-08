@@ -24,12 +24,12 @@ vi.mock('@/lib/utils/timeFormatters', () => ({
 }));
 
 describe('useActivityForm', () => {
-  let onSubmit: ReturnType<typeof vi.fn>;
-  let onClose: ReturnType<typeof vi.fn>;
+  let onSubmit: ReturnType<typeof vi.fn<(activity: Partial<TimelineItem>) => Promise<void>>>;
+  let onClose: ReturnType<typeof vi.fn<() => void>>;
 
   beforeEach(() => {
-    onSubmit = vi.fn().mockResolvedValue(undefined);
-    onClose = vi.fn();
+    onSubmit = vi.fn<(activity: Partial<TimelineItem>) => Promise<void>>().mockResolvedValue(undefined);
+    onClose = vi.fn<() => void>();
     vi.clearAllMocks();
   });
 

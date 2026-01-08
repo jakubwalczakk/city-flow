@@ -3,10 +3,10 @@ import { renderHook, act } from '@testing-library/react';
 import { usePasswordUpdateForm } from '@/hooks/usePasswordUpdateForm';
 
 describe('usePasswordUpdateForm', () => {
-  let mockOnSubmit: ReturnType<typeof vi.fn>;
+  let mockOnSubmit: ReturnType<typeof vi.fn<(password: string) => Promise<void>>>;
 
   beforeEach(() => {
-    mockOnSubmit = vi.fn().mockResolvedValue(undefined);
+    mockOnSubmit = vi.fn<(password: string) => Promise<void>>().mockResolvedValue(undefined);
   });
 
   describe('initialization', () => {

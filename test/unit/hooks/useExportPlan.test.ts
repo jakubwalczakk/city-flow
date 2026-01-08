@@ -12,9 +12,9 @@ vi.mock('sonner', () => ({
 }));
 
 describe('useExportPlan', () => {
-  let mockFetch: ReturnType<typeof vi.fn>;
-  let mockCreateObjectURL: ReturnType<typeof vi.fn>;
-  let mockRevokeObjectURL: ReturnType<typeof vi.fn>;
+  let mockFetch: ReturnType<typeof vi.fn<typeof fetch>>;
+  let mockCreateObjectURL: ReturnType<typeof vi.fn<(obj: Blob | MediaSource) => string>>;
+  let mockRevokeObjectURL: ReturnType<typeof vi.fn<(url: string) => void>>;
   let mockLink: HTMLAnchorElement;
   let originalCreateElement: typeof document.createElement;
   let originalAppendChild: typeof document.body.appendChild;
@@ -22,12 +22,12 @@ describe('useExportPlan', () => {
 
   beforeEach(() => {
     // Mock fetch
-    mockFetch = vi.fn();
+    mockFetch = vi.fn<typeof fetch>();
     global.fetch = mockFetch;
 
     // Mock URL methods
-    mockCreateObjectURL = vi.fn(() => 'blob:mock-url');
-    mockRevokeObjectURL = vi.fn();
+    mockCreateObjectURL = vi.fn<(obj: Blob | MediaSource) => string>(() => 'blob:mock-url');
+    mockRevokeObjectURL = vi.fn<(url: string) => void>();
     global.URL.createObjectURL = mockCreateObjectURL;
     global.URL.revokeObjectURL = mockRevokeObjectURL;
 
@@ -95,7 +95,7 @@ describe('useExportPlan', () => {
         }),
       };
 
-      mockFetch.mockResolvedValue(mockResponse);
+      mockFetch.mockResolvedValue(mockResponse as unknown as Response);
 
       const { result } = renderHook(() => useExportPlan({ planId: 'plan-1', planName: 'Test Plan' }));
 
@@ -129,7 +129,7 @@ describe('useExportPlan', () => {
         headers: new Headers(), // No Content-Disposition
       };
 
-      mockFetch.mockResolvedValue(mockResponse);
+      mockFetch.mockResolvedValue(mockResponse as unknown as Response);
 
       const { result } = renderHook(() => useExportPlan({ planId: 'plan-1', planName: 'My Trip' }));
 
@@ -153,7 +153,7 @@ describe('useExportPlan', () => {
         }),
       };
 
-      mockFetch.mockResolvedValue(mockResponse);
+      mockFetch.mockResolvedValue(mockResponse as unknown as Response);
 
       const { result } = renderHook(() => useExportPlan({ planId: 'plan-1', planName: 'Test' }));
 
@@ -174,7 +174,7 @@ describe('useExportPlan', () => {
         }),
       };
 
-      mockFetch.mockResolvedValue(mockResponse);
+      mockFetch.mockResolvedValue(mockResponse as unknown as Response);
 
       const { result } = renderHook(() => useExportPlan({ planId: 'plan-1', planName: 'Test' }));
 
@@ -193,7 +193,7 @@ describe('useExportPlan', () => {
         headers: new Headers(),
       };
 
-      mockFetch.mockResolvedValue(mockResponse);
+      mockFetch.mockResolvedValue(mockResponse as unknown as Response);
 
       const { result } = renderHook(() => useExportPlan({ planId: 'plan-1', planName: 'Test' }));
 
@@ -222,7 +222,7 @@ describe('useExportPlan', () => {
       mockFetch.mockResolvedValue({
         ok: false,
         status: 404,
-      });
+      } as unknown as Response);
 
       const { result } = renderHook(() => useExportPlan({ planId: 'plan-1', planName: 'Test' }));
 
@@ -240,7 +240,7 @@ describe('useExportPlan', () => {
       mockFetch.mockResolvedValue({
         ok: false,
         status: 500,
-      });
+      } as unknown as Response);
 
       const { result } = renderHook(() => useExportPlan({ planId: 'plan-1', planName: 'Test' }));
 
@@ -258,7 +258,7 @@ describe('useExportPlan', () => {
       mockFetch.mockResolvedValue({
         ok: false,
         status: 403,
-      });
+      } as unknown as Response);
 
       const { result } = renderHook(() => useExportPlan({ planId: 'plan-1', planName: 'Test' }));
 
@@ -325,7 +325,7 @@ describe('useExportPlan', () => {
         headers: new Headers(),
       };
 
-      mockFetch.mockResolvedValue(mockResponse);
+      mockFetch.mockResolvedValue(mockResponse as unknown as Response);
 
       const { result } = renderHook(() => useExportPlan({ planId: 'plan-1', planName: 'Test' }));
 
@@ -346,7 +346,7 @@ describe('useExportPlan', () => {
         headers: new Headers(),
       };
 
-      mockFetch.mockResolvedValue(mockResponse);
+      mockFetch.mockResolvedValue(mockResponse as unknown as Response);
 
       const { result } = renderHook(() => useExportPlan({ planId: 'plan-1', planName: 'Test' }));
 

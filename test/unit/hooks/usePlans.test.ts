@@ -4,7 +4,7 @@ import { usePlans, type UsePlansParams } from '@/hooks/usePlans';
 import type { PaginatedPlansDto } from '@/types';
 
 describe('usePlans', () => {
-  let mockFetch: ReturnType<typeof vi.fn>;
+  let mockFetch: ReturnType<typeof vi.fn<typeof fetch>>;
 
   const mockPlansData: PaginatedPlansDto = {
     data: [
@@ -35,7 +35,7 @@ describe('usePlans', () => {
   };
 
   beforeEach(() => {
-    mockFetch = vi.fn();
+    mockFetch = vi.fn<typeof fetch>();
     global.fetch = mockFetch;
     vi.clearAllMocks();
   });
@@ -62,7 +62,7 @@ describe('usePlans', () => {
       mockFetch.mockResolvedValue({
         ok: true,
         json: async () => mockPlansData,
-      });
+      } as unknown as Response);
 
       const { result } = renderHook(() => usePlans({ limit: 10, offset: 0 }));
 
@@ -79,7 +79,7 @@ describe('usePlans', () => {
       mockFetch.mockResolvedValue({
         ok: true,
         json: async () => mockPlansData,
-      });
+      } as unknown as Response);
 
       const { result } = renderHook(() => usePlans({ status: 'generated', limit: 10, offset: 0 }));
 
@@ -94,7 +94,7 @@ describe('usePlans', () => {
       mockFetch.mockResolvedValue({
         ok: true,
         json: async () => mockPlansData,
-      });
+      } as unknown as Response);
 
       const { result } = renderHook(() => usePlans({ status: ['draft', 'generated'], limit: 10, offset: 0 }));
 
@@ -109,7 +109,7 @@ describe('usePlans', () => {
       mockFetch.mockResolvedValue({
         ok: true,
         json: async () => mockPlansData,
-      });
+      } as unknown as Response);
 
       const { result } = renderHook(() => usePlans({ limit: 10, offset: 0, sortBy: 'name', order: 'asc' }));
 
@@ -124,7 +124,7 @@ describe('usePlans', () => {
       mockFetch.mockResolvedValue({
         ok: true,
         json: async () => mockPlansData,
-      });
+      } as unknown as Response);
 
       const { result } = renderHook(() => usePlans({ limit: 10, offset: 20 }));
 
@@ -139,7 +139,7 @@ describe('usePlans', () => {
       mockFetch.mockResolvedValue({
         ok: true,
         json: async () => mockPlansData,
-      });
+      } as unknown as Response);
 
       const params: UsePlansParams = {
         status: ['draft', 'generated'],
@@ -167,7 +167,7 @@ describe('usePlans', () => {
       mockFetch.mockResolvedValue({
         ok: false,
         statusText: 'Internal Server Error',
-      });
+      } as unknown as Response);
 
       const { result } = renderHook(() => usePlans({ limit: 10, offset: 0 }));
 
@@ -210,7 +210,7 @@ describe('usePlans', () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
         json: async () => mockPlansData,
-      });
+      } as unknown as Response);
 
       const { result, rerender } = renderHook((props) => usePlans(props), {
         initialProps: { limit: 10, offset: 0 } as UsePlansParams,
@@ -224,7 +224,7 @@ describe('usePlans', () => {
       mockFetch.mockResolvedValueOnce({
         ok: false,
         statusText: 'Not Found',
-      });
+      } as unknown as Response);
 
       rerender({ limit: 10, offset: 10 });
 
@@ -241,7 +241,7 @@ describe('usePlans', () => {
       mockFetch.mockResolvedValue({
         ok: true,
         json: async () => mockPlansData,
-      });
+      } as unknown as Response);
 
       const { rerender } = renderHook((props) => usePlans(props), {
         initialProps: { limit: 10, offset: 0 } as UsePlansParams,
@@ -265,7 +265,7 @@ describe('usePlans', () => {
       mockFetch.mockResolvedValue({
         ok: true,
         json: async () => mockPlansData,
-      });
+      } as unknown as Response);
 
       const { rerender } = renderHook((props) => usePlans(props), {
         initialProps: { status: 'draft', limit: 10, offset: 0 } as UsePlansParams,
@@ -289,7 +289,7 @@ describe('usePlans', () => {
       mockFetch.mockResolvedValue({
         ok: true,
         json: async () => mockPlansData,
-      });
+      } as unknown as Response);
 
       const { result } = renderHook(() => usePlans({ limit: 10, offset: 0 }));
 
@@ -311,7 +311,7 @@ describe('usePlans', () => {
       mockFetch.mockResolvedValue({
         ok: true,
         json: async () => mockPlansData,
-      });
+      } as unknown as Response);
 
       const { result } = renderHook(() => usePlans({ limit: 10, offset: 0 }));
 
@@ -337,7 +337,7 @@ describe('usePlans', () => {
       mockFetch.mockResolvedValueOnce({
         ok: false,
         statusText: 'Error',
-      });
+      } as unknown as Response);
 
       const { result } = renderHook(() => usePlans({ limit: 10, offset: 0 }));
 
@@ -349,7 +349,7 @@ describe('usePlans', () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
         json: async () => mockPlansData,
-      });
+      } as unknown as Response);
 
       await act(async () => {
         result.current.refetch();
@@ -377,7 +377,7 @@ describe('usePlans', () => {
       mockFetch.mockResolvedValue({
         ok: true,
         json: async () => emptyData,
-      });
+      } as unknown as Response);
 
       const { result } = renderHook(() => usePlans({ limit: 10, offset: 0 }));
 
@@ -393,7 +393,7 @@ describe('usePlans', () => {
       mockFetch.mockResolvedValue({
         ok: true,
         json: async () => mockPlansData,
-      });
+      } as unknown as Response);
 
       const { result } = renderHook(() => usePlans({ limit: 0, offset: 0 }));
 
@@ -408,7 +408,7 @@ describe('usePlans', () => {
       mockFetch.mockResolvedValue({
         ok: true,
         json: async () => mockPlansData,
-      });
+      } as unknown as Response);
 
       const { result } = renderHook(() => usePlans({ limit: 10, offset: 0, sortBy: 'name' }));
 
@@ -423,7 +423,7 @@ describe('usePlans', () => {
       mockFetch.mockResolvedValue({
         ok: true,
         json: async () => mockPlansData,
-      });
+      } as unknown as Response);
 
       const { result } = renderHook(() => usePlans({ limit: 10, offset: 0, order: 'desc' }));
 

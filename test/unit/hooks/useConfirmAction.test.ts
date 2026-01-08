@@ -3,14 +3,14 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import { useConfirmAction } from '@/hooks/useConfirmAction';
 
 describe('useConfirmAction', () => {
-  let mockAction: ReturnType<typeof vi.fn>;
-  let mockOnSuccess: ReturnType<typeof vi.fn>;
-  let mockOnError: ReturnType<typeof vi.fn>;
+  let mockAction: ReturnType<typeof vi.fn<() => Promise<void>>>;
+  let mockOnSuccess: ReturnType<typeof vi.fn<() => void>>;
+  let mockOnError: ReturnType<typeof vi.fn<() => void>>;
 
   beforeEach(() => {
-    mockAction = vi.fn().mockResolvedValue(undefined);
-    mockOnSuccess = vi.fn();
-    mockOnError = vi.fn();
+    mockAction = vi.fn<() => Promise<void>>().mockResolvedValue(undefined);
+    mockOnSuccess = vi.fn<() => void>();
+    mockOnError = vi.fn<() => void>();
   });
 
   describe('initialization', () => {

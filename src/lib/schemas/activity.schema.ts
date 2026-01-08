@@ -12,7 +12,7 @@ export const activitySchema = z.object({
     .optional()
     .or(z.literal('')),
   category: z.enum(['history', 'food', 'sport', 'nature', 'culture', 'transport', 'accommodation', 'other'], {
-    required_error: 'Kategoria jest wymagana',
+    message: 'Kategoria jest wymagana',
   }),
   location: z.string().max(200, 'Lokalizacja może mieć maksymalnie 200 znaków').optional().or(z.literal('')),
   description: z.string().max(1000, 'Opis może mieć maksymalnie 1000 znaków').optional().or(z.literal('')),

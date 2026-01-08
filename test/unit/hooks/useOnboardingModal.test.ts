@@ -15,8 +15,10 @@ vi.mock('sonner', () => ({
 }));
 
 describe('useOnboardingModal', () => {
-  let mockUpdateProfile: ReturnType<typeof vi.fn>;
-  let mockRefetch: ReturnType<typeof vi.fn>;
+  let mockUpdateProfile: ReturnType<
+    typeof vi.fn<(data: { travel_pace?: string; preferences?: string[] }) => Promise<void>>
+  >;
+  let mockRefetch: ReturnType<typeof vi.fn<() => Promise<void>>>;
   let mockProfile: ProfileDto;
 
   /**
@@ -38,8 +40,10 @@ describe('useOnboardingModal', () => {
   });
 
   beforeEach(() => {
-    mockUpdateProfile = vi.fn().mockResolvedValue(undefined);
-    mockRefetch = vi.fn().mockResolvedValue(undefined);
+    mockUpdateProfile = vi
+      .fn<(data: { travel_pace?: string; preferences?: string[] }) => Promise<void>>()
+      .mockResolvedValue(undefined);
+    mockRefetch = vi.fn<() => Promise<void>>().mockResolvedValue(undefined);
     mockProfile = {
       id: 'user-1',
       travel_pace: null,

@@ -8,10 +8,10 @@ type TestItem = {
 };
 
 describe('useDeleteConfirmation', () => {
-  let mockOnConfirm: ReturnType<typeof vi.fn>;
+  let mockOnConfirm: ReturnType<typeof vi.fn<(item: TestItem) => void>>;
 
   beforeEach(() => {
-    mockOnConfirm = vi.fn();
+    mockOnConfirm = vi.fn<(item: TestItem) => void>();
   });
 
   describe('initialization', () => {

@@ -3,10 +3,10 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import { useEditableTitle } from '@/hooks/useEditableTitle';
 
 describe('useEditableTitle', () => {
-  let mockOnSave: ReturnType<typeof vi.fn>;
+  let mockOnSave: ReturnType<typeof vi.fn<(newTitle: string) => Promise<void>>>;
 
   beforeEach(() => {
-    mockOnSave = vi.fn().mockResolvedValue(undefined);
+    mockOnSave = vi.fn<(newTitle: string) => Promise<void>>().mockResolvedValue(undefined);
   });
 
   describe('initialization', () => {

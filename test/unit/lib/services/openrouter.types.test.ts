@@ -250,7 +250,7 @@ describe('openrouter.types.ts - Type definitions', () => {
           user: z.object({
             name: z.string(),
             email: z.string(),
-            preferences: z.record(z.boolean()),
+            preferences: z.record(z.string(), z.boolean()),
           }),
           metadata: z.object({
             createdAt: z.date(),

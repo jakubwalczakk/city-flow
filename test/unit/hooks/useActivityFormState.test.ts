@@ -4,10 +4,12 @@ import { useActivityFormState } from '@/hooks/useActivityFormState';
 import type { TimelineItem } from '@/types';
 
 describe('useActivityFormState', () => {
-  let onAddActivity: ReturnType<typeof vi.fn>;
-  let onUpdateActivity: ReturnType<typeof vi.fn>;
-  let onDeleteActivity: ReturnType<typeof vi.fn>;
-  let mockAlert: ReturnType<typeof vi.fn>;
+  let onAddActivity: ReturnType<typeof vi.fn<(date: string, activity: Partial<TimelineItem>) => Promise<void>>>;
+  let onUpdateActivity: ReturnType<
+    typeof vi.fn<(date: string, itemId: string, activity: Partial<TimelineItem>) => Promise<void>>
+  >;
+  let onDeleteActivity: ReturnType<typeof vi.fn<(date: string, itemId: string) => Promise<void>>>;
+  let mockAlert: ReturnType<typeof vi.fn<() => void>>;
 
   const mockActivity: TimelineItem = {
     id: 'activity-1',
@@ -22,10 +24,14 @@ describe('useActivityFormState', () => {
   };
 
   beforeEach(() => {
-    onAddActivity = vi.fn().mockResolvedValue(undefined);
-    onUpdateActivity = vi.fn().mockResolvedValue(undefined);
-    onDeleteActivity = vi.fn().mockResolvedValue(undefined);
-    mockAlert = vi.fn();
+    onAddActivity = vi
+      .fn<(date: string, activity: Partial<TimelineItem>) => Promise<void>>()
+      .mockResolvedValue(undefined);
+    onUpdateActivity = vi
+      .fn<(date: string, itemId: string, activity: Partial<TimelineItem>) => Promise<void>>()
+      .mockResolvedValue(undefined);
+    onDeleteActivity = vi.fn<(date: string, itemId: string) => Promise<void>>().mockResolvedValue(undefined);
+    mockAlert = vi.fn<() => void>();
     global.alert = mockAlert;
     vi.clearAllMocks();
   });

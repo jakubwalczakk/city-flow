@@ -18,12 +18,12 @@ vi.mock('@/lib/constants/planStatus', () => ({
 }));
 
 describe('usePlanCard', () => {
-  let onDelete: ReturnType<typeof vi.fn>;
-  let onClick: ReturnType<typeof vi.fn>;
+  let onDelete: ReturnType<typeof vi.fn<(planId: string) => void>>;
+  let onClick: ReturnType<typeof vi.fn<() => void>>;
 
   beforeEach(() => {
-    onDelete = vi.fn();
-    onClick = vi.fn();
+    onDelete = vi.fn<(planId: string) => void>();
+    onClick = vi.fn<() => void>();
     vi.clearAllMocks();
   });
 

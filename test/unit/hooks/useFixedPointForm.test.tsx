@@ -24,12 +24,12 @@ vi.mock('@/lib/utils/dateFormatters', () => ({
 }));
 
 describe('useFixedPointForm', () => {
-  let onAdd: ReturnType<typeof vi.fn>;
-  let onUpdate: ReturnType<typeof vi.fn>;
+  let onAdd: ReturnType<typeof vi.fn<(point: FixedPointFormItem) => void>>;
+  let onUpdate: ReturnType<typeof vi.fn<(index: number, point: FixedPointFormItem) => void>>;
 
   beforeEach(() => {
-    onAdd = vi.fn();
-    onUpdate = vi.fn();
+    onAdd = vi.fn<(point: FixedPointFormItem) => void>();
+    onUpdate = vi.fn<(index: number, point: FixedPointFormItem) => void>();
     vi.clearAllMocks();
   });
 
