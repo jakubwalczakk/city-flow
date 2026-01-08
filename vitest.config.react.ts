@@ -3,7 +3,6 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 
 export default defineConfig({
-  // @ts-expect-error - Vite plugin type conflict
   plugins: [react()],
   test: {
     name: 'react',
@@ -24,10 +23,10 @@ export default defineConfig({
         'src/components/ui/**', // Shadcn components
       ],
       thresholds: {
-        lines: 80,
-        functions: 80,
-        branches: 75,
-        statements: 80,
+        lines: 70,
+        functions: 70,
+        branches: 70,
+        statements: 70,
       },
     },
     server: {

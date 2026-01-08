@@ -18,7 +18,11 @@ vi.mock('sonner', () => ({
 
 // Mock lucide-react icons
 vi.mock('lucide-react', () => ({
-  Loader2: ({ className }: { className?: string }) => <span className={className}>Loading Icon</span>,
+  Loader2: ({ className, 'data-testid': dataTestId }: { className?: string; 'data-testid'?: string }) => (
+    <span className={className} data-testid={dataTestId}>
+      Loading Icon
+    </span>
+  ),
 }));
 
 /* eslint-disable @typescript-eslint/no-explicit-any */

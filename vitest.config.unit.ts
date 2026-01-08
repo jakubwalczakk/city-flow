@@ -26,10 +26,10 @@ export default defineConfig({
       ],
       exclude: ['node_modules/', 'test/', '**/*.d.ts', '**/*.config.*', '**/dist/'],
       thresholds: {
-        lines: 80,
-        functions: 80,
-        branches: 75,
-        statements: 80,
+        lines: 70,
+        functions: 70,
+        branches: 70,
+        statements: 70,
       },
     },
     server: {

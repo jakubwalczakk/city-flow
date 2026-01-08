@@ -22,6 +22,9 @@ vi.mock('@/components/ActivityForm', () => ({
 vi.mock('@/components/NewPlanForm', () => ({
   default: () => <div data-testid='new-plan-form'>NewPlanForm</div>,
 }));
+vi.mock('@/components/DraftPlanView', () => ({
+  default: () => <div data-testid='draft-plan-view'>DraftPlanView</div>,
+}));
 vi.mock('@/components/ui/state-views', () => ({
   LoadingView: () => <div data-testid='loading-view'>Loading...</div>,
   ErrorView: ({ title, message }: { title: string; message: string }) => (
@@ -139,7 +142,7 @@ describe('PlanDetailsView', () => {
       expect(screen.getByTestId('back-link')).toBeInTheDocument();
       expect(screen.getByTestId('plan-header')).toBeInTheDocument();
       expect(screen.getByTestId('plan-draft-section')).toBeInTheDocument();
-      expect(screen.getByTestId('new-plan-form')).toBeInTheDocument();
+      expect(screen.getByTestId('draft-plan-view')).toBeInTheDocument();
     });
 
     it('should not show generated or archived sections for draft plan', () => {

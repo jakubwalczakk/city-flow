@@ -10,7 +10,7 @@ describe('usePreferencesForm', () => {
   });
 
   describe('initialization', () => {
-    it('should initialize with provided preferences and travel pace', () => {
+    it('should initialize with provided preferences and travel pace', async () => {
       const { result } = renderHook(() =>
         usePreferencesForm({
           initialPreferences: ['culture', 'food'],
@@ -19,8 +19,10 @@ describe('usePreferencesForm', () => {
         })
       );
 
-      expect(result.current.form.getValues('preferences')).toEqual(['culture', 'food']);
-      expect(result.current.form.getValues('travel_pace')).toBe('moderate');
+      await waitFor(() => {
+        expect(result.current.form.getValues('preferences')).toEqual(['culture', 'food']);
+        expect(result.current.form.getValues('travel_pace')).toBe('moderate');
+      });
     });
 
     it('should initialize with empty array when preferences is null', () => {
@@ -51,7 +53,7 @@ describe('usePreferencesForm', () => {
   });
 
   describe('change detection', () => {
-    it('should detect no changes when form matches initial values', () => {
+    it('should detect no changes when form matches initial values', async () => {
       const { result } = renderHook(() =>
         usePreferencesForm({
           initialPreferences: ['culture', 'food'],
@@ -60,7 +62,9 @@ describe('usePreferencesForm', () => {
         })
       );
 
-      expect(result.current.hasChanges).toBe(false);
+      await waitFor(() => {
+        expect(result.current.hasChanges).toBe(false);
+      });
     });
 
     it('should detect changes when preferences are modified', async () => {
@@ -395,7 +399,7 @@ describe('usePreferencesForm', () => {
   });
 
   describe('form state', () => {
-    it('should provide form instance', () => {
+    it('should provide form instance', async () => {
       const { result } = renderHook(() =>
         usePreferencesForm({
           initialPreferences: ['culture', 'food'],
@@ -404,13 +408,15 @@ describe('usePreferencesForm', () => {
         })
       );
 
-      expect(result.current.form).toBeDefined();
-      expect(result.current.form.control).toBeDefined();
-      expect(result.current.form.getValues).toBeTypeOf('function');
-      expect(result.current.form.setValue).toBeTypeOf('function');
+      await waitFor(() => {
+        expect(result.current.form).toBeDefined();
+        expect(result.current.form.control).toBeDefined();
+        expect(result.current.form.getValues).toBeTypeOf('function');
+        expect(result.current.form.setValue).toBeTypeOf('function');
+      });
     });
 
-    it('should provide handleSubmit function', () => {
+    it('should provide handleSubmit function', async () => {
       const { result } = renderHook(() =>
         usePreferencesForm({
           initialPreferences: ['culture', 'food'],
@@ -419,10 +425,12 @@ describe('usePreferencesForm', () => {
         })
       );
 
-      expect(result.current.handleSubmit).toBeTypeOf('function');
+      await waitFor(() => {
+        expect(result.current.handleSubmit).toBeTypeOf('function');
+      });
     });
 
-    it('should provide hasChanges boolean', () => {
+    it('should provide hasChanges boolean', async () => {
       const { result } = renderHook(() =>
         usePreferencesForm({
           initialPreferences: ['culture', 'food'],
@@ -431,10 +439,12 @@ describe('usePreferencesForm', () => {
         })
       );
 
-      expect(typeof result.current.hasChanges).toBe('boolean');
+      await waitFor(() => {
+        expect(typeof result.current.hasChanges).toBe('boolean');
+      });
     });
 
-    it('should provide isValid boolean', () => {
+    it('should provide isValid boolean', async () => {
       const { result } = renderHook(() =>
         usePreferencesForm({
           initialPreferences: ['culture', 'food'],
@@ -443,7 +453,9 @@ describe('usePreferencesForm', () => {
         })
       );
 
-      expect(typeof result.current.isValid).toBe('boolean');
+      await waitFor(() => {
+        expect(typeof result.current.isValid).toBe('boolean');
+      });
     });
   });
 });

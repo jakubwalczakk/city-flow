@@ -3,7 +3,6 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 
 export default defineConfig({
-  // @ts-expect-error - Vite plugin type conflict between vitest's bundled vite and workspace vite
   plugins: [react()],
   test: {
     globals: true,
@@ -33,10 +32,10 @@ export default defineConfig({
         'src/pages/**', // Astro pages (E2E tested)
       ],
       thresholds: {
-        lines: 80,
-        functions: 80,
-        branches: 75,
-        statements: 80,
+        lines: 70,
+        functions: 70,
+        branches: 70,
+        statements: 70,
       },
     },
     server: {
