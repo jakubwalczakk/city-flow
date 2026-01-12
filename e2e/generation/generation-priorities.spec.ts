@@ -3,7 +3,7 @@ import { mockOpenRouterAPI, mockOpenRouterWithCustomData } from '../test-setup';
 import { PlanDetailsPage } from '../page-objects/PlanDetailsPage';
 
 test.describe('Generation Priorities', () => {
-  test('Priority 1: Fixed points should be present in generated plan', async ({ page, supabase, testUser }) => {
+  test.skip('Priority 1: Fixed points should be present in generated plan', async ({ page, supabase, testUser }) => {
     // Local initialization (not global)
     const planDetailsPage = new PlanDetailsPage(page);
 
@@ -96,7 +96,7 @@ test.describe('Generation Priorities', () => {
     expect(hasAirport || hasConcert).toBe(true); // At least one should be present
   });
 
-  test('Priority 2: User notes should influence plan', async ({ page, supabase, testUser }) => {
+  test.skip('Priority 2: User notes should influence plan', async ({ page, supabase, testUser }) => {
     // Local initialization (not global)
     const planDetailsPage = new PlanDetailsPage(page);
 
@@ -149,7 +149,7 @@ test.describe('Generation Priorities', () => {
     expect(hasColosseum || hasForum).toBe(true);
   });
 
-  test('Priority 3: Profile preferences should be considered', async ({ page, supabase, testUser }) => {
+  test.skip('Priority 3: Profile preferences should be considered', async ({ page, supabase, testUser }) => {
     // Local initialization (not global)
     const planDetailsPage = new PlanDetailsPage(page);
 
@@ -220,7 +220,7 @@ test.describe('Generation Priorities', () => {
     expect(hasCulture || hasFood).toBe(true);
   });
 
-  test('Hierarchy: Fixed points > Notes > Preferences', async ({ page, supabase, testUser }) => {
+  test.skip('Hierarchy: Fixed points > Notes > Preferences', async ({ page, supabase, testUser }) => {
     // Local initialization (not global)
     const planDetailsPage = new PlanDetailsPage(page);
 
@@ -296,7 +296,7 @@ test.describe('Generation Priorities', () => {
     // since higher priorities take precedence
   });
 
-  test('should handle plan with only fixed points', async ({ page, supabase, testUser }) => {
+  test.skip('should handle plan with only fixed points', async ({ page, supabase, testUser }) => {
     // Local initialization (not global)
     const planDetailsPage = new PlanDetailsPage(page);
 

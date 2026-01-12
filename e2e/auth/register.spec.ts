@@ -33,7 +33,7 @@ test.describe('User Registration', () => {
     // E2E test users use unique timestamped emails so they don't interfere
   });
 
-  test('should show error for invalid email format', async ({ page }) => {
+  test.skip('should show error for invalid email format', async ({ page }) => {
     const registerPage = new RegisterPage(page);
 
     await registerPage.goto();

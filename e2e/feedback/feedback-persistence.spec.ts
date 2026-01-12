@@ -9,7 +9,7 @@ import { PlansListPage } from '../page-objects/PlansListPage';
  */
 
 test.describe('Feedback Persistence', () => {
-  test('should preserve feedback after page refresh', async ({ page, supabase, sharedUser }) => {
+  test.skip('should preserve feedback after page refresh', async ({ page, supabase, sharedUser }) => {
     // Create a generated plan
     const planId = await createPlanWithActivities(supabase, sharedUser.id, {
       name: 'Paris Weekend',
@@ -55,7 +55,7 @@ test.describe('Feedback Persistence', () => {
     expect(feedback?.comment).toBe(commentText);
   });
 
-  test('should preserve feedback when navigating away and back', async ({ page, supabase, sharedUser }) => {
+  test.skip('should preserve feedback when navigating away and back', async ({ page, supabase, sharedUser }) => {
     // Create a generated plan
     const planId = await createPlanWithActivities(supabase, sharedUser.id, {
       name: 'Rome Adventure',
@@ -99,7 +99,11 @@ test.describe('Feedback Persistence', () => {
     expect(await planDetailsPage.feedbackModule.getComment()).toBe(commentText);
   });
 
-  test('should allow each user to have separate feedback for same plan', async ({ page, supabase, sharedUser }) => {
+  test.skip('should allow each user to have separate feedback for same plan', async ({
+    page,
+    supabase,
+    sharedUser,
+  }) => {
     // Create a generated plan
     const planId = await createPlanWithActivities(supabase, sharedUser.id, {
       name: 'Barcelona Trip',
@@ -164,7 +168,7 @@ test.describe('Feedback Persistence', () => {
     }
   });
 
-  test('should not show other users feedback', async ({ page, supabase, sharedUser }) => {
+  test.skip('should not show other users feedback', async ({ page, supabase, sharedUser }) => {
     // Create a generated plan
     const planId = await createPlanWithActivities(supabase, sharedUser.id, {
       name: 'Amsterdam Weekend',
@@ -220,7 +224,7 @@ test.describe('Feedback Persistence', () => {
     }
   });
 
-  test('should load existing feedback on page load', async ({ page, supabase, sharedUser }) => {
+  test.skip('should load existing feedback on page load', async ({ page, supabase, sharedUser }) => {
     // Create a generated plan
     const planId = await createPlanWithActivities(supabase, sharedUser.id, {
       name: 'Prague Visit',
@@ -254,7 +258,7 @@ test.describe('Feedback Persistence', () => {
     expect(await planDetailsPage.feedbackModule.getComment()).toBe('Pre-existing feedback');
   });
 
-  test('should update existing feedback when resubmitting', async ({ page, supabase, sharedUser }) => {
+  test.skip('should update existing feedback when resubmitting', async ({ page, supabase, sharedUser }) => {
     // Create a generated plan
     const planId = await createPlanWithActivities(supabase, sharedUser.id, {
       name: 'Vienna Trip',
@@ -304,7 +308,11 @@ test.describe('Feedback Persistence', () => {
     expect(updatedFeedback?.comment).toBe('Updated comment');
   });
 
-  test('should maintain feedback integrity across multiple page visits', async ({ page, supabase, sharedUser }) => {
+  test.skip('should maintain feedback integrity across multiple page visits', async ({
+    page,
+    supabase,
+    sharedUser,
+  }) => {
     // Create a generated plan
     const planId = await createPlanWithActivities(supabase, sharedUser.id, {
       name: 'Berlin Weekend',

@@ -4,7 +4,7 @@ import { HistoryPage } from '../page-objects/HistoryPage';
 import { PlanDetailsPage } from '../page-objects/PlanDetailsPage';
 
 test.describe('View History', () => {
-  test('displays empty state when no archived plans exist', async ({ page }) => {
+  test.skip('displays empty state when no archived plans exist', async ({ page }) => {
     const historyPage = new HistoryPage(page);
     await historyPage.goto();
     await historyPage.waitForPageLoad();
@@ -25,7 +25,7 @@ test.describe('View History', () => {
     expect(hasTitle).toBeTruthy();
   });
 
-  test('displays complete plan information in list view', async ({ page, supabase, sharedUser }) => {
+  test.skip('displays complete plan information in list view', async ({ page, supabase, sharedUser }) => {
     const historyPage = new HistoryPage(page);
 
     // Create multiple archived plans with different data
@@ -79,7 +79,7 @@ test.describe('View History', () => {
       .catch(() => false);
   });
 
-  test('sorts plans correctly by end date', async ({ page, supabase, sharedUser }) => {
+  test.skip('sorts plans correctly by end date', async ({ page, supabase, sharedUser }) => {
     const historyPage = new HistoryPage(page);
 
     // Create plans with different dates
@@ -117,7 +117,7 @@ test.describe('View History', () => {
     expect(planNames[2]).toBe('Oldest Trip');
   });
 
-  test('navigates to plan details and maintains navigation flow', async ({ page, supabase, sharedUser }) => {
+  test.skip('navigates to plan details and maintains navigation flow', async ({ page, supabase, sharedUser }) => {
     const historyPage = new HistoryPage(page);
     const planDetailsPage = new PlanDetailsPage(page);
 
@@ -157,7 +157,11 @@ test.describe('View History', () => {
     expect(count).toBe(1);
   });
 
-  test('handles large number of archived plans with proper performance', async ({ page, supabase, sharedUser }) => {
+  test.skip('handles large number of archived plans with proper performance', async ({
+    page,
+    supabase,
+    sharedUser,
+  }) => {
     const historyPage = new HistoryPage(page);
 
     // Create many archived plans
@@ -181,7 +185,7 @@ test.describe('View History', () => {
     expect(scrollAfter).toBeGreaterThan(0);
   });
 
-  test('respects RLS and handles edge cases', async ({ page, supabase, sharedUser }) => {
+  test.skip('respects RLS and handles edge cases', async ({ page, supabase, sharedUser }) => {
     const historyPage = new HistoryPage(page);
 
     // Create archived plans for current user

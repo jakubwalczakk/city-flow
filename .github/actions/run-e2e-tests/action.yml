@@ -113,8 +113,7 @@ runs:
         E2E_PASSWORD: ${{ inputs.e2e-password }}
         PUBLIC_SITE_URL: http://localhost:4321
         NODE_ENV: test
-      # run: npm run test:e2e
-      run: echo "There should be E2E tests here, but as of now we are struggling with the proper setup."
+      run: npm run test:e2e
 
     - name: Upload Playwright report
       if: always()

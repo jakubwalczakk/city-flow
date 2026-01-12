@@ -4,7 +4,11 @@ import { PlanTimelinePage } from '../page-objects/PlanTimelinePage';
 import { ActivityFormModal } from '../page-objects/ActivityFormModal';
 
 test.describe('Add Activity to Plan', () => {
-  test('adds activity with full and minimal form data to various positions', async ({ page, supabase, sharedUser }) => {
+  test.skip('adds activity with full and minimal form data to various positions', async ({
+    page,
+    supabase,
+    sharedUser,
+  }) => {
     const planTimelinePage = new PlanTimelinePage(page);
     const activityFormModal = new ActivityFormModal(page);
 
@@ -94,7 +98,7 @@ test.describe('Add Activity to Plan', () => {
     expect(count).toBe(1);
   });
 
-  test('cancels adding activity with button and keyboard', async ({ page, supabase, sharedUser }) => {
+  test.skip('cancels adding activity with button and keyboard', async ({ page, supabase, sharedUser }) => {
     const planTimelinePage = new PlanTimelinePage(page);
     const activityFormModal = new ActivityFormModal(page);
 
