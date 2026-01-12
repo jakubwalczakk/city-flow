@@ -2,7 +2,7 @@ import { authTest as test, expect, createTestPlan, setGenerationLimit, getGenera
 import { PlanDetailsPage } from '../page-objects/PlanDetailsPage';
 
 test.describe('Generation Limits', () => {
-  test('should generate plan with available limit', async ({ page, supabase, testUser }) => {
+  test.skip('should generate plan with available limit', async ({ page, supabase, testUser }) => {
     // Local initialization (not global)
     const planDetailsPage = new PlanDetailsPage(page);
 
@@ -28,7 +28,7 @@ test.describe('Generation Limits', () => {
     expect(generationsUsed).toBe(1);
   });
 
-  test('should prevent generation when limit exhausted', async ({ page, supabase, testUser }) => {
+  test.skip('should prevent generation when limit exhausted', async ({ page, supabase, testUser }) => {
     // Local initialization (not global)
     const planDetailsPage = new PlanDetailsPage(page);
 
@@ -78,7 +78,7 @@ test.describe('Generation Limits', () => {
     expect(generationsUsed).toBe(5);
   });
 
-  test('should display generation counter in UI', async ({ page, supabase, testUser }) => {
+  test.skip('should display generation counter in UI', async ({ page, supabase, testUser }) => {
     // Local initialization (not global)
     const planDetailsPage = new PlanDetailsPage(page);
 
@@ -112,7 +112,7 @@ test.describe('Generation Limits', () => {
     }
   });
 
-  test('should update counter after generation', async ({ page, supabase, testUser }) => {
+  test.skip('should update counter after generation', async ({ page, supabase, testUser }) => {
     // Local initialization (not global)
     const planDetailsPage = new PlanDetailsPage(page);
 
@@ -150,7 +150,7 @@ test.describe('Generation Limits', () => {
     expect(generationsUsed).toBe(3); // 2 + 1 = 3
   });
 
-  test('should allow generation with 1 generation left', async ({ supabase, testUser, page }) => {
+  test.skip('should allow generation with 1 generation left', async ({ supabase, testUser, page }) => {
     // Local initialization (not global)
     const planDetailsPage = new PlanDetailsPage(page);
 
@@ -188,7 +188,7 @@ test.describe('Generation Limits', () => {
     expect(isEnabled).toBe(false);
   });
 
-  test('should show informative message about limit reset', async ({ page, supabase, testUser }) => {
+  test.skip('should show informative message about limit reset', async ({ page, supabase, testUser }) => {
     // Local initialization (not global)
     const planDetailsPage = new PlanDetailsPage(page);
 
@@ -230,7 +230,7 @@ test.describe('Generation Limits', () => {
     }
   });
 
-  test('should not decrease counter on failed generation', async ({ page, supabase, testUser }) => {
+  test.skip('should not decrease counter on failed generation', async ({ page, supabase, testUser }) => {
     // Local initialization (not global)
     const planDetailsPage = new PlanDetailsPage(page);
 

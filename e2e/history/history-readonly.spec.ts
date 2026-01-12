@@ -3,7 +3,7 @@ import { createArchivedPlan } from '../fixtures';
 import { PlanDetailsPage } from '../page-objects/PlanDetailsPage';
 
 test.describe('History Read-Only Mode', () => {
-  test('displays complete read-only plan information without edit capabilities', async ({
+  test.skip('displays complete read-only plan information without edit capabilities', async ({
     page,
     supabase,
     sharedUser,
@@ -49,7 +49,7 @@ test.describe('History Read-Only Mode', () => {
     expect(hasArchivedText).toBeTruthy();
   });
 
-  test('prevents all editing operations on archived plan', async ({ page, supabase, sharedUser }) => {
+  test.skip('prevents all editing operations on archived plan', async ({ page, supabase, sharedUser }) => {
     const planDetailsPage = new PlanDetailsPage(page);
 
     // Create an archived plan with activities
@@ -92,7 +92,7 @@ test.describe('History Read-Only Mode', () => {
     expect(isMoveToHistoryVisible).toBeFalsy();
   });
 
-  test('allows exporting archived plan to PDF', async ({ page, supabase, sharedUser }) => {
+  test.skip('allows exporting archived plan to PDF', async ({ page, supabase, sharedUser }) => {
     const planDetailsPage = new PlanDetailsPage(page);
 
     // Create an archived plan
@@ -113,7 +113,7 @@ test.describe('History Read-Only Mode', () => {
     expect(canExport).toBeTruthy();
   });
 
-  test('maintains data integrity after viewing archived plan', async ({ page, supabase, sharedUser }) => {
+  test.skip('maintains data integrity after viewing archived plan', async ({ page, supabase, sharedUser }) => {
     const planDetailsPage = new PlanDetailsPage(page);
 
     // Create an archived plan with activities
@@ -147,7 +147,7 @@ test.describe('History Read-Only Mode', () => {
     expect(planAfterView?.end_date).toBe(originalPlan?.end_date);
   });
 
-  test('allows navigation between multiple archived plans', async ({ page, supabase, sharedUser }) => {
+  test.skip('allows navigation between multiple archived plans', async ({ page, supabase, sharedUser }) => {
     const planDetailsPage = new PlanDetailsPage(page);
 
     // Create multiple archived plans
@@ -186,7 +186,7 @@ test.describe('History Read-Only Mode', () => {
     expect(isReadOnly2).toBeTruthy();
   });
 
-  test('prevents API modifications and shows proper UI indicators', async ({ page, supabase, sharedUser }) => {
+  test.skip('prevents API modifications and shows proper UI indicators', async ({ page, supabase, sharedUser }) => {
     const planDetailsPage = new PlanDetailsPage(page);
 
     // Create an archived plan

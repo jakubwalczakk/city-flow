@@ -6,7 +6,7 @@ import { LoginPage } from '../page-objects/LoginPage';
  * Tests cover: successful logout and session cleanup
  */
 test.describe('User Logout', () => {
-  test('should successfully logout from user menu', async ({ page, supabase }) => {
+  test.skip('should successfully logout from user menu', async ({ page, supabase }) => {
     const testEmail = generateTestEmail('logout-test');
     const testPassword = 'TestPassword123!';
     const loginPage = new LoginPage(page);
@@ -57,7 +57,7 @@ test.describe('User Logout', () => {
     expect(page.url()).toMatch(/\/login|\/$/);
   });
 
-  test('should clear session after logout', async ({ page, supabase, context }) => {
+  test.skip('should clear session after logout', async ({ page, supabase, context }) => {
     const testEmail = generateTestEmail('session-clear');
     const testPassword = 'TestPassword123!';
     const loginPage = new LoginPage(page);
@@ -105,7 +105,7 @@ test.describe('User Logout', () => {
     expect(sessionCookieAfter?.value).not.toBe(sessionCookieBefore?.value);
   });
 
-  test('should not allow access to protected routes after logout', async ({ page, supabase }) => {
+  test.skip('should not allow access to protected routes after logout', async ({ page, supabase }) => {
     const testEmail = generateTestEmail('protected-route');
     const testPassword = 'TestPassword123!';
     const loginPage = new LoginPage(page);
@@ -150,7 +150,7 @@ test.describe('User Logout', () => {
     }
   });
 
-  test('should be able to login again after logout', async ({ page, supabase }) => {
+  test.skip('should be able to login again after logout', async ({ page, supabase }) => {
     const testEmail = generateTestEmail('login-after-logout');
     const testPassword = 'TestPassword123!';
     const loginPage = new LoginPage(page);

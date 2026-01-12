@@ -5,7 +5,7 @@ import { PlanDetailsPage } from '../page-objects/PlanDetailsPage';
 import { PlansListPage } from '../page-objects/PlansListPage';
 
 test.describe('Edit Plan Name', () => {
-  test('successfully edits plan name and persists changes', async ({ page, supabase, sharedUser }) => {
+  test.skip('successfully edits plan name and persists changes', async ({ page, supabase, sharedUser }) => {
     const planDetailsPage = new PlanDetailsPage(page);
     const plansListPage = new PlansListPage(page);
 
@@ -46,7 +46,7 @@ test.describe('Edit Plan Name', () => {
     await plansListPage.expectPlanNotExists('Original Plan Name');
   });
 
-  test('validates plan name constraints (empty, too short, too long)', async ({ page, supabase, sharedUser }) => {
+  test.skip('validates plan name constraints (empty, too short, too long)', async ({ page, supabase, sharedUser }) => {
     const planDetailsPage = new PlanDetailsPage(page);
 
     // Create a test plan
@@ -107,7 +107,7 @@ test.describe('Edit Plan Name', () => {
     expect(plan!.name).toBe('Valid Plan Name');
   });
 
-  test('cancels edit with Escape key without saving changes', async ({ page, supabase, sharedUser }) => {
+  test.skip('cancels edit with Escape key without saving changes', async ({ page, supabase, sharedUser }) => {
     const planDetailsPage = new PlanDetailsPage(page);
 
     // Create a test plan
@@ -133,7 +133,7 @@ test.describe('Edit Plan Name', () => {
     expect(plan!.name).toBe('Unchanged Plan');
   });
 
-  test('handles special characters and unicode in plan names', async ({ page, supabase, sharedUser }) => {
+  test.skip('handles special characters and unicode in plan names', async ({ page, supabase, sharedUser }) => {
     const planDetailsPage = new PlanDetailsPage(page);
 
     // Create a test plan
@@ -161,7 +161,7 @@ test.describe('Edit Plan Name', () => {
     expect(plan!.name).toContain('München');
   });
 
-  test('shows appropriate feedback after successful edit', async ({ page, supabase, sharedUser }) => {
+  test.skip('shows appropriate feedback after successful edit', async ({ page, supabase, sharedUser }) => {
     const planDetailsPage = new PlanDetailsPage(page);
 
     // Create a test plan

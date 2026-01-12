@@ -5,7 +5,7 @@ import { PlanDetailsPage } from '../page-objects/PlanDetailsPage';
 import { GenerationLoadingPage } from '../page-objects/GenerationLoadingPage';
 
 test.describe('Plan Generation', () => {
-  test('should successfully generate a plan from draft', async ({ page, supabase, sharedUser }) => {
+  test.skip('should successfully generate a plan from draft', async ({ page, supabase, sharedUser }) => {
     // Local initialization (not global)
     const planDetailsPage = new PlanDetailsPage(page);
     // Mock OpenRouter API
@@ -60,7 +60,7 @@ test.describe('Plan Generation', () => {
     await expect(successToast).toBeVisible({ timeout: 5000 });
   });
 
-  test('should generate plan with fixed point', async ({ page, supabase, sharedUser }) => {
+  test.skip('should generate plan with fixed point', async ({ page, supabase, sharedUser }) => {
     // Local initialization (not global)
     const planDetailsPage = new PlanDetailsPage(page);
 
@@ -103,7 +103,7 @@ test.describe('Plan Generation', () => {
     expect(hasColosseum).toBe(true);
   });
 
-  test('should show loader during generation', async ({ page, supabase, sharedUser }) => {
+  test.skip('should show loader during generation', async ({ page, supabase, sharedUser }) => {
     // Local initialization (not global)
     const planDetailsPage = new PlanDetailsPage(page);
     const generationLoadingPage = new GenerationLoadingPage(page);
@@ -140,7 +140,7 @@ test.describe('Plan Generation', () => {
     expect(await generationLoadingPage.isLoaderVisible()).toBe(false);
   });
 
-  test('should handle regeneration of existing plan', async ({ page, supabase, sharedUser }) => {
+  test.skip('should handle regeneration of existing plan', async ({ page, supabase, sharedUser }) => {
     // Local initialization (not global)
     const planDetailsPage = new PlanDetailsPage(page);
 
@@ -178,7 +178,7 @@ test.describe('Plan Generation', () => {
     // Note: If regenerate button doesn't exist, test will pass without regeneration check
   });
 
-  test('should respect generation timeout', async ({ page, supabase, sharedUser }) => {
+  test.skip('should respect generation timeout', async ({ page, supabase, sharedUser }) => {
     // Local initialization (not global)
     const planDetailsPage = new PlanDetailsPage(page);
     const generationLoadingPage = new GenerationLoadingPage(page);

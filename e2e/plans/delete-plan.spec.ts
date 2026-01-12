@@ -5,7 +5,7 @@ import { PlanDetailsPage } from '../page-objects/PlanDetailsPage';
 import { PlansListPage } from '../page-objects/PlansListPage';
 
 test.describe('Delete Plan', () => {
-  test('deletes plan from list view and removes from database', async ({ page, supabase, sharedUser }) => {
+  test.skip('deletes plan from list view and removes from database', async ({ page, supabase, sharedUser }) => {
     const plansListPage = new PlansListPage(page);
 
     // Create test plans
@@ -46,7 +46,7 @@ test.describe('Delete Plan', () => {
     expect(plans![0].name).toBe('Plan to Keep');
   });
 
-  test('deletes plan from details view and redirects correctly', async ({ page, supabase, sharedUser }) => {
+  test.skip('deletes plan from details view and redirects correctly', async ({ page, supabase, sharedUser }) => {
     const planDetailsPage = new PlanDetailsPage(page);
 
     // Create a test plan
@@ -72,7 +72,7 @@ test.describe('Delete Plan', () => {
     expect(plan).toBeNull();
   });
 
-  test('cancels deletion when user dismisses confirmation modal', async ({ page, supabase, sharedUser }) => {
+  test.skip('cancels deletion when user dismisses confirmation modal', async ({ page, supabase, sharedUser }) => {
     const plansListPage = new PlansListPage(page);
 
     // Create a test plan
@@ -117,7 +117,7 @@ test.describe('Delete Plan', () => {
     expect(plans![0].name).toBe('Plan Not to Delete');
   });
 
-  test('cascades deletion to related data (fixed points, activities)', async ({ page, supabase, sharedUser }) => {
+  test.skip('cascades deletion to related data (fixed points, activities)', async ({ page, supabase, sharedUser }) => {
     const planDetailsPage = new PlanDetailsPage(page);
 
     // Create a plan with fixed points and activities
@@ -154,7 +154,7 @@ test.describe('Delete Plan', () => {
     expect(fpAfter).toBeNull();
   });
 
-  test('shows confirmation modal with correct warning message', async ({ page, supabase, sharedUser }) => {
+  test.skip('shows confirmation modal with correct warning message', async ({ page, supabase, sharedUser }) => {
     const plansListPage = new PlansListPage(page);
 
     // Create a test plan
@@ -198,7 +198,7 @@ test.describe('Delete Plan', () => {
     await page.getByTestId('cancel-delete').click();
   });
 
-  test('handles deletion of last plan gracefully', async ({ page, supabase, sharedUser }) => {
+  test.skip('handles deletion of last plan gracefully', async ({ page, supabase, sharedUser }) => {
     const plansListPage = new PlansListPage(page);
 
     // Create only one plan

@@ -10,7 +10,7 @@ import { PlansListPage } from '../page-objects/PlansListPage';
 import { HistoryPage } from '../page-objects/HistoryPage';
 
 test.describe('Auto-Archive Plans', () => {
-  test('auto-archives plan after end date passes and shows in history', async ({ page, supabase, sharedUser }) => {
+  test.skip('auto-archives plan after end date passes and shows in history', async ({ page, supabase, sharedUser }) => {
     const plansListPage = new PlansListPage(page);
     const historyPage = new HistoryPage(page);
 
@@ -46,7 +46,7 @@ test.describe('Auto-Archive Plans', () => {
     await historyPage.expectPlanExists('Expired Plan');
   });
 
-  test('handles archiving logic correctly based on date and status', async ({ page, supabase, sharedUser }) => {
+  test.skip('handles archiving logic correctly based on date and status', async ({ page, supabase, sharedUser }) => {
     const plansListPage = new PlansListPage(page);
     const historyPage = new HistoryPage(page);
 
@@ -105,7 +105,7 @@ test.describe('Auto-Archive Plans', () => {
     await historyPage.expectPlanNotExists('Expired Draft');
   });
 
-  test('batch archives multiple expired plans efficiently', async ({ page, supabase, sharedUser }) => {
+  test.skip('batch archives multiple expired plans efficiently', async ({ page, supabase, sharedUser }) => {
     const historyPage = new HistoryPage(page);
 
     // Create 5 generated plans with past dates

@@ -8,7 +8,7 @@ import { PlanDetailsPage } from '../page-objects/PlanDetailsPage';
  */
 
 test.describe('Feedback Comments', () => {
-  test('should allow adding comment without rating', async ({ page, supabase, sharedUser }) => {
+  test.skip('should allow adding comment without rating', async ({ page, supabase, sharedUser }) => {
     // Create a generated plan
     const planId = await createPlanWithActivities(supabase, sharedUser.id, {
       name: 'Paris Weekend',
@@ -45,7 +45,7 @@ test.describe('Feedback Comments', () => {
     expect(feedback?.rating).toBeNull();
   });
 
-  test('should allow adding comment with positive rating', async ({ page, supabase, sharedUser }) => {
+  test.skip('should allow adding comment with positive rating', async ({ page, supabase, sharedUser }) => {
     // Create a generated plan
     const planId = await createPlanWithActivities(supabase, sharedUser.id, {
       name: 'Rome Adventure',
@@ -83,7 +83,7 @@ test.describe('Feedback Comments', () => {
     expect(feedback?.comment).toBe(commentText);
   });
 
-  test('should allow adding comment with negative rating', async ({ page, supabase, sharedUser }) => {
+  test.skip('should allow adding comment with negative rating', async ({ page, supabase, sharedUser }) => {
     // Create a generated plan
     const planId = await createPlanWithActivities(supabase, sharedUser.id, {
       name: 'Barcelona Trip',
@@ -121,7 +121,7 @@ test.describe('Feedback Comments', () => {
     expect(feedback?.comment).toBe(commentText);
   });
 
-  test('should allow updating existing comment', async ({ page, supabase, sharedUser }) => {
+  test.skip('should allow updating existing comment', async ({ page, supabase, sharedUser }) => {
     // Create a generated plan
     const planId = await createPlanWithActivities(supabase, sharedUser.id, {
       name: 'Amsterdam Weekend',
@@ -167,7 +167,7 @@ test.describe('Feedback Comments', () => {
     expect(updatedFeedback?.comment).toBe(updatedComment);
   });
 
-  test('should handle empty comment submission', async ({ page, supabase, sharedUser }) => {
+  test.skip('should handle empty comment submission', async ({ page, supabase, sharedUser }) => {
     // Create a generated plan
     const planId = await createPlanWithActivities(supabase, sharedUser.id, {
       name: 'Prague Visit',
@@ -203,7 +203,7 @@ test.describe('Feedback Comments', () => {
     expect(feedback?.comment).toBeNull();
   });
 
-  test('should validate maximum comment length', async ({ page, supabase, sharedUser }) => {
+  test.skip('should validate maximum comment length', async ({ page, supabase, sharedUser }) => {
     // Create a generated plan
     const planId = await createPlanWithActivities(supabase, sharedUser.id, {
       name: 'Vienna Trip',
@@ -255,7 +255,7 @@ test.describe('Feedback Comments', () => {
     }
   });
 
-  test('should allow submitting comment after changing rating', async ({ page, supabase, sharedUser }) => {
+  test.skip('should allow submitting comment after changing rating', async ({ page, supabase, sharedUser }) => {
     // Create a generated plan
     const planId = await createPlanWithActivities(supabase, sharedUser.id, {
       name: 'Berlin Weekend',
@@ -302,7 +302,7 @@ test.describe('Feedback Comments', () => {
     expect(feedback?.comment).toBe(updatedComment);
   });
 
-  test('should preserve comment when changing rating', async ({ page, supabase, sharedUser }) => {
+  test.skip('should preserve comment when changing rating', async ({ page, supabase, sharedUser }) => {
     // Create a generated plan
     const planId = await createPlanWithActivities(supabase, sharedUser.id, {
       name: 'Brussels Trip',

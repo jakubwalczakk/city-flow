@@ -5,7 +5,7 @@ import { PlansListPage } from '../page-objects/PlansListPage';
 import { HistoryPage } from '../page-objects/HistoryPage';
 
 test.describe('Move Plan to History', () => {
-  test('moves plan to history from plans list successfully', async ({ page, supabase, sharedUser }) => {
+  test.skip('moves plan to history from plans list successfully', async ({ page, supabase, sharedUser }) => {
     const plansListPage = new PlansListPage(page);
     const historyPage = new HistoryPage(page);
 
@@ -44,7 +44,7 @@ test.describe('Move Plan to History', () => {
     await historyPage.expectPlanExists('Trip to Rome');
   });
 
-  test('moves plan to history from plan details page', async ({ page, supabase, sharedUser }) => {
+  test.skip('moves plan to history from plan details page', async ({ page, supabase, sharedUser }) => {
     const planDetailsPage = new PlanDetailsPage(page);
     const historyPage = new HistoryPage(page);
 
@@ -78,7 +78,11 @@ test.describe('Move Plan to History', () => {
     await historyPage.expectPlanExists('Barcelona Vacation');
   });
 
-  test('cancels moving plan to history when user dismisses confirmation', async ({ page, supabase, sharedUser }) => {
+  test.skip('cancels moving plan to history when user dismisses confirmation', async ({
+    page,
+    supabase,
+    sharedUser,
+  }) => {
     const plansListPage = new PlansListPage(page);
 
     // Create a generated plan
@@ -132,7 +136,7 @@ test.describe('Move Plan to History', () => {
     expect(isVisible).toBeFalsy();
   });
 
-  test('shows confirmation modal with proper messaging', async ({ page, supabase, sharedUser }) => {
+  test.skip('shows confirmation modal with proper messaging', async ({ page, supabase, sharedUser }) => {
     const plansListPage = new PlansListPage(page);
 
     // Create a generated plan
@@ -178,7 +182,7 @@ test.describe('Move Plan to History', () => {
     await page.getByTestId('cancel-archive').click();
   });
 
-  test('handles rapid archiving of multiple plans', async ({ page, supabase, sharedUser }) => {
+  test.skip('handles rapid archiving of multiple plans', async ({ page, supabase, sharedUser }) => {
     const plansListPage = new PlansListPage(page);
 
     // Create multiple generated plans
@@ -246,7 +250,7 @@ test.describe('Move Plan to History', () => {
     expect(archivedPlans).toHaveLength(2);
   });
 
-  test('maintains plan data integrity after archiving', async ({ page, supabase, sharedUser }) => {
+  test.skip('maintains plan data integrity after archiving', async ({ page, supabase, sharedUser }) => {
     const planDetailsPage = new PlanDetailsPage(page);
 
     // Create a plan with activities

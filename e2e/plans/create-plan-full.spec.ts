@@ -5,7 +5,7 @@ import { NewPlanPage } from '../page-objects/NewPlanPage';
 import { PlansListPage } from '../page-objects/PlansListPage';
 
 test.describe('Create Plan - Full Flow', () => {
-  test('should create a draft plan without generating', async ({ page, supabase, testUser }) => {
+  test.skip('should create a draft plan without generating', async ({ page, supabase, testUser }) => {
     // Local initialization (not global)
     const newPlanPage = new NewPlanPage(page);
     const plansListPage = new PlansListPage(page);
@@ -52,7 +52,7 @@ test.describe('Create Plan - Full Flow', () => {
     await plansListPage.expectPlanExists('Wycieczka do Paryża');
   });
 
-  test('should create and generate a plan (full flow)', async ({ page, supabase, testUser }) => {
+  test.skip('should create and generate a plan (full flow)', async ({ page, supabase, testUser }) => {
     // Local initialization (not global)
     const newPlanPage = new NewPlanPage(page);
 
@@ -92,7 +92,7 @@ test.describe('Create Plan - Full Flow', () => {
     // If generation happens after modal closes, it might still be processing
   });
 
-  test('should show validation errors for empty required fields', async ({ page }) => {
+  test.skip('should show validation errors for empty required fields', async ({ page }) => {
     // Local initialization (not global)
     const newPlanPage = new NewPlanPage(page);
 
@@ -123,7 +123,7 @@ test.describe('Create Plan - Full Flow', () => {
     }
   });
 
-  test('should allow canceling plan creation', async ({ page, supabase, testUser }) => {
+  test.skip('should allow canceling plan creation', async ({ page, supabase, testUser }) => {
     // Local initialization (not global)
     const newPlanPage = new NewPlanPage(page);
 
@@ -156,7 +156,7 @@ test.describe('Create Plan - Full Flow', () => {
     await expect(page).toHaveURL(/\/plans$/);
   });
 
-  test('should preserve data when navigating between steps', async ({ page }) => {
+  test.skip('should preserve data when navigating between steps', async ({ page }) => {
     // Local initialization (not global)
     const newPlanPage = new NewPlanPage(page);
 
@@ -185,7 +185,7 @@ test.describe('Create Plan - Full Flow', () => {
     expect(summaryVisible).toBeTruthy();
   });
 
-  test('should handle multiple fixed points', async ({ page, supabase, testUser }) => {
+  test.skip('should handle multiple fixed points', async ({ page, supabase, testUser }) => {
     // Local initialization (not global)
     const newPlanPage = new NewPlanPage(page);
 

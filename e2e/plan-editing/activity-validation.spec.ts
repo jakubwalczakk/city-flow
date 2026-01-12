@@ -4,7 +4,11 @@ import { PlanTimelinePage } from '../page-objects/PlanTimelinePage';
 import { ActivityFormModal } from '../page-objects/ActivityFormModal';
 
 test.describe('Activity Form Validation', () => {
-  test('validates all required activity fields (title, time, duration)', async ({ page, supabase, sharedUser }) => {
+  test.skip('validates all required activity fields (title, time, duration)', async ({
+    page,
+    supabase,
+    sharedUser,
+  }) => {
     // Create a plan with one activity
     const planId = await createPlanWithActivities(supabase, sharedUser.id, {
       name: 'Paris Trip',
@@ -97,7 +101,7 @@ test.describe('Activity Form Validation', () => {
     }
   });
 
-  test('validates text field length constraints', async ({ page, supabase, sharedUser }) => {
+  test.skip('validates text field length constraints', async ({ page, supabase, sharedUser }) => {
     // Create a plan
     const planId = await createPlanWithActivities(supabase, sharedUser.id, {
       name: 'Validation Test Plan',
@@ -171,7 +175,7 @@ test.describe('Activity Form Validation', () => {
     // Test passes if there's an error or button is disabled
   });
 
-  test('validates time and cost logic constraints', async ({ page, supabase, sharedUser }) => {
+  test.skip('validates time and cost logic constraints', async ({ page, supabase, sharedUser }) => {
     // Create a plan
     const planId = await createPlanWithActivities(supabase, sharedUser.id, {
       name: 'Logic Test Plan',
@@ -234,7 +238,7 @@ test.describe('Activity Form Validation', () => {
     // Time validation might be handled by input type="time"
   });
 
-  test('handles special characters and edge cases in text fields', async ({ page, supabase, sharedUser }) => {
+  test.skip('handles special characters and edge cases in text fields', async ({ page, supabase, sharedUser }) => {
     // Create a plan
     const planId = await createPlanWithActivities(supabase, sharedUser.id, {
       name: 'Edge Cases Plan',

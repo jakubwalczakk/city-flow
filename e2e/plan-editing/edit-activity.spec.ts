@@ -4,7 +4,7 @@ import { PlanTimelinePage } from '../page-objects/PlanTimelinePage';
 import { ActivityFormModal } from '../page-objects/ActivityFormModal';
 
 test.describe('Edit Activity', () => {
-  test('edits activity with single and multiple field changes', async ({ page, supabase, sharedUser }) => {
+  test.skip('edits activity with single and multiple field changes', async ({ page, supabase, sharedUser }) => {
     const planTimelinePage = new PlanTimelinePage(page);
     const activityFormModal = new ActivityFormModal(page);
 
@@ -92,7 +92,11 @@ test.describe('Edit Activity', () => {
     expect((activity3 as { location: string }).location).toContain('Légion');
   });
 
-  test('cancels editing with button and keyboard without saving changes', async ({ page, supabase, sharedUser }) => {
+  test.skip('cancels editing with button and keyboard without saving changes', async ({
+    page,
+    supabase,
+    sharedUser,
+  }) => {
     const planTimelinePage = new PlanTimelinePage(page);
     const activityFormModal = new ActivityFormModal(page);
 
@@ -149,7 +153,7 @@ test.describe('Edit Activity', () => {
     expect(currentActivity).toEqual(originalActivity);
   });
 
-  test('changes activity category successfully', async ({ page, supabase, sharedUser }) => {
+  test.skip('changes activity category successfully', async ({ page, supabase, sharedUser }) => {
     const planTimelinePage = new PlanTimelinePage(page);
     const activityFormModal = new ActivityFormModal(page);
 

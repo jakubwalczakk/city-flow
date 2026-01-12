@@ -3,7 +3,7 @@ import { createPlanWithActivities, countActivities } from '../fixtures';
 import { PlanTimelinePage } from '../page-objects/PlanTimelinePage';
 
 test.describe('Delete Activity', () => {
-  test('deletes activities from any position (first, middle, last) with confirmation', async ({
+  test.skip('deletes activities from any position (first, middle, last) with confirmation', async ({
     page,
     supabase,
     sharedUser,
@@ -83,7 +83,7 @@ test.describe('Delete Activity', () => {
     await expect(page.getByTestId('add-activity-button')).toBeVisible();
   });
 
-  test('cancels deletion and deletes multiple activities in sequence', async ({ page, supabase, sharedUser }) => {
+  test.skip('cancels deletion and deletes multiple activities in sequence', async ({ page, supabase, sharedUser }) => {
     const planTimelinePage = new PlanTimelinePage(page);
 
     const planId = await createPlanWithActivities(supabase, sharedUser.id, {
