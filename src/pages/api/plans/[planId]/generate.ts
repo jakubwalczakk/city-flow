@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import { AppError, ExternalServiceError } from '@/lib/errors/app-error';
 import { PlanGenerationService } from '@/lib/services/plan-generation.service';
+import { PlanService } from '@/lib/services/plan.service';
 import { AuthService } from '@/lib/services/auth.service';
 import { logger } from '@/lib/utils/logger';
 import { handleApiError } from '@/lib/utils/error-handler';
@@ -24,7 +25,12 @@ export const POST: APIRoute = async ({ params, locals }) => {
       throw new AppError('Plan ID is required.', 400);
     }
 
-    // 2. Initialize Service
+    // 2. Verify plan ownership BEFORE checking API key
+    // This prevents leaking configuration details to unauthorized users
+    const planService = new PlanService(locals);
+    await planService.getPlanById(planId, userId); // Throws NotFoundError if plan doesn't belong to user
+
+    // 3. Initialize Service
     const apiKey = import.meta.env.OPENROUTER_API_KEY;
     if (!apiKey) {
       throw new ExternalServiceError('OpenRouter API key is not configured.');
@@ -32,10 +38,10 @@ export const POST: APIRoute = async ({ params, locals }) => {
     const language = import.meta.env.APP_DEFAULT_LANGUAGE || 'Polish';
     const planGenerationService = new PlanGenerationService(locals, apiKey);
 
-    // 3. Delegate to Service
+    // 4. Delegate to Service
     const updatedPlan = await planGenerationService.generateAndSavePlan(planId, userId, language);
 
-    // 4. Return Response
+    // 5. Return Response
     return new Response(JSON.stringify(updatedPlan), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
