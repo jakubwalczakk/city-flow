@@ -106,6 +106,7 @@ jobs:
     name: 🎭 E2E Tests (Playwright)
     runs-on: ubuntu-latest
     timeout-minutes: 40
+    environment: integration
 
     steps:
       - name: Checkout repository
