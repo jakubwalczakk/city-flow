@@ -1,7 +1,6 @@
 ---
 import Layout from '@/layouts/Layout.astro';
 import { AuthForm } from '@/components/auth/AuthForm';
-import { GoogleAuthButton } from '@/components/auth/GoogleAuthButton';
 ---
 
 <Layout title='Zaloguj się - CityFlow'>
@@ -14,22 +13,7 @@ import { GoogleAuthButton } from '@/components/auth/GoogleAuthButton';
       </div>
 
       {/* Auth Form */}
-      <div class='space-y-6'>
-        <AuthForm mode='login' client:load />
-
-        {/* Divider */}
-        <div class='relative'>
-          <div class='absolute inset-0 flex items-center'>
-            <span class='w-full border-t'></span>
-          </div>
-          <div class='relative flex justify-center text-xs uppercase'>
-            <span class='bg-background px-2 text-muted-foreground'> Lub kontynuuj z </span>
-          </div>
-        </div>
-
-        {/* Google Auth */}
-        <GoogleAuthButton mode='login' client:load />
-      </div>
+      <AuthForm mode='login' client:load />
 
       {/* Back to home */}
       <div class='text-center'>

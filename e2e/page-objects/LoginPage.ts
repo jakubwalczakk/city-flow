@@ -6,7 +6,6 @@ export class LoginPage {
   readonly emailInput: Locator;
   readonly passwordInput: Locator;
   readonly submitButton: Locator;
-  readonly googleAuthButton: Locator;
   readonly errorAlert: Locator;
   readonly forgotPasswordLink: Locator;
   readonly registerLink: Locator;
@@ -17,7 +16,6 @@ export class LoginPage {
     this.emailInput = page.getByTestId('auth-email-input');
     this.passwordInput = page.getByTestId('auth-password-input');
     this.submitButton = page.getByTestId('auth-submit-btn');
-    this.googleAuthButton = page.getByTestId('google-auth-btn');
     this.errorAlert = page.getByTestId('error-alert');
     this.forgotPasswordLink = page.getByTestId('forgot-password-link');
     this.registerLink = page.getByTestId('register-link');
@@ -81,10 +79,6 @@ export class LoginPage {
     const isUserMenuVisible = await userMenuButton.isVisible().catch(() => false);
 
     return isOnPlansPage && isUserMenuVisible;
-  }
-
-  async clickGoogleLogin() {
-    await this.googleAuthButton.click();
   }
 
   async clickForgotPassword() {

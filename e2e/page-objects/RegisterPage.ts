@@ -14,7 +14,6 @@ export class RegisterPage {
   readonly errorAlert: Locator;
   readonly successAlert: Locator;
   readonly loginLink: Locator;
-  readonly googleAuthButton: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -26,7 +25,6 @@ export class RegisterPage {
     this.errorAlert = page.getByTestId('error-alert');
     this.successAlert = page.getByTestId('success-alert');
     this.loginLink = page.getByTestId('login-link');
-    this.googleAuthButton = page.getByTestId('google-auth-btn');
   }
 
   async goto() {
@@ -106,10 +104,6 @@ export class RegisterPage {
 
   async isSubmitButtonEnabled(): Promise<boolean> {
     return await this.submitButton.isEnabled();
-  }
-
-  async clickGoogleAuth() {
-    await this.googleAuthButton.click();
   }
 
   async waitForRedirect(expectedUrl: string | RegExp) {
