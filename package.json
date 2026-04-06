@@ -29,10 +29,10 @@
     "dev:e2e": "astro dev --mode test"
   },
   "dependencies": {
-    "@astrojs/node": "^9.5.4",
-    "@astrojs/react": "^4.4.2",
-    "@astrojs/sitemap": "^3.7.0",
-    "@astrojs/vercel": "^9.0.4",
+    "@astrojs/node": "^10.0.4",
+    "@astrojs/react": "^5.0.2",
+    "@astrojs/sitemap": "^3.7.2",
+    "@astrojs/vercel": "^10.0.4",
     "@hookform/resolvers": "^5.2.2",
     "@pdf-lib/fontkit": "^1.1.1",
     "@radix-ui/react-accordion": "^1.2.12",
@@ -53,7 +53,7 @@
     "@tailwindcss/vite": "^4.0.2",
     "@tanstack/react-query": "^5.64.2",
     "@tanstack/react-query-devtools": "^5.95.0",
-    "astro": "^5.17.2",
+    "astro": "^6.1.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
